@@ -1,7 +1,7 @@
 # AErender Launcher
 GUI for Adobe After Effects aerender console interface with various features
 
-![GitHub config](https://img.shields.io/badge/config-beta-yellow)
+![Discord](https://img.shields.io/discord/553694764004933633?label=discord)
 ![GitHub issues](https://img.shields.io/github/issues/LilyStilson/AErender-Launcher)
 ![GitHub](https://img.shields.io/github/license/LilyStilson/AErender-Launcher)
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/LilyStilson/AErender-Launcher?include_prereleases)
