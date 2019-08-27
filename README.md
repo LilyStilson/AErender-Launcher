@@ -1,5 +1,5 @@
 # AErender Launcher
-Lightweight GUI for Adobe After Effects aerender console interface
+GUI for Adobe After Effects aerender console interface with various features
 
 ![GitHub config](https://img.shields.io/badge/config-beta-yellow)
 ![GitHub issues](https://img.shields.io/github/issues/LilyStilson/AErender-Launcher)
