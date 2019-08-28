@@ -8,5 +8,5 @@ GUI for Adobe After Effects aerender console interface with various features
 ![GitHub issues](https://img.shields.io/github/issues/LilyStilson/AErender-Launcher)
 ![Website](https://img.shields.io/website/https/aerenderlauncher.com?down_color=lightgrey&down_message=offline&up_color=blue&up_message=online)
 
-![Launcher Windows](https://aer.epizy.com/img/Capture84_AER.png)
-![Launcher macOS](https://aer.epizy.com/img/Capture85_AERmac.png)
+![Launcher Windows](http://aer.epizy.com/img/Capture84_AER.png)
+![Launcher macOS](http://aer.epizy.com/img/Capture85_AERmac.png)
