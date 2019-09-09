@@ -7,5 +7,5 @@
   <a href="#"><img src="https://img.shields.io/github/license/LilyStilson/AErender-Launcher" alt="license"></img></a>
   <a href="#"><img src="https://img.shields.io/badge/platfowm-windows%20%7C%20macos-blue" alt="platform"></a>
   <a href="https://github.com/LilyStilson/AErender-Launcher/issues"><img src="https://img.shields.io/github/issues/LilyStilson/AErender-Launcher" alt="issues"></a>
-  <a href="https://aerenderlauncher.com"><img src="https://img.shields.io/website/https/aerenderlauncher.com?down_color=lightgrey&down_message=offline&up_color=blue&up_message=online" alt="website"></a>
+  <a href="http://aerenderlauncher.com"><img src="https://img.shields.io/website/http/aerenderlauncher.com" alt="website"></a>
 </div>
