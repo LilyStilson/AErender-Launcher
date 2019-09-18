@@ -1,4 +1,4 @@
-<h1 align="center"> AErender Launcher </h1>
+<h1 align="center"><img src="https://i.imgur.com/cbN81vX.png" alt="AErender Launcher"></img></h1>
 <p align="center">GUI for Adobe After Effects aerender console interface with various features.</p>
 
 <div align="center">
