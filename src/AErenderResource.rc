@@ -1,0 +1,7 @@
+AboutEN RCDATA "Docs\\About.html"
+AEREN RCDATA "Docs\\AfterEffectsRenderEngine.html"
+ERREN RCDATA "Docs\\Error.html"
+ICNEN RCDATA "Docs\\icon_128.png"
+INTROEN RCDATA "Docs\\Introduction.html"
+ISSEN RCDATA "Docs\\Issues.html"
+PRRREN RCDATA "Docs\\PreparingRendering.html"

@@ -1,0 +1,438 @@
+object Form6: TForm6
+  Left = 0
+  Top = 0
+  BorderStyle = SizeToolWin
+  Caption = 'FFMPEG Concat Configuration'
+  ClientHeight = 214
+  ClientWidth = 433
+  Position = MainFormCenter
+  StyleBook = Form1.AERModernStyle
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  DesignerMasterStyle = 0
+  object ffmpegConfigFormLabel: TLabel
+    Align = Top
+    StyledSettings = [Family, FontColor]
+    Margins.Left = 5.000000000000000000
+    Margins.Top = 5.000000000000000000
+    Margins.Right = 5.000000000000000000
+    Position.X = 5.000000000000000000
+    Position.Y = 5.000000000000000000
+    Size.Width = 423.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    TextSettings.Font.Size = 14.000000000000000000
+    TextSettings.Font.StyleExt = {00070000000000000004000000}
+    TextSettings.HorzAlign = Center
+    Text = 'FFMPEG Configuration'
+    TabOrder = 0
+  end
+  object filesGroupBox: TGroupBox
+    Align = Top
+    Position.Y = 22.000000000000000000
+    Size.Width = 433.000000000000000000
+    Size.Height = 75.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'File'
+    TabOrder = 4
+    object outputFileLayout: TLayout
+      Align = Top
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 15.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Position.X = 5.000000000000000000
+      Position.Y = 15.000000000000000000
+      Size.Width = 423.000000000000000000
+      Size.Height = 55.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object outputPathLabel: TLabel
+        Align = Left
+        Margins.Left = 10.000000000000000000
+        Position.X = 10.000000000000000000
+        Size.Width = 111.000000000000000000
+        Size.Height = 31.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Output file path:'
+        TabOrder = 0
+      end
+      object outputPathEdit: TEdit
+        Touch.InteractiveGestures = [LongTap, DoubleTap]
+        Align = Client
+        TabOrder = 1
+        Margins.Top = 5.000000000000000000
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Size.Width = 270.000000000000000000
+        Size.Height = 21.000000000000000000
+        Size.PlatformDefault = False
+      end
+      object outputPathButton: TButton
+        Align = Right
+        Margins.Top = 5.000000000000000000
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Position.X = 396.000000000000000000
+        Position.Y = 5.000000000000000000
+        Size.Width = 22.000000000000000000
+        Size.Height = 21.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        Text = '...'
+      end
+      object defaultOutputCheckBox: TCheckBox
+        Align = Bottom
+        Margins.Left = 5.000000000000000000
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Position.X = 5.000000000000000000
+        Position.Y = 31.000000000000000000
+        Size.Width = 413.000000000000000000
+        Size.Height = 19.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 3
+        Text = 'Same as lossless render path'
+        OnChange = defaultOutputCheckBoxChange
+      end
+    end
+  end
+  object Layout5: TLayout
+    Align = Client
+    Enabled = False
+    Size.Width = 433.000000000000000000
+    Size.Height = 376.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 5
+    TabStop = False
+    object TabControl1: TTabControl
+      Align = Client
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 5.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Size.Width = 423.000000000000000000
+      Size.Height = 366.000000000000000000
+      Size.PlatformDefault = False
+      TabIndex = 0
+      TabOrder = 0
+      TabPosition = PlatformDefault
+      Sizes = (
+        419s
+        340s
+        419s
+        340s)
+      object videoTab: TTabItem
+        CustomIcon = <
+          item
+          end>
+        IsSelected = True
+        Size.Width = 87.000000000000000000
+        Size.Height = 22.000000000000000000
+        Size.PlatformDefault = False
+        StyleLookup = ''
+        TabOrder = 0
+        Text = 'Video Settings'
+        ExplicitSize.cx = 87.000000000000000000
+        ExplicitSize.cy = 22.000000000000000000
+        object bitrateGroupBox: TGroupBox
+          Align = Top
+          Margins.Left = 5.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Right = 5.000000000000000000
+          Position.X = 5.000000000000000000
+          Position.Y = 38.000000000000000000
+          Size.Width = 409.000000000000000000
+          Size.Height = 115.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Bitrate'
+          TabOrder = 0
+          object Layout2: TLayout
+            Align = Top
+            Margins.Left = 5.000000000000000000
+            Margins.Top = 15.000000000000000000
+            Margins.Right = 5.000000000000000000
+            Position.X = 5.000000000000000000
+            Position.Y = 15.000000000000000000
+            Size.Width = 399.000000000000000000
+            Size.Height = 33.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 2
+            object Label3: TLabel
+              Align = Left
+              Margins.Left = 10.000000000000000000
+              Position.X = 10.000000000000000000
+              Size.Width = 79.000000000000000000
+              Size.Height = 33.000000000000000000
+              Size.PlatformDefault = False
+              Text = 'Target bitrate'
+              TabOrder = 0
+            end
+            object TrackBar1: TTrackBar
+              Align = Client
+              CanParentFocus = True
+              Min = 1.000000000000000000
+              Orientation = Horizontal
+              Margins.Left = 5.000000000000000000
+              Margins.Top = 8.000000000000000000
+              Margins.Right = 5.000000000000000000
+              Size.Width = 240.000000000000000000
+              Size.Height = 17.000000000000000000
+              Size.PlatformDefault = False
+              TabOrder = 1
+              Value = 1.000000000000000000
+            end
+            object memUsageInfo: TLabel
+              Align = Right
+              Cursor = crHandPoint
+              StyledSettings = [Family, Size]
+              HitTest = True
+              Margins.Right = 10.000000000000000000
+              Margins.Bottom = 5.000000000000000000
+              Position.X = 339.000000000000000000
+              Size.Width = 50.000000000000000000
+              Size.Height = 28.000000000000000000
+              Size.PlatformDefault = False
+              TextSettings.Font.StyleExt = {04040000000000000004000000}
+              TextSettings.FontColor = xFF2A82E2
+              TextSettings.HorzAlign = Trailing
+              Text = 'Lossless'
+              TabOrder = 2
+            end
+          end
+          object Layout3: TLayout
+            Align = Top
+            Margins.Left = 5.000000000000000000
+            Margins.Right = 5.000000000000000000
+            Position.X = 5.000000000000000000
+            Position.Y = 48.000000000000000000
+            Size.Width = 399.000000000000000000
+            Size.Height = 33.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 1
+            object Label4: TLabel
+              Align = Left
+              Margins.Left = 10.000000000000000000
+              Position.X = 10.000000000000000000
+              Size.Width = 79.000000000000000000
+              Size.Height = 33.000000000000000000
+              Size.PlatformDefault = False
+              Text = 'Min bitrate'
+              TabOrder = 0
+            end
+            object TrackBar2: TTrackBar
+              Align = Client
+              CanParentFocus = True
+              Min = 1.000000000000000000
+              Orientation = Horizontal
+              Margins.Left = 5.000000000000000000
+              Margins.Top = 8.000000000000000000
+              Margins.Right = 5.000000000000000000
+              Size.Width = 240.000000000000000000
+              Size.Height = 17.000000000000000000
+              Size.PlatformDefault = False
+              TabOrder = 1
+              Value = 1.000000000000000000
+            end
+            object Label5: TLabel
+              Align = Right
+              Cursor = crHandPoint
+              StyledSettings = [Family, Size]
+              HitTest = True
+              Margins.Right = 10.000000000000000000
+              Margins.Bottom = 5.000000000000000000
+              Position.X = 339.000000000000000000
+              Size.Width = 50.000000000000000000
+              Size.Height = 28.000000000000000000
+              Size.PlatformDefault = False
+              TextSettings.Font.StyleExt = {04040000000000000004000000}
+              TextSettings.FontColor = xFF2A82E2
+              TextSettings.HorzAlign = Trailing
+              Text = 'Lossless'
+              TabOrder = 2
+            end
+          end
+          object Layout4: TLayout
+            Align = Top
+            Margins.Left = 5.000000000000000000
+            Margins.Right = 5.000000000000000000
+            Position.X = 5.000000000000000000
+            Position.Y = 81.000000000000000000
+            Size.Width = 399.000000000000000000
+            Size.Height = 33.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 0
+            object Label6: TLabel
+              Align = Left
+              Margins.Left = 10.000000000000000000
+              Position.X = 10.000000000000000000
+              Size.Width = 79.000000000000000000
+              Size.Height = 33.000000000000000000
+              Size.PlatformDefault = False
+              Text = 'Max bitrate'
+              TabOrder = 0
+            end
+            object TrackBar3: TTrackBar
+              Align = Client
+              CanParentFocus = True
+              Min = 1.000000000000000000
+              Orientation = Horizontal
+              Margins.Left = 5.000000000000000000
+              Margins.Top = 8.000000000000000000
+              Margins.Right = 5.000000000000000000
+              Size.Width = 240.000000000000000000
+              Size.Height = 17.000000000000000000
+              Size.PlatformDefault = False
+              TabOrder = 1
+              Value = 1.000000000000000000
+            end
+            object Label7: TLabel
+              Align = Right
+              Cursor = crHandPoint
+              StyledSettings = [Family, Size]
+              HitTest = True
+              Margins.Right = 10.000000000000000000
+              Margins.Bottom = 5.000000000000000000
+              Position.X = 339.000000000000000000
+              Size.Width = 50.000000000000000000
+              Size.Height = 28.000000000000000000
+              Size.PlatformDefault = False
+              TextSettings.Font.StyleExt = {04040000000000000004000000}
+              TextSettings.FontColor = xFF2A82E2
+              TextSettings.HorzAlign = Trailing
+              Text = 'Lossless'
+              TabOrder = 2
+            end
+          end
+        end
+        object Layout1: TLayout
+          Align = Top
+          Size.Width = 419.000000000000000000
+          Size.Height = 33.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 1
+          object Label1: TLabel
+            Align = Left
+            Margins.Left = 10.000000000000000000
+            Position.X = 10.000000000000000000
+            Size.Width = 160.000000000000000000
+            Size.Height = 33.000000000000000000
+            Size.PlatformDefault = False
+            Text = 'Codec'
+            TabOrder = 1
+          end
+          object styleBox: TComboBox
+            Align = Client
+            Items.Strings = (
+              'H.264 (libx264)')
+            ItemIndex = 0
+            Margins.Top = 5.000000000000000000
+            Margins.Right = 5.000000000000000000
+            Margins.Bottom = 5.000000000000000000
+            Size.Width = 244.000000000000000000
+            Size.Height = 23.000000000000000000
+            Size.PlatformDefault = False
+            TabOrder = 0
+          end
+        end
+      end
+      object audioTab: TTabItem
+        CustomIcon = <
+          item
+          end>
+        IsSelected = False
+        Size.Width = 88.000000000000000000
+        Size.Height = 22.000000000000000000
+        Size.PlatformDefault = False
+        StyleLookup = ''
+        TabOrder = 0
+        Text = 'Audio Settings'
+        ExplicitSize.cx = 88.000000000000000000
+        ExplicitSize.cy = 22.000000000000000000
+      end
+    end
+  end
+  object Label8: TLabel
+    Align = Bottom
+    AutoSize = True
+    StyledSettings = [Family, FontColor]
+    Margins.Left = 10.000000000000000000
+    Margins.Top = 5.000000000000000000
+    Margins.Right = 10.000000000000000000
+    Margins.Bottom = 5.000000000000000000
+    Position.X = 10.000000000000000000
+    Position.Y = 171.000000000000000000
+    Size.Width = 413.000000000000000000
+    Size.Height = 38.000000000000000000
+    Size.PlatformDefault = False
+    TextSettings.Font.Size = 14.000000000000000000
+    TextSettings.Font.StyleExt = {00070000000000000004000000}
+    TextSettings.HorzAlign = Center
+    Text = 
+      'Video and Audio settings customisation are still under developem' +
+      'ent!'
+    TabOrder = 6
+  end
+  object renderPresetGroupBox: TGroupBox
+    Align = Top
+    Position.Y = 97.000000000000000000
+    Size.Width = 433.000000000000000000
+    Size.Height = 64.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'FFMPEG Preset'
+    TabOrder = 7
+    object Layout6: TLayout
+      Align = Client
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 15.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Size.Width = 423.000000000000000000
+      Size.Height = 44.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object ComboBox1: TComboBox
+        Align = Client
+        Items.Strings = (
+          'AVI (Lossless, Alpha)'
+          'MOV (Lossless, Alpha)'
+          'H.264 (Match Source, High Bitrate)'
+          'H.264 (Match Source, Low Bitrate)')
+        ItemIndex = 0
+        Margins.Left = 10.000000000000000000
+        Margins.Top = 10.000000000000000000
+        Margins.Right = 10.000000000000000000
+        Margins.Bottom = 10.000000000000000000
+        Size.Width = 403.000000000000000000
+        Size.Height = 24.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        OnChange = ComboBox1Change
+      end
+    end
+  end
+  object BindingsList1: TBindingsList
+    Methods = <>
+    OutputConverters = <>
+    Left = 400
+    object LinkControlToPropertyEnabled: TLinkControlToProperty
+      Category = 'Quick Bindings'
+      Control = defaultOutputCheckBox
+      Track = True
+      Component = outputPathButton
+      ComponentProperty = 'Enabled'
+      CustomFormat = 'IfThen(IsChecked, False, True)'
+      InitializeControlValue = False
+    end
+    object LinkControlToPropertyEnabled2: TLinkControlToProperty
+      Category = 'Quick Bindings'
+      Control = defaultOutputCheckBox
+      Track = True
+      Component = outputPathEdit
+      ComponentProperty = 'Enabled'
+      CustomFormat = 'IfThen(IsChecked, False, True)'
+      InitializeControlValue = False
+    end
+  end
+end

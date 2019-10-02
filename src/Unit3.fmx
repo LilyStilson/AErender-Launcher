@@ -1,0 +1,76 @@
+object Form3: TForm3
+  Left = 0
+  Top = 0
+  Caption = 'AErender Launcher Help'
+  ClientHeight = 600
+  ClientWidth = 960
+  Position = OwnerFormCenter
+  StyleBook = Form1.AERModernStyle
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnShow = FormShow
+  DesignerMasterStyle = 0
+  object Layout2: TLayout
+    Align = MostBottom
+    Position.Y = 568.000000000000000000
+    Size.Width = 960.000000000000000000
+    Size.Height = 32.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    object Button1: TButton
+      Align = Center
+      TabOrder = 0
+      Text = 'Ok'
+      OnClick = Button1Click
+    end
+  end
+  object Contents: TListBox
+    Align = MostLeft
+    Position.Y = 33.000000000000000000
+    Size.Width = 200.000000000000000000
+    Size.Height = 535.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 3
+    DisableFocusEffect = True
+    Items.Strings = (
+      'Introduction'
+      'After Effects render engine'
+      'Preparing and Rendering'
+      'Known issues')
+    DefaultItemStyles.ItemStyle = ''
+    DefaultItemStyles.GroupHeaderStyle = ''
+    DefaultItemStyles.GroupFooterStyle = ''
+    OnChange = ContentsChange
+    Viewport.Width = 200.000000000000000000
+    Viewport.Height = 535.000000000000000000
+  end
+  object Layout1: TLayout
+    Align = MostTop
+    Size.Width = 960.000000000000000000
+    Size.Height = 33.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 5
+    object Title: TLabel
+      Align = Center
+      AutoSize = True
+      StyledSettings = [Family, FontColor]
+      Size.Width = 273.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 16.000000000000000000
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+      TextSettings.HorzAlign = Center
+      TextSettings.Trimming = Word
+      Text = 'AErender Launcher Help'
+      TabOrder = 0
+    end
+  end
+  object WebBrowser1: TWebBrowser
+    Align = Client
+    Size.Width = 755.000000000000000000
+    Size.Height = 535.000000000000000000
+    Size.PlatformDefault = False
+    Margins.Left = 5.000000000000000000
+  end
+end

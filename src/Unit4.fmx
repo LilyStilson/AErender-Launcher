@@ -1,0 +1,290 @@
+object Form4: TForm4
+  Left = 0
+  Top = 0
+  Caption = 'Import After Effects Project'
+  ClientHeight = 450
+  ClientWidth = 640
+  Position = ScreenCenter
+  StyleBook = Form1.AERModernStyle
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnClose = FormClose
+  OnResize = FormResize
+  OnShow = FormShow
+  DesignerMasterStyle = 0
+  object bottomLayout: TLayout
+    Align = Bottom
+    Position.Y = 406.000000000000000000
+    Size.Width = 640.000000000000000000
+    Size.Height = 44.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 3
+    object importButton: TButton
+      Align = Center
+      Size.Width = 114.000000000000000000
+      Size.Height = 33.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Text = 'Import'
+      OnClick = importButtonClick
+    end
+  end
+  object topLayout: TLayout
+    Align = Top
+    Size.Width = 640.000000000000000000
+    Size.Height = 33.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 4
+    object importLabel: TLabel
+      Align = Client
+      StyledSettings = [Family, FontColor]
+      Size.Width = 342.000000000000000000
+      Size.Height = 33.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 14.000000000000000000
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+      TextSettings.HorzAlign = Center
+      Text = 'Import After Effects Project'
+      TabOrder = 0
+    end
+    object XMLFile: TEdit
+      Touch.InteractiveGestures = [LongTap, DoubleTap]
+      Align = Right
+      TabOrder = 1
+      ReadOnly = True
+      Position.X = 342.000000000000000000
+      Position.Y = 5.000000000000000000
+      Margins.Top = 5.000000000000000000
+      Margins.Right = 10.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Size.Width = 288.000000000000000000
+      Size.Height = 23.000000000000000000
+      Size.PlatformDefault = False
+    end
+  end
+  object projectPathLayout: TLayout
+    Align = Top
+    Position.Y = 33.000000000000000000
+    Size.Width = 640.000000000000000000
+    Size.Height = 32.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 5
+    object aerProjectPathLabel: TLabel
+      Align = Left
+      Margins.Left = 10.000000000000000000
+      Position.X = 10.000000000000000000
+      Size.Width = 120.000000000000000000
+      Size.Height = 32.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Project path: '
+      TabOrder = 0
+    end
+    object aerProjectPath: TEdit
+      Touch.InteractiveGestures = [LongTap, DoubleTap]
+      Align = Client
+      TabOrder = 1
+      ReadOnly = True
+      Margins.Top = 5.000000000000000000
+      Margins.Right = 10.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Size.Width = 500.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+    end
+  end
+  object compLayout: TGroupBox
+    Align = Client
+    Margins.Left = 5.000000000000000000
+    Margins.Top = 5.000000000000000000
+    Margins.Right = 5.000000000000000000
+    Margins.Bottom = 5.000000000000000000
+    Size.Width = 326.000000000000000000
+    Size.Height = 331.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Compositions'
+    TabOrder = 6
+    object compositions: TListBox
+      Align = Client
+      Margins.Left = 10.000000000000000000
+      Margins.Top = 20.000000000000000000
+      Margins.Right = 10.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Size.Width = 306.000000000000000000
+      Size.Height = 269.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      DisableFocusEffect = True
+      DefaultItemStyles.ItemStyle = ''
+      DefaultItemStyles.GroupHeaderStyle = ''
+      DefaultItemStyles.GroupFooterStyle = ''
+      ShowCheckboxes = True
+      OnChangeCheck = compositionsChangeCheck
+      OnItemClick = compositionsItemClick
+      Viewport.Width = 302.000000000000000000
+      Viewport.Height = 265.000000000000000000
+    end
+    object Layout1: TLayout
+      Align = Bottom
+      Margins.Left = 10.000000000000000000
+      Margins.Right = 10.000000000000000000
+      Margins.Bottom = 10.000000000000000000
+      Position.X = 10.000000000000000000
+      Position.Y = 294.000000000000000000
+      Size.Width = 306.000000000000000000
+      Size.Height = 27.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      object selectallButton: TButton
+        Align = Left
+        Size.Width = 121.000000000000000000
+        Size.Height = 27.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        Text = 'Select All'
+        OnClick = selectallButtonClick
+      end
+      object deselallButton: TButton
+        Align = Right
+        Position.X = 186.000000000000000000
+        Size.Width = 120.000000000000000000
+        Size.Height = 27.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+        Text = 'Deselect All'
+        OnClick = deselallButtonClick
+      end
+    end
+  end
+  object compImportLayout: TLayout
+    Align = Right
+    Position.X = 336.000000000000000000
+    Position.Y = 65.000000000000000000
+    Size.Width = 304.000000000000000000
+    Size.Height = 341.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 8
+    object compProp: TGroupBox
+      Align = Client
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 5.000000000000000000
+      Margins.Right = 10.000000000000000000
+      Size.Width = 289.000000000000000000
+      Size.Height = 209.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Composition Properties'
+      TabOrder = 0
+      object compName: TLabel
+        Align = Top
+        Margins.Left = 10.000000000000000000
+        Margins.Top = 20.000000000000000000
+        Margins.Right = 10.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Position.X = 10.000000000000000000
+        Position.Y = 20.000000000000000000
+        Size.Width = 269.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Name: '
+        TabOrder = 4
+      end
+      object compResolution: TLabel
+        Align = Top
+        Margins.Left = 10.000000000000000000
+        Margins.Right = 10.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Position.X = 10.000000000000000000
+        Position.Y = 42.000000000000000000
+        Size.Width = 269.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Resolution: '
+        TabOrder = 3
+      end
+      object compFramerate: TLabel
+        Align = Top
+        Margins.Left = 10.000000000000000000
+        Margins.Right = 10.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Position.X = 10.000000000000000000
+        Position.Y = 64.000000000000000000
+        Size.Width = 269.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Framerate: '
+        TabOrder = 2
+      end
+      object compRangeIn: TLabel
+        Align = Top
+        Margins.Left = 10.000000000000000000
+        Margins.Right = 10.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Position.X = 10.000000000000000000
+        Position.Y = 86.000000000000000000
+        Size.Width = 269.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Range start: '
+        TabOrder = 1
+      end
+      object compRangeOut: TLabel
+        Align = Top
+        Margins.Left = 10.000000000000000000
+        Margins.Right = 10.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Position.X = 10.000000000000000000
+        Position.Y = 108.000000000000000000
+        Size.Width = 269.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Range end: '
+        TabOrder = 0
+      end
+    end
+    object importProp: TGroupBox
+      Align = Bottom
+      Margins.Left = 5.000000000000000000
+      Margins.Right = 10.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Position.X = 5.000000000000000000
+      Position.Y = 214.000000000000000000
+      Size.Width = 289.000000000000000000
+      Size.Height = 122.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Import Properties'
+      TabOrder = 1
+      object splitRenderCheckbox: TCheckBox
+        Align = Top
+        Margins.Left = 10.000000000000000000
+        Margins.Top = 20.000000000000000000
+        Margins.Right = 10.000000000000000000
+        Position.X = 10.000000000000000000
+        Position.Y = 20.000000000000000000
+        Size.Width = 269.000000000000000000
+        Size.Height = 19.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        Text = 'Prepare for split rendering'
+      end
+    end
+  end
+  object XMLDocument: TXMLDocument
+    Left = 8
+    Top = 416
+  end
+  object BindingsList1: TBindingsList
+    Methods = <>
+    OutputConverters = <>
+    Left = 40
+    Top = 416
+    object LinkControlToPropertyShowCheckboxes: TLinkControlToProperty
+      Category = 'Quick Bindings'
+      Control = splitRenderCheckbox
+      Track = True
+      Component = compositions
+      ComponentProperty = 'ShowCheckboxes'
+      CustomFormat = 'IfThen(IsChecked, False, True)'
+      InitializeControlValue = False
+    end
+  end
+end
