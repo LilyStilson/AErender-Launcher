@@ -145,99 +145,104 @@ end;
 procedure TRenderingForm.FormShow(Sender: TObject);
 begin
   if Unit1.RenderWindowSender = Form1.launchButton then
-    if Length(Unit1.LogFiles) = 0 then
-      begin
-        emptyLabel.Visible := True;
-        emptyLabel.Enabled := True;
-      end
-    else
-      begin
-        emptyLabel.Visible := False;
-        emptyLabel.Enabled := False;
+    begin
+      if Length(Unit1.LogFiles) = 0 then
+        begin
+          emptyLabel.Visible := True;
+          emptyLabel.Enabled := True;
+        end
+      else
+        begin
+          emptyLabel.Visible := False;
+          emptyLabel.Enabled := False;
 
-        SetLength (RenderGroups, Form1.threadsCount.Items[Form1.threadsCount.ItemIndex].ToInteger());
+          SetLength (RenderGroups, Form1.threadsCount.Items[Form1.threadsCount.ItemIndex].ToInteger());
 
-        for var i := 0 to High (RenderGroups) do
-          begin
-            //Initialize GroupBox
-            RenderGroups[i].TRenderGroupBox := TGroupBox.Create(Self);
-            RenderGroups[i].TRenderGroupBox.Parent := renderLayout;
-            RenderGroups[i].TRenderGroupBox.Margins.Left := 5;
-            RenderGroups[i].TRenderGroupBox.Margins.Bottom := 5;
-            RenderGroups[i].TRenderGroupBox.Position.X := 5;
-            RenderGroups[i].TRenderGroupBox.Width := 390;
-            RenderGroups[i].TRenderGroupBox.Height := 75;
-            RenderGroups[i].TRenderGroupBox.Text := Unit1.LogFiles[i].Remove(Unit1.LogFiles[i].Length - 4);
-            RenderGroups[i].TRenderGroupBox.Tag := i;
+          for var i := 0 to High (RenderGroups) do
+            begin
+              //Initialize GroupBox
+              RenderGroups[i].TRenderGroupBox := TGroupBox.Create(Self);
+              RenderGroups[i].TRenderGroupBox.Parent := renderLayout;
+              RenderGroups[i].TRenderGroupBox.Margins.Left := 5;
+              RenderGroups[i].TRenderGroupBox.Margins.Bottom := 5;
+              RenderGroups[i].TRenderGroupBox.Position.X := 5;
+              RenderGroups[i].TRenderGroupBox.Width := 390;
+              RenderGroups[i].TRenderGroupBox.Height := 75;
+              RenderGroups[i].TRenderGroupBox.Text := Unit1.LogFiles[i].Remove(Unit1.LogFiles[i].Length - 4);
+              RenderGroups[i].TRenderGroupBox.Tag := i;
 
-            //Initialize GroupBox MainLayout
-            RenderGroups[i].TRenderGroupBoxMainLayout := TLayout.Create(Self);
-            RenderGroups[i].TRenderGroupBoxMainLayout.Parent := RenderGroups[i].TRenderGroupBox;
-            RenderGroups[i].TRenderGroupBoxMainLayout.Align := TAlignLayout.Top;
-            RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Left := 5;
-            RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Top := 20;
-            RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Right := 5;
-            RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Bottom := 5;
+              //Initialize GroupBox MainLayout
+              RenderGroups[i].TRenderGroupBoxMainLayout := TLayout.Create(Self);
+              RenderGroups[i].TRenderGroupBoxMainLayout.Parent := RenderGroups[i].TRenderGroupBox;
+              RenderGroups[i].TRenderGroupBoxMainLayout.Align := TAlignLayout.Top;
+              RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Left := 5;
+              RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Top := 20;
+              RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Right := 5;
+              RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Bottom := 5;
 
-            //Initialize GroupBox MainLayout ProgressBar
-            RenderGroups[i].TRenderProgressBar := TProgressBar.Create(Self);
-            RenderGroups[i].TRenderProgressBar.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
-            RenderGroups[i].TRenderProgressBar.Align := TAlignLayout.Top;
-            RenderGroups[i].TRenderProgressBar.Orientation := TOrientation.Horizontal;
-            RenderGroups[i].TRenderProgressBar.Margins.Left := 5;
-            RenderGroups[i].TRenderProgressBar.Margins.Top := 10;
-            RenderGroups[i].TRenderProgressBar.Margins.Right := 5;
-            RenderGroups[i].TRenderProgressBar.Height := 10;
-            if Form1.threadsSwitch.IsChecked then
-              RenderGroups[i].TRenderProgressBar.Max := Form1.threadsGrid.Cells[1, i].ToSingle() - Form1.threadsGrid.Cells[0, i].ToSingle() + 50
-            else
-              if Form1.outFrame.Text.IsEmpty or Form1.compSwitch.IsChecked then
-                RenderGroups[i].TRenderProgressBar.Max := 1
+              //Initialize GroupBox MainLayout ProgressBar
+              RenderGroups[i].TRenderProgressBar := TProgressBar.Create(Self);
+              RenderGroups[i].TRenderProgressBar.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
+              RenderGroups[i].TRenderProgressBar.Align := TAlignLayout.Top;
+              RenderGroups[i].TRenderProgressBar.Orientation := TOrientation.Horizontal;
+              RenderGroups[i].TRenderProgressBar.Margins.Left := 5;
+              RenderGroups[i].TRenderProgressBar.Margins.Top := 10;
+              RenderGroups[i].TRenderProgressBar.Margins.Right := 5;
+              RenderGroups[i].TRenderProgressBar.Height := 10;
+              RenderGroups[i].TRenderProgressBar.Min := 0;
+              RenderGroups[i].TRenderProgressBar.Value := 0;
+              if Form1.threadsSwitch.IsChecked then
+                RenderGroups[i].TRenderProgressBar.Max := Form1.threadsGrid.Cells[1, i].ToSingle() - Form1.threadsGrid.Cells[0, i].ToSingle() + 50
               else
-                RenderGroups[i].TRenderProgressBar.Max := Form1.outFrame.Text.ToSingle() + 50;
+                if Form1.outFrame.Text.IsEmpty or Form1.compSwitch.IsChecked then
+                  RenderGroups[i].TRenderProgressBar.Max := 1
+                else
+                  RenderGroups[i].TRenderProgressBar.Max := Form1.outFrame.Text.ToSingle() + 50;
 
-            //Initialise GroupBox MainLayout ProgressLabel
-            RenderGroups[i].TRenderProgressLabel := TLabel.Create(Self);
-            RenderGroups[i].TRenderProgressLabel.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
-            RenderGroups[i].TRenderProgressLabel.Align := TAlignLayout.Left;
-            RenderGroups[i].TRenderProgressLabel.Margins.Left := 5;
-            RenderGroups[i].TRenderProgressLabel.Width := 100;
-            RenderGroups[i].TRenderProgressLabel.AutoSize := False;
-            RenderGroups[i].TRenderProgressLabel.TextSettings.WordWrap := False;
-            if Form1.threadsSwitch.IsChecked then
-              RenderGroups[i].TRenderProgressLabel.Text := '0%'
-            else
-              if Form1.outFrame.Text.IsEmpty then
-                RenderGroups[i].TRenderProgressLabel.Text := 'N/A'
+              //Initialise GroupBox MainLayout ProgressLabel
+              RenderGroups[i].TRenderProgressLabel := TLabel.Create(Self);
+              RenderGroups[i].TRenderProgressLabel.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
+              RenderGroups[i].TRenderProgressLabel.Align := TAlignLayout.Left;
+              RenderGroups[i].TRenderProgressLabel.Margins.Left := 5;
+              RenderGroups[i].TRenderProgressLabel.Width := 100;
+              RenderGroups[i].TRenderProgressLabel.AutoSize := False;
+              RenderGroups[i].TRenderProgressLabel.TextSettings.WordWrap := False;
+              if Form1.threadsSwitch.IsChecked then
+                RenderGroups[i].TRenderProgressLabel.Text := '0%'
               else
-                RenderGroups[i].TRenderProgressLabel.Text := '0%';
+                if Form1.outFrame.Text.IsEmpty then
+                  RenderGroups[i].TRenderProgressLabel.Text := 'N/A'
+                else
+                  RenderGroups[i].TRenderProgressLabel.Text := '0%';
 
-            //Initialize GroupBox MainLayout ShowLogButton
-            RenderGroups[i].TRenderShowLogButton := TButton.Create(Self);
-            RenderGroups[i].TRenderShowLogButton.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
-            RenderGroups[i].TRenderShowLogButton.Align := TAlignLayout.Client;
-            RenderGroups[i].TRenderShowLogButton.Margins.Left := 100;
-            RenderGroups[i].TRenderShowLogButton.Margins.Top := 5;
-            RenderGroups[i].TRenderShowLogButton.Margins.Right := 5;
-            RenderGroups[i].TRenderShowLogButton.Margins.Bottom := 5;
-            RenderGroups[i].TRenderShowLogButton.Text := 'Toggle Render Log';
-            RenderGroups[i].TRenderShowLogButton.Tag := i;
-            RenderGroups[i].TRenderShowLogButton.OnClick := ShowLogButtonClick;
+              //Initialize GroupBox MainLayout ShowLogButton
+              RenderGroups[i].TRenderShowLogButton := TButton.Create(Self);
+              RenderGroups[i].TRenderShowLogButton.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
+              RenderGroups[i].TRenderShowLogButton.Align := TAlignLayout.Client;
+              RenderGroups[i].TRenderShowLogButton.Margins.Left := 100;
+              RenderGroups[i].TRenderShowLogButton.Margins.Top := 5;
+              RenderGroups[i].TRenderShowLogButton.Margins.Right := 5;
+              RenderGroups[i].TRenderShowLogButton.Margins.Bottom := 5;
+              RenderGroups[i].TRenderShowLogButton.Text := 'Toggle Render Log';
+              RenderGroups[i].TRenderShowLogButton.Tag := i;
+              RenderGroups[i].TRenderShowLogButton.OnClick := ShowLogButtonClick;
 
-            //Initialise GroupBox LogMemo
-            RenderGroups[i].TLogMemo := TMemo.Create(Self);
-            RenderGroups[i].TLogMemo.Parent := RenderGroups[i].TRenderGroupBox;
-            RenderGroups[i].TLogMemo.Align := TAlignLayout.Client;
-            RenderGroups[i].TLogMemo.Margins.Left := 5;
-            RenderGroups[i].TLogMemo.Margins.Right := 5;
-            RenderGroups[i].TLogMemo.Margins.Bottom := 5;
-            RenderGroups[i].TLogMemo.ReadOnly := True;
-            RenderGroups[i].TLogMemo.WordWrap := True;
-            RenderGroups[i].TLogMemo.Visible := False;
-            RenderGroups[i].TLogMemo.TextSettings.Font.Family := 'Consolas';
-          end;
-        ResizeFlowLayout(renderLayout, 400, 80 + LogIncrement, Length(RenderGroups));
-      end;
+              //Initialise GroupBox LogMemo
+              RenderGroups[i].TLogMemo := TMemo.Create(Self);
+              RenderGroups[i].TLogMemo.Parent := RenderGroups[i].TRenderGroupBox;
+              RenderGroups[i].TLogMemo.Align := TAlignLayout.Client;
+              RenderGroups[i].TLogMemo.Margins.Left := 5;
+              RenderGroups[i].TLogMemo.Margins.Right := 5;
+              RenderGroups[i].TLogMemo.Margins.Bottom := 5;
+              RenderGroups[i].TLogMemo.ReadOnly := True;
+              RenderGroups[i].TLogMemo.WordWrap := True;
+              RenderGroups[i].TLogMemo.Visible := False;
+              RenderGroups[i].TLogMemo.TextSettings.Font.Family := 'Consolas';
+            end;
+          ResizeFlowLayout(renderLayout, 400, 80 + LogIncrement, Length(RenderGroups));
+        end;
+      renderingTimer.Enabled := True;
+    end;
   //if TButton(Sender) = Form1.infoButton then
 
 
@@ -281,12 +286,20 @@ begin
 
         if Render[i].LogFile.Count > RenderGroups[i].TLogMemo.Lines.Count then
           begin
-            RenderGroups[i].TRenderProgressBar.Value := Render[i].LogFile.Count;
             if Form1.threadsSwitch.IsChecked then
-              RenderGroups[i].TRenderProgressLabel.Text := Round((RenderGroups[i].TRenderProgressBar.Value / RenderGroups[i].TRenderProgressBar.Max) * 100).ToString + '%'
+              begin
+                RenderGroups[i].TRenderProgressBar.Value := Render[i].LogFile.Count;
+                RenderGroups[i].TRenderProgressLabel.Text := Round((RenderGroups[i].TRenderProgressBar.Value / RenderGroups[i].TRenderProgressBar.Max) * 100).ToString + '%';
+              end
             else
               if Form1.outFrame.Text.IsEmpty then
-                RenderGroups[i].TRenderProgressLabel.Text := 'N/A'
+                begin
+                  RenderGroups[i].TRenderProgressLabel.Text := 'N/A';
+                  if Render[i].LogFile.Text.Contains ('Finished Compositon') then
+                    RenderGroups[i].TRenderProgressBar.Value := 1
+                  else
+                    RenderGroups[i].TRenderProgressBar.Value := 0;
+                end
               else
                 RenderGroups[i].TRenderProgressLabel.Text := Round((RenderGroups[i].TRenderProgressBar.Value / RenderGroups[i].TRenderProgressBar.Max) * 100).ToString + '%';
             RenderGroups[i].TLogMemo.Lines.Add(Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);

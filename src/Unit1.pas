@@ -190,7 +190,6 @@ type
     Memo2: TMemo;
     stap: TButton;
     test: TLayout;
-    StyleBook1: TStyleBook;
     procedure FormResize(Sender: TObject);
     procedure compSwitchSwitch(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -982,7 +981,6 @@ begin
     RenderingForm.TotalProgressBar.Max := outFrame.Text.ToInteger() + 50 * Length(LogFiles);
   //RenderingForm.framesLabel.Text := '0 / ' + outFrame.Text + ' Frames';
   RenderWindowSender := launchButton;
-  RenderingForm.renderingTimer.Enabled := True;
   RenderingForm.Show;
 
   //OnRenderStart Actions
