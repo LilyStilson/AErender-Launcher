@@ -3,12 +3,13 @@ object RenderingForm: TRenderingForm
   Top = 0
   Caption = 'Rendering Progress'
   ClientHeight = 400
-  ClientWidth = 800
+  ClientWidth = 400
   Position = MainFormCenter
   StyleBook = Form1.AERModernStyle
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
+  OnClose = FormClose
   OnResize = FormResize
   OnShow = FormShow
   DesignerMasterStyle = 0
@@ -30,7 +31,7 @@ object RenderingForm: TRenderingForm
     Align = MostBottom
     Position.Y = 290.000000000000000000
     ShowSizeGrip = True
-    Size.Width = 800.000000000000000000
+    Size.Width = 400.000000000000000000
     Size.Height = 110.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 0
@@ -63,7 +64,7 @@ object RenderingForm: TRenderingForm
       Margins.Top = 2.500000000000000000
       Margins.Right = 25.000000000000000000
       Margins.Bottom = 2.500000000000000000
-      Position.X = 659.000000000000000000
+      Position.X = 259.000000000000000000
       Position.Y = 88.500000000000000000
       Size.Width = 116.000000000000000000
       Size.Height = 19.000000000000000000
@@ -74,7 +75,7 @@ object RenderingForm: TRenderingForm
     end
     object statusBarTopLayout: TLayout
       Align = Top
-      Size.Width = 800.000000000000000000
+      Size.Width = 400.000000000000000000
       Size.Height = 85.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 3
@@ -85,26 +86,24 @@ object RenderingForm: TRenderingForm
         Margins.Top = 5.000000000000000000
         Margins.Right = 15.000000000000000000
         Margins.Bottom = 5.000000000000000000
-        Size.Width = 770.000000000000000000
+        Size.Width = 370.000000000000000000
         Size.Height = 21.000000000000000000
         Size.PlatformDefault = False
       end
       object framesLabel: TLabel
         Align = Bottom
-        AutoSize = True
         StyledSettings = [Family, FontColor]
         Margins.Left = 15.000000000000000000
         Margins.Right = 15.000000000000000000
         Margins.Bottom = 5.000000000000000000
         Position.X = 15.000000000000000000
         Position.Y = 58.000000000000000000
-        Size.Width = 770.000000000000000000
+        Size.Width = 370.000000000000000000
         Size.Height = 22.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Size = 16.000000000000000000
         TextSettings.Font.StyleExt = {00070000000000000004000000}
-        TextSettings.HorzAlign = Trailing
-        TextSettings.Trimming = Word
+        TextSettings.Trimming = None
         TabOrder = 0
       end
       object topLayoutTitle: TLayout
@@ -114,7 +113,7 @@ object RenderingForm: TRenderingForm
         Margins.Right = 15.000000000000000000
         Position.X = 15.000000000000000000
         Position.Y = 5.000000000000000000
-        Size.Width = 770.000000000000000000
+        Size.Width = 370.000000000000000000
         Size.Height = 22.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 2
@@ -135,7 +134,7 @@ object RenderingForm: TRenderingForm
           Align = Right
           AutoSize = True
           StyledSettings = [Family, FontColor]
-          Position.X = 585.000000000000000000
+          Position.X = 185.000000000000000000
           Size.Width = 185.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
@@ -152,14 +151,14 @@ object RenderingForm: TRenderingForm
       Align = Top
       LineType = Bottom
       Position.Y = 85.000000000000000000
-      Size.Width = 800.000000000000000000
+      Size.Width = 400.000000000000000000
       Size.Height = 1.000000000000000000
       Size.PlatformDefault = False
       Stroke.Color = xFF151515
     end
   end
   object RenderingToolBar: TToolBar
-    Size.Width = 800.000000000000000000
+    Size.Width = 400.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 2
@@ -180,24 +179,12 @@ object RenderingForm: TRenderingForm
   end
   object VertScrollBox1: TVertScrollBox
     Align = Client
-    Size.Width = 800.000000000000000000
+    Size.Width = 400.000000000000000000
     Size.Height = 257.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 5
-    Viewport.Width = 800.000000000000000000
+    Viewport.Width = 400.000000000000000000
     Viewport.Height = 257.000000000000000000
-    object renderLayout: TFlowLayout
-      Align = Top
-      ClipChildren = True
-      HitTest = False
-      Size.Width = 800.000000000000000000
-      Size.Height = 80.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 0
-      Justify = Left
-      JustifyLastLine = Left
-      FlowDirection = LeftToRight
-    end
   end
   object renderingTimer: TTimer
     Enabled = False

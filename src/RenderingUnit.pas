@@ -27,13 +27,13 @@ type
     totalProgressPercentage: TLabel;
     renderingTimer: TTimer;
     emptyLabel: TLabel;
-    renderLayout: TFlowLayout;
     VertScrollBox1: TVertScrollBox;
     procedure ShowLogButtonClick (Sender: TObject);
     procedure renderingTimerTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure abortRenderingButtonClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
     {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
@@ -120,26 +120,37 @@ begin
           RenderGroups[i].TRenderProgressBar.Free;
           RenderGroups[i].TRenderGroupBoxMainLayout.Free;
           RenderGroups[i].TRenderGroupBox.Free;
+
+          {$IFDEF MSWNDOWS}DeleteFile(Unit1.LogFiles[i]);{$ENDIF MSWINDOWS}
         end;
       emptyLabel.Visible := True;
       emptyLabel.Enabled := True;
-      renderLayout.Height := 80;
+      //renderLayout.Height := 80;
       renderingTimer.Enabled := False;
     end
   else
     ShowMessage ('Nothing to abort!')
 end;
-
+{
 procedure ResizeFlowLayout (FlowLayout: TFlowLayout; BaseWidth, BaseHeight: Single; Count: Integer);
 begin
   var Lines := Trunc(Count / Trunc(FlowLayout.Width / BaseWidth));
 
   FlowLayout.Height := BaseHeight * Lines;
 end;
+}
+procedure TRenderingForm.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  if TotalProgressBar.Value = TotalProgressBar.Max then
+    begin
+      abortRenderingButtonClick(Sender);
+      TotalProgressBar.Value := 0;
+    end;
+end;
 
 procedure TRenderingForm.FormResize(Sender: TObject);
 begin
-  ResizeFlowLayout(renderLayout, 400, 80 + LogIncrement, Length(RenderGroups));
+  //ResizeFlowLayout(renderLayout, 400, 80 + LogIncrement, Length(RenderGroups));
 end;
 
 procedure TRenderingForm.FormShow(Sender: TObject);
@@ -156,17 +167,17 @@ begin
           emptyLabel.Visible := False;
           emptyLabel.Enabled := False;
 
-          SetLength (RenderGroups, Form1.threadsCount.Items[Form1.threadsCount.ItemIndex].ToInteger());
+          SetLength (RenderGroups, Length(Unit1.LogFiles));
 
           for var i := 0 to High (RenderGroups) do
             begin
               //Initialize GroupBox
               RenderGroups[i].TRenderGroupBox := TGroupBox.Create(Self);
-              RenderGroups[i].TRenderGroupBox.Parent := renderLayout;
+              RenderGroups[i].TRenderGroupBox.Parent := VertScrollBox1;
+              RenderGroups[i].TRenderGroupBox.Align := TAlignLayout.Top;
               RenderGroups[i].TRenderGroupBox.Margins.Left := 5;
               RenderGroups[i].TRenderGroupBox.Margins.Bottom := 5;
               RenderGroups[i].TRenderGroupBox.Position.X := 5;
-              RenderGroups[i].TRenderGroupBox.Width := 390;
               RenderGroups[i].TRenderGroupBox.Height := 75;
               RenderGroups[i].TRenderGroupBox.Text := Unit1.LogFiles[i].Remove(Unit1.LogFiles[i].Length - 4);
               RenderGroups[i].TRenderGroupBox.Tag := i;
@@ -185,6 +196,7 @@ begin
               RenderGroups[i].TRenderProgressBar.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
               RenderGroups[i].TRenderProgressBar.Align := TAlignLayout.Top;
               RenderGroups[i].TRenderProgressBar.Orientation := TOrientation.Horizontal;
+              RenderGroups[i].TRenderProgressBar.StyleLookup := 'progressbarstyle';
               RenderGroups[i].TRenderProgressBar.Margins.Left := 5;
               RenderGroups[i].TRenderProgressBar.Margins.Top := 10;
               RenderGroups[i].TRenderProgressBar.Margins.Right := 5;
@@ -202,9 +214,9 @@ begin
               //Initialise GroupBox MainLayout ProgressLabel
               RenderGroups[i].TRenderProgressLabel := TLabel.Create(Self);
               RenderGroups[i].TRenderProgressLabel.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
-              RenderGroups[i].TRenderProgressLabel.Align := TAlignLayout.Left;
+              RenderGroups[i].TRenderProgressLabel.Align := TAlignLayout.Client;
               RenderGroups[i].TRenderProgressLabel.Margins.Left := 5;
-              RenderGroups[i].TRenderProgressLabel.Width := 100;
+              //RenderGroups[i].TRenderProgressLabel.Width := 100;
               RenderGroups[i].TRenderProgressLabel.AutoSize := False;
               RenderGroups[i].TRenderProgressLabel.TextSettings.WordWrap := False;
               if Form1.threadsSwitch.IsChecked then
@@ -218,8 +230,8 @@ begin
               //Initialize GroupBox MainLayout ShowLogButton
               RenderGroups[i].TRenderShowLogButton := TButton.Create(Self);
               RenderGroups[i].TRenderShowLogButton.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
-              RenderGroups[i].TRenderShowLogButton.Align := TAlignLayout.Client;
-              RenderGroups[i].TRenderShowLogButton.Margins.Left := 100;
+              RenderGroups[i].TRenderShowLogButton.Align := TAlignLayout.Right;
+              RenderGroups[i].TRenderShowLogButton.Width := 150;
               RenderGroups[i].TRenderShowLogButton.Margins.Top := 5;
               RenderGroups[i].TRenderShowLogButton.Margins.Right := 5;
               RenderGroups[i].TRenderShowLogButton.Margins.Bottom := 5;
@@ -239,13 +251,9 @@ begin
               RenderGroups[i].TLogMemo.Visible := False;
               RenderGroups[i].TLogMemo.TextSettings.Font.Family := 'Consolas';
             end;
-          ResizeFlowLayout(renderLayout, 400, 80 + LogIncrement, Length(RenderGroups));
         end;
       renderingTimer.Enabled := True;
     end;
-  //if TButton(Sender) = Form1.infoButton then
-
-
   FormResize(Sender);
 end;
 
@@ -255,24 +263,24 @@ type
     LogFile: TStrings;
     Data: TStrings;
     Stream: TStream;
-    State: Boolean;
+    State: String[6];
   end;
 var
   Render: TArray<TRenderData>;
   i: Integer;
 begin
   var Finished: Integer := 0;
-  var sum: Integer := 0;
   SetLength (Render, Length(Unit1.LogFiles));
 
   for var j := 0 to High(Render) do
     begin
       Render[j].Data := TStrings.Create;
-      Render[j].State := False;
+      Render[j].State := '';
     end;
 
   for i := 0 to High(Render) do
     begin
+      var sum: Integer := 0;
       Render[i].LogFile := TStringList.Create;
       Render[i].LogFile.Encoding.UTF8;
 
@@ -286,7 +294,7 @@ begin
 
         if Render[i].LogFile.Count > RenderGroups[i].TLogMemo.Lines.Count then
           begin
-            if Form1.threadsSwitch.IsChecked then
+            if Form1.threadsSwitch.IsChecked or (not Form1.compSwitch.IsChecked and not Form1.outFrame.Text.IsEmpty) then
               begin
                 RenderGroups[i].TRenderProgressBar.Value := Render[i].LogFile.Count;
                 RenderGroups[i].TRenderProgressLabel.Text := Round((RenderGroups[i].TRenderProgressBar.Value / RenderGroups[i].TRenderProgressBar.Max) * 100).ToString + '%';
@@ -294,11 +302,7 @@ begin
             else
               if Form1.outFrame.Text.IsEmpty then
                 begin
-                  RenderGroups[i].TRenderProgressLabel.Text := 'N/A';
-                  if Render[i].LogFile.Text.Contains ('Finished Compositon') then
-                    RenderGroups[i].TRenderProgressBar.Value := 1
-                  else
-                    RenderGroups[i].TRenderProgressBar.Value := 0;
+                  RenderGroups[i].TRenderProgressLabel.Text := 'Rendering';
                 end
               else
                 RenderGroups[i].TRenderProgressLabel.Text := Round((RenderGroups[i].TRenderProgressBar.Value / RenderGroups[i].TRenderProgressBar.Max) * 100).ToString + '%';
@@ -307,27 +311,48 @@ begin
           end;
 
         for var j := 0 to High(RenderGroups) do
-          inc (sum, LimitInt(RenderGroups[i].TRenderProgressBar.Value.ToString.ToInteger - 50));
+          if (Form1.threadsSwitch.IsChecked) and (not Form1.outFrame.Text.IsEmpty) then
+            inc (sum, LimitInt(RenderGroups[j].TRenderProgressBar.Value.ToString.ToInteger))
+          else
+            inc (sum, RenderGroups[j].TRenderProgressBar.Value.ToString.ToInteger);
 
         TotalProgressBar.Value := sum;
         totalProgressPercentage.Text := Round((TotalProgressBar.Value / TotalProgressBar.Max) * 100).ToString + '%';
-        //framesLabel.Text := sum.ToString + ' / ' + Form1.outFrame.Text + ' Frames';
 
-        if Render[i].LogFile.Text.Contains('Finished Compositon') then
-          Render[i].State := True;
+        {framesLabel.Text := 'tpb.max = ' + TotalProgressBar.max.ToString + '; '
+                          + 'tpb.val = ' + TotalProgressBar.Value.ToString + '; '
+                          + 'rg[0].val = ' + RenderGroups[0].TRenderProgressBar.Value.ToString + '; '
+                          + 'rg[0].max = ' + RenderGroups[0].TRenderProgressBar.Max.ToString + '; '
+                          + 'rg[1].val = ' + RenderGroups[1].TRenderProgressBar.Value.ToString + '; '
+                          + 'rg[1].max = ' + RenderGroups[1].TRenderProgressBar.Max.ToString + '; ';}
+
+        if RenderGroups[i].TLogMemo.Text.Contains('Finished composition') then
+          begin
+            Render[i].State := 'finish';
+            RenderGroups[i].TRenderProgressLabel.Text := 'Finished';
+            RenderGroups[i].TRenderProgressBar.Value := RenderGroups[i].TRenderProgressBar.Max;
+          end;
+        if RenderGroups[i].TLogMemo.Text.Contains('aerender ERROR') or RenderGroups[i].TLogMemo.Text.Contains('aerender Error') then
+          begin
+            Render[i].State := 'error';
+            RenderGroups[i].TRenderProgressLabel.Text := 'ERROR: See log for more info';
+            RenderGroups[i].TRenderProgressBar.Value := RenderGroups[i].TRenderProgressBar.Max;
+            RenderGroups[i].TRenderProgressBar.StyleLookup := 'progressbarerrorstyle'
+          end;
       finally
         Render[i].LogFile.Free;
       end;
     end;
 
     for var j := 0 to High(Render) do
-      if Render[j].State = True then
+      if Render[j].State = 'finish' then
         inc (Finished);
 
     if Finished = Length(LogFiles) then
       begin
         Sleep (2000);
-        abortRenderingButtonClick(Sender);
+        TotalProgressBar.Value := TotalProgressBar.Max;
+        totalProgressPercentage.Text := '100%';
         renderingTimer.Enabled := False;
       end;
 end;
@@ -363,9 +388,9 @@ begin
       else
         LogIncrement := 0;
     end;
-  FormResize(Sender);
+  {FormResize(Sender);
   RenderingForm.Width := RenderingForm.Width - 1;
-  RenderingForm.Width := RenderingForm.Width + 1;
+  RenderingForm.Width := RenderingForm.Width + 1;       }
 end;
 
 end.

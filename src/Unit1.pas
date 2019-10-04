@@ -861,7 +861,8 @@ begin
       else
         begin
           threads := 1;
-//          SetLength (LogFiles, threads);
+          if Length(LogFiles) = 0 then
+            SetLength (LogFiles, threads);
         end;
       if compSwitch.IsChecked then
         begin
@@ -871,7 +872,8 @@ begin
       else
         begin
           comps := 1;
-//          SetLength (LogFiles, comps);
+          if Length(LogFiles) = 0 then
+            SetLength (LogFiles, comps);
         end;
 
       for var j := 0 to comps-1 do
@@ -975,10 +977,10 @@ begin
     end;
 
   Sleep (2000);
-  if compSwitch.IsChecked then
+  if compSwitch.IsChecked or outFrame.Text.IsEmpty then
     RenderingForm.TotalProgressBar.Max := Length(LogFiles)
   else
-    RenderingForm.TotalProgressBar.Max := outFrame.Text.ToInteger() + 50 * Length(LogFiles);
+    RenderingForm.TotalProgressBar.Max := outFrame.Text.ToInteger() + (50 * Length(LogFiles));
   //RenderingForm.framesLabel.Text := '0 / ' + outFrame.Text + ' Frames';
   RenderWindowSender := launchButton;
   RenderingForm.Show;
