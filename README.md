@@ -9,3 +9,30 @@
   <a href="https://github.com/LilyStilson/AErender-Launcher/issues"><img src="https://img.shields.io/github/issues/LilyStilson/AErender-Launcher" alt="issues"></a>
   <a href="http://aerenderlauncher.com"><img src="https://img.shields.io/website/http/aerenderlauncher.com" alt="website"></a>
 </div>
+
+<h2>Features</h2>
+<ul>
+  <li>Forever free and open source</li>
+  <li>Cross-platform</li>
+  <li>After Effects version independent</li>
+  <li>Threaded rendering</li>
+  <li>Multi-Composition rendering</li>
+  <li>Cache and RAM usage limit</li>
+  <li>After Effects project importing</li>
+  <li>Automatic updates via GitHub</li>
+  <li>Some visual skins</li>
+</ul>
+
+<h2>Installation and usage</h2>
+<p></p>
+
+<h2>Roadmap</h2>
+<ul>
+  <li>aerender handle</li>
+  <li>Concatenation of rendered parts</li>
+  <li>Conversion and concatenation lossless renders into various formats</li>
+  <li>On Rendering Finish actions</li>
+  <li>Dragging projects onto <code>Project Path</code> field <i>(suggested by @pencilgame#3118)</i></li>
+  <li>Automated rendering <i>(suggested by <a href="https://www.reddit.com/user/granite603" target="_blank">/u/granite603</a>)</i></li>
+  <li>Network rendering <i>(suggested by <a href="https://www.reddit.com/user/pixeldrift" target="_blank">/u/pixeldrift</a>)</i></li>
+</ul>
