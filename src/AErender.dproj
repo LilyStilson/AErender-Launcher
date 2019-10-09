@@ -286,6 +286,7 @@
             <Form>RenderingForm</Form>
             <FormType>fmx</FormType>
         </DCCReference>
+        <DCCReference Include="MathExpParser.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -338,18 +339,18 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="Docs\PreparingRendering.html" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Enabled>false</Enabled>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="E:\AErender CC 2018\icon_UWP_44.png" Configuration="Debug" Class="UWP_DelphiLogo44">
                     <Platform Name="Win32">
                         <RemoteDir>Assets\</RemoteDir>
                         <Enabled>false</Enabled>
                         <RemoteName>Logo44x44.png</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Docs\PreparingRendering.html" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
-                        <Enabled>false</Enabled>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
