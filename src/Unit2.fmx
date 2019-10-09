@@ -4,19 +4,20 @@ object Form2: TForm2
   BorderIcons = [biSystemMenu]
   BorderStyle = SizeToolWin
   Caption = 'AErender Settings'
-  ClientHeight = 266
+  ClientHeight = 313
   ClientWidth = 442
   Position = MainFormCenter
   StyleBook = Form1.AERModernStyle
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
   OnCloseQuery = FormCloseQuery
   OnShow = FormShow
   DesignerMasterStyle = 0
   object Layout1: TLayout
     Align = Bottom
-    Position.Y = 234.000000000000000000
+    Position.Y = 281.000000000000000000
     Size.Width = 442.000000000000000000
     Size.Height = 32.000000000000000000
     Size.PlatformDefault = False
@@ -30,10 +31,12 @@ object Form2: TForm2
   end
   object langLayout: TLayout
     Align = Top
+    Enabled = False
     Position.Y = 55.000000000000000000
     Size.Width = 442.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
+    Visible = False
     TabOrder = 5
     object langBox: TComboBox
       Align = Client
@@ -112,7 +115,7 @@ object Form2: TForm2
   end
   object defaultProjectsLayout: TLayout
     Align = Top
-    Position.Y = 121.000000000000000000
+    Position.Y = 88.000000000000000000
     Size.Width = 442.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
@@ -155,7 +158,7 @@ object Form2: TForm2
   end
   object defaultOutputLayout: TLayout
     Align = Top
-    Position.Y = 154.000000000000000000
+    Position.Y = 121.000000000000000000
     Size.Width = 442.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
@@ -204,11 +207,11 @@ object Form2: TForm2
   end
   object styleLayout: TLayout
     Align = Top
-    Position.Y = 88.000000000000000000
+    Position.Y = 55.000000000000000000
     Size.Width = 442.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 8
+    TabOrder = 9
     object styleBox: TComboBox
       Align = Client
       Items.Strings = (
@@ -238,11 +241,11 @@ object Form2: TForm2
   end
   object onRenderStartLayout: TLayout
     Align = Top
-    Position.Y = 187.000000000000000000
+    Position.Y = 154.000000000000000000
     Size.Width = 442.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 7
+    TabOrder = 8
     object onRenderStartBox: TComboBox
       Align = Client
       Items.Strings = (
@@ -268,6 +271,27 @@ object Form2: TForm2
       Size.PlatformDefault = False
       Text = 'On render start'
       TabOrder = 1
+    end
+  end
+  object Layout2: TLayout
+    Align = Top
+    Position.Y = 187.000000000000000000
+    Size.Width = 442.000000000000000000
+    Size.Height = 33.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 7
+    object HandleCheckBox: TCheckBox
+      Align = Client
+      Hint = 'Not available on macOS now!'
+      IsChecked = True
+      Margins.Left = 10.000000000000000000
+      Margins.Right = 10.000000000000000000
+      Size.Width = 422.000000000000000000
+      Size.Height = 33.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Text = 'Handle aerender processes inside Launcher'
+      OnChange = HandleCheckBoxChange
     end
   end
 end

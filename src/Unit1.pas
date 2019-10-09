@@ -12,7 +12,7 @@ uses
   FMX.Grid.Style, FMX.Grid, FMX.ScrollBox, FMX.EditBox, FMX.SpinBox,
   FMX.ComboTrackBar, System.ImageList, FMX.ImgList, FMX.ListBox, FMX.Objects, FMX.Menus,
   Xml.xmldom, Xml.XMLIntf, Xml.omnixmldom, Xml.XMLDoc, Xml.adomxmldom, FMX.MultiView, FMX.ExtCtrls, FMX.DialogService.Sync,
-  FMX.Effects, FMX.Filter.Effects, System.Notification, FMX.Ani, FMX.Memo,
+  FMX.Effects, FMX.Filter.Effects, System.Notification, FMX.Ani, FMX.Memo, MathExpParser,
   {$IFDEF MSWINDOWS}
     Winapi.ShellAPI, Winapi.Windows, FMX.Platform.Win, Winapi.TlHelp32;
   {$ENDIF MSWINDOWS}
@@ -184,7 +184,6 @@ type
     renderingProgressLabel: TLabel;
     renderingPopup: TLayout;
     ShadowEffect1: TShadowEffect;
-    renderingTimer: TTimer;
     mainRenderingLayout: TLayout;
     Memo1: TMemo;
     Memo2: TMemo;
@@ -220,6 +219,11 @@ type
     procedure memUsageInfoEditExit(Sender: TObject);
     procedure downloadButtonClick(Sender: TObject);
     procedure ffmpegConfigButtonClick(Sender: TObject);
+    procedure projectPathDragDrop(Sender: TObject; const Data: TDragObject;
+      const Point: TPointF);
+    procedure projectPathDragOver(Sender: TObject; const Data: TDragObject;
+      const Point: TPointF; var Operation: TDragOperation);
+    procedure outFrameValidate(Sender: TObject; var Text: string);
   private
     { Private declarations }
   public
@@ -232,13 +236,14 @@ const
 var
   Form1: TForm1;
   CFG: TextFile;
-  VER, LANG, AERPATH, DEFPRGPATH, DEFOUTPATH, ERR, gitResponse, gitVersion, gitDownload, ffmpegPath: String;
+  VER, LANG, AERPATH, DEFPRGPATH, DEFOUTPATH, ERR, gitResponse, gitVersion, gitDownload, ffmpegPath, AERH: String;
   gitRelease: TJsonValue;
   UpdateAvailable: Boolean = False;
   FFMPEG: Boolean = False;
   RenderWindowSender: TButton;
   MEMORY, STYLE, ONRENDERSTART: Integer;
   LogFiles: TArray<System.String>;
+  TMathParser: MathExpParser.TExpressionParser;
 
 implementation
 
@@ -261,10 +266,10 @@ var
   {$IFDEF MSWINDOWS}
     MS_Ex: MemoryStatusEx;
   {$ENDIF MSWINDOWS}
-  {$IFDEF POSIX}
+  {$IFDEF MACOS}
     res: Int64;
     len: size_t;
-  {$ENDIF POSIX}
+  {$ENDIF MACOS}
 begin
   {$IFDEF MSWINDOWS}
     FillChar (MS_Ex, SizeOf (MemoryStatusEx), #0);
@@ -272,12 +277,12 @@ begin
     GlobalMemoryStatusEx (MS_Ex);
     Result := MS_Ex.ullTotalPhys;
   {$ENDIF MSWINDOWS}
-  {$IFDEF POSIX}
+  {$IFDEF MACOS}
     len := SizeOf (Result);
     res := SysCtlByName ('hw.memsize', @Result, @len, nil, 0);
     if res <> 0 then
       RaiseLastOSError;
-  {$ENDIF POSIX}
+  {$ENDIF MACOS}
 end;
 
 function GetHTML(URL: String): String;
@@ -316,40 +321,33 @@ begin
     Result := True;
 end;
 
-function IsFFMPEGPresent: Boolean;
+function GetFFMPEGPath: WideString;
 var
   AERenderDirectory: String;
-  Folders: System.TArray<System.String>;
+  Folders: System.TArray<String>;
 begin
   {$IFDEF MSWINDOWS}AERenderDirectory := 'C:\ProgramData\AErender';{$ENDIF MSWINDOWS}
-  {$IFDEF POSIX}AERenderDirectory := GetEnvironmentVariable('HOME') + '/Documents/AErender/';{$ENDIF}
+  {$IFDEF MACOS}AERenderDirectory := GetEnvironmentVariable('HOME') + '/Documents/AErender/';{$ENDIF}
 
   Folders := TDirectory.GetDirectories(AErenderDirectory);
 
   for var i := 0 to High(Folders) do
     if Folders[i].Contains('ffmpeg') then
-      begin
-        Result := True;
-        ffmpegPath := Folders[i];
-      end
+      Result := Folders[i]
     else
-      Result := False;
+      Result := '';
 end;
 
 function GetDirectoryFiles(Directory: String): TArray<System.String>;
 var
   Files: System.TArray<System.String>;
-  Logs: Integer;
 begin
-  Logs := 1;
   Files := TDirectory.GetFiles(Directory);
   for var i := 0 to High(Files) do
-    if Files[i].Contains('.log') then
-      begin
-        SetLength(Result, Logs);
-        Result[Logs-1] := Files[i];
-        inc (Logs);
-      end;
+    begin
+      SetLength(Result, i+1);
+      Result[i] := Files[i];
+    end;
 end;
 
 {$IFDEF MSWINDOWS}
@@ -469,9 +467,9 @@ begin
   {$IFDEF MSWINDOWS}
     ShellExecute(0, 'open', PWideChar(gitDownload), nil, nil, SW_SHOW);
   {$ENDIF MSWINDOWS}
-  {$IFDEF POSIX}
+  {$IFDEF MACOS}
     _system(PAnsiChar('open ' + AnsiString('"' + gitDownload + '"')));
-  {$ENDIF POSIX}
+  {$ENDIF MACOS}
 end;
 
 procedure TForm1.exitItemClick(Sender: TObject);
@@ -546,6 +544,12 @@ begin
   else
     Writeln (CFG, 'False');
 
+  //Handle aerender
+  if Form2.HandleCheckBox.IsChecked then
+    Writeln (CFG, 'True')
+  else
+    Writeln (CFG, 'False');
+
   //Custom Properties
   if customCheckbox.IsChecked then
     begin
@@ -586,6 +590,13 @@ begin
   Writeln (CFG, cacheUsageTrackBar.Value.ToString);
 
   CloseFile (CFG);
+
+  {$IFDEF MSWINDOWS}
+    var AerenderDirectory: TArray<String> := GetDirectoryFiles('C:\ProgramData\AErender');
+    for var i := 0 to High(AerenderDirectory) do
+      if (AerenderDirectory[i].Contains('.bat')) then
+        DeleteFile(PWideChar(AerenderDirectory[i]));
+  {$ENDIF MSWINDOWS}
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -604,9 +615,9 @@ begin
       {$IFDEF MSWINDOWS}
         gitDownload := gitRelease.GetValue<string>('[0].assets[1].browser_download_url');
       {$ENDIF MSWINDOWS}
-      {$IFDEF POSIX}
+      {$IFDEF MACOS}
         gitDownload := gitRelease.GetValue<string>('[0].assets[0].browser_download_url');
-      {$ENDIF POSIX}
+      {$ENDIF MACOS}
     end
   else
     begin
@@ -615,9 +626,10 @@ begin
       //Form1.Height := 420;
     end;
 
-  if IsFFMPEGPresent then
+  if GetFFMPEGPath <> '' then
     begin
       FFMPEG := True;
+      ffmpegPath := GetFFMPEGPath;
       ffmpegCheckBox.Enabled := True;
     end
   else
@@ -625,7 +637,7 @@ begin
       FFMPEG := False;
       ffmpegCheckBox.Enabled := False;
       ffmpegCheckBox.Hint := 'FFMPEG is not found at' + {$IFDEF MSWINDOWS} 'C:\ProgramData\AErender' {$ENDIF MSWINDOWS}
-                                                        {$IFDEF POSIX} '~/Documents/AErender' {$ENDIF POSIX} + 'directory';
+                                                        {$IFDEF MACOS} '~/Documents/AErender' {$ENDIF MACOS} + 'directory';
     end;
   {$IFDEF MSWINDOWS}
   //Form1.Height := 444;
@@ -639,7 +651,7 @@ begin
     end;
   if FileExists('C:\ProgramData\AErender\AErenderConfiguration.cfg') then
   {$ENDIF MSWINDOWS}
-  {$IFDEF POSIX}
+  {$IFDEF MACOS}
   editItem.Visible := False; editItem.Enabled := False;
   MenuBar1.Destroy;
   if DirectoryExists (GetEnvironmentVariable('HOME') + '/Documents/AErender') then
@@ -651,7 +663,7 @@ begin
       AssignFile (CFG, './AErenderConfiguration.cfg');
     end;
   if FileExists(GetEnvironmentVariable('HOME') + '/Documents/AErender/AErenderConfiguration.cfg') then
-  {$ENDIF POSIX}
+  {$ENDIF MACOS}
     begin
       //Reading values
       Reset (CFG);
@@ -667,6 +679,7 @@ begin
         Readln (CFG, MF);               //Missing Files
         Readln (CFG, SOUND);            //Sound on finish
         Readln (CFG, THREAD);           //Threaded render
+        Readln (CFG, AERH);             //Handle aerender
         Readln (CFG, PROP);             //Custom Properties
         Readln (CFG, PROPTEXT);         //Custom Properties Text
         Readln (CFG, AERPATH);          //AErender Path
@@ -693,14 +706,14 @@ begin
       except
         if (TDialogServiceSync.MessageDialog(('Configuration file is corrupted! Press OK to renew configuration file. Application will be restarted.' + #13#10 +
                               {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\AErenderConfiguration.cfg read error.'{$ENDIF MSWINDOWS}
-                                  {$IFDEF POSIX}'~/Documents/AErender/AErenderConfiguration.cfg read error.'{$ENDIF POSIX}),
+                                  {$IFDEF MACOS}'~/Documents/AErender/AErenderConfiguration.cfg read error.'{$ENDIF MACOS}),
               TMsgDlgType.mtError, mbOKCancel, TMsgDlgBtn.mbOK, 0) = 1) then
             begin
               CloseFile (CFG);
               {$IFDEF MSWINDOWS}DeleteFile ('C:\ProgramData\AErender\AErenderConfiguration.cfg');{$ENDIF MSWINDOWS}
-              {$IFDEF POSIX}DeleteFile (GetEnvironmentVariable('HOME') + '/Documents/AErender/AErenderConfiguration.cfg');{$ENDIF POSIX}
+              {$IFDEF MACOS}DeleteFile (GetEnvironmentVariable('HOME') + '/Documents/AErender/AErenderConfiguration.cfg');{$ENDIF MACOS}
               {$IFDEF MSWINDOWS}ShellExecute(0, 'OPEN', PChar(ParamStr(0)), '', '', SW_SHOWNORMAL);{$ENDIF MSWINDOWS}
-              {$IFDEF POSIX}_system(PAnsiChar('open "' + AnsiString(ParamStr(0)) + '"'));{$ENDIF POSIX}
+              {$IFDEF MACOS}_system(PAnsiChar('open "' + AnsiString(ParamStr(0)) + '"'));{$ENDIF MACOS}
             end;
         Application.Terminate;
       end;
@@ -708,7 +721,7 @@ begin
   else
     begin
       Rewrite (CFG);
-      Writeln (CFG, '');             //Language
+      Writeln (CFG, 'EN');           //Language
       Writeln (CFG, '0');            //Style
       Writeln (CFG, '0');            //OnRenderStart Event
       Writeln (CFG, '');             //Project Path
@@ -719,6 +732,7 @@ begin
       Writeln (CFG, 'False');        //Missing Files
       Writeln (CFG, 'False');        //Sound on finish
       Writeln (CFG, 'False');        //Threaded render
+      Writeln (CFG, 'True');         //Handle aerender
       Writeln (CFG, 'False');        //Custom Properties
       Writeln (CFG, '');             //Custom Properties Text
       Writeln (CFG, '');             //AErender Path
@@ -729,7 +743,9 @@ begin
       LANG := 'EN';
       STYLE := 0;
       ONRENDERSTART := 0;
-      VER := '0';
+      //VER := '0';
+      {$IFDEF MSWINDOWS}AERH := 'True';{$ENDIF MSWINDOWS}
+      {$IFDEF MACOS}AERH := 'False';{$ENDIF MACOS}
       Lang1.Lang := LANG;
       CloseFile (CFG);
     end;
@@ -801,7 +817,7 @@ var
   Notification: TNotification;
 begin
   //Error Codes
-  if LANG = 'EN' then
+  //if LANG = 'EN' then
     begin
       emptyComps := 0;
       if AERPATH.IsEmpty then
@@ -820,8 +836,8 @@ begin
           if emptyComps > 0 then
             ERR := ERR + #13#10 + '[Error 5]: Not all compositions specified in composition list';
         end;
-    end
-  else
+    end;
+  {else
     begin
       emptyComps := 0;
       if AERPATH.IsEmpty then
@@ -840,15 +856,15 @@ begin
           if emptyComps > 0 then
             ERR := ERR + #13#10 + '[Error 5]: Названия не всех композиций указаны в списке';
         end;
-    end;
+    end;}
 
   //Proceed if no errors occured
   if not ERR.IsEmpty then
     begin
-      if LANG = 'EN' then
-        MessageDlg(('The following error(s) has occured: ' + ERR), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0)
-      else
-        MessageDlg(('Произошли следующие ошибки: ' + ERR), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
+      //if LANG = 'EN' then
+        TDialogServiceSync.MessageDialog(('The following error(s) has occured: ' + ERR), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
+      {if LANG = 'RU' then
+        TDialogServiceSync.MessageDialog(('Произошли следующие ошибки: ' + ERR), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0); }
       ERR := '';
     end
   else
@@ -880,7 +896,8 @@ begin
         for var i := 1 to threads do
           begin
             //Script compiling section
-            execFile[i].script := '(';
+            if Form2.HandleCheckBox.IsChecked then
+              execFile[i].script := '(';
             PATH := outputPath.Text;
             PATH.Insert(Length(Path)-4, '_' + compGrid.Cells[0, j] + '_' + i.ToString);
             execFile[i].script := execFile[i].script + '"' + AERPATH + '" ' + '-project "' + projectPath.Text + '" -output "' + PATH + '" ';
@@ -913,17 +930,18 @@ begin
 
             execFile[i].script := execFile[i].script + '-mem_usage "' + Trunc(cacheUsageTrackBar.Value).ToString + '" "' + Trunc(memUsageTrackBar.Value).ToString + '" ';
 
+            if Form2.HandleCheckBox.IsChecked then
+              begin
+                if customCheckbox.IsChecked then
+                  execFile[i].script := execFile[i].script + customProp.Text;
 
-            if customCheckbox.IsChecked then
-              execFile[i].script := execFile[i].script + customProp.Text;
+                execFile[i].script := execFile[i].script + ') > "' + PATH.Remove(PATH.Length - 4) + '.log"';
 
-            execFile[i].script := execFile[i].script + ') > "' + PATH.Remove(PATH.Length - 4) + '.log"';
-
-            if threadsSwitch.IsChecked then
-              LogFiles[i-1] := PATH.Remove(PATH.Length - 4) + '.log'
-            else
-              LogFiles[j] := PATH.Remove(PATH.Length - 4) + '.log';
-
+                if threadsSwitch.IsChecked then
+                  LogFiles[i-1] := PATH.Remove(PATH.Length - 4) + '.log'
+                else
+                  LogFiles[j] := PATH.Remove(PATH.Length - 4) + '.log';
+              end;
             //File section
             {$IFDEF MSWINDOWS}
               if compSwitch.IsChecked then
@@ -934,12 +952,18 @@ begin
               Writeln (execFile[i].F, execFile[i].script);
               //Writeln (execFile[i].F, '@PAUSE');
               CloseFile (execFile[i].F);
-              if compSwitch.IsChecked then
-                ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_HIDE)
+              if Form2.HandleCheckBox.IsChecked then
+                if compSwitch.IsChecked then
+                  ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_HIDE)
+                else
+                  ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_HIDE)
               else
-                ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_HIDE);
+                if compSwitch.IsChecked then
+                  ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_SHOWNORMAL)
+                else
+                  ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_SHOWNORMAL)
             {$ENDIF MSWINOWS}
-            {$IFDEF POSIX}
+            {$IFDEF MACOS}
               if compSwitch.IsChecked then
                 AssignFile (execFile[i].F, GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command')
               else
@@ -958,7 +982,7 @@ begin
                   _system(PAnsiChar('chmod +x ' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command')));
                   _system(PAnsiChar('open ' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command')));
                 end;
-            {$ENDIF POSIX}
+            {$ENDIF MACOS}
           end;
       {$REGION '  Notifications Invoker [Windows]  '}
       {$IFDEF MSWINDOWS}
@@ -974,23 +998,27 @@ begin
       end;
       {$ENDIF MSWINDOWS}
       {$ENDREGION}
+      Sleep (2000);
+      if Form2.HandleCheckBox.IsChecked then
+        begin
+          if RenderingUnit.VISIBLE then
+            RenderingForm.abortRenderingButtonClick(Sender);
+          if compSwitch.IsChecked or outFrame.Text.IsEmpty then
+            RenderingForm.TotalProgressBar.Max := Length(LogFiles)
+          else
+            RenderingForm.TotalProgressBar.Max := outFrame.Text.ToInteger() + (50 * Length(LogFiles));
+          //RenderingForm.framesLabel.Text := '0 / ' + outFrame.Text + ' Frames';
+          RenderWindowSender := launchButton;
+          RenderingForm.Show;
+        end
+      else
+        //OnRenderStart Actions
+        case Form2.onRenderStartBox.ItemIndex of
+          1:begin
+              WindowState := TWindowState.wsMinimized;
+            end;
+        end
     end;
-
-  Sleep (2000);
-  if compSwitch.IsChecked or outFrame.Text.IsEmpty then
-    RenderingForm.TotalProgressBar.Max := Length(LogFiles)
-  else
-    RenderingForm.TotalProgressBar.Max := outFrame.Text.ToInteger() + (50 * Length(LogFiles));
-  //RenderingForm.framesLabel.Text := '0 / ' + outFrame.Text + ' Frames';
-  RenderWindowSender := launchButton;
-  RenderingForm.Show;
-
-  //OnRenderStart Actions
-  case Form2.onRenderStartBox.ItemIndex of
-    1:begin
-        WindowState := TWindowState.wsMinimized;
-      end;
-  end
 end;
 
 procedure TForm1.openFileClick(Sender: TObject);
@@ -998,6 +1026,34 @@ begin
   with AEPOpenDialog do
     if Execute then
       projectPath.Text := AEPOpenDialog.FileName;
+end;
+
+procedure TForm1.outFrameValidate(Sender: TObject; var Text: string);
+var 
+  tempStr: String;
+begin
+  try
+    tempStr := TMathParser.ParseExpressionToFloat(outFrame.Text).ToString;
+  except
+    on Exception do
+      tempStr := Text;   
+  end;
+  Text := tempStr;
+end;
+
+procedure TForm1.projectPathDragDrop(Sender: TObject;
+  const Data: TDragObject; const Point: TPointF);
+begin
+  if Data.Source <> nil then
+    projectPath.Text := Data.Source.ClassName
+  else
+    projectPath.Text := Data.Files[0];
+end;
+
+procedure TForm1.projectPathDragOver(Sender: TObject; const Data: TDragObject;
+  const Point: TPointF; var Operation: TDragOperation);
+begin
+  Operation := TDragOperation.Link;
 end;
 
 procedure TForm1.saveFileClick(Sender: TObject);
@@ -1116,10 +1172,10 @@ begin
       except
         on Exception do
           begin
-            if LANG = 'EN' then
-              MessageDlg((Text + ' is not a valid memory value. Try <value unit> or <value> instead.'), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
-            if LANG = 'RU' then
-              MessageDlg((Text + ' недействительное значение памяти. Используйте <value unit> или <value>.'), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
+            //if LANG = 'EN' then
+              TDialogServiceSync.MessageDialog((Text + ' is not a valid memory value. Try <value unit> or <value> instead.'), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
+            //if LANG = 'RU' then
+            //  MessageDlg((Text + ' недействительное значение памяти. Используйте <value unit> или <value>.'), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
           end;
       end;
     end;
@@ -1176,10 +1232,10 @@ begin
   except
     on Exception do
       begin
-        if LANG = 'EN' then
-          MessageDlg((Text + ' is invalid percentage value. Try <value %> or <value> instead.'), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
-        if LANG = 'RU' then
-          MessageDlg((Text + ' недействительное процентное значение. Используйте <value %> или <value>.'), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
+        //if LANG = 'EN' then
+          TDialogServiceSync.MessageDialog((Text + ' is invalid percentage value. Try <value %> or <value> instead.'), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
+        //if LANG = 'RU' then
+        //  MessageDlg((Text + ' недействительное процентное значение. Используйте <value %> или <value>.'), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
       end;
   end;
   tempText := '';

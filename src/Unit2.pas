@@ -3,7 +3,8 @@
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, System.IOUtils,
+  System.Character,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
   FMX.ListBox, FMX.Controls.Presentation, FMX.StdCtrls, FMX.Layouts, FMX.Edit, FMX.Platform;
 
@@ -33,6 +34,8 @@ type
     onRenderStartLayout: TLayout;
     onRenderStartBox: TComboBox;
     onRenderStartLabel: TLabel;
+    HandleCheckBox: TCheckBox;
+    Layout2: TLayout;
     procedure langBoxChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure aerenderPathSelectClick(Sender: TObject);
@@ -42,6 +45,8 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure styleBoxChange(Sender: TObject);
     procedure onRenderStartBoxChange(Sender: TObject);
+    procedure HandleCheckBoxChange(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   public
@@ -58,6 +63,48 @@ implementation
 uses
   Unit1, Unit3, Unit4, Unit5, Unit6, RenderingUnit;
 
+function ExtractIntegerFromString(s: String): Integer;
+var
+  tempstr: String;
+begin
+  tempstr := '';
+  for var i := 0 to s.Length do
+    begin
+      if s[i].IsDigit then
+        tempstr := tempstr + s[i];
+    end;
+  Result := tempstr.ToInteger;
+end;
+
+function DetectAerender: String;
+var
+  AdobeFolder, AEVersions: TArray<String>;
+  maxVer: Integer;
+  maxVerStr, AdobeFolderPath: String;
+begin
+  {$IFDEF MSWINDOWS}AdobeFolderPath := 'C:\Program Files\Adobe\';{$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}AdobeFolderPath := '/Applications/';{$ENDIF MACOS}
+
+  AdobeFolder := TDirectory.GetDirectories(AdobeFolderPath);
+  for var i := 0 to High(AdobeFolder) do
+    begin
+      if AdobeFolder[i].Contains ('After Effects') then
+        begin
+          SetLength(AEVersions, i+1);
+          AEVersions[i] := AdobeFolder[i];
+        end;
+    end;
+  for var i := 0 to High(AEVersions) do
+    begin
+      if ExtractIntegerFromString(AEVersions[i]) > maxVer then
+        begin
+          maxVer := ExtractIntegerFromString(AEVersions[i]);
+          maxVerStr := AEVersions[i];
+        end;
+    end;
+  Result := maxVerStr;
+end;
+
 procedure TForm2.aerenderPathSelectClick(Sender: TObject);
 begin
   With OpenDialog1 do
@@ -70,12 +117,12 @@ end;
 
 procedure TForm2.Button1Click(Sender: TObject);
 begin
-  if not aerenderPath.Text.Contains('aerender') then
+  {if not aerenderPath.Text.Contains('aerender') then
     if Unit1.LANG = 'EN' then
       MessageDlg(('Please specify valid Adobe After Effects render engine path!'), TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0)
     else
       MessageDlg(('Пожалуйста, укажите путь к модулю рендеринга After Effects!'), TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0)
-  else
+  else        }
     begin
       Form2.Close;
       AERPATH := aerenderPath.Text;
@@ -92,10 +139,10 @@ begin
     SelectDirectory ('Select Default Projects Directory', '%USERPROFILE%\Documents', PATH);
     defaultProjectsPath.Text := PATH;
   {$ENDIF MSWINDOWS}
-  {$IFDEF POSIX}
+  {$IFDEF MACOS}
     SelectDirectory ('Select Default Projects Directory', '~/Documents', PATH);
     defaultProjectsPath.Text := PATH;
-  {$ENDIF POSIX}
+  {$ENDIF MACOS}
 end;
 
 procedure TForm2.Button3Click(Sender: TObject);
@@ -106,7 +153,7 @@ begin
     SelectDirectory ('Select Default Output Directory', '%USERPROFILE%\Documents', PATH);
     defaultOutputPath.Text := PATH;
   {$ENDIF MSWINDOWS}
-  {$IFDEF POSIX}
+  {$IFDEF MACOS}
     SelectDirectory ('Select Default Output Directory', '~/Documents', PATH);
     defaultOutputPath.Text := PATH;
   {$ENDIF POSX}
@@ -114,7 +161,7 @@ end;
 
 procedure TForm2.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  if not aerenderPath.Text.Contains('aerender') then
+  {if not aerenderPath.Text.Contains('aerender') then
     begin
       if Unit1.LANG = 'EN' then
         MessageDlg(('Please specify the Adobe After Effects render engine path!'), TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0)
@@ -122,7 +169,7 @@ begin
         MessageDlg(('Пожалуйста, укажите путь к модулю рендеринга After Effects!'), TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0);
       CanClose := False;
     end
-  else
+  else}
     begin
       CanClose := True;
       Form2.Close;
@@ -132,11 +179,27 @@ begin
     end;
 end;
 
+procedure TForm2.FormCreate(Sender: TObject);
+begin
+  if AERPATH.IsEmpty then
+    AERPATH := DetectAerender + {$IFDEF MSWINDOWS}'\Support Files\aerender.exe'{$ENDIF MSWINDOWS}
+                                          {$IFDEF MACOS}'/aerender'{$ENDIF MACOS};
+end;
+
 procedure TForm2.FormShow(Sender: TObject);
 begin
   aerenderPath.Text := AERPATH;
   defaultProjectsPath.Text := DEFPRGPATH;
   defaultOutputPath.Text := DEFOUTPATH;
+  {$IFDEF MSWINDOWS}
+    HandleCheckBox.IsChecked := Unit1.AERH.ToBoolean();
+    HandleCheckBox.Hint := '';
+  {$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}
+    HandleCheckBox.Enabled := False;
+    HandleCheckBox.IsChecked := False;
+    HandleCheckBox.Hint := 'Not available on macOS!';
+  {$ENDIF MACOS}
   if Unit1.LANG = 'EN' then
     langBox.ItemIndex := 0;
   if Unit1.LANG = 'RU' then
@@ -145,10 +208,18 @@ begin
     aerenderPath.TextPrompt := 'C:\Program Files\Adobe\Adobe After Effects CC\Support Files\aerender.exe';
     OpenDialog1.Filter := 'After Effects Render Engine|aerender.exe';
   {$ENDIF MSWINDOWS}
-  {$IFDEF POSIX}
+  {$IFDEF MACOS}
     aerenderPath.TextPrompt := '/Applications/Adobe After Effects CC/aerender';
     OpenDialog1.Filter := 'After Effects Render Engine|aerender';
-  {$ENDIF POSIX}
+  {$ENDIF MACOS}
+end;
+
+procedure TForm2.HandleCheckBoxChange(Sender: TObject);
+begin
+  if HandleCheckBox.IsChecked then
+    RenderingForm.emptyLabel.Text := 'Queue is Empty'
+  else
+    RenderingForm.emptyLabel.Text := 'Aerender handle disabled. Enable aerender handle in Launcher settings.';
 end;
 
 procedure TForm2.langBoxChange(Sender: TObject);

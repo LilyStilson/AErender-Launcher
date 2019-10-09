@@ -31,7 +31,6 @@ type
     procedure ShowLogButtonClick (Sender: TObject);
     procedure renderingTimerTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure FormResize(Sender: TObject);
     procedure abortRenderingButtonClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
@@ -51,6 +50,7 @@ type
 
 var
   RenderingForm: TRenderingForm;
+  VISIBLE: Boolean = False;
   RenderGroups: TArray<TRenderGroup>;
   LogIncrement: Integer = 0;
 
@@ -125,22 +125,15 @@ begin
         end;
       emptyLabel.Visible := True;
       emptyLabel.Enabled := True;
-      //renderLayout.Height := 80;
       renderingTimer.Enabled := False;
     end
   else
     ShowMessage ('Nothing to abort!')
 end;
-{
-procedure ResizeFlowLayout (FlowLayout: TFlowLayout; BaseWidth, BaseHeight: Single; Count: Integer);
-begin
-  var Lines := Trunc(Count / Trunc(FlowLayout.Width / BaseWidth));
 
-  FlowLayout.Height := BaseHeight * Lines;
-end;
-}
 procedure TRenderingForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  VISIBLE := False;
   if TotalProgressBar.Value = TotalProgressBar.Max then
     begin
       abortRenderingButtonClick(Sender);
@@ -148,13 +141,9 @@ begin
     end;
 end;
 
-procedure TRenderingForm.FormResize(Sender: TObject);
-begin
-  //ResizeFlowLayout(renderLayout, 400, 80 + LogIncrement, Length(RenderGroups));
-end;
-
 procedure TRenderingForm.FormShow(Sender: TObject);
 begin
+  VISIBLE := True;
   if Unit1.RenderWindowSender = Form1.launchButton then
     begin
       if Length(Unit1.LogFiles) = 0 then
@@ -254,7 +243,6 @@ begin
         end;
       renderingTimer.Enabled := True;
     end;
-  FormResize(Sender);
 end;
 
 procedure TRenderingForm.renderingTimerTimer(Sender: TObject);
@@ -364,7 +352,6 @@ begin
     begin
       RenderGroups[TButton(Sender).Tag].TLogMemo.Visible := True;
       RenderGroups[TButton(Sender).Tag].TRenderGroupBox.Height := RenderGroups[TButton(Sender).Tag].TRenderGroupBox.Height + 175;
-      //renderLayout.ItemHeight := 250;
 
       for var i := 0 to High(RenderGroups) do
         if RenderGroups[i].TLogMemo.Visible = True then
@@ -378,7 +365,6 @@ begin
     begin
       RenderGroups[TButton(Sender).Tag].TLogMemo.Visible := False;
       RenderGroups[TButton(Sender).Tag].TRenderGroupBox.Height := RenderGroups[TButton(Sender).Tag].TRenderGroupBox.Height - 175;
-      //renderLayout.ItemHeight := 75;
 
       for var i := 0 to High(RenderGroups) do
         if RenderGroups[i].TLogMemo.Visible = True then
@@ -388,9 +374,6 @@ begin
       else
         LogIncrement := 0;
     end;
-  {FormResize(Sender);
-  RenderingForm.Width := RenderingForm.Width - 1;
-  RenderingForm.Width := RenderingForm.Width + 1;       }
 end;
 
 end.

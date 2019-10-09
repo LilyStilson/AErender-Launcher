@@ -50,13 +50,13 @@ begin
           WebBrowser1.URL := 'file://C:/ProgramData/AErender/Docs/Error.html';
         //WebBrowser1.Reload();
         {$ENDIF MSWINDOWS}
-        {$IFDEF POSIX}
+        {$IFDEF MACOS}
         if FileExists (GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Introduction.html') then
           WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Introduction.html'
         else
           WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Error.html';
         //WebBrowser1.Reload();
-        {$ENDIF POSIX}
+        {$ENDIF MACOS}
       end;
     1:begin
         {$IFDEF MSWINDOWS}
@@ -65,12 +65,12 @@ begin
         else
           WebBrowser1.URL := 'file://C:/ProgramData/AErender/Docs/Error.html';
         {$ENDIF MSWINDOWS}
-        {$IFDEF POSIX}
+        {$IFDEF MACOS}
         if FileExists (GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/AfterEffectsRenderEngine.html') then
           WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/AfterEffectsRenderEngine.html'
         else
           WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Error.html';
-        {$ENDIF POSIX}
+        {$ENDIF MACOS}
       end;
     2:begin
         {$IFDEF MSWINDOWS}
@@ -79,12 +79,12 @@ begin
         else
           WebBrowser1.URL := 'file://C:/ProgramData/AErender/Docs/Error.html';
         {$ENDIF MSWINDOWS}
-        {$IFDEF POSIX}
+        {$IFDEF MACOS}
         if FileExists (GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/PreparingRendering.html') then
           WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/PreparingRendering.html'
         else
           WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Error.html';
-        {$ENDIF POSIX}
+        {$ENDIF MACOS}
       end;
     3:begin
         {$IFDEF MSWINDOWS}
@@ -93,12 +93,12 @@ begin
         else
           WebBrowser1.URL := 'file://C:/ProgramData/AErender/Docs/Error.html';
         {$ENDIF MSWINDOWS}
-        {$IFDEF POSIX}
+        {$IFDEF MACOS}
         if FileExists (GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Issues.html') then
           WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Issues.html'
         else
           WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Error.html';
-        {$ENDIF POSIX}
+        {$ENDIF MACOS}
       end;
   end;
 end;

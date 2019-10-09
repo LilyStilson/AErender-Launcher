@@ -5,9 +5,9 @@ interface
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Objects,
-  FMX.Controls.Presentation, FMX.StdCtrls,
+  FMX.Controls.Presentation, FMX.StdCtrls, FMX.Layouts,
   {$IFDEF MSWINDOWS}
-    Winapi.ShellAPI, Winapi.Windows, FMX.Layouts;
+    Winapi.ShellAPI, Winapi.Windows;
   {$ENDIF MSWINDOWS}
   {$IFDEF MACOS}
     Posix.Stdlib, Posix.Unistd, Posix.SysSysctl, Posix.SysTypes;
@@ -62,9 +62,9 @@ begin
   {$IFDEF MSWINDOWS}
     ShellExecute(0, 'open', PWideChar('http://aerenderlauncher.com'), nil, nil, SW_SHOW);
   {$ENDIF MSWINDOWS}
-  {$IFDEF POSIX}
+  {$IFDEF MACOS}
     _system(PAnsiChar('open ' + AnsiString('"' + 'http://aerenderlauncher.com' + '"')));
-  {$ENDIF POSIX}
+  {$ENDIF MACOS}
 end;
 
 end.

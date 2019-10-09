@@ -370,7 +370,7 @@ object Form6: TForm6
     TextSettings.Font.StyleExt = {00070000000000000004000000}
     TextSettings.HorzAlign = Center
     Text = 
-      'Video and Audio settings customisation are still under developem' +
+      'Video and Audio settings customization are still under developem' +
       'ent!'
     TabOrder = 6
   end
@@ -398,8 +398,7 @@ object Form6: TForm6
           'AVI (Lossless, Alpha)'
           'MOV (Lossless, Alpha)'
           'H.264 (Match Source, High Bitrate)'
-          'H.264 (Match Source, Low Bitrate)')
-        ItemIndex = 0
+          'H.264 (Match Source, Medium Bitrate)')
         Margins.Left = 10.000000000000000000
         Margins.Top = 10.000000000000000000
         Margins.Right = 10.000000000000000000

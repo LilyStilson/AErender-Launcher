@@ -54,6 +54,12 @@ type
     { Public declarations }
   end;
 
+const
+  ffmpeg_lossless_avi = '';
+  ffmpeg_lossless_mov = '';
+  ffmpeg_highbitrate_mp4 = '';
+  ffmpeg_medbitrate_mp4 = '';
+
 var
   Form6: TForm6;
   FFMPEG, OutputFile: String;

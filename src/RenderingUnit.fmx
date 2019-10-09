@@ -10,21 +10,18 @@ object RenderingForm: TRenderingForm
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   OnClose = FormClose
-  OnResize = FormResize
   OnShow = FormShow
   DesignerMasterStyle = 0
   object emptyLabel: TLabel
     Align = Client
-    Enabled = False
     StyledSettings = [Family, FontColor]
-    Size.Width = 800.000000000000000000
+    Size.Width = 400.000000000000000000
     Size.Height = 257.000000000000000000
     Size.PlatformDefault = False
     TextSettings.Font.Size = 20.000000000000000000
     TextSettings.Font.StyleExt = {00070000000000000004000000}
     TextSettings.HorzAlign = Center
     Text = 'Queue is empty'
-    Visible = False
     TabOrder = 4
   end
   object RenderingStatusBar: TStatusBar
