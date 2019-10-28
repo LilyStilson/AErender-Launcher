@@ -17,7 +17,7 @@ Coordinates=2132,10,53,58
 Coordinates=1665,1176,106,58
 
 []
-Coordinates=548,1260,116,36
+Coordinates=10,1406,61,36
 Visible=False
 ExplicitSubNodes=Enabled;Visible
 
@@ -179,9 +179,6 @@ Coordinates=2461,1406,89,36
 [outputModuleLabel]
 Coordinates=1193,1176,124,58
 
-[settingsItem]
-Coordinates=1319,1344,84,36
-
 [ListBoxGroupHeader3]
 Coordinates=929,1344,142,36
 
@@ -223,9 +220,6 @@ Coordinates=811,10,101,146
 
 [separatorItem2]
 Coordinates=1701,1260,101,36
-
-[editItem]
-Coordinates=10,1406,61,36
 
 [docsItem]
 Coordinates=2119,1406,67,36

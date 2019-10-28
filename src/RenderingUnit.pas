@@ -124,7 +124,8 @@ begin
       emptyLabel.Visible := True;
       emptyLabel.Enabled := True;
       renderingTimer.Enabled := False;
-      totalProgressPercentage.Text := '0%'
+      totalProgressPercentage.Text := '0%';
+      TotalProgressBar.Value := 0;
     end
   except
     on Exception do

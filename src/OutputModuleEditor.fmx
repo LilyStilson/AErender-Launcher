@@ -26,7 +26,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
       Size.Width = 500.000000000000000000
       Size.Height = 30.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 0
+      TabOrder = 1
       object outputModuleLabel: TLabel
         Align = Left
         Margins.Left = 10.000000000000000000
@@ -56,7 +56,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
       Size.Width = 500.000000000000000000
       Size.Height = 30.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 1
+      TabOrder = 0
       object presetNameLabel: TLabel
         Align = Left
         Margins.Left = 10.000000000000000000
@@ -130,7 +130,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
         Size.Width = 490.000000000000000000
         Size.Height = 190.000000000000000000
         Size.PlatformDefault = False
-        TabIndex = 5
+        TabIndex = 0
         TabOrder = 2
         TabPosition = PlatformDefault
         Sizes = (
@@ -148,7 +148,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
           CustomIcon = <
             item
             end>
-          IsSelected = False
+          IsSelected = True
           Size.Width = 47.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False

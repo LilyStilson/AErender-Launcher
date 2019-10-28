@@ -261,14 +261,13 @@
         <VerInfo_PreRelease>true</VerInfo_PreRelease>
         <VerInfo_Private>true</VerInfo_Private>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.0.2;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.0;Comments=;PrivateBuild=v0.8.0-beta</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.0;Comments=;PrivateBuild=v0.8.0-beta</VerInfo_Keys>
         <Icon_MainIcon>AErender CC 2018\AErender.ico</Icon_MainIcon>
         <Icns_MainIcns>AErender CC 2018\AErender.icns</Icns_MainIcns>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <VerInfo_Build>2</VerInfo_Build>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_3_Win64)'!=''">
         <BT_BuildType>Debug</BT_BuildType>
@@ -342,15 +341,15 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
+                <DeployFile LocalName="OSX64\Debug\AErender.entitlements" Configuration="Debug" Class="ProjectOSXEntitlements">
+                    <Platform Name="OSX64">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Docs\AfterEffectsRenderEngine.html" Configuration="Release" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>C:\ProgramData\AErender\Docs</RemoteDir>
                         <Enabled>false</Enabled>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="OSX64\Debug\AErender.entitlements" Configuration="Debug" Class="ProjectOSXEntitlements">
-                    <Platform Name="OSX64">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -367,11 +366,10 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="E:\AErender CC 2018\icon_UWP_44.png" Configuration="Debug" Class="UWP_DelphiLogo44">
+                <DeployFile LocalName="Docs\PreparingRendering.html" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
-                        <RemoteDir>Assets\</RemoteDir>
+                        <RemoteDir>.\</RemoteDir>
                         <Enabled>false</Enabled>
-                        <RemoteName>Logo44x44.png</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -382,10 +380,11 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Docs\PreparingRendering.html" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="E:\AErender CC 2018\icon_UWP_44.png" Configuration="Debug" Class="UWP_DelphiLogo44">
                     <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
+                        <RemoteDir>Assets\</RemoteDir>
                         <Enabled>false</Enabled>
+                        <RemoteName>Logo44x44.png</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

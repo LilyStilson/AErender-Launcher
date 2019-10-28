@@ -165,8 +165,6 @@ type
     settingsItem0: TMenuItem;
     separatorItem1: TMenuItem;
     exitItem: TMenuItem;
-    editItem: TMenuItem;
-    settingsItem: TMenuItem;
     helpItem: TMenuItem;
     docsItem: TMenuItem;
     aboutItem: TMenuItem;
@@ -215,6 +213,8 @@ type
     Layout2: TLayout;
     GridPanelLayout3: TGridPanelLayout;
     UpdateInfo: TStatusBar;
+    outModuleEditorItem: TMenuItem;
+    outModuleEditorItem0: TMenuItem;
     procedure FormResize(Sender: TObject);
     procedure compSwitchSwitch(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -251,6 +251,8 @@ type
     procedure outFrameValidate(Sender: TObject; var Text: string);
     procedure outputModuleBoxChange(Sender: TObject);
     procedure compNameTyping(Sender: TObject);
+    procedure outModuleEditorItem0Click(Sender: TObject);
+    procedure outModuleEditorItemClick(Sender: TObject);
   private
     { Private declarations }
 
@@ -850,14 +852,8 @@ begin
                                                           {$IFDEF MACOS} '~/Documents/AErender/' {$ENDIF MACOS} + 'directory';
       end;
   end;
-  {$IFDEF MSWINDOWS}
-  //Form1.Height := 444;
-  MainMenu1.Free;
-  {$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}
-  editItem.Visible := False; editItem.Enabled := False;
-  MenuBar1.Destroy;
-  {$ENDIF MACOS}
+  {$IFDEF MSWINDOWS}MainMenu1.Free;{$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}MenuBar1.Free;{$ENDIF MACOS}
   if DirectoryExists (APPFOLDER) then
     AssignFile (CFG, APPFOLDER + 'AErenderConfiguration.xml')
   else
@@ -1207,6 +1203,16 @@ begin
       tempStr := Text;   
   end;
   Text := tempStr;
+end;
+
+procedure TForm1.outModuleEditorItem0Click(Sender: TObject);
+begin
+  OutputModuleEditorForm.Show;
+end;
+
+procedure TForm1.outModuleEditorItemClick(Sender: TObject);
+begin
+  OutputModuleEditorForm.Show;
 end;
 
 procedure TForm1.outputModuleBoxChange(Sender: TObject);
