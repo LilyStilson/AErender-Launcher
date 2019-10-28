@@ -14,7 +14,8 @@ uses
   Unit5 in 'Unit5.pas' {Form5},
   Unit6 in 'Unit6.pas' {Form6},
   RenderingUnit in 'RenderingUnit.pas' {RenderingForm},
-  MathExpParser in 'MathExpParser.pas';
+  MathExpParser in 'MathExpParser.pas',
+  OutputModuleEditor in 'OutputModuleEditor.pas' {OutputModuleEditorForm};
 
 {$R *.res}
 
@@ -27,5 +28,6 @@ begin
   Application.CreateForm(TForm5, Form5);
   Application.CreateForm(TForm6, Form6);
   Application.CreateForm(TRenderingForm, RenderingForm);
+  Application.CreateForm(TOutputModuleEditorForm, OutputModuleEditorForm);
   Application.Run;
 end.

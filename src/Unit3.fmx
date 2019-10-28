@@ -13,10 +13,12 @@ object Form3: TForm3
   DesignerMasterStyle = 0
   object Layout2: TLayout
     Align = MostBottom
+    Enabled = False
     Position.Y = 568.000000000000000000
     Size.Width = 960.000000000000000000
     Size.Height = 32.000000000000000000
     Size.PlatformDefault = False
+    Visible = False
     TabOrder = 1
     object Button1: TButton
       Align = Center
@@ -26,10 +28,10 @@ object Form3: TForm3
     end
   end
   object Contents: TListBox
-    Align = MostLeft
+    Align = Left
     Position.Y = 33.000000000000000000
     Size.Width = 200.000000000000000000
-    Size.Height = 535.000000000000000000
+    Size.Height = 567.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 3
     DisableFocusEffect = True
@@ -42,35 +44,37 @@ object Form3: TForm3
     DefaultItemStyles.GroupHeaderStyle = ''
     DefaultItemStyles.GroupFooterStyle = ''
     OnChange = ContentsChange
-    Viewport.Width = 200.000000000000000000
-    Viewport.Height = 535.000000000000000000
-  end
-  object Layout1: TLayout
-    Align = MostTop
-    Size.Width = 960.000000000000000000
-    Size.Height = 33.000000000000000000
-    Size.PlatformDefault = False
-    TabOrder = 5
-    object Title: TLabel
-      Align = Center
-      AutoSize = True
-      StyledSettings = [Family, FontColor]
-      Size.Width = 273.000000000000000000
-      Size.Height = 22.000000000000000000
-      Size.PlatformDefault = False
-      TextSettings.Font.Size = 16.000000000000000000
-      TextSettings.Font.StyleExt = {00070000000000000004000000}
-      TextSettings.HorzAlign = Center
-      TextSettings.Trimming = Word
-      Text = 'AErender Launcher Help'
-      TabOrder = 0
-    end
+    Viewport.Width = 196.000000000000000000
+    Viewport.Height = 563.000000000000000000
   end
   object WebBrowser1: TWebBrowser
     Align = Client
     Size.Width = 755.000000000000000000
-    Size.Height = 535.000000000000000000
+    Size.Height = 567.000000000000000000
     Size.PlatformDefault = False
     Margins.Left = 5.000000000000000000
+  end
+  object PresetsConfiguratorToolbar: TToolBar
+    Size.Width = 960.000000000000000000
+    Size.Height = 33.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 6
+    object Title: TLabel
+      Align = Left
+      AutoSize = True
+      StyledSettings = [Family, FontColor]
+      Margins.Left = 20.000000000000000000
+      Position.X = 20.000000000000000000
+      Size.Width = 183.000000000000000000
+      Size.Height = 33.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 16.000000000000000000
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+      TextSettings.HorzAlign = Center
+      TextSettings.WordWrap = False
+      TextSettings.Trimming = Word
+      Text = 'AErender Launcher Help'
+      TabOrder = 1
+    end
   end
 end

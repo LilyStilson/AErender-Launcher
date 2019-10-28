@@ -3,18 +3,40 @@ unit Unit4;
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
-  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
-  FMX.Layouts, FMX.Controls.Presentation, FMX.TabControl, FMX.ListView.Types,
-  FMX.ListView.Appearances, FMX.ListView.Adapters.Base, FMX.Menus, FMX.ListView,
-  FMX.Edit, FMX.DialogService.Sync,
-  Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc, FMX.ListBox, Data.Bind.EngExt,
-  Fmx.Bind.DBEngExt, System.Rtti, System.Bindings.Outputs, Fmx.Bind.Editors,
+  System.SysUtils,
+  System.Types,
+  System.UITypes,
+  System.Classes,
+  System.Variants,
+  FMX.Types,
+  FMX.Controls,
+  FMX.Forms,
+  FMX.Graphics,
+  FMX.Dialogs,
+  FMX.StdCtrls,
+  FMX.Layouts,
+  FMX.Controls.Presentation,
+  FMX.TabControl,
+  FMX.ListView.Types,
+  FMX.ListView.Appearances,
+  FMX.ListView.Adapters.Base,
+  FMX.Menus,
+  FMX.ListView,
+  FMX.Edit,
+  FMX.DialogService.Sync,
+  Xml.xmldom,
+  Xml.XMLIntf,
+  Xml.XMLDoc,
+  FMX.ListBox,
+  Data.Bind.EngExt,
+  Fmx.Bind.DBEngExt,
+  System.Rtti,
+  System.Bindings.Outputs,
+  Fmx.Bind.Editors,
   Data.Bind.Components;
 
 type
   TForm4 = class(TForm)
-    bottomLayout: TLayout;
     importButton: TButton;
     topLayout: TLayout;
     importLabel: TLabel;
@@ -37,8 +59,9 @@ type
     LinkControlToPropertyShowCheckboxes: TLinkControlToProperty;
     XMLFile: TEdit;
     selectallButton: TButton;
-    Layout1: TLayout;
     deselallButton: TButton;
+    StatusBar1: TStatusBar;
+    GridPanelLayout1: TGridPanelLayout;
     procedure FormShow(Sender: TObject);
     procedure compositionsItemClick(const Sender: TCustomListBox;
       const Item: TListBoxItem);
@@ -184,14 +207,14 @@ begin
       compRangeIn.Text := 'Range start: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['rangeStart'].Text;
       compRangeOut.Text := 'Range end: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['rangeEnd'].Text;
     end;
-  if Unit1.LANG = 'RU' then
+  {if Unit1.LANG = 'RU' then
     begin
       compName.Text := 'Название: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['name'].Text;
       compResolution.Text := 'Разрешение: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['resolution'].Text;
       compFramerate.Text := 'Частота кадров: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['framerate'].Text;
       compRangeIn.Text := 'Начало композиции: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['rangeStart'].Text;
       compRangeOut.Text := 'Конец композиции: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['rangeEnd'].Text;
-    end;
+    end;    }
 end;
 procedure TForm4.deselallButtonClick(Sender: TObject);
 var
@@ -230,14 +253,6 @@ begin
         XMLFile.Text := ExtractFileName(Form1.XMLOpenDialog.FileName);
         XMLDocument.LoadFromFile(Form1.XMLOpenDialog.FileName);
       end;
-  {except
-    on Exception do
-    begin
-      TDialogServiceSync.MessageDialog('Error reading selected file!', TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
-      Form4.Close;
-    end;
-  end;    }
-
 
     XMLDocument.Active := True;
 

@@ -1,453 +1,390 @@
 ﻿[InputLabels]
-Coordinates=1212,1344,72,33
+Coordinates=1212,1344,81,36
 
 [outputPath]
-Coordinates=147,1260,68,51
+Coordinates=147,1260,77,58
 
 [Label2]
-Coordinates=1343,1176,46,51
+Coordinates=1343,1176,53,58
 
 [projectPath]
-Coordinates=250,1260,70,51
+Coordinates=250,1260,80,58
 
 [Label1]
-Coordinates=2132,10,46,51
+Coordinates=2132,10,53,58
 
 [soundCheckbox]
-Coordinates=1665,1176,94,51
+Coordinates=1665,1176,106,58
 
 []
-Coordinates=1350,460,65,58
-Visible=True
+Coordinates=548,1260,116,36
+Visible=False
+ExplicitSubNodes=Enabled;Visible
 
 [missingFilesCheckbox]
-Coordinates=2007,1176,125,51
+Coordinates=2007,1176,143,58
 
 [threadedRender]
-Coordinates=2176,1176,93,51
+Coordinates=2176,1176,107,58
 
 [customCheckbox]
-Coordinates=1447,21,100,51
+Coordinates=1447,21,113,58
 Visible=True
 
 [BindingsList1]
-Coordinates=570,1,82,33
+Coordinates=570,1,91,36
 
 [properties]
-Coordinates=937,1176,64,51
+Coordinates=937,1176,72,58
 
 [propertiesLayout1]
-Coordinates=2053,1344,104,33
+Coordinates=2053,1344,118,36
 
 [properiesLayout2]
-Coordinates=2329,1344,100,33
+Coordinates=2329,1344,114,36
 
 [pathLayout]
-Coordinates=938,1468,69,33
+Coordinates=938,1468,78,36
 
 [fileChooseLayout]
-Coordinates=931,1260,100,33
+Coordinates=931,1260,114,36
 
 [compGrid]
-Coordinates=583,172,62,87
+Coordinates=583,172,70,102
 ExplicitSubNodes=Enabled;Visible
 
 [StringColumn1]
-Coordinates=698,1344,88,33
+Coordinates=698,1344,100,36
 
 [compSwitch]
-Coordinates=414,131,75,177
+Coordinates=414,131,84,184
 Visible=True
 ExplicitSubNodes=Enabled
 
 [Lang1]
-Coordinates=65,183,44,33
+Coordinates=65,183,50,36
 
 [compLayout]
-Coordinates=247,1406,75,33
+Coordinates=247,1406,84,36
 
 [compSwitchLabel]
-Coordinates=1677,10,101,51
+Coordinates=1677,10,115,58
 
 [settingsButton]
-Coordinates=181,1176,86,51
+Coordinates=181,1176,96,58
 
 [compName]
-Coordinates=578,10,69,87
+Coordinates=578,10,80,102
 ExplicitSubNodes=Enabled;Visible
 
 [compTopLayout]
-Coordinates=1569,1260,94,33
+Coordinates=1569,1260,106,36
 
 [threadsLayout]
-Coordinates=1928,1406,85,33
-
-[FlowLayout1]
-Coordinates=10,1344,77,33
-
-[FlowLayout2]
-Coordinates=977,1406,77,33
+Coordinates=1928,1406,96,36
 
 [StringColumn3]
-Coordinates=1429,1344,88,33
+Coordinates=1429,1344,100,36
 
 [Label3]
-Coordinates=2290,10,46,51
+Coordinates=2290,10,53,58
 
 [threadsSwitch]
-Coordinates=230,568,84,231
+Coordinates=230,568,95,202
 Visible=True
 ExplicitSubNodes=Enabled
 
 [threadsTopLayout]
-Coordinates=556,1468,104,33
+Coordinates=556,1468,118,36
 
 [threadsSwitchLabel]
-Coordinates=1512,1176,111,51
+Coordinates=1512,1176,127,58
 
 [threadsGrid]
-Coordinates=415,636,72,87
+Coordinates=415,636,82,102
 ExplicitSubNodes=Enabled;Visible
 
 [StringColumn2]
-Coordinates=805,1260,88,33
+Coordinates=805,1260,100,36
 
 [Label4]
-Coordinates=2211,10,46,51
+Coordinates=2211,10,53,58
 
 [calculateButton]
-Coordinates=405,1048,91,87
+Coordinates=405,1048,103,102
 ExplicitSubNodes=Enabled;Visible
 
 [launchButton]
-Coordinates=2309,1176,80,51
+Coordinates=2309,1176,90,58
 
 [framesLayout]
-Coordinates=859,1406,81,33
+Coordinates=859,1406,92,36
 
 [threadsCount]
-Coordinates=406,798,84,159
+Coordinates=406,798,101,190
 Visible=True
 ExplicitSubNodes=Enabled;Visible
 
 [inFrame]
-Coordinates=2508,1176,54,51
+Coordinates=2508,1176,62,58
 
 [outFrame]
-Coordinates=421,496,61,69
+Coordinates=421,496,70,80
 ExplicitSubNodes=TextPrompt
 
 [openFile]
-Coordinates=1422,1176,56,51
+Coordinates=1422,1176,64,58
 
 [saveFile]
-Coordinates=2596,1176,54,51
+Coordinates=2596,1176,63,58
 
 [SaveDialog1]
-Coordinates=442,219,75,33
+Coordinates=442,219,87,36
 
 [customProp]
-Coordinates=1284,10,74,69
+Coordinates=1284,10,83,80
 Visible=True
 ExplicitSubNodes=Enabled
 
 [Image1]
-Coordinates=1797,1176,49,51
+Coordinates=1797,1176,57,58
 
 [Image2]
-Coordinates=2425,1176,49,51
+Coordinates=2425,1176,57,58
 
 [infoButton]
-Coordinates=725,1176,66,51
+Coordinates=725,1176,73,58
 
 [AEPOpenDialog]
-Coordinates=678,155,93,33
+Coordinates=678,155,108,36
 
 [settingsItem0]
-Coordinates=1042,1468,80,33
+Coordinates=1042,1468,91,36
 
 [importConfigItem]
-Coordinates=1308,1260,100,33
-
-[ListBoxItem1]
-Coordinates=1097,1344,79,33
+Coordinates=1308,1260,113,36
 
 [MainMenu1]
-Coordinates=181,213,70,33
-
-[ListBoxItem3]
-Coordinates=357,1406,79,33
-
-[ListBoxGroupHeader1]
-Coordinates=1197,1406,123,33
+Coordinates=181,213,81,36
 
 [ListBoxItem9]
-Coordinates=2551,1344,79,33
+Coordinates=2551,1344,89,36
 
 [ListBoxItem6]
-Coordinates=2576,1406,79,33
+Coordinates=2576,1406,89,36
 
 [ListBoxItem5]
-Coordinates=2461,1406,79,33
-
-[MetropolisUIListBoxItem1]
-Coordinates=413,1344,141,33
+Coordinates=2461,1406,89,36
 
 [outputModuleLabel]
-Coordinates=1193,1176,109,51
+Coordinates=1193,1176,124,58
 
 [settingsItem]
-Coordinates=1319,1344,74,33
-
-[ListBoxItem16]
-Coordinates=1555,1344,84,33
-
-[ListBoxItem11]
-Coordinates=1563,1406,84,33
+Coordinates=1319,1344,84,36
 
 [ListBoxGroupHeader3]
-Coordinates=929,1344,123,33
-
-[ListBoxItem15]
-Coordinates=1936,1260,84,33
-
-[ListBoxItem2]
-Coordinates=2226,1260,79,33
+Coordinates=929,1344,142,36
 
 [separatorItem1]
-Coordinates=811,1468,88,33
+Coordinates=811,1468,101,36
 
 [fileItem]
-Coordinates=2469,1344,50,33
+Coordinates=2469,1344,56,36
 
 [launcherItem]
-Coordinates=1852,1344,78,33
+Coordinates=1852,1344,89,36
 
 [helpItem]
-Coordinates=769,1406,56,33
-
-[ListBoxItem12]
-Coordinates=1447,1260,84,33
+Coordinates=769,1406,64,36
 
 [aboutItem]
-Coordinates=600,1344,63,33
+Coordinates=600,1344,72,36
 
 [ListBoxGroupHeader4]
-Coordinates=2058,1260,123,33
-
-[ListBoxItem13]
-Coordinates=647,1406,84,33
-
-[ListBoxGroupHeader2]
-Coordinates=123,1344,123,33
-
-[ListBoxItem17]
-Coordinates=291,1344,84,33
-
-[outputModule]
-Coordinates=684,10,84,123
+Coordinates=2058,1260,142,36
 
 [renderSettingsLayout]
-Coordinates=2298,1406,120,33
+Coordinates=2298,1406,137,36
 
 [renderSettingsLabel]
-Coordinates=303,1176,113,51
+Coordinates=303,1176,130,58
 
 [ListBoxItem7]
-Coordinates=1193,1260,79,33
+Coordinates=1193,1260,89,36
 
 [exportConfigItem]
-Coordinates=1159,1468,99,33
+Coordinates=1159,1468,113,36
 
 [ListBoxItem8]
-Coordinates=690,1260,79,33
+Coordinates=690,1260,89,36
 
 [renderSettings]
-Coordinates=811,10,87,123
+Coordinates=811,10,101,146
 
 [separatorItem2]
-Coordinates=1701,1260,88,33
+Coordinates=1701,1260,101,36
 
 [editItem]
-Coordinates=10,1406,53,33
-
-[XMLDocument1]
-Coordinates=817,455,92,33
-
-[ListBoxItem4]
-Coordinates=2616,1260,79,33
+Coordinates=10,1406,61,36
 
 [docsItem]
-Coordinates=2119,1406,59,33
-
-[ListBoxItem10]
-Coordinates=82,1468,84,33
+Coordinates=2119,1406,67,36
 
 [exitItem]
-Coordinates=2212,1406,53,33
+Coordinates=2212,1406,60,36
 
 [outputModuleLayout]
-Coordinates=2341,1260,116,33
-
-[ListBoxItem14]
-Coordinates=1071,1260,84,33
+Coordinates=2341,1260,131,36
 
 [XMLOpenDialog]
-Coordinates=610,551,93,33
+Coordinates=610,551,109,36
 
 [compCount]
-Coordinates=578,334,71,87
+Coordinates=578,334,80,102
 ExplicitSubNodes=Enabled;Visible
 
 [OnyxBlueStyle]
-Coordinates=152,1,87,33
+Coordinates=152,1,99,36
 
 [cacheUsageLayout]
-Coordinates=97,1406,108,33
+Coordinates=97,1406,124,36
 
 [MenuBar1]
-Coordinates=1829,1406,64,33
+Coordinates=1829,1406,73,36
 
 [AERModernStyle]
-Coordinates=1051,87,97,33
+Coordinates=1051,87,113,36
 
 [winFileItem]
-Coordinates=442,1260,70,33
+Coordinates=442,1260,80,36
 
 [ffmpegConcateLayout]
-Coordinates=10,647,123,69
+Coordinates=0,630,140,80
 ExplicitSubNodes=Enabled;Visible
+Visible=True
 
 [ffmpegCheckBox]
-Coordinates=1146,21,99,51
+Coordinates=1146,21,112,58
 
 [cacheUsageTrackBar]
-Coordinates=1968,10,119,51
+Coordinates=1968,10,138,58
 
 [winExportConfigItem]
-Coordinates=290,1468,117,33
+Coordinates=290,1468,133,36
 
 [memUsageInfo]
-Coordinates=1880,1176,88,51
+Coordinates=1880,1176,101,58
 
 [downloadButton]
-Coordinates=592,1176,95,51
+Coordinates=592,1176,107,58
 
 [winEditItem]
-Coordinates=1090,1406,72,33
+Coordinates=1090,1406,81,36
 
 [cacheUsageLimitLabel]
-Coordinates=10,1176,125,51
+Coordinates=10,1176,145,58
 
 [memUsageLabel]
-Coordinates=10,1260,96,51
+Coordinates=10,1260,111,58
 
 [infoIconFill]
-Coordinates=997,307,69,33
+Coordinates=997,307,77,36
 
 [ffmpegConfigButton]
-Coordinates=938,10,114,69
+Coordinates=938,10,128,80
 ExplicitSubNodes=Enabled
 
 [AERModernAnimatedStyle]
-Coordinates=1116,252,144,33
+Coordinates=1116,252,167,36
 
 [winHelpItem]
-Coordinates=700,1468,74,33
+Coordinates=700,1468,85,36
 
 [winAboutItem]
-Coordinates=2498,1260,82,33
+Coordinates=2498,1260,92,36
 
 [winSettingsItem]
-Coordinates=2197,1344,93,33
-
-[Line1]
-Coordinates=10,1468,41,33
+Coordinates=2197,1344,106,36
 
 [settingsIconFill]
-Coordinates=997,527,89,33
+Coordinates=997,527,100,36
 
 [winMenuBarSeparator2]
-Coordinates=472,1406,129,33
+Coordinates=472,1406,149,36
 
 [UpdateLabel]
-Coordinates=824,1176,76,51
+Coordinates=824,1176,87,58
 
 [memUsageInfoEdit]
-Coordinates=1818,10,107,51
+Coordinates=1818,10,124,58
 
 [memUsageTrackBar]
-Coordinates=1035,1176,113,51
-
-[UpdateInfoLayout]
-Coordinates=548,1260,101,33
+Coordinates=1035,1176,132,58
 
 [cacheUsageInfo]
-Coordinates=459,1176,93,51
+Coordinates=459,1176,107,58
 
 [winExitItem]
-Coordinates=449,1468,71,33
+Coordinates=449,1468,81,36
 
 [cacheUsageInfoEdit]
-Coordinates=2369,10,112,51
+Coordinates=2369,10,130,58
 
 [memUsageLayout]
-Coordinates=1685,1406,103,33
+Coordinates=1685,1406,118,36
 
 [winDocItem]
-Coordinates=1828,1260,72,33
+Coordinates=1828,1260,82,36
 
 [winImportConfigurationItem]
-Coordinates=1365,1406,152,33
+Coordinates=1365,1406,172,36
 
 [NotificationC]
-Coordinates=908,702,78,33
+Coordinates=908,702,88,36
 
 [winMenuBarSeparator1]
-Coordinates=1677,1344,129,33
+Coordinates=1677,1344,149,36
 
 [MenuItem1]
-Coordinates=824,1344,68,33
+Coordinates=824,1344,79,36
 
 [FloatAnimation1]
-Coordinates=1460,460,95,33
+Coordinates=1460,460,108,36
 Visible=False
 ExplicitSubNodes=
 
-[popupBackground]
-Coordinates=277,123,105,33
-
-[ShadowEffect1]
-Coordinates=188,142,88,33
-
-[renderingPopup]
-Coordinates=980,420,81,33
-Visible=False
-ExplicitSubNodes=Enabled;Visible
-
 [renderingBlurEffect]
-Coordinates=1190,420,99,33
+Coordinates=1190,420,125,36
 Visible=False
 ExplicitSubNodes=Enabled
 
 [mainLayout]
-Coordinates=356,1260,53,33
+Coordinates=356,1260,81,36
 
 [bottomButtonsLayout]
-Coordinates=1967,1344,53,33
+Coordinates=1967,1344,136,36
 
 [launcherLayout]
-Coordinates=204,1468,53,33
+Coordinates=204,1468,103,36
 
 [inputFileLayout]
-Coordinates=2050,1406,40,33
+Coordinates=2050,1406,102,36
 
-[renderingProgress]
-Coordinates=65,53,126,51
+[outputModuleBox]
+Coordinates=684,10,114,146
 
-[renderingProgressLabel]
-Coordinates=0,0,46,51
+[GridPanelLayout3]
+Coordinates=0,0,118,36
 
-[renderingPopupProgressLabel]
-Coordinates=258,53,153,51
+[GridPanelLayout1]
+Coordinates=133,55,118,36
+
+[GridPanelLayout2]
+Coordinates=14,55,118,36
+
+[Layout2]
+Coordinates=289,1,60,36
+
+[Layout1]
+Coordinates=289,56,60,36
 

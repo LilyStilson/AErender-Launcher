@@ -3,18 +3,32 @@ unit Unit3;
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
-  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
-  FMX.Controls.Presentation, FMX.Layouts, FMX.ListBox, FMX.ScrollBox, FMX.Memo, FMX.WebBrowser;
+  System.SysUtils,
+  System.Types,
+  System.UITypes,
+  System.Classes,
+  System.Variants,
+  FMX.Types,
+  FMX.Controls,
+  FMX.Forms,
+  FMX.Graphics,
+  FMX.Dialogs,
+  FMX.StdCtrls,
+  FMX.Controls.Presentation,
+  FMX.Layouts,
+  FMX.ListBox,
+  FMX.ScrollBox,
+  FMX.Memo,
+  FMX.WebBrowser;
 
 type
   TForm3 = class(TForm)
     Layout2: TLayout;
     Button1: TButton;
     Contents: TListBox;
-    Layout1: TLayout;
     Title: TLabel;
     WebBrowser1: TWebBrowser;
+    PresetsConfiguratorToolbar: TToolBar;
     procedure ContentsChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Button1Click(Sender: TObject);

@@ -4,7 +4,7 @@ object Form2: TForm2
   BorderIcons = [biSystemMenu]
   BorderStyle = SizeToolWin
   Caption = 'AErender Settings'
-  ClientHeight = 313
+  ClientHeight = 311
   ClientWidth = 442
   Position = MainFormCenter
   StyleBook = Form1.AERModernStyle
@@ -13,22 +13,9 @@ object Form2: TForm2
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
   OnCloseQuery = FormCloseQuery
+  OnKeyDown = FormKeyDown
   OnShow = FormShow
   DesignerMasterStyle = 0
-  object Layout1: TLayout
-    Align = Bottom
-    Position.Y = 281.000000000000000000
-    Size.Width = 442.000000000000000000
-    Size.Height = 32.000000000000000000
-    Size.PlatformDefault = False
-    TabOrder = 1
-    object Button1: TButton
-      Align = Center
-      TabOrder = 0
-      Text = 'Ok'
-      OnClick = Button1Click
-    end
-  end
   object langLayout: TLayout
     Align = Top
     Enabled = False
@@ -37,7 +24,7 @@ object Form2: TForm2
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 5
+    TabOrder = 4
     object langBox: TComboBox
       Align = Client
       Items.Strings = (
@@ -69,7 +56,7 @@ object Form2: TForm2
     Size.Width = 442.000000000000000000
     Size.Height = 55.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 2
+    TabOrder = 1
     object Label1: TLabel
       Align = Top
       StyledSettings = [Family, Size, FontColor]
@@ -119,7 +106,7 @@ object Form2: TForm2
     Size.Width = 442.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 4
+    TabOrder = 3
     object Label2: TLabel
       Align = Left
       Margins.Left = 10.000000000000000000
@@ -162,7 +149,7 @@ object Form2: TForm2
     Size.Width = 442.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 3
+    TabOrder = 2
     object Label3: TLabel
       Align = Left
       Margins.Left = 10.000000000000000000
@@ -292,6 +279,51 @@ object Form2: TForm2
       TabOrder = 0
       Text = 'Handle aerender processes inside Launcher'
       OnChange = HandleCheckBoxChange
+    end
+  end
+  object Layout3: TLayout
+    Align = Top
+    Position.Y = 220.000000000000000000
+    Size.Width = 442.000000000000000000
+    Size.Height = 33.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 6
+    object delFilesCheckBox: TCheckBox
+      Align = Client
+      IsChecked = True
+      Margins.Left = 10.000000000000000000
+      Margins.Right = 10.000000000000000000
+      Size.Width = 422.000000000000000000
+      Size.Height = 33.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Text = 'Delete temporary files on close'
+      OnChange = delFilesCheckBoxChange
+    end
+  end
+  object ResetButton: TButton
+    Align = Client
+    Enabled = False
+    Size.Width = 442.000000000000000000
+    Size.Height = 26.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 12
+    Text = 'Reset Launcher Configuration'
+    Visible = False
+    OnClick = ResetButtonClick
+  end
+  object StatusBar1: TStatusBar
+    Position.Y = 279.000000000000000000
+    ShowSizeGrip = True
+    Size.Width = 442.000000000000000000
+    Size.Height = 32.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 15
+    object Button1: TButton
+      Align = Center
+      TabOrder = 1
+      Text = 'Ok'
+      OnClick = Button1Click
     end
   end
 end

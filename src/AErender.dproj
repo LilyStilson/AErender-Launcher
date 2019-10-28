@@ -7,7 +7,7 @@
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Beta</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
-        <TargetedPlatforms>4101</TargetedPlatforms>
+        <TargetedPlatforms>4103</TargetedPlatforms>
         <AppType>Application</AppType>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -47,6 +47,12 @@
     </PropertyGroup>
     <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win32)'!=''">
         <Cfg_1_Win32>true</Cfg_1_Win32>
+        <CfgParent>Cfg_1</CfgParent>
+        <Cfg_1>true</Cfg_1>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win64)'!=''">
+        <Cfg_1_Win64>true</Cfg_1_Win64>
         <CfgParent>Cfg_1</CfgParent>
         <Cfg_1>true</Cfg_1>
         <Base>true</Base>
@@ -93,6 +99,12 @@
     </PropertyGroup>
     <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_3)'=='true') or '$(Cfg_3_Win32)'!=''">
         <Cfg_3_Win32>true</Cfg_3_Win32>
+        <CfgParent>Cfg_3</CfgParent>
+        <Cfg_3>true</Cfg_3>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_3)'=='true') or '$(Cfg_3_Win64)'!=''">
+        <Cfg_3_Win64>true</Cfg_3_Win64>
         <CfgParent>Cfg_3</CfgParent>
         <Cfg_3>true</Cfg_3>
         <Base>true</Base>
@@ -189,6 +201,9 @@
         <Icns_MainIcns>E:\AErender CC 2018\AErender.icns</Icns_MainIcns>
         <VerInfo_Debug>true</VerInfo_Debug>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
+        <BT_BuildType>Debug</BT_BuildType>
+    </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
         <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
@@ -246,13 +261,17 @@
         <VerInfo_PreRelease>true</VerInfo_PreRelease>
         <VerInfo_Private>true</VerInfo_Private>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.0;Comments=;PrivateBuild=v0.8.0-beta</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.0.2;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.0;Comments=;PrivateBuild=v0.8.0-beta</VerInfo_Keys>
         <Icon_MainIcon>AErender CC 2018\AErender.ico</Icon_MainIcon>
         <Icns_MainIcns>AErender CC 2018\AErender.icns</Icns_MainIcns>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
+        <VerInfo_Build>2</VerInfo_Build>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_3_Win64)'!=''">
+        <BT_BuildType>Debug</BT_BuildType>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
@@ -287,6 +306,10 @@
             <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="MathExpParser.pas"/>
+        <DCCReference Include="OutputModuleEditor.pas">
+            <Form>OutputModuleEditorForm</Form>
+            <FormType>fmx</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -326,6 +349,11 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="OSX64\Debug\AErender.entitlements" Configuration="Debug" Class="ProjectOSXEntitlements">
+                    <Platform Name="OSX64">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Docs\Error.html" Configuration="Release" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>C:\ProgramData\AErender\Docs</RemoteDir>
@@ -336,13 +364,6 @@
                 <DeployFile LocalName="OSX32\Debug\AErender" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="OSX32">
                         <RemoteName>AErender</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Docs\PreparingRendering.html" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
-                        <Enabled>false</Enabled>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -361,6 +382,13 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="Docs\PreparingRendering.html" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Enabled>false</Enabled>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Docs\AfterEffectsRenderEngine.html" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
@@ -375,6 +403,12 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="E:\AErender CC 2018\AErender.icns" Configuration="Debug" Class="ProjectOSXResource">
+                    <Platform Name="OSX64">
+                        <RemoteName>AErender.icns</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="OSX32\Beta\AErender" Configuration="Beta" Class="ProjectOutput">
                     <Platform Name="OSX32">
                         <RemoteName>AErender</RemoteName>
@@ -385,6 +419,12 @@
                     <Platform Name="Win32">
                         <RemoteDir>C:\ProgramData\AErender\Docs</RemoteDir>
                         <Enabled>false</Enabled>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="OSX64\Debug\AErender.dSYM" Configuration="Debug" Class="ProjectOSXDebug">
+                    <Platform Name="OSX64">
+                        <RemoteName>AErender</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -490,6 +530,12 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="OSX64\Debug\AErender" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="OSX64">
+                        <RemoteName>AErender</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="E:\AErender CC 2018\icon_UWP_44.png" Configuration="Release" Class="UWP_DelphiLogo44">
                     <Platform Name="Win32">
                         <RemoteDir>Assets\</RemoteDir>
@@ -512,6 +558,12 @@
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Enabled>false</Enabled>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="OSX64\Debug\AErender.info.plist" Configuration="Debug" Class="ProjectOSXInfoPList">
+                    <Platform Name="OSX64">
+                        <RemoteName>Info.plist</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -1393,6 +1445,7 @@
                 <Platform value="OSX32">True</Platform>
                 <Platform value="OSX64">True</Platform>
                 <Platform value="Win32">True</Platform>
+                <Platform value="Win64">True</Platform>
             </Platforms>
             <ModelSupport>False</ModelSupport>
         </BorlandProject>

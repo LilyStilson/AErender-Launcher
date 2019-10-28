@@ -3,12 +3,29 @@ unit RenderingUnit;
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
-  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Layouts,
-  FMX.Controls.Presentation, FMX.StdCtrls, FMX.Objects, FMX.ScrollBox, FMX.Memo,
+  System.SysUtils,
+  System.Types,
+  System.UITypes,
+  System.Classes,
+  System.Variants,
+  FMX.Types,
+  FMX.Controls,
+  FMX.Forms,
+  FMX.Graphics,
+  FMX.Dialogs,
+  FMX.Layouts,
+  FMX.Controls.Presentation,
+  FMX.StdCtrls,
+  FMX.Objects,
+  FMX.ScrollBox,
+  FMX.Memo,
+  FMX.Effects,
   {$IFDEF MSWINDOWS}
     FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
   {$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}
+  Posix.Unistd;
+  {$ENDIF MACOS}
 
 type
   TRenderingForm = class(TForm)
@@ -28,6 +45,14 @@ type
     renderingTimer: TTimer;
     emptyLabel: TLabel;
     VertScrollBox1: TVertScrollBox;
+    AErenderLayout: TLayout;
+    BlurEffect1: TBlurEffect;
+    FFMPEGConcatLayout: TLayout;
+    Rectangle1: TRectangle;
+    Label1: TLabel;
+    ProgressBar1: TProgressBar;
+    Label2: TLabel;
+    Button1: TButton;
     procedure ShowLogButtonClick (Sender: TObject);
     procedure renderingTimerTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -35,9 +60,9 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
-    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
+    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   end;
   TRenderGroup = record
     TRenderGroupBox: TGroupBox;
@@ -62,34 +87,6 @@ uses
   Unit1;
 
 {$IFDEF MSWINDOWS}
-function KillProcess(ExeFileName: string): Integer;
-const
-  PROCESS_TERMINATE = $0001;
-var
-  ContinueLoop: BOOL;
-  FSnapshotHandle: THandle;
-  FProcessEntry32: TProcessEntry32;
-begin
-  Result := 0;
-  FSnapshotHandle := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-  FProcessEntry32.dwSize := SizeOf(FProcessEntry32);
-  ContinueLoop := Process32First(FSnapshotHandle, FProcessEntry32);
-
-  while Integer(ContinueLoop) <> 0 do
-  begin
-    if ((UpperCase(ExtractFileName(FProcessEntry32.szExeFile)) =
-      UpperCase(ExeFileName)) or (UpperCase(FProcessEntry32.szExeFile) =
-      UpperCase(ExeFileName))) then
-      Result := Integer(TerminateProcess(
-                        OpenProcess(PROCESS_TERMINATE,
-                                    BOOL(0),
-                                    FProcessEntry32.th32ProcessID),
-                                    0));
-     ContinueLoop := Process32Next(FSnapshotHandle, FProcessEntry32);
-  end;
-  CloseHandle(FSnapshotHandle);
-end;
-
 procedure TRenderingForm.CreateHandle;
 begin
   inherited CreateHandle;
@@ -109,9 +106,10 @@ end;
 
 procedure TRenderingForm.abortRenderingButtonClick(Sender: TObject);
 begin
-  if Length(RenderGroups) <> 0 then
+  try
     begin
-      KillProcess('AfterFX.com');
+      {$IFDEF MSWINDOWS}KillProcess('AfterFX.com');{$ENDIF MSWINDOWS}
+      {$IFDEF MACOS}KillProcess('aerendercore');{$ENDIF MACOS}
       for var i := 0 to High(RenderGroups) do
         begin
           RenderGroups[i].TLogMemo.Free;
@@ -126,9 +124,12 @@ begin
       emptyLabel.Visible := True;
       emptyLabel.Enabled := True;
       renderingTimer.Enabled := False;
+      totalProgressPercentage.Text := '0%'
     end
-  else
-    ShowMessage ('Nothing to abort!')
+  except
+    on Exception do
+      ShowMessage ('Nothing to abort!')
+  end;
 end;
 
 procedure TRenderingForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -168,7 +169,7 @@ begin
               RenderGroups[i].TRenderGroupBox.Margins.Bottom := 5;
               RenderGroups[i].TRenderGroupBox.Position.X := 5;
               RenderGroups[i].TRenderGroupBox.Height := 75;
-              RenderGroups[i].TRenderGroupBox.Text := Unit1.LogFiles[i].Remove(Unit1.LogFiles[i].Length - 4);
+              RenderGroups[i].TRenderGroupBox.Text := ExtractFileName(Unit1.LogFiles[i]);
               RenderGroups[i].TRenderGroupBox.Tag := i;
 
               //Initialize GroupBox MainLayout
@@ -205,7 +206,6 @@ begin
               RenderGroups[i].TRenderProgressLabel.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
               RenderGroups[i].TRenderProgressLabel.Align := TAlignLayout.Client;
               RenderGroups[i].TRenderProgressLabel.Margins.Left := 5;
-              //RenderGroups[i].TRenderProgressLabel.Width := 100;
               RenderGroups[i].TRenderProgressLabel.AutoSize := False;
               RenderGroups[i].TRenderProgressLabel.TextSettings.WordWrap := False;
               if Form1.threadsSwitch.IsChecked then

@@ -3,12 +3,30 @@ unit Unit6;
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
-  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
-  FMX.Controls.Presentation, FMX.StdCtrls, FMX.Edit, FMX.Layouts,
-  FMX.ListBox, FMX.TabControl, FMX.Effects, FMX.Objects, Data.Bind.EngExt,
-  Fmx.Bind.DBEngExt, System.Rtti, System.Bindings.Outputs,
-  Fmx.Bind.Editors, Data.Bind.Components;
+  System.SysUtils,
+  System.Types,
+  System.UITypes,
+  System.Classes,
+  System.Variants,
+  FMX.Types,
+  FMX.Controls,
+  FMX.Forms,
+  FMX.Graphics,
+  FMX.Dialogs,
+  FMX.Controls.Presentation,
+  FMX.StdCtrls,
+  FMX.Edit,
+  FMX.Layouts,
+  FMX.ListBox,
+  FMX.TabControl,
+  FMX.Effects,
+  FMX.Objects,
+  Data.Bind.EngExt,
+  Fmx.Bind.DBEngExt,
+  System.Rtti,
+  System.Bindings.Outputs,
+  Fmx.Bind.Editors,
+  Data.Bind.Components;
 
 type
   TForm6 = class(TForm)

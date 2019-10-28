@@ -3,23 +3,76 @@
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, System.IOUtils, System.Character,
-  System.JSON, System.Net.HttpClient, System.Threading,
-  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
-  FMX.Layouts, FMX.Controls.Presentation, FMX.StdCtrls, FMX.Edit, FMX.Platform,
-  Data.Bind.EngExt, Fmx.Bind.DBEngExt, System.Rtti,
-  System.Bindings.Outputs, Fmx.Bind.Editors, Data.Bind.Components,
-  FMX.Grid.Style, FMX.Grid, FMX.ScrollBox, FMX.EditBox, FMX.SpinBox,
-  FMX.ComboTrackBar, System.ImageList, FMX.ImgList, FMX.ListBox, FMX.Objects, FMX.Menus,
-  Xml.xmldom, Xml.XMLIntf, Xml.omnixmldom, Xml.XMLDoc, Xml.adomxmldom, FMX.MultiView, FMX.ExtCtrls, FMX.DialogService.Sync,
-  FMX.Effects, FMX.Filter.Effects, System.Notification, FMX.Ani, FMX.Memo, MathExpParser,
-  {$IFDEF MSWINDOWS}
-    Winapi.ShellAPI, Winapi.Windows, FMX.Platform.Win, Winapi.TlHelp32;
-  {$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}
-    Posix.Stdlib, Posix.Unistd, Posix.SysSysctl, Posix.SysTypes;
-  {$ENDIF MACOS}
+  {$REGION '  System Namespaces  '}
+  System.SysUtils,
+  System.Types,
+  System.UITypes,
+  System.Classes,
+  System.Variants,
+  System.IOUtils,
+  System.Character,
+  System.JSON,
+  System.Net.HttpClient,
+  System.Threading,
+  System.Rtti,
+  System.Bindings.Outputs,
+  System.Notification,
+  System.ImageList,
+  {$ENDREGION}
 
+  {$REGION '  FMX Namespaces  '}
+  FMX.Types,
+  FMX.Controls,
+  FMX.Forms,
+  FMX.Grid.Style,
+  Fmx.Bind.Editors,
+  Fmx.Bind.DBEngExt,
+  FMX.Memo,
+  FMX.StdCtrls,
+  FMX.Effects,
+  FMX.Objects,
+  FMX.Menus,
+  FMX.EditBox,
+  FMX.SpinBox,
+  FMX.Grid,
+  FMX.ScrollBox,
+  FMX.ListBox,
+  FMX.Layouts,
+  FMX.Edit,
+  FMX.Filter.Effects,
+  FMX.Controls.Presentation,
+  FMX.Ani,
+  FMX.Dialogs,
+  FMX.Graphics,
+  FMX.Platform,
+  FMX.MultiView,
+  FMX.ExtCtrls,
+  FMX.DialogService.Sync,
+  FMX.ComboTrackBar,
+  FMX.ImgList,
+  {$ENDREGION}
+
+  {$REGION '  Data Lib Namespaces  '}
+  Data.Bind.EngExt,
+  Xml.xmldom,
+  Xml.XMLIntf,
+  Xml.adomxmldom,
+  Xml.XMLDoc,
+  Data.Bind.Components,
+  Xml.omnixmldom,
+  {$ENDREGION}
+
+  {$REGION '  Additional Liraries  '}
+  MathExpParser,
+  {$ENDREGION}
+
+  {$REGION '  Windows Only Libraries  '}{$IFDEF MSWINDOWS}
+    Winapi.ShellAPI, Winapi.Windows, FMX.Platform.Win, Winapi.TlHelp32;
+  {$ENDIF MSWINDOWS}{$ENDREGION}
+
+  {$REGION '  macOS Only Libraries  '}{$IFDEF MACOS}
+    Posix.Stdlib, Posix.Unistd, Posix.SysSysctl, Posix.SysTypes;
+  {$ENDIF MACOS}{$ENDREGION}
 
 type
   TForm1 = class(TForm)
@@ -66,9 +119,7 @@ type
     threadsSwitch: TSwitch;
     threadsSwitchLabel: TLabel;
     Label3: TLabel;
-    FlowLayout1: TFlowLayout;
     inFrame: TEdit;
-    FlowLayout2: TFlowLayout;
     Label4: TLabel;
     outFrame: TEdit;
     threadsGrid: TStringGrid;
@@ -93,14 +144,9 @@ type
     Image1: TImage;
     Image2: TImage;
     launcherLayout: TLayout;
-    outputModule: TComboBox;
+    outputModuleBox: TComboBox;
     outputModuleLabel: TLabel;
     outputModuleLayout: TLayout;
-    ListBoxItem1: TListBoxItem;
-    ListBoxGroupHeader2: TListBoxGroupHeader;
-    ListBoxItem2: TListBoxItem;
-    ListBoxItem3: TListBoxItem;
-    ListBoxItem4: TListBoxItem;
     renderSettingsLayout: TLayout;
     renderSettings: TComboBox;
     ListBoxGroupHeader3: TListBoxGroupHeader;
@@ -111,17 +157,6 @@ type
     ListBoxItem8: TListBoxItem;
     renderSettingsLabel: TLabel;
     ListBoxItem9: TListBoxItem;
-    ListBoxItem10: TListBoxItem;
-    ListBoxItem11: TListBoxItem;
-    ListBoxItem12: TListBoxItem;
-    ListBoxItem13: TListBoxItem;
-    ListBoxItem14: TListBoxItem;
-    ListBoxItem15: TListBoxItem;
-    ListBoxItem16: TListBoxItem;
-    ListBoxItem17: TListBoxItem;
-    MetropolisUIListBoxItem1: TMetropolisUIListBoxItem;
-    ListBoxGroupHeader1: TListBoxGroupHeader;
-    XMLDocument1: TXMLDocument;
     MainMenu1: TMainMenu;
     launcherItem: TMenuItem;
     fileItem: TMenuItem;
@@ -165,30 +200,21 @@ type
     AERModernAnimatedStyle: TStyleBook;
     NotificationC: TNotificationCenter;
     MenuItem1: TMenuItem;
-    UpdateInfoLayout: TLayout;
     UpdateLabel: TLabel;
     downloadButton: TButton;
-    Line1: TLine;
     ffmpegCheckBox: TCheckBox;
     ffmpegConfigButton: TButton;
     ffmpegConcateLayout: TLayout;
-    LinkControlToPropertyVisible7: TLinkControlToProperty;
-    LinkControlToPropertyEnabled10: TLinkControlToProperty;
     LinkControlToPropertyEnabled11: TLinkControlToProperty;
     renderingBlurEffect: TBlurEffect;
     mainLayout: TLayout;
     FloatAnimation1: TFloatAnimation;
-    popupBackground: TRectangle;
-    renderingPopupProgressLabel: TLabel;
-    renderingProgress: TProgressBar;
-    renderingProgressLabel: TLabel;
-    renderingPopup: TLayout;
-    ShadowEffect1: TShadowEffect;
-    mainRenderingLayout: TLayout;
-    Memo1: TMemo;
-    Memo2: TMemo;
-    stap: TButton;
-    test: TLayout;
+    GridPanelLayout1: TGridPanelLayout;
+    GridPanelLayout2: TGridPanelLayout;
+    Layout1: TLayout;
+    Layout2: TLayout;
+    GridPanelLayout3: TGridPanelLayout;
+    UpdateInfo: TStatusBar;
     procedure FormResize(Sender: TObject);
     procedure compSwitchSwitch(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -201,7 +227,6 @@ type
     procedure openFileClick(Sender: TObject);
     procedure launchButtonClick(Sender: TObject);
     procedure saveFileClick(Sender: TObject);
-    procedure compNameChange(Sender: TObject);
     procedure infoButtonClick(Sender: TObject);
     procedure exitItemClick(Sender: TObject);
     procedure docsItemClick(Sender: TObject);
@@ -224,33 +249,60 @@ type
     procedure projectPathDragOver(Sender: TObject; const Data: TDragObject;
       const Point: TPointF; var Operation: TDragOperation);
     procedure outFrameValidate(Sender: TObject; var Text: string);
+    procedure outputModuleBoxChange(Sender: TObject);
+    procedure compNameTyping(Sender: TObject);
   private
     { Private declarations }
+
   public
     { Public declarations }
+    procedure DragEnter(const Data: TDragObject; const Point: TPointF); override;
+    procedure DragOver(const Data: TDragObject; const Point: TPointF; var Operation: TDragOperation); override;
+    procedure DragDrop(const Data: TDragObject; const Point: TPointF); override;
   end;
+  OutputModule = record
+    Name: String;
+    Module: String;
+    Mask: String;
+  end;
+  function GetPlatformMemorySize: Int64;
+  function GetHTML(URL: String): String;
+  function IsUpdateAvailable: Boolean;
+  function GetFFMPEGPath: WideString;
+  function GetDirectoryFiles(Directory: String): TArray<System.String>;
+  function KillProcess(ProcessName: String): Integer;
+  procedure InitOutputModules;
+  procedure UpdateOutputModules;
+  procedure InitConfiguration(Path: String);
+  procedure LoadConfiguration(Path: String);
+  procedure SaveConfiguration(Path: String);
 
 const
   APPVERSION = 'v0.8.0-beta';
+  PLATFORMPATHSEPARATOR = {$IFDEF MSWINDOWS}'\'{$ENDIF MSWINDOWS}
+                          {$IFDEF MACOS}'/'{$ENDIF MACOS};
 
 var
   Form1: TForm1;
   CFG: TextFile;
-  VER, LANG, AERPATH, DEFPRGPATH, DEFOUTPATH, ERR, gitResponse, gitVersion, gitDownload, ffmpegPath, AERH: String;
+  APPFOLDER: String;
+  VER, LANG, AERPATH, DEFPRGPATH, DEFOUTPATH, ERR, gitResponse, gitVersion, gitDownload, ffmpegPath, AERH, tempSavePath, DelTempFiles: String;
   gitRelease: TJsonValue;
   UpdateAvailable: Boolean = False;
   FFMPEG: Boolean = False;
   RenderWindowSender: TButton;
-  MEMORY, STYLE, ONRENDERSTART: Integer;
+  STYLE, ONRENDERSTART: Integer;
   LogFiles: TArray<System.String>;
+  OutputModules: TArray<OutputModule>;
   TMathParser: MathExpParser.TExpressionParser;
+  FHandleDragDirectly: Boolean = False;
 
 implementation
 
 {$R *.fmx}
 
 uses
-  Unit2, Unit3, Unit4, Unit5, Unit6, RenderingUnit;
+  Unit2, Unit3, Unit4, Unit5, Unit6, RenderingUnit, OutputModuleEditor;
 
 {$REGION '  ResetEditorErrorHighlighting = True'}
 function ResetEditorErrorHighlighting(): Boolean;
@@ -260,6 +312,8 @@ begin
       Result := true;
 end;
 {$ENDREGION}
+
+{$REGION '  Routines  '}
 
 function GetPlatformMemorySize: Int64;            //BYTES, BLYAD
 var
@@ -330,7 +384,6 @@ begin
   {$IFDEF MACOS}AERenderDirectory := GetEnvironmentVariable('HOME') + '/Documents/AErender/';{$ENDIF}
 
   Folders := TDirectory.GetDirectories(AErenderDirectory);
-
   for var i := 0 to High(Folders) do
     if Folders[i].Contains('ffmpeg') then
       Result := Folders[i]
@@ -350,8 +403,8 @@ begin
     end;
 end;
 
+function KillProcess(ProcessName: String): Integer;
 {$IFDEF MSWINDOWS}
-function KillProcess(ExeFileName: string): Integer;
 const
   PROCESS_TERMINATE = $0001;
 var
@@ -367,8 +420,8 @@ begin
   while Integer(ContinueLoop) <> 0 do
   begin
     if ((UpperCase(ExtractFileName(FProcessEntry32.szExeFile)) =
-      UpperCase(ExeFileName)) or (UpperCase(FProcessEntry32.szExeFile) =
-      UpperCase(ExeFileName))) then
+      UpperCase(ProcessName)) or (UpperCase(FProcessEntry32.szExeFile) =
+      UpperCase(ProcessName))) then
       Result := Integer(TerminateProcess(
                         OpenProcess(PROCESS_TERMINATE,
                                     BOOL(0),
@@ -377,8 +430,256 @@ begin
      ContinueLoop := Process32Next(FSnapshotHandle, FProcessEntry32);
   end;
   CloseHandle(FSnapshotHandle);
-end;
 {$ENDIF MSWINDOWS}
+{$IFDEF MACOS}
+begin
+  _system(PAnsiChar('pkill "' + AnsiString(ProcessName) + '"'));
+{$ENDIF MACOS}
+end;
+
+procedure InitOutputModules;
+begin
+  SetLength (OutputModules, 10);
+
+  OutputModules[0].Name := 'Lossless';
+  OutputModules[0].Module := 'Lossless';
+  OutputModules[0].Mask := '[compName].[fileExtension]';
+
+  OutputModules[1].Name := 'AIFF 48kHz';
+  OutputModules[1].Module := 'AIFF 48kHz';
+  OutputModules[1].Mask := '[compName].[fileExtension]';
+
+  OutputModules[2].Name := 'Alpha Only';
+  OutputModules[2].Module := 'Alpha Only';
+  OutputModules[2].Mask := '[compName].[fileExtension]';
+
+  OutputModules[3].Name := 'AVI DV NTSC 48kHz';
+  OutputModules[3].Module := 'AVI DV NTSC 48kHz';
+  OutputModules[3].Mask := '[compName].[fileExtension]';
+
+  OutputModules[4].Name := 'AVI DV PAL 48kHz';
+  OutputModules[4].Module := 'AVI DV PAL 48kHz';
+  OutputModules[4].Mask := '[compName].[fileExtension]';
+
+  OutputModules[5].Name := 'Lossless with Alpha';
+  OutputModules[5].Module := 'Lossless with Alpha';
+  OutputModules[5].Mask := '[compName].[fileExtension]';
+
+  OutputModules[6].Name := 'Multi-Machine Sequence';
+  OutputModules[6].Module := 'Multi-Machine Sequence';
+  OutputModules[6].Mask := '[compName]_[#####].[fileExtension]';
+
+  OutputModules[7].Name := 'Photoshop';
+  OutputModules[7].Module := 'Photoshop';
+  OutputModules[7].Mask := '[compName]_[#####].[fileExtension]';
+
+  OutputModules[8].Name := 'Save Current Preview';
+  OutputModules[8].Module := 'Save Current Preview';
+  OutputModules[8].Mask := '[compName].[fileExtension]';
+
+  OutputModules[9].Name := 'TIFF Sequence with Alpha';
+  OutputModules[9].Module := 'TIFF Sequence with Alpha';
+  OutputModules[9].Mask := '[compName]_[#####].[fileExtension]';
+end;
+
+procedure UpdateOutputModules;
+begin
+  Form1.outputModuleBox.Items.Clear;
+  for var i := 0 to High(OutputModules) do
+    Form1.outputModuleBox.Items.Add(OutputModules[i].Name);
+  Form1.outputModuleBox.Items.Add('Configure Output Modules...');
+end;
+
+procedure InitConfiguration(Path: String);
+var
+  Config: IXMLDocument;
+  RootNode: IXMLNode;
+  ChildNode: IXMLNode;
+begin
+  InitOutputModules;
+  Config := TXMLDocument.Create(nil);
+  Config.Active := True;
+  Config.Encoding := 'utf-8';
+  Config.Options := [doNodeAutoIndent];
+
+  RootNode := Config.AddChild('launcherconfig');
+
+  RootNode.AddChild('lang').Text := 'EN';
+  RootNode.AddChild('style').Text := '0';
+  RootNode.AddChild('aerender').Text := '';
+  RootNode.AddChild('onRenderStart').Text := '0';
+  RootNode.AddChild('defprgpath').Text := '';
+  RootNode.AddChild('defoutpath').Text := '';
+  RootNode.AddChild('handle').Text := 'True';
+  RootNode.AddChild('delTempFiles').Text := 'True';
+
+  RootNode.AddChild('projectPath').Text := '';
+  RootNode.AddChild('outputPath').Text := '';
+  RootNode.AddChild('tempSavePath').Text := '';
+
+  RootNode.AddChild('comp').Text := '';
+  RootNode.AddChild('startFrame').Text := '';
+  RootNode.AddChild('endFrame').Text := '';
+
+  RootNode.AddChild('missingFiles').Text := 'False';
+  RootNode.AddChild('sound').Text := 'False';
+  RootNode.AddChild('thread').Text := 'False';
+  RootNode.AddChild('prop').Text := '';
+  RootNode.ChildNodes['prop'].Attributes['enabled'] := 'False';
+
+  RootNode.AddChild('memoryLimit').Text := '100';
+  RootNode.AddChild('cacheLimit').Text := '100';
+
+  ChildNode := RootNode.AddChild('outputModule');
+  ChildNode.Attributes['selected'] := '0';
+
+  for var i := 0 to High(OutputModules) do
+    begin
+      var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
+      ModuleNode.AddChild('name').Text := OutputModules[i].Name;
+      ModuleNode.AddChild('moduleName').Text := OutputModules[i].Module;
+      Form1.outputModuleBox.Items.Add(OutputModules[i].Name);
+      ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
+    end;
+
+  Form1.outputModuleBox.Items.Add('Configure Output Modules...');
+  Config.SaveToFile(Path);
+end;
+
+procedure LoadConfiguration(Path: String);
+var
+  Config: IXMLDocument;
+  RootNode: IXMLNode;
+begin
+  Config := TXMLDocument.Create(nil);
+  Config.LoadFromFile(Path);
+  Config.Active := True;
+  RootNode := Config.DocumentElement;
+
+  LANG := RootNode.ChildNodes['lang'].Text;
+  STYLE := RootNode.ChildNodes['style'].Text.ToInteger();
+  AERPATH := RootNode.ChildNodes['aerender'].Text;
+  ONRENDERSTART := RootNode.ChildNodes['onRenderStart'].Text.ToInteger();
+  DEFPRGPATH := RootNode.ChildNodes['defprgpath'].Text;
+  DEFOUTPATH := RootNode.ChildNodes['defoutpath'].Text;
+  AERH := RootNode.ChildNodes['handle'].Text;
+  DelTempFiles := RootNode.ChildNodes['delTempFiles'].Text;
+
+  Form1.projectPath.Text := RootNode.ChildNodes['projectPath'].Text;
+  Form1.outputPath.Text := RootNode.ChildNodes['outputPath'].Text;
+  tempSavePath := RootNode.ChildNodes['tempSavePath'].Text;
+
+  Form1.compName.Text := RootNode.ChildNodes['comp'].Text;
+  Form1.inFrame.Text := RootNode.ChildNodes['startFrame'].Text;
+  Form1.outFrame.Text := RootNode.ChildNodes['endFrame'].Text;
+
+  Form1.missingFilesCheckbox.IsChecked := RootNode.ChildNodes['missingFiles'].Text.ToBoolean();
+  Form1.soundCheckbox.IsChecked := RootNode.ChildNodes['sound'].Text.ToBoolean();
+  Form1.threadedRender.IsChecked := RootNode.ChildNodes['thread'].Text.ToBoolean();
+  Form1.customCheckbox.IsChecked := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
+  Form1.customProp.Text := RootNode.ChildNodes['prop'].Text;
+
+  Form1.memUsageTrackBar.Value := RootNode.ChildNodes['memoryLimit'].Text.ToSingle();
+  Form1.cacheUsageTrackBar.Value := RootNode.ChildNodes['cacheLimit'].Text.ToSingle();
+
+  SetLength (OutputModules, RootNode.ChildNodes['outputModule'].ChildNodes.Count);
+  for var i := 0 to High(OutputModules) do
+    begin
+      OutputModules[i].Name := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['name'].Text;
+      OutputModules[i].Module := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['moduleName'].Text;
+      Form1.outputModuleBox.Items.Add(OutputModules[i].Name);
+      OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
+    end;
+  Form1.outputModuleBox.Items.Add('Configure Output Modules...');
+  Form1.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
+end;
+
+procedure SaveConfiguration(Path: String);
+var
+  Config: IXMLDocument;
+  RootNode: IXMLNode;
+  ChildNode: IXMLNode;
+begin
+  Config := TXMLDocument.Create(nil);
+  Config.Active := True;
+  Config.Encoding := 'utf-8';
+  Config.Options := [doNodeAutoIndent];
+
+  RootNode := Config.AddChild('launcherconfig');
+
+  RootNode.AddChild('lang').Text := LANG;
+  RootNode.AddChild('style').Text := STYLE.ToString;
+  RootNode.AddChild('aerender').Text := AERPATH;
+  RootNode.AddChild('onRenderStart').Text := ONRENDERSTART.ToString;
+  RootNode.AddChild('defprgpath').Text := DEFPRGPATH;
+  RootNode.AddChild('defoutpath').Text := DEFOUTPATH;
+  RootNode.AddChild('handle').Text := AERH;
+  RootNode.AddChild('delTempFiles').Text := DelTempFiles;
+
+  RootNode.AddChild('projectPath').Text := Form1.projectPath.Text;
+  RootNode.AddChild('outputPath').Text := Form1.outputPath.Text;
+  RootNode.AddChild('tempSavePath').Text := tempSavePath;
+
+  RootNode.AddChild('comp').Text := Form1.compName.Text;
+  RootNode.AddChild('startFrame').Text := Form1.inFrame.Text;
+  RootNode.AddChild('endFrame').Text := Form1.outFrame.Text;
+  RootNode.AddChild('missingFiles').Text := BoolToStr(Form1.missingFilesCheckbox.IsChecked, True);
+
+  RootNode.AddChild('sound').Text := BoolToStr(Form1.soundCheckbox.IsChecked, True);
+  RootNode.AddChild('thread').Text := BoolToStr(Form1.threadedRender.IsChecked, True);
+  RootNode.AddChild('prop').Text := Form1.customProp.Text;
+  RootNode.ChildNodes['prop'].Attributes['enabled'] := BoolToStr(Form1.customCheckbox.IsChecked, True);
+
+  RootNode.AddChild('memoryLimit').Text := Form1.memUsageTrackBar.Value.ToString;
+  RootNode.AddChild('cacheLimit').Text := Form1.cacheUsageTrackBar.Value.ToString;
+
+  ChildNode := RootNode.AddChild('outputModule');
+  ChildNode.Attributes['selected'] := Form1.outputModuleBox.ItemIndex.ToString;
+
+  for var i := 0 to High(OutputModules) do
+    begin
+      var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
+      ModuleNode.AddChild('name').Text := OutputModules[i].Name;
+      ModuleNode.AddChild('moduleName').Text := OutputModules[i].Module;
+      ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
+    end;
+
+  Config.SaveToFile(Path);
+end;
+
+{$ENDREGION}
+
+{$REGION '  Public  '}
+procedure TForm1.DragEnter(const Data: TDragObject; const Point: TPointF);
+begin
+  FHandleDragDirectly := (Data.Files <> nil);
+  if not FHandleDragDirectly then
+    inherited;
+end;
+
+procedure TForm1.DragOver(const Data: TDragObject; const Point: TPointF; var Operation: TDragOperation);
+begin
+  if FHandleDragDirectly then
+    Operation := TDragOperation.Copy
+  else
+    inherited;
+end;
+
+procedure TForm1.DragDrop(const Data: TDragObject; const Point: TPointF);
+var
+  S: string;
+begin
+  if FHandleDragDirectly then
+    if Data.Source <> nil then
+      projectPath.Text := Data.Source.ClassName
+    else
+      projectPath.Text := Data.Files[0]
+  else
+    inherited;
+end;
+{$ENDREGION}
+
+{$REGION '  Published  '}
 
 procedure TForm1.aboutItemClick(Sender: TObject);
 begin
@@ -413,7 +714,7 @@ begin
   end;
 end;
 
-procedure TForm1.compNameChange(Sender: TObject);
+procedure TForm1.compNameTyping(Sender: TObject);
 begin
   compGrid.Cells[0, 0] := compName.Text;
 end;
@@ -424,7 +725,7 @@ begin
     begin
       if UpdateAvailable = True then
         begin
-          if Form1.Height <= 450 then
+          if Form1.Height <= 470 then
             Form1.Height := Form1.Height + 130;
         end
       else
@@ -443,7 +744,7 @@ begin
     begin
       if UpdateAvailable = True then
         begin
-          if Form1.Height <= 580 then
+          if Form1.Height >= 580 then
             Form1.Height := Form1.Height - 130
         end
       else
@@ -484,282 +785,118 @@ end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  KillProcess('AfterFX.com');
-  Rewrite (CFG);
+  {$IFDEF MSWINDOWS}KillProcess('AfterFX.com');{$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}KillProcess('aerendercore');{$ENDIF MACOS}
 
-  //Language
-  Writeln (CFG, LANG);
-
-  //Style
-  Writeln (CFG, STYLE.ToString);
-
-  //OnRenderStart Event
-  Writeln (CFG, ONRENDERSTART.ToString);
-
-  //Project Path
-  if projectPath.Text.IsEmpty then
-    Writeln (CFG, '')
-  else
-    Writeln (CFG, projectPath.Text);
-
-  //Output Path
-  if outputPath.Text.IsEmpty then
-    Writeln (CFG, '')
-  else
-    Writeln (CFG, outputPath.Text);
-
-  //Composition Name
-  if compName.Text.IsEmpty then
-    Writeln (CFG, '')
-  else
-    Writeln (CFG, compName.Text);
-
-  //Start Frame
-  if inFrame.Text.IsEmpty then
-    Writeln (CFG, '')
-  else
-    Writeln (CFG, inFrame.Text);
-
-  //End Frame
-  if outFrame.Text.IsEmpty then
-    Writeln (CFG, '')
-  else
-    Writeln (CFG, outFrame.Text);
-
-  //Missing Files
-  if missingFilesCheckbox.IsChecked then
-    Writeln (CFG, 'True')
-  else
-    Writeln (CFG, 'False');
-
-  //Sound on render finish
-  if soundCheckbox.IsChecked then
-    Writeln (CFG, 'True')
-  else
-    Writeln (CFG, 'False');
-
-  //Threaded Render
-  if threadedRender.IsChecked then
-    Writeln (CFG, 'True')
-  else
-    Writeln (CFG, 'False');
-
-  //Handle aerender
-  if Form2.HandleCheckBox.IsChecked then
-    Writeln (CFG, 'True')
-  else
-    Writeln (CFG, 'False');
-
-  //Custom Properties
-  if customCheckbox.IsChecked then
+  SaveConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
+  if StrToBool(DelTempFiles) = True then
     begin
-      Writeln (CFG, 'True');
-      Writeln (CFG, customProp.Text);
-    end
-  else
-    begin
-      Writeln (CFG, 'False');
-      Writeln (CFG, '');
+      var AerenderDirectory: TArray<String> := GetDirectoryFiles(APPFOLDER);
+      for var i := 0 to High(AerenderDirectory) do
+        begin
+          {$IFDEF MSWINDOWS}
+          if (AerenderDirectory[i].Contains('.bat')) then
+            System.SysUtils.DeleteFile(PWideChar(AerenderDirectory[i]));
+          {$ENDIF MSWINDOWS}
+          {$IFDEF MACOS}
+          if (AerenderDirectory[i].Contains('.command')) then
+            System.SysUtils.DeleteFile(PWideChar(AerenderDirectory[i]));
+          {$ENDIF MACOS}
+          if (AerenderDirectory[i].Contains('.log')) then
+            System.SysUtils.DeleteFile(PWideChar(AerenderDirectory[i]));
+        end;
     end;
-
-  //AErender Path
-  if AERPATH.IsEmpty then
-    if Form2.aerenderPath.Text.isEmpty then
-      Writeln (CFG, '')
-    else
-      Writeln (CFG, Form2.aerenderPath.Text)
-  else
-    Writeln (CFG, AERPATH);
-
-  //Default Projects Path
-  if (Form2.defaultProjectsPath.Text.IsEmpty) and (DEFPRGPATH = '') then
-    Writeln (CFG, '')
-  else
-    Writeln (CFG, DEFPRGPATH);
-
-  //Default Outputs Path
-  if (Form2.defaultOutputPath.Text.IsEmpty) and (DEFOUTPATH = '') then
-    Writeln (CFG, '')
-  else
-    Writeln (CFG, DEFOUTPATH);
-
-  //Memory Limit
-  Writeln (CFG, memUsageTrackBar.Value.ToString);
-
-  //Cache Limit
-  Writeln (CFG, cacheUsageTrackBar.Value.ToString);
-
-  CloseFile (CFG);
-
-  {$IFDEF MSWINDOWS}
-    var AerenderDirectory: TArray<String> := GetDirectoryFiles('C:\ProgramData\AErender');
-    for var i := 0 to High(AerenderDirectory) do
-      if (AerenderDirectory[i].Contains('.bat')) then
-        DeleteFile(PWideChar(AerenderDirectory[i]));
-  {$ENDIF MSWINDOWS}
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
-var
-  PRGP, OUTP, COMP, INFR, OTFR, MF, SOUND, THREAD, PROP, PROPTEXT, MEMLIMIT, CACHELIMIT: String;
 begin
-  //Form1.Width := 600;
+  Form1.Width := 600;
   Form1.Caption := 'AErender Launcher (' + APPVERSION + ')';
+  APPFOLDER :=  {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\'{$ENDIF MSWINDOWS}
+                {$IFDEF MACOS}GetEnvironmentVariable('HOME') + '/Documents/AErender/'{$ENDIF MACOS};
   UpdateAvailable := IsUpdateAvailable;
   if UpdateAvailable = True then
     begin
-      //Form1.Height := 450;
-      UpdateInfoLayout.Visible := True;
-      UpdateInfoLayout.Enabled := True;
+      Form1.Height := {$IFDEF MSWINDOWS}460{$ENDIF MSWINDOWS}
+                      {$IFDEF MACOS}420{$ENDIF MACOS};
+      UpdateInfo.Visible := True;
+      UpdateInfo.Enabled := True;
       downloadButton.Text := 'Download from GitHub (' + gitVersion + ')';
-      {$IFDEF MSWINDOWS}
-        gitDownload := gitRelease.GetValue<string>('[0].assets[1].browser_download_url');
-      {$ENDIF MSWINDOWS}
-      {$IFDEF MACOS}
-        gitDownload := gitRelease.GetValue<string>('[0].assets[0].browser_download_url');
-      {$ENDIF MACOS}
+      {$IFDEF MSWINDOWS}gitDownload := gitRelease.GetValue<string>('[0].assets[1].browser_download_url');{$ENDIF MSWINDOWS}
+      {$IFDEF MACOS}gitDownload := gitRelease.GetValue<string>('[0].assets[0].browser_download_url');{$ENDIF MACOS}
     end
   else
     begin
-      UpdateInfoLayout.Visible := False;
-      UpdateInfoLayout.Enabled := False;
-      //Form1.Height := 420;
+      UpdateInfo.Visible := False;
+      UpdateInfo.Enabled := False;
+      Form1.Height := {$IFDEF MSWINDOWS}420{$ENDIF MSWINDOWS}
+                      {$IFDEF MACOS}400{$ENDIF MACOS};
     end;
-
-  if GetFFMPEGPath <> '' then
-    begin
-      FFMPEG := True;
-      ffmpegPath := GetFFMPEGPath;
-      ffmpegCheckBox.Enabled := True;
-    end
-  else
-    begin
-      FFMPEG := False;
-      ffmpegCheckBox.Enabled := False;
-      ffmpegCheckBox.Hint := 'FFMPEG is not found at' + {$IFDEF MSWINDOWS} 'C:\ProgramData\AErender' {$ENDIF MSWINDOWS}
-                                                        {$IFDEF MACOS} '~/Documents/AErender' {$ENDIF MACOS} + 'directory';
-    end;
+  try
+    if GetFFMPEGPath <> '' then
+      begin
+        FFMPEG := True;
+        ffmpegPath := GetFFMPEGPath;
+        ffmpegCheckBox.Enabled := True;
+      end
+    else
+      raise Exception.Create('FFMPEG not found');
+  except
+    on Exception do
+      begin
+        FFMPEG := False;
+        ffmpegCheckBox.Enabled := False;
+        ffmpegCheckBox.Hint := 'FFMPEG is not found at' + {$IFDEF MSWINDOWS} 'C:\ProgramData\AErender\' {$ENDIF MSWINDOWS}
+                                                          {$IFDEF MACOS} '~/Documents/AErender/' {$ENDIF MACOS} + 'directory';
+      end;
+  end;
   {$IFDEF MSWINDOWS}
   //Form1.Height := 444;
-  MainMenu1.Destroy;
-  if DirectoryExists ('C:\ProgramData\AErender') then
-    AssignFile (CFG, 'C:\ProgramData\AErender\AErenderConfiguration.cfg')
-  else
-    begin
-      CreateDir ('C:\ProgramData\AErender');
-      AssignFile (CFG, 'C:\ProgramData\AErender\AErenderConfiguration.cfg');
-    end;
-  if FileExists('C:\ProgramData\AErender\AErenderConfiguration.cfg') then
+  MainMenu1.Free;
   {$ENDIF MSWINDOWS}
   {$IFDEF MACOS}
   editItem.Visible := False; editItem.Enabled := False;
   MenuBar1.Destroy;
-  if DirectoryExists (GetEnvironmentVariable('HOME') + '/Documents/AErender') then
-    AssignFile (CFG, GetEnvironmentVariable('HOME') + '/Documents/AErender/AErenderConfiguration.cfg')
+  {$ENDIF MACOS}
+  if DirectoryExists (APPFOLDER) then
+    AssignFile (CFG, APPFOLDER + 'AErenderConfiguration.xml')
   else
     begin
-      CreateDir (GetEnvironmentVariable('HOME') + '/Documents/AErender');
-      AssignFile (CFG, GetEnvironmentVariable('HOME') + '/Documents/AErender/AErenderConfiguration.cfg');
-      AssignFile (CFG, './AErenderConfiguration.cfg');
+      CreateDir (APPFOLDER);
+      AssignFile (CFG, APPFOLDER + 'AErenderConfiguration.xml');
     end;
-  if FileExists(GetEnvironmentVariable('HOME') + '/Documents/AErender/AErenderConfiguration.cfg') then
-  {$ENDIF MACOS}
+  if FileExists(APPFOLDER + 'AErenderConfiguration.xml') then
     begin
-      //Reading values
-      Reset (CFG);
       try
-        Readln (CFG, LANG);             //Language
-        Readln (CFG, STYLE);            //Style
-        Readln (CFG, ONRENDERSTART);    //OnRenderStart Event
-        Readln (CFG, PRGP);             //Project Path
-        Readln (CFG, OUTP);             //Output Path
-        Readln (CFG, COMP);             //Composition Name
-        Readln (CFG, INFR);             //Start Frame
-        Readln (CFG, OTFR);             //Out Frame
-        Readln (CFG, MF);               //Missing Files
-        Readln (CFG, SOUND);            //Sound on finish
-        Readln (CFG, THREAD);           //Threaded render
-        Readln (CFG, AERH);             //Handle aerender
-        Readln (CFG, PROP);             //Custom Properties
-        Readln (CFG, PROPTEXT);         //Custom Properties Text
-        Readln (CFG, AERPATH);          //AErender Path
-        Readln (CFG, DEFPRGPATH);       //Default Project Path
-        Readln (CFG, DEFOUTPATH);       //Default Output Path
-        Readln (CFG, MEMLIMIT);         //Memory Limit
-        Readln (CFG, CACHELIMIT);       //Cache Limit
-
-        //Assigning values
-        projectPath.Text := PRGP;
-        outputPath.Text := OUTP;
-        compName.Text := COMP;
-        inFrame.Text := INFR;
-        outFrame.Text := OTFR;
-        missingFilesCheckbox.IsChecked := MF.ToBoolean();
-        soundCheckbox.IsChecked := SOUND.ToBoolean();
-        threadedRender.IsChecked := THREAD.ToBoolean();
-        customCheckbox.IsChecked := PROP.ToBoolean();
-        customProp.Text := PROPTEXT;
-        memUsageTrackBar.Value := MEMLIMIT.ToSingle();
-        cacheUsageTrackBar.Value := CACHELIMIT.ToSingle();
-        Lang1.Lang := LANG;
-        CloseFile (CFG);
+        LoadConfiguration (APPFOLDER + 'AErenderConfiguration.xml');
       except
         if (TDialogServiceSync.MessageDialog(('Configuration file is corrupted! Press OK to renew configuration file. Application will be restarted.' + #13#10 +
-                              {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\AErenderConfiguration.cfg read error.'{$ENDIF MSWINDOWS}
-                                  {$IFDEF MACOS}'~/Documents/AErender/AErenderConfiguration.cfg read error.'{$ENDIF MACOS}),
+                              {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\AErenderConfiguration.xml read error.'{$ENDIF MSWINDOWS}
+                                  {$IFDEF MACOS}'~/Documents/AErender/AErenderConfiguration.xml read error.'{$ENDIF MACOS}),
               TMsgDlgType.mtError, mbOKCancel, TMsgDlgBtn.mbOK, 0) = 1) then
             begin
-              CloseFile (CFG);
-              {$IFDEF MSWINDOWS}DeleteFile ('C:\ProgramData\AErender\AErenderConfiguration.cfg');{$ENDIF MSWINDOWS}
-              {$IFDEF MACOS}DeleteFile (GetEnvironmentVariable('HOME') + '/Documents/AErender/AErenderConfiguration.cfg');{$ENDIF MACOS}
+              System.SysUtils.DeleteFile (APPFOLDER + 'AErenderConfiguration.xml');
               {$IFDEF MSWINDOWS}ShellExecute(0, 'OPEN', PChar(ParamStr(0)), '', '', SW_SHOWNORMAL);{$ENDIF MSWINDOWS}
-              {$IFDEF MACOS}_system(PAnsiChar('open "' + AnsiString(ParamStr(0)) + '"'));{$ENDIF MACOS}
+              {$IFDEF MACOS}_system(PAnsiChar('open -a "' + AnsiString(ParamStr(0)) + '" &'));{$ENDIF MACOS}
             end;
         Application.Terminate;
       end;
     end
   else
     begin
-      Rewrite (CFG);
-      Writeln (CFG, 'EN');           //Language
-      Writeln (CFG, '0');            //Style
-      Writeln (CFG, '0');            //OnRenderStart Event
-      Writeln (CFG, '');             //Project Path
-      Writeln (CFG, '');             //Output Path
-      Writeln (CFG, '');             //Composition Name
-      Writeln (CFG, '');             //Start Frame
-      Writeln (CFG, '');             //Out Frame
-      Writeln (CFG, 'False');        //Missing Files
-      Writeln (CFG, 'False');        //Sound on finish
-      Writeln (CFG, 'False');        //Threaded render
-      Writeln (CFG, 'True');         //Handle aerender
-      Writeln (CFG, 'False');        //Custom Properties
-      Writeln (CFG, '');             //Custom Properties Text
-      Writeln (CFG, '');             //AErender Path
-      Writeln (CFG, '');             //Default Project Path
-      Writeln (CFG, '');             //Default Output Path
-      Writeln (CFG, '100');          //Memory Limit
-      Writeln (CFG, '100');          //Cache Limit
-      LANG := 'EN';
-      STYLE := 0;
-      ONRENDERSTART := 0;
-      //VER := '0';
-      {$IFDEF MSWINDOWS}AERH := 'True';{$ENDIF MSWINDOWS}
-      {$IFDEF MACOS}AERH := 'False';{$ENDIF MACOS}
+      InitConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
+      AERH := 'True';
+      DelTempFiles := 'True';
       Lang1.Lang := LANG;
-      CloseFile (CFG);
     end;
 end;
 
 procedure TForm1.FormResize(Sender: TObject);
 begin
-  compLayout.Width := Form1.Width * 0.5;
-  FlowLayout1.Width := threadsLayout.Width * 0.5;
+  //compName.Text := 'H: ' + Form1.Height.ToString + '; W: ' + Form1.Width.ToString;
   StringColumn1.Width := compGrid.Width;
   StringColumn2.Width := threadsGrid.Width * 0.5;
   StringColumn3.Width := threadsGrid.Width * 0.5;
-  propertiesLayout1.Width := properties.Width * 0.5;
-  renderingPopup.Width := Form1.Width * 0.75;
 end;
 
 procedure TForm1.FormShow(Sender: TObject);
@@ -811,7 +948,7 @@ type
   end;
 var
   threads, comps, emptyComps: Integer;
-  PATH: String;
+  PATH, logPath, prgPath: String;
   execFile: array [1..100] of exec;
 
   Notification: TNotification;
@@ -898,9 +1035,24 @@ begin
             //Script compiling section
             if Form2.HandleCheckBox.IsChecked then
               execFile[i].script := '(';
+
+            if comps = 1 then
+              logPath := APPFOLDER + compName.Text + '_' + i.ToString
+            else
+              logPath := APPFOLDER + compGrid.Cells[0, j] + '_' + i.ToString;
+
             PATH := outputPath.Text;
-            PATH.Insert(Length(Path)-4, '_' + compGrid.Cells[0, j] + '_' + i.ToString);
+            PATH.Insert(PATH.Length, '_' + compGrid.Cells[0, j] + '_' + i.ToString);
+
+            if outputPath.Text.Contains('[projectName]' + PLATFORMPATHSEPARATOR) then
+              begin
+                PATH := StringReplace(PATH, '[projectName]', ExtractFileName(projectPath.Text), [rfReplaceAll, rfIgnoreCase]);
+                if not DirectoryExists(ExtractFilePath(PATH)) then
+                  CreateDir(ExtractFilePath(PATH));
+              end;
+
             execFile[i].script := execFile[i].script + '"' + AERPATH + '" ' + '-project "' + projectPath.Text + '" -output "' + PATH + '" ';
+
             if compSwitch.IsChecked then
               execFile[i].script := execFile[i].script + '-comp "' + compGrid.Cells[0, j] + '" '
             else
@@ -928,20 +1080,24 @@ begin
             if missingFilesCheckbox.IsChecked then
               execFile[i].script := execFile[i].script + '-continueOnMissingFootage ';
 
+            if outputModuleBox.ItemIndex <> -1 then
+              execFile[i].script := execFile[i].script + '-OMtemplate "' + OutputModules[outputModuleBox.ItemIndex].Module + '" ';
+
             execFile[i].script := execFile[i].script + '-mem_usage "' + Trunc(cacheUsageTrackBar.Value).ToString + '" "' + Trunc(memUsageTrackBar.Value).ToString + '" ';
+
+            if customCheckbox.IsChecked then
+                  execFile[i].script := execFile[i].script + customProp.Text;
 
             if Form2.HandleCheckBox.IsChecked then
               begin
-                if customCheckbox.IsChecked then
-                  execFile[i].script := execFile[i].script + customProp.Text;
-
-                execFile[i].script := execFile[i].script + ') > "' + PATH.Remove(PATH.Length - 4) + '.log"';
+                execFile[i].script := execFile[i].script + ') > "' + logPath + '.log"';
 
                 if threadsSwitch.IsChecked then
-                  LogFiles[i-1] := PATH.Remove(PATH.Length - 4) + '.log'
+                  LogFiles[i-1] := logPath + '.log'
                 else
-                  LogFiles[j] := PATH.Remove(PATH.Length - 4) + '.log';
+                  LogFiles[j] := logPath + '.log';
               end;
+
             //File section
             {$IFDEF MSWINDOWS}
               if compSwitch.IsChecked then
@@ -970,18 +1126,30 @@ begin
                 AssignFile (execFile[i].F, GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command');
               Rewrite (execFile[i].F);
               Writeln (execFile[i].F, execFile[i].script);
-              Writeln (execFile[i].F, 'read -p "Press any key to continue..."');
+              //Writeln (execFile[i].F, 'read -p "Press any key to continue..."');
               CloseFile (execFile[i].F);
-              if compSwitch.IsChecked then
-                begin
-                  _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
-                  _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
-                end
+              if Form2.HandleCheckBox.IsChecked then
+                if compSwitch.IsChecked then
+                  begin
+                    _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
+                    _system(PAnsiChar('command "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command" & disown')));
+                  end
+                else
+                  begin
+                    _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
+                    _system(PAnsiChar('command "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command" & disown')));
+                  end
               else
-                begin
-                  _system(PAnsiChar('chmod +x ' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command')));
-                  _system(PAnsiChar('open ' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command')));
-                end;
+                if compSwitch.IsChecked then
+                  begin
+                    _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
+                    _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
+                  end
+                else
+                  begin
+                    _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
+                    _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
+                  end
             {$ENDIF MACOS}
           end;
       {$REGION '  Notifications Invoker [Windows]  '}
@@ -1041,6 +1209,21 @@ begin
   Text := tempStr;
 end;
 
+procedure TForm1.outputModuleBoxChange(Sender: TObject);
+begin
+  if outputModuleBox.ItemIndex = outputModuleBox.Count-1 then
+    begin
+      OutputModuleEditorForm.Show;
+      outputModuleBox.ItemIndex := 0;
+    end
+  else
+    if not outputPath.Text.IsEmpty then
+      if ExtractFileName(tempSavePath).IsEmpty then
+        outputPath.Text := tempSavePath + OutputModules[outputModuleBox.ItemIndex].Mask
+      else
+        outputPath.Text := tempSavePath + '_' + OutputModules[outputModuleBox.ItemIndex].Mask;
+end;
+
 procedure TForm1.projectPathDragDrop(Sender: TObject;
   const Data: TDragObject; const Point: TPointF);
 begin
@@ -1060,7 +1243,8 @@ procedure TForm1.saveFileClick(Sender: TObject);
 begin
   with SaveDialog1 do
     if Execute then
-      outputPath.Text := SaveDialog1.FileName;
+      tempSavePath := ExtractFilePath(SaveDialog1.FileName);
+  outputPath.Text := tempSavePath + OutputModules[outputModuleBox.ItemIndex].Mask;
 end;
 
 procedure TForm1.settingsButtonClick(Sender: TObject);
@@ -1086,7 +1270,7 @@ begin
     begin
       if UpdateAvailable = True then
         begin
-          if Form1.Height <= 450 then
+          if Form1.Height <= 470 then
             Form1.Height := Form1.Height + 130;
         end
       else
@@ -1103,7 +1287,7 @@ begin
     begin
       if UpdateAvailable = True then
         begin
-          if Form1.Height <= 580 then
+          if Form1.Height >= 580 then
             Form1.Height := Form1.Height - 130
         end
       else
@@ -1254,5 +1438,7 @@ begin
   else
     cacheUsageInfo.Text := Trunc(cacheUsageTrackBar.Value).ToString + '%';
 end;
+
+{$ENDREGION}
 
 end.

@@ -1,7 +1,4 @@
-﻿[bottomLayout]
-Coordinates=10,368,82,33
-
-[compFramerate]
+﻿[compFramerate]
 Coordinates=102,232,91,51
 
 [compLayout]
@@ -63,14 +60,11 @@ Coordinates=145,139,53,51
 [selectallButton]
 Coordinates=145,80,88,51
 
-[Layout1]
-Coordinates=271,80,53,33
-
 [deselallButton]
 Coordinates=428,80,85,51
 
 []
-Coordinates=112,368,62,33
+Coordinates=271,80,53,33
 
 [importButton]
 Coordinates=217,232,53,51
