@@ -21,8 +21,25 @@
 - Automatic updates via GitHub
 - Some modern visual skins
 
-## Installation and usage
-- Extract AErender Launcher wherever you want
+## Installation
+### AErender Launcher
+- Extract contents of release archive wherever you want
+- Start AErender Launcher
+
+### AErender Launcher Script
+#### Adobe After Effects CC 2019 and newer
+- In Adobe After Effects go to `File` -> `Scripts` -> `Install ScriptUI Panel...`
+- Select `AErender Launcher Script.jsx`
+- Restart Adobe After Effects
+- In Adobe After Effects go to `Window` and select `AErender Launcher Script.jsx`
+#### Adobe After Effects CC 2018 and older
+##### Windows
+- Copy `AErender Launcher Script.jsx` to `Adobe\Adobe After Effects CC <year>\Support Files\Scripts\ScriptUI Panels` folder
+##### macOS
+- Copy `AErender Launcher Script.jsx` to `/Applications/Adobe After Effects CC <year>/Scripts/ScriptUI Panels`
+
+- Restart Adobe After Effects if opened
+- In Adobe After Effects go to `Window` and select `AErender Launcher Script.jsx`
 
 ## Roadmap
 - aerender handle
