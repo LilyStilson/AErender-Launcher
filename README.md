@@ -21,16 +21,14 @@
 - Automatic updates via GitHub
 - Some modern visual skins
 
-<h2>Installation and usage</h2>
-<p></p>
+## Installation and usage
+- Extract AErender Launcher wherever you want
 
-<h2>Roadmap</h2>
-<ul>
-  <li>aerender handle</li>
-  <li>Concatenation of rendered parts</li>
-  <li>Conversion and concatenation lossless renders into various formats</li>
-  <li>On Rendering Finish actions</li>
-  <li>Dragging projects onto <code>Project Path</code> field <i>(suggested by @pencilgame#3118)</i></li>
-  <li>Automated rendering <i>(suggested by <a href="https://www.reddit.com/user/granite603" target="_blank">/u/granite603</a>)</i></li>
-  <li>Network rendering <i>(suggested by <a href="https://www.reddit.com/user/pixeldrift" target="_blank">/u/pixeldrift</a>)</i></li>
-</ul>
+## Roadmap
+- aerender handle
+- Concatenation of rendered parts
+- Conversion and concatenation lossless renders into various formats
+- On Rendering Finish actions
+- Dragging projects onto `Project Path` field <i>(suggested by @pencilgame#3118)</i>
+- Automated rendering <i>(suggested by <a href="https://www.reddit.com/user/granite603" target="_blank">/u/granite603</a>)</i>
+- Network rendering <i>(suggested by <a href="https://www.reddit.com/user/pixeldrift" target="_blank">/u/pixeldrift</a>)</i>
