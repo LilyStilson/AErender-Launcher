@@ -10,18 +10,16 @@
   <a href="http://aerenderlauncher.com"><img src="https://img.shields.io/website/http/aerenderlauncher.com" alt="website"></a>
 </div>
 
-<h2>Features</h2>
-<ul>
-  <li>Forever free and open source</li>
-  <li>Cross-platform</li>
-  <li>After Effects version independent</li>
-  <li>Threaded rendering</li>
-  <li>Multi-Composition rendering</li>
-  <li>Cache and RAM usage limit</li>
-  <li>After Effects project importing</li>
-  <li>Automatic updates via GitHub</li>
-  <li>Some visual skins</li>
-</ul>
+## Features
+- Forever free and open source
+- Cross-platform
+- After Effects version independent
+- Threaded rendering
+- Multi-Composition rendering
+- Cache and RAM usage limit
+- After Effects project importing
+- Automatic updates via GitHub
+- Some modern visual skins
 
 <h2>Installation and usage</h2>
 <p></p>
