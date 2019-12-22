@@ -42,10 +42,8 @@
 - In Adobe After Effects go to `Window` and select `AErender Launcher Script.jsx`
 
 ## Roadmap
-- aerender handle
 - Concatenation of rendered parts
 - Conversion and concatenation lossless renders into various formats
 - On Rendering Finish actions
-- Dragging projects onto `Project Path` field <i>(suggested by @pencilgame#3118)</i>
 - Automated rendering <i>(suggested by <a href="https://www.reddit.com/user/granite603" target="_blank">/u/granite603</a>)</i>
 - Network rendering <i>(suggested by <a href="https://www.reddit.com/user/pixeldrift" target="_blank">/u/pixeldrift</a>)</i>
