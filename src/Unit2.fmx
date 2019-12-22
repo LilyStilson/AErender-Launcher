@@ -3,9 +3,9 @@ object Form2: TForm2
   Top = 0
   BorderIcons = [biSystemMenu]
   BorderStyle = SizeToolWin
-  Caption = 'AErender Settings'
-  ClientHeight = 311
-  ClientWidth = 442
+  Caption = 'AErender Launcher Settings'
+  ClientHeight = 300
+  ClientWidth = 450
   Position = MainFormCenter
   StyleBook = Form1.AERModernStyle
   FormFactor.Width = 320
@@ -53,7 +53,7 @@ object Form2: TForm2
   end
   object aerenderPathLayout: TLayout
     Align = Top
-    Size.Width = 442.000000000000000000
+    Size.Width = 450.000000000000000000
     Size.Height = 55.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 1
@@ -65,7 +65,7 @@ object Form2: TForm2
       Margins.Right = 5.000000000000000000
       Position.X = 5.000000000000000000
       Position.Y = 5.000000000000000000
-      Size.Width = 432.000000000000000000
+      Size.Width = 440.000000000000000000
       Size.Height = 17.000000000000000000
       Size.PlatformDefault = False
       TextSettings.Font.StyleExt = {00070000000000000004000000}
@@ -81,7 +81,7 @@ object Form2: TForm2
       Margins.Top = 5.000000000000000000
       Margins.Right = 5.000000000000000000
       Margins.Bottom = 5.000000000000000000
-      Size.Width = 405.000000000000000000
+      Size.Width = 413.000000000000000000
       Size.Height = 23.000000000000000000
       Size.PlatformDefault = False
     end
@@ -90,7 +90,7 @@ object Form2: TForm2
       Margins.Top = 5.000000000000000000
       Margins.Right = 5.000000000000000000
       Margins.Bottom = 5.000000000000000000
-      Position.X = 415.000000000000000000
+      Position.X = 423.000000000000000000
       Position.Y = 27.000000000000000000
       Size.Width = 22.000000000000000000
       Size.Height = 23.000000000000000000
@@ -103,7 +103,7 @@ object Form2: TForm2
   object defaultProjectsLayout: TLayout
     Align = Top
     Position.Y = 88.000000000000000000
-    Size.Width = 442.000000000000000000
+    Size.Width = 450.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 3
@@ -124,7 +124,7 @@ object Form2: TForm2
       Margins.Top = 5.000000000000000000
       Margins.Right = 5.000000000000000000
       Margins.Bottom = 5.000000000000000000
-      Size.Width = 240.000000000000000000
+      Size.Width = 248.000000000000000000
       Size.Height = 23.000000000000000000
       Size.PlatformDefault = False
     end
@@ -133,7 +133,7 @@ object Form2: TForm2
       Margins.Top = 5.000000000000000000
       Margins.Right = 5.000000000000000000
       Margins.Bottom = 5.000000000000000000
-      Position.X = 415.000000000000000000
+      Position.X = 423.000000000000000000
       Position.Y = 5.000000000000000000
       Size.Width = 22.000000000000000000
       Size.Height = 23.000000000000000000
@@ -146,7 +146,7 @@ object Form2: TForm2
   object defaultOutputLayout: TLayout
     Align = Top
     Position.Y = 121.000000000000000000
-    Size.Width = 442.000000000000000000
+    Size.Width = 450.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 2
@@ -167,7 +167,7 @@ object Form2: TForm2
       Margins.Top = 5.000000000000000000
       Margins.Right = 5.000000000000000000
       Margins.Bottom = 5.000000000000000000
-      Size.Width = 240.000000000000000000
+      Size.Width = 248.000000000000000000
       Size.Height = 23.000000000000000000
       Size.PlatformDefault = False
     end
@@ -176,7 +176,7 @@ object Form2: TForm2
       Margins.Top = 5.000000000000000000
       Margins.Right = 5.000000000000000000
       Margins.Bottom = 5.000000000000000000
-      Position.X = 415.000000000000000000
+      Position.X = 423.000000000000000000
       Position.Y = 5.000000000000000000
       Size.Width = 22.000000000000000000
       Size.Height = 23.000000000000000000
@@ -188,14 +188,13 @@ object Form2: TForm2
   end
   object OpenDialog1: TOpenDialog
     Filter = 'After Effects Render Engine|aerender.exe'
-    InitialDir = '%ProgramFiles%\Adobe'
     Left = 8
-    Top = 280
+    Top = 272
   end
   object styleLayout: TLayout
     Align = Top
     Position.Y = 55.000000000000000000
-    Size.Width = 442.000000000000000000
+    Size.Width = 450.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 9
@@ -209,7 +208,7 @@ object Form2: TForm2
       Margins.Top = 5.000000000000000000
       Margins.Right = 5.000000000000000000
       Margins.Bottom = 5.000000000000000000
-      Size.Width = 267.000000000000000000
+      Size.Width = 275.000000000000000000
       Size.Height = 23.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
@@ -229,7 +228,7 @@ object Form2: TForm2
   object onRenderStartLayout: TLayout
     Align = Top
     Position.Y = 154.000000000000000000
-    Size.Width = 442.000000000000000000
+    Size.Width = 450.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 8
@@ -243,7 +242,7 @@ object Form2: TForm2
       Margins.Top = 5.000000000000000000
       Margins.Right = 5.000000000000000000
       Margins.Bottom = 5.000000000000000000
-      Size.Width = 267.000000000000000000
+      Size.Width = 275.000000000000000000
       Size.Height = 23.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
@@ -263,7 +262,7 @@ object Form2: TForm2
   object Layout2: TLayout
     Align = Top
     Position.Y = 187.000000000000000000
-    Size.Width = 442.000000000000000000
+    Size.Width = 450.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 7
@@ -273,7 +272,7 @@ object Form2: TForm2
       IsChecked = True
       Margins.Left = 10.000000000000000000
       Margins.Right = 10.000000000000000000
-      Size.Width = 422.000000000000000000
+      Size.Width = 430.000000000000000000
       Size.Height = 33.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
@@ -284,7 +283,7 @@ object Form2: TForm2
   object Layout3: TLayout
     Align = Top
     Position.Y = 220.000000000000000000
-    Size.Width = 442.000000000000000000
+    Size.Width = 450.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 6
@@ -293,7 +292,7 @@ object Form2: TForm2
       IsChecked = True
       Margins.Left = 10.000000000000000000
       Margins.Right = 10.000000000000000000
-      Size.Width = 422.000000000000000000
+      Size.Width = 430.000000000000000000
       Size.Height = 33.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
@@ -313,9 +312,9 @@ object Form2: TForm2
     OnClick = ResetButtonClick
   end
   object StatusBar1: TStatusBar
-    Position.Y = 279.000000000000000000
+    Position.Y = 268.000000000000000000
     ShowSizeGrip = True
-    Size.Width = 442.000000000000000000
+    Size.Width = 450.000000000000000000
     Size.Height = 32.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 15

@@ -33,7 +33,9 @@ uses
   System.Rtti,
   System.Bindings.Outputs,
   Fmx.Bind.Editors,
-  Data.Bind.Components;
+  Data.Bind.Components,
+  {$IFDEF MSWINDOWS}Fmx.Platform.Win, WinApi.Windows;{$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}MacApi.Foundation;{$ENDIF MACOS}
 
 type
   TForm4 = class(TForm)
@@ -63,16 +65,16 @@ type
     StatusBar1: TStatusBar;
     GridPanelLayout1: TGridPanelLayout;
     procedure FormShow(Sender: TObject);
-    procedure compositionsItemClick(const Sender: TCustomListBox;
-      const Item: TListBoxItem);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure compositionsChangeCheck(Sender: TObject);
     procedure importButtonClick(Sender: TObject);
     procedure selectallButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure deselallButtonClick(Sender: TObject);
+    procedure compositionsChange(Sender: TObject);
   private
     { Private declarations }
+    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
   end;
@@ -91,6 +93,18 @@ uses
   Unit1;
 
 {$R *.fmx}
+
+{$IFDEF MSWINDOWS}
+procedure TForm4.CreateHandle;
+begin
+  inherited CreateHandle;
+
+  var hWnd: HWND := FormToHWND(Self);
+
+  SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) or WS_EX_APPWINDOW);
+  SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or CS_DROPSHADOW);
+end;
+{$ENDIF MSWINDOWS}
 
 procedure TForm4.importButtonClick(Sender: TObject);
 var
@@ -182,6 +196,15 @@ begin
   Form4.Close;
 end;
 
+procedure TForm4.compositionsChange(Sender: TObject);
+begin
+  compName.Text := 'Name: ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['name'].Text;
+  compResolution.Text := 'Resolution: ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['resolution'].Text;
+  compFramerate.Text := 'Framerate: ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['framerate'].Text;
+  compRangeIn.Text := 'Range start: ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['rangeStart'].Text;
+  compRangeOut.Text := 'Range end: ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['rangeEnd'].Text;
+end;
+
 procedure TForm4.compositionsChangeCheck(Sender: TObject);
 var
   i: Integer;
@@ -196,26 +219,6 @@ begin
     splitRenderCheckbox.Enabled := True;
 end;
 
-procedure TForm4.compositionsItemClick(const Sender: TCustomListBox;
-  const Item: TListBoxItem);
-begin
-  if Unit1.LANG = 'EN' then
-    begin
-      compName.Text := 'Name: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['name'].Text;
-      compResolution.Text := 'Resolution: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['resolution'].Text;
-      compFramerate.Text := 'Framerate: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['framerate'].Text;
-      compRangeIn.Text := 'Range start: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['rangeStart'].Text;
-      compRangeOut.Text := 'Range end: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['rangeEnd'].Text;
-    end;
-  {if Unit1.LANG = 'RU' then
-    begin
-      compName.Text := 'Название: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['name'].Text;
-      compResolution.Text := 'Разрешение: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['resolution'].Text;
-      compFramerate.Text := 'Частота кадров: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['framerate'].Text;
-      compRangeIn.Text := 'Начало композиции: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['rangeStart'].Text;
-      compRangeOut.Text := 'Конец композиции: ' + RootNode.ChildNodes['compositions'].ChildNodes[Item.Index].ChildNodes['rangeEnd'].Text;
-    end;    }
-end;
 procedure TForm4.deselallButtonClick(Sender: TObject);
 var
   i: Integer;

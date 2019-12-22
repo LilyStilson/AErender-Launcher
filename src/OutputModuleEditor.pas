@@ -23,7 +23,14 @@ uses
   FMX.Memo,
   FMX.TabControl,
   FMX.DialogService.Sync,
-  Unit1;
+  FMX.Objects,
+  Unit1,
+  {$IFDEF MSWINDOWS}
+    FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
+  {$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}
+    MacApi.Foundation;
+  {$ENDIF MACOS}
 
 type
   TOutputModuleEditorForm = class(TForm)
@@ -56,6 +63,8 @@ type
     removeModuleButton: TButton;
     saveModulesButton: TButton;
     cancelButton: TButton;
+    Splitter1: TSplitter;
+    Line1: TLine;
     procedure FormCreate(Sender: TObject);
     procedure outputModulesBoxChange(Sender: TObject);
     procedure fileMaskDragOver(Sender: TObject; const Data: TDragObject;
@@ -74,6 +83,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
+    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
   end;
@@ -95,6 +105,17 @@ var
 implementation
 
 {$R *.fmx}
+
+{$IFDEF MSWINDOWS}
+procedure TOutputModuleEditorForm.CreateHandle;
+begin
+  inherited CreateHandle;
+  var hWnd: HWND := FormToHWND(Self);
+
+  SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) or WS_EX_APPWINDOW);
+  SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or CS_DROPSHADOW);
+end;
+{$ENDIF MSWINDOWS}
 
 procedure TOutputModuleEditorForm.cancelButtonClick(Sender: TObject);
 begin

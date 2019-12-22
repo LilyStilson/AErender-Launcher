@@ -19,7 +19,13 @@ uses
   FMX.ListBox,
   FMX.ScrollBox,
   FMX.Memo,
-  FMX.WebBrowser;
+  FMX.WebBrowser,
+  {$IFDEF MSWINDOWS}
+    FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
+  {$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}
+    MacApi.Foundation;
+  {$ENDIF MACOS}
 
 type
   TForm3 = class(TForm)
@@ -28,18 +34,40 @@ type
     Contents: TListBox;
     Title: TLabel;
     WebBrowser1: TWebBrowser;
-    PresetsConfiguratorToolbar: TToolBar;
+    Toolbar: TToolBar;
+    ListBoxGroupHeader1: TListBoxGroupHeader;
+    ListBoxItem1: TListBoxItem;
+    ListBoxItem2: TListBoxItem;
+    ListBoxGroupHeader2: TListBoxGroupHeader;
+    ListBoxGroupHeader3: TListBoxGroupHeader;
+    ListBoxItem3: TListBoxItem;
+    ListBoxItem4: TListBoxItem;
+    ListBoxItem5: TListBoxItem;
+    ListBoxItem6: TListBoxItem;
+    ListBoxItem7: TListBoxItem;
+    ListBoxItem8: TListBoxItem;
+    ListBoxItem9: TListBoxItem;
+    ListBoxItem10: TListBoxItem;
+    ListBoxGroupHeader4: TListBoxGroupHeader;
+    ListBoxItem11: TListBoxItem;
+    ListBoxItem12: TListBoxItem;
+    Splitter1: TSplitter;
     procedure ContentsChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
+    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
   end;
 
 var
   Form3: TForm3;
+  MacDocsPaths: TArray<String> = ['', '',
+                                  '', '', '', '', '', '',
+                                  '', '',
+                                  '', ''];
 
 implementation
 
@@ -47,6 +75,18 @@ uses
   Unit1;
 
 {$R *.fmx}
+
+{$IFDEF MSWINDOWS}
+procedure TForm3.CreateHandle;
+begin
+  inherited CreateHandle;
+
+  var hWnd: HWND := FormToHWND(Self);
+
+  SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) or WS_EX_APPWINDOW);
+  SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or CS_DROPSHADOW);
+end;
+{$ENDIF MSWINDOWS}
 
 procedure TForm3.Button1Click(Sender: TObject);
 begin
@@ -56,64 +96,26 @@ end;
 procedure TForm3.ContentsChange(Sender: TObject);
 begin
   case Contents.ItemIndex of
-    0:begin
-        {$IFDEF MSWINDOWS}
-        if FileExists ('C:/ProgramData/AErender/Docs/Introduction.html') then
-          WebBrowser1.URL := 'file://C:/ProgramData/AErender/Docs/Introduction.html'
-        else
-          WebBrowser1.URL := 'file://C:/ProgramData/AErender/Docs/Error.html';
-        //WebBrowser1.Reload();
-        {$ENDIF MSWINDOWS}
-        {$IFDEF MACOS}
-        if FileExists (GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Introduction.html') then
-          WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Introduction.html'
-        else
-          WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Error.html';
-        //WebBrowser1.Reload();
-        {$ENDIF MACOS}
-      end;
     1:begin
-        {$IFDEF MSWINDOWS}
-        if FileExists ('C:/ProgramData/AErender/Docs/AfterEffectsRenderEngine.html') then
-          WebBrowser1.URL := 'file://C:/ProgramData/AErender/Docs/AfterEffectsRenderEngine.html'
-        else
-          WebBrowser1.URL := 'file://C:/ProgramData/AErender/Docs/Error.html';
-        {$ENDIF MSWINDOWS}
-        {$IFDEF MACOS}
-        if FileExists (GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/AfterEffectsRenderEngine.html') then
-          WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/AfterEffectsRenderEngine.html'
-        else
-          WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Error.html';
-        {$ENDIF MACOS}
+        if FileExists (APPFOLDER + 'Docs/Introduction/AErender Launcher.html') then
+          WebBrowser1.URL := 'file://'+ APPFOLDER + 'Docs/Introduction/AErender Launcher.html'
       end;
     2:begin
-        {$IFDEF MSWINDOWS}
-        if FileExists ('C:/ProgramData/AErender/Docs/PreparingRendering.html') then
-          WebBrowser1.URL := 'file://C:/ProgramData/AErender/Docs/PreparingRendering.html'
-        else
-          WebBrowser1.URL := 'file://C:/ProgramData/AErender/Docs/Error.html';
-        {$ENDIF MSWINDOWS}
-        {$IFDEF MACOS}
-        if FileExists (GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/PreparingRendering.html') then
-          WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/PreparingRendering.html'
-        else
-          WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Error.html';
-        {$ENDIF MACOS}
+        if FileExists (APPFOLDER + 'Docs/Introduction/After Effects Render Engine.html') then
+          WebBrowser1.URL := 'file://'+ APPFOLDER + 'Docs/Introduction/After Effects Render Engine.html'
       end;
-    3:begin
-        {$IFDEF MSWINDOWS}
-        if FileExists ('C:/ProgramData/AErender/Docs/Issues.html') then
-          WebBrowser1.URL := 'file://C:/ProgramData/AErender/Docs/Issues.html'
-        else
-          WebBrowser1.URL := 'file://C:/ProgramData/AErender/Docs/Error.html';
-        {$ENDIF MSWINDOWS}
-        {$IFDEF MACOS}
-        if FileExists (GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Issues.html') then
-          WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Issues.html'
-        else
-          WebBrowser1.URL := 'file://' + GetEnvironmentVariable('HOME') + '/Documents/AErender/Docs/Error.html';
-        {$ENDIF MACOS}
+    4:begin
+        if FileExists (APPFOLDER + 'Docs/User Interface/Main Window.html') then
+          WebBrowser1.URL := 'file://'+ APPFOLDER + 'Docs/User Interface/Main Window.html'
       end;
+    11: begin
+          if FileExists (APPFOLDER + 'Docs/Rendering/Preparing project.html') then
+            WebBrowser1.URL := 'file://'+ APPFOLDER + 'Docs/Rendering/Preparing project.html'
+        end;
+    12: begin
+          if FileExists (APPFOLDER + 'Docs/Rendering/Rendering with Launcher.html') then
+            WebBrowser1.URL := 'file://'+ APPFOLDER + 'Docs/Rendering/Rendering with Launcher.html'
+        end;
   end;
 end;
 

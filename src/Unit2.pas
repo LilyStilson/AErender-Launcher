@@ -79,6 +79,7 @@ type
     procedure ResetButtonClick(Sender: TObject);
   private
     { Private declarations }
+    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
   end;
@@ -92,6 +93,18 @@ implementation
 
 uses
   Unit1, Unit3, Unit4, Unit5, Unit6, RenderingUnit, OutputModuleEditor;
+
+{$IFDEF MSWINDOWS}
+procedure TForm2.CreateHandle;
+begin
+  inherited CreateHandle;
+
+  var hWnd: HWND := FormToHWND(Self);
+
+  SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) or WS_EX_APPWINDOW);
+  SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or CS_DROPSHADOW);
+end;
+{$ENDIF MSWINDOWS}
 
 function ExtractIntegerFromString(s: String): Integer;
 var
@@ -134,6 +147,7 @@ begin
           maxVerStr := AEVersions[i];
         end;
     end;
+  //ver := maxVer;
   Result := maxVerStr;
 end;
 
@@ -158,8 +172,8 @@ begin
     begin
       Form2.Close;
       AERPATH := aerenderPath.Text;
-      DEFPRGPATH := defaultProjectsPath.Text;
-      DEFOUTPATH := defaultOutputPath.Text;
+      Form1.AEPOpenDialog.InitialDir := defaultProjectsPath.Text;
+      Form1.SaveDialog1.InitialDir := defaultOutputPath.Text;
     end;
 end;
 
@@ -226,6 +240,9 @@ begin
     on Exception do
       AERPATH := '';
   end;
+
+  {$IFDEF MSWINDOWS}OpenDialog1.InitialDir := 'C:\Program Files\Adobe';{$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}OpenDialog1.InitialDir := '/Applications'{$ENDIF MACOS};
 end;
 
 procedure TForm2.FormKeyDown(Sender: TObject; var Key: Word;
@@ -243,11 +260,11 @@ begin
   aerenderPath.Text := AERPATH;
   defaultProjectsPath.Text := DEFPRGPATH;
   defaultOutputPath.Text := DEFOUTPATH;
-  HandleCheckBox.IsChecked := Unit1.AERH.ToBoolean();
-  delFilesCheckBox.IsChecked := Unit1.DelTempFiles.ToBoolean();
-  if Unit1.LANG = 'EN' then
+  HandleCheckBox.IsChecked := StrToBool(AERH);
+  delFilesCheckBox.IsChecked := StrToBool(DelTempFiles);
+  if LANG = 'EN' then
     langBox.ItemIndex := 0;
-  if Unit1.LANG = 'RU' then
+  if LANG = 'RU' then
     langBox.ItemIndex := 1;
   {$IFDEF MSWINDOWS}
     aerenderPath.TextPrompt := 'C:\Program Files\Adobe\Adobe After Effects CC\Support Files\aerender.exe';
@@ -263,12 +280,12 @@ procedure TForm2.HandleCheckBoxChange(Sender: TObject);
 begin
   if HandleCheckBox.IsChecked then
     begin
-      Unit1.AERH := 'True';
+      AERH := 'True';
       RenderingForm.emptyLabel.Text := 'Queue is Empty'
     end
   else
     begin
-      Unit1.AERH := 'False';
+      AERH := 'False';
       RenderingForm.emptyLabel.Text := 'Aerender handle disabled. Enable aerender handle in Launcher settings.';
     end;
 end;
@@ -277,7 +294,7 @@ procedure TForm2.langBoxChange(Sender: TObject);
 begin
   case langBox.ItemIndex of
     0:begin
-        Unit1.LANG := 'EN';
+        LANG := 'EN';
         Form1.Lang1.Lang := 'EN';
         if Form1.compSwitch.IsChecked then
           Form1.compSwitchLabel.Text := 'Multiple Compositions'
@@ -289,7 +306,7 @@ begin
           Form1.threadsSwitchLabel.Text := 'Single Render';
       end;
     1:begin
-        Unit1.LANG := 'RU';
+        LANG := 'RU';
         Form1.Lang1.Lang := 'RU';
         if Form1.compSwitch.IsChecked then
           Form1.compSwitchLabel.Text := 'Несколько композиций'
@@ -305,7 +322,7 @@ end;
 
 procedure TForm2.onRenderStartBoxChange(Sender: TObject);
 begin
-  Unit1.ONRENDERSTART := onRenderStartBox.ItemIndex;
+  ONRENDERSTART := onRenderStartBox.ItemIndex;
 end;
 
 procedure TForm2.ResetButtonClick(Sender: TObject);
@@ -324,10 +341,15 @@ procedure TForm2.styleBoxChange(Sender: TObject);
 begin
   case styleBox.ItemIndex of
     0:begin
-        Unit1.STYLE := 0;
+        STYLE := 0;
         Form1.StyleBook := Form1.AERModernStyle;
-        Form1.settingsIconFill.Color := $FFFFFFFF;
-        Form1.infoIconFill.Color := $FFFFFFFF;
+        //Form1.settingsIconFill.Color := $FFFFFFFF;
+        //Form1.infoIconFill.Color := $FFFFFFFF;
+
+        Form1.SettingsIcon.Fill.Color := $FFFFFFFF;
+        Form1.InfoIcon.Fill.Color := $FFFFFFFF;
+        Form1.LaunchIcon.Fill.Color := $FFFFFFFF;
+
         Form1.memUsageTrackBar.Margins.Top := 5;
         Form1.cacheUsageTrackBar.Margins.Top := 5;
         Form2.StyleBook := Form1.AERModernStyle;
@@ -339,10 +361,15 @@ begin
         OutputModuleEditorForm.StyleBook := Form1.AERModernStyle;
       end;
     1:begin
-        Unit1.STYLE := 1;
+        STYLE := 1;
         Form1.StyleBook := Form1.AERModernAnimatedStyle;
-        Form1.settingsIconFill.Color := $FFFFFFFF;
-        Form1.infoIconFill.Color := $FFFFFFFF;
+        //Form1.settingsIconFill.Color := $FFFFFFFF;
+        //Form1.infoIconFill.Color := $FFFFFFFF;
+
+        Form1.SettingsIcon.Fill.Color := $FFFFFFFF;
+        Form1.InfoIcon.Fill.Color := $FFFFFFFF;
+        Form1.LaunchIcon.Fill.Color := $FFFFFFFF;
+
         Form1.memUsageTrackBar.Margins.Top := 5;
         Form1.cacheUsageTrackBar.Margins.Top := 5;
         Form2.StyleBook := Form1.AERModernAnimatedStyle;
@@ -354,10 +381,15 @@ begin
         OutputModuleEditorForm.StyleBook := Form1.AERModernAnimatedStyle;
       end;
     2:begin
-        Unit1.STYLE := 2;
+        STYLE := 2;
         Form1.StyleBook := Form1.OnyxBlueStyle;
-        Form1.settingsIconFill.Color := $FF000000;
-        Form1.infoIconFill.Color := $FF000000;
+        //Form1.settingsIconFill.Color := $FF000000;
+        //Form1.infoIconFill.Color := $FF000000;
+
+        Form1.SettingsIcon.Fill.Color := $FF000000;
+        Form1.InfoIcon.Fill.Color := $FF000000;
+        Form1.LaunchIcon.Fill.Color := $FF000000;
+
         Form1.memUsageTrackBar.Margins.Top := 0;
         Form1.cacheUsageTrackBar.Margins.Top := 0;
         Form2.StyleBook := Form1.OnyxBlueStyle;

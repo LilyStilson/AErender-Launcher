@@ -8,6 +8,7 @@ uses
   System.UITypes,
   System.Classes,
   System.Variants,
+  System.Diagnostics,
   FMX.Types,
   FMX.Controls,
   FMX.Forms,
@@ -53,11 +54,16 @@ type
     ProgressBar1: TProgressBar;
     Label2: TLabel;
     Button1: TButton;
+    timeElapsedLabel: TLabel;
+    Line1: TLine;
+    StopwatchTimer: TTimer;
     procedure ShowLogButtonClick (Sender: TObject);
     procedure renderingTimerTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure abortRenderingButtonClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure StopwatchTimerTimer(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   public
@@ -78,6 +84,8 @@ var
   VISIBLE: Boolean = False;
   RenderGroups: TArray<TRenderGroup>;
   LogIncrement: Integer = 0;
+  CurrentTime: TDateTime;
+  AERVERSION: String;
 
 implementation
 
@@ -90,9 +98,10 @@ uses
 procedure TRenderingForm.CreateHandle;
 begin
   inherited CreateHandle;
+  var hWnd: HWND := FormToHWND(Self);
 
-  SetWindowLong(WindowHandleToPlatform(Handle).Wnd, GWL_EXSTYLE,
-    GetWindowLong(WindowHandleToPlatform(Handle).Wnd, GWL_EXSTYLE) or WS_EX_APPWINDOW);
+  SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) or WS_EX_APPWINDOW);
+  SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or CS_DROPSHADOW);
 end;
 {$ENDIF MSWINDOWS}
 
@@ -143,6 +152,14 @@ begin
     end;
 end;
 
+procedure TRenderingForm.FormCreate(Sender: TObject);
+begin
+  if AERPATH.Contains('2020') then
+    AERVERSION := '2020'
+  else
+    AERVERSION := '';
+end;
+
 procedure TRenderingForm.FormShow(Sender: TObject);
 begin
   VISIBLE := True;
@@ -182,6 +199,20 @@ begin
               RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Right := 5;
               RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Bottom := 5;
 
+              var MaxFrameValue: Single := 100;
+              {if Form1.threadsSwitch.IsChecked then
+                if AERVERSION = '2020' then
+                  MaxFrameValue := (Form1.threadsGrid.Cells[1, i].ToSingle() - Form1.threadsGrid.Cells[0, i].ToSingle()) * 2 + 80
+                else
+                  MaxFrameValue := Form1.threadsGrid.Cells[1, i].ToSingle() - Form1.threadsGrid.Cells[0, i].ToSingle() + 50
+              else
+                if Form1.outFrame.Text.IsEmpty or Form1.compSwitch.IsChecked then
+                  MaxFrameValue := 1
+                else
+                  if AERVERSION = '2020' then
+                    MaxFrameValue := Form1.outFrame.Text.ToSingle() * 2 + 80
+                  else
+                    MaxFrameValue := Form1.outFrame.Text.ToSingle() + 50;}
               //Initialize GroupBox MainLayout ProgressBar
               RenderGroups[i].TRenderProgressBar := TProgressBar.Create(Self);
               RenderGroups[i].TRenderProgressBar.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
@@ -194,13 +225,8 @@ begin
               RenderGroups[i].TRenderProgressBar.Height := 10;
               RenderGroups[i].TRenderProgressBar.Min := 0;
               RenderGroups[i].TRenderProgressBar.Value := 0;
-              if Form1.threadsSwitch.IsChecked then
-                RenderGroups[i].TRenderProgressBar.Max := Form1.threadsGrid.Cells[1, i].ToSingle() - Form1.threadsGrid.Cells[0, i].ToSingle() + 50
-              else
-                if Form1.outFrame.Text.IsEmpty or Form1.compSwitch.IsChecked then
-                  RenderGroups[i].TRenderProgressBar.Max := 1
-                else
-                  RenderGroups[i].TRenderProgressBar.Max := Form1.outFrame.Text.ToSingle() + 50;
+              RenderGroups[i].TRenderProgressBar.Max := MaxFrameValue;
+
 
               //Initialise GroupBox MainLayout ProgressLabel
               RenderGroups[i].TRenderProgressLabel := TLabel.Create(Self);
@@ -243,6 +269,8 @@ begin
             end;
         end;
       renderingTimer.Enabled := True;
+      CurrentTime := Now;
+      StopwatchTimer.Enabled := True;
     end;
 end;
 
@@ -259,6 +287,7 @@ var
   i: Integer;
 begin
   var Finished: Integer := 0;
+  var Error: Integer := 0;
   SetLength (Render, Length(Unit1.LogFiles));
 
   for var j := 0 to High(Render) do
@@ -308,13 +337,6 @@ begin
         TotalProgressBar.Value := sum;
         totalProgressPercentage.Text := Round((TotalProgressBar.Value / TotalProgressBar.Max) * 100).ToString + '%';
 
-        {framesLabel.Text := 'tpb.max = ' + TotalProgressBar.max.ToString + '; '
-                          + 'tpb.val = ' + TotalProgressBar.Value.ToString + '; '
-                          + 'rg[0].val = ' + RenderGroups[0].TRenderProgressBar.Value.ToString + '; '
-                          + 'rg[0].max = ' + RenderGroups[0].TRenderProgressBar.Max.ToString + '; '
-                          + 'rg[1].val = ' + RenderGroups[1].TRenderProgressBar.Value.ToString + '; '
-                          + 'rg[1].max = ' + RenderGroups[1].TRenderProgressBar.Max.ToString + '; ';}
-
         if RenderGroups[i].TLogMemo.Text.Contains('Finished composition') then
           begin
             Render[i].State := 'finish';
@@ -337,12 +359,18 @@ begin
       if Render[j].State = 'finish' then
         inc (Finished);
 
-    if Finished = Length(LogFiles) then
+    for var j := 0 to High(Render) do
+      if Render[j].State = 'error' then
+        inc (Error);
+
+
+    if (Finished = Length(LogFiles)) or (Error = Length(LogFiles)) then
       begin
         Sleep (2000);
         TotalProgressBar.Value := TotalProgressBar.Max;
         totalProgressPercentage.Text := '100%';
         renderingTimer.Enabled := False;
+        StopwatchTimer.Enabled := False;
       end;
 end;
 
@@ -375,6 +403,11 @@ begin
       else
         LogIncrement := 0;
     end;
+end;
+
+procedure TRenderingForm.StopwatchTimerTimer(Sender: TObject);
+begin
+  timeElapsedLabel.Text := 'Time Elapsed: ' + FormatDateTime('hh:nn:ss', Now - CurrentTime);
 end;
 
 end.

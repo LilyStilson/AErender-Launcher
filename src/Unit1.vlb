@@ -140,6 +140,7 @@ Coordinates=2596,1176,63,58
 
 [SaveDialog1]
 Coordinates=442,219,87,36
+Visible=True
 
 [customProp]
 Coordinates=1284,10,83,80
@@ -381,4 +382,13 @@ Coordinates=289,1,60,36
 
 [Layout1]
 Coordinates=289,56,60,36
+
+[outModuleEditorItem0]
+Coordinates=130,129,140,36
+
+[UpdateInfo]
+Coordinates=51,129,77,36
+
+[winOutModuleEditorItem]
+Coordinates=279,129,133,36
 

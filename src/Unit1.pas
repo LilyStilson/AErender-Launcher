@@ -67,7 +67,7 @@ uses
   {$ENDREGION}
 
   {$REGION '  Windows Only Libraries  '}{$IFDEF MSWINDOWS}
-    Winapi.ShellAPI, Winapi.Windows, FMX.Platform.Win, Winapi.TlHelp32;
+    Winapi.ShellAPI, Winapi.Windows, FMX.Platform.Win, Winapi.TlHelp32, WinApi.DwmApi, WinApi.UxTheme, WinApi.Messages{, Vcl.Controls};
   {$ENDIF MSWINDOWS}{$ENDREGION}
 
   {$REGION '  macOS Only Libraries  '}{$IFDEF MACOS}
@@ -213,8 +213,14 @@ type
     Layout2: TLayout;
     GridPanelLayout3: TGridPanelLayout;
     UpdateInfo: TStatusBar;
-    outModuleEditorItem: TMenuItem;
+    winOutModuleEditorItem: TMenuItem;
     outModuleEditorItem0: TMenuItem;
+    editItem: TMenuItem;
+    outModuleEditorItem: TMenuItem;
+    settingsItem: TMenuItem;
+    SettingsIcon: TPath;
+    InfoIcon: TPath;
+    LaunchIcon: TPath;
     procedure FormResize(Sender: TObject);
     procedure compSwitchSwitch(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -252,10 +258,11 @@ type
     procedure outputModuleBoxChange(Sender: TObject);
     procedure compNameTyping(Sender: TObject);
     procedure outModuleEditorItem0Click(Sender: TObject);
-    procedure outModuleEditorItemClick(Sender: TObject);
+    procedure winOutModuleEditorItemClick(Sender: TObject);
+    procedure inFrameValidate(Sender: TObject; var Text: string);
   private
     { Private declarations }
-
+    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
     procedure DragEnter(const Data: TDragObject; const Point: TPointF); override;
@@ -280,15 +287,17 @@ type
   procedure SaveConfiguration(Path: String);
 
 const
-  APPVERSION = 'v0.8.0-beta';
+  APPVERSION = 'v0.8.2-beta';
   PLATFORMPATHSEPARATOR = {$IFDEF MSWINDOWS}'\'{$ENDIF MSWINDOWS}
                           {$IFDEF MACOS}'/'{$ENDIF MACOS};
 
 var
   Form1: TForm1;
   CFG: TextFile;
-  APPFOLDER: String;
-  VER, LANG, AERPATH, DEFPRGPATH, DEFOUTPATH, ERR, gitResponse, gitVersion, gitDownload, ffmpegPath, AERH, tempSavePath, DelTempFiles: String;
+  APPFOLDER,
+  VER, LANG, AERPATH, DEFPRGPATH, DEFOUTPATH, ERR,
+  gitResponse, gitVersion, gitDownload,
+  ffmpegPath, AERH, tempSavePath, DelTempFiles: String;
   gitRelease: TJsonValue;
   UpdateAvailable: Boolean = False;
   FFMPEG: Boolean = False;
@@ -306,16 +315,27 @@ implementation
 uses
   Unit2, Unit3, Unit4, Unit5, Unit6, RenderingUnit, OutputModuleEditor;
 
-{$REGION '  ResetEditorErrorHighlighting = True'}
-function ResetEditorErrorHighlighting(): Boolean;
-begin
-  for var i := 0 to 10 do
-    if True then
-      Result := true;
-end;
-{$ENDREGION}
-
 {$REGION '  Routines  '}
+
+{$IFDEF MSWINDOWS}
+procedure TForm1.CreateHandle;
+begin
+  inherited CreateHandle;
+
+  var hWnd: HWND := FormToHWND(Self);
+  //SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) or WS_EX_TOOLWINDOW);
+  SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or CS_DROPSHADOW);
+
+  var m: MARGINS;
+
+  m.cxLeftWidth := 0;
+  m.cxRightWidth := 0;
+  m.cyTopHeight := 0;
+  m.cyBottomHeight := 1;
+
+  DwmExtendFrameIntoClientArea(hWnd, m);
+end;
+{$ENDIF MSWINDOWS}
 
 function GetPlatformMemorySize: Int64;            //BYTES, BLYAD
 var
@@ -613,8 +633,8 @@ begin
   RootNode.AddChild('style').Text := STYLE.ToString;
   RootNode.AddChild('aerender').Text := AERPATH;
   RootNode.AddChild('onRenderStart').Text := ONRENDERSTART.ToString;
-  RootNode.AddChild('defprgpath').Text := DEFPRGPATH;
-  RootNode.AddChild('defoutpath').Text := DEFOUTPATH;
+  RootNode.AddChild('defprgpath').Text := Form1.AEPOpenDialog.InitialDir;
+  RootNode.AddChild('defoutpath').Text := Form1.SaveDialog1.InitialDir;
   RootNode.AddChild('handle').Text := AERH;
   RootNode.AddChild('delTempFiles').Text := DelTempFiles;
 
@@ -733,10 +753,10 @@ begin
       else
         if Form1.Height <= 420 then
           Form1.Height := Form1.Height + 130;
-      if LANG = 'EN' then
+      //if LANG = 'EN' then
         compSwitchLabel.Text := 'Multiple Compositions';
-      if LANG = 'RU' then
-        compSwitchLabel.Text := 'Несколько композиций';
+      {if LANG = 'RU' then
+        compSwitchLabel.Text := 'Несколько композиций';}
       compGrid.AniCalculations.AutoShowing := False;
       compGrid.RowCount := Round(compCount.Value);
       compGrid.Cells[0, 0] := compName.Text;
@@ -752,17 +772,18 @@ begin
       else
         if Form1.Height <= 550 then
           Form1.Height := Form1.Height - 130;
-      if LANG = 'EN' then
+      //if LANG = 'EN' then
         compSwitchLabel.Text := 'Single Composition';
-      if LANG = 'RU' then
-        compSwitchLabel.Text := 'Одна композиция';
+      {if LANG = 'RU' then
+        compSwitchLabel.Text := 'Одна композиция';}
       compName.Text := compGrid.Cells[0, 0];
     end;
 end;
 
 procedure TForm1.docsItemClick(Sender: TObject);
 begin
-  Form3.Show;
+  //Form3.Show;
+  TDialogServiceSync.MessageDialog('Not ready yet!', TMsgDlgType.mtInformation, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
 end;
 
 procedure TForm1.downloadButtonClick(Sender: TObject);
@@ -852,8 +873,18 @@ begin
                                                           {$IFDEF MACOS} '~/Documents/AErender/' {$ENDIF MACOS} + 'directory';
       end;
   end;
-  {$IFDEF MSWINDOWS}MainMenu1.Free;{$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}MenuBar1.Free;{$ENDIF MACOS}
+  {$IFDEF MSWINDOWS}
+  launcherItem.Free;
+  exitItem.ShortCut := TextToShortCut('Alt+F4');
+  exportConfigItem.ShortCut := TextToShortCut('Ctrl+E');
+  importConfigItem.ShortCut := TextToShortCut('Ctrl+I');
+  {$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}
+  editItem.Free;
+  exitItem.ShortCut := TextToShortCut('Cmd+Q');
+  exportConfigItem.ShortCut := TextToShortCut('Cmd+E');
+  importConfigItem.ShortCut := TextToShortCut('Cmd+I');
+  {$ENDIF MACOS}
   if DirectoryExists (APPFOLDER) then
     AssignFile (CFG, APPFOLDER + 'AErenderConfiguration.xml')
   else
@@ -883,8 +914,10 @@ begin
       InitConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
       AERH := 'True';
       DelTempFiles := 'True';
-      Lang1.Lang := LANG;
     end;
+  Lang1.Lang := LANG;
+  AEPOpenDialog.InitialDir := DEFPRGPATH;
+  SaveDialog1.InitialDir := DEFOUTPATH;
 end;
 
 procedure TForm1.FormResize(Sender: TObject);
@@ -899,6 +932,8 @@ procedure TForm1.FormShow(Sender: TObject);
 begin
   Form2.styleBox.ItemIndex := STYLE;
   Form2.onRenderStartBox.ItemIndex := ONRENDERSTART;
+  Form2.HandleCheckBox.IsChecked := StrToBool(AERH);
+  Form2.delFilesCheckBox.IsChecked := StrToBool(DelTempFiles);
   if (ParamCount > 0) and (ParamStr(1).Contains('-aer')) then
     begin
       Unit4.PARAMSTART := True;
@@ -933,7 +968,20 @@ end;
 procedure TForm1.infoButtonClick(Sender: TObject);
 begin
   RenderWindowSender := infoButton;
-  RenderingForm.Show;
+  RenderingForm.ShowModal;
+end;
+
+procedure TForm1.inFrameValidate(Sender: TObject; var Text: string);
+var
+  tempStr: String;
+begin
+  try
+    tempStr := TMathParser.ParseExpressionToFloat(inFrame.Text).ToString;
+  except
+    on Exception do
+      tempStr := Text;
+  end;
+  Text := tempStr;
 end;
 
 procedure TForm1.launchButtonClick(Sender: TObject);
@@ -969,6 +1017,8 @@ begin
           if emptyComps > 0 then
             ERR := ERR + #13#10 + '[Error 5]: Not all compositions specified in composition list';
         end;
+      if OutputModules[outputModuleBox.ItemIndex].Module.IsEmpty then
+        ERR := ERR + #13#10 + '[Error 6]: Output Module in selected Output Module Preset is not specified';
     end;
   {else
     begin
@@ -1038,7 +1088,7 @@ begin
               logPath := APPFOLDER + compGrid.Cells[0, j] + '_' + i.ToString;
 
             PATH := outputPath.Text;
-            PATH.Insert(PATH.Length, '_' + compGrid.Cells[0, j] + '_' + i.ToString);
+            //PATH.Insert(PATH.Length - 12, '_' + compGrid.Cells[0, j] + '_' + i.ToString);
 
             if outputPath.Text.Contains('[projectName]' + PLATFORMPATHSEPARATOR) then
               begin
@@ -1046,6 +1096,25 @@ begin
                 if not DirectoryExists(ExtractFilePath(PATH)) then
                   CreateDir(ExtractFilePath(PATH));
               end;
+
+            if threadsSwitch.IsChecked then
+              begin
+                var FilePath: String := ExtractFilePath(PATH);
+                var FileName: String := StringReplace(ExtractFileName(PATH), ExtractFileExt(PATH), '', [rfReplaceAll, rfIgnoreCase]);
+                var FileExt:  String := ExtractFileExt(PATH);
+                PATH := FilePath + FileName + '_' + i.ToString + FileExt;
+              end;
+
+            if compSwitch.IsChecked then
+              if not outputPath.Text.Contains('[compName]') then
+                begin
+                  var FilePath: String := ExtractFilePath(PATH);
+                  var FileName: String := StringReplace(ExtractFileName(PATH), ExtractFileExt(PATH), '', [rfReplaceAll, rfIgnoreCase]);
+                  var FileExt:  String := ExtractFileExt(PATH);
+                  PATH := FilePath + FileName + '_' + compGrid.Cells[0, j] + FileExt;
+                end;
+
+
 
             execFile[i].script := execFile[i].script + '"' + AERPATH + '" ' + '-project "' + projectPath.Text + '" -output "' + PATH + '" ';
 
@@ -1079,7 +1148,7 @@ begin
             if outputModuleBox.ItemIndex <> -1 then
               execFile[i].script := execFile[i].script + '-OMtemplate "' + OutputModules[outputModuleBox.ItemIndex].Module + '" ';
 
-            execFile[i].script := execFile[i].script + '-mem_usage "' + Trunc(cacheUsageTrackBar.Value).ToString + '" "' + Trunc(memUsageTrackBar.Value).ToString + '" ';
+            execFile[i].script := execFile[i].script + '-mem_usage "' + Trunc(memUsageTrackBar.Value).ToString + '" "' + Trunc(cacheUsageTrackBar.Value).ToString + '" ';
 
             if customCheckbox.IsChecked then
                   execFile[i].script := execFile[i].script + customProp.Text;
@@ -1173,7 +1242,7 @@ begin
             RenderingForm.TotalProgressBar.Max := outFrame.Text.ToInteger() + (50 * Length(LogFiles));
           //RenderingForm.framesLabel.Text := '0 / ' + outFrame.Text + ' Frames';
           RenderWindowSender := launchButton;
-          RenderingForm.Show;
+          RenderingForm.ShowModal;
         end
       else
         //OnRenderStart Actions
@@ -1187,6 +1256,7 @@ end;
 
 procedure TForm1.openFileClick(Sender: TObject);
 begin
+  //ShowMessage (AEPOpenDialog.InitialDir + '; ' + DEFPRGPATH);
   with AEPOpenDialog do
     if Execute then
       projectPath.Text := AEPOpenDialog.FileName;
@@ -1210,7 +1280,7 @@ begin
   OutputModuleEditorForm.Show;
 end;
 
-procedure TForm1.outModuleEditorItemClick(Sender: TObject);
+procedure TForm1.winOutModuleEditorItemClick(Sender: TObject);
 begin
   OutputModuleEditorForm.Show;
 end;
@@ -1224,10 +1294,17 @@ begin
     end
   else
     if not outputPath.Text.IsEmpty then
-      if ExtractFileName(tempSavePath).IsEmpty then
-        outputPath.Text := tempSavePath + OutputModules[outputModuleBox.ItemIndex].Mask
+      if tempSavePath.Contains('Def') or tempSavePath.Contains('def') then
+        outputPath.Text := ExtractFilePath(tempSavePath) + OutputModules[outputModuleBox.ItemIndex].Mask
       else
-        outputPath.Text := tempSavePath + '_' + OutputModules[outputModuleBox.ItemIndex].Mask;
+        if ExtractFileName(tempSavePath).IsEmpty then
+          outputPath.Text := tempSavePath + OutputModules[outputModuleBox.ItemIndex].Mask
+        else
+          if ExtractFileExt(tempSavePath).IsEmpty then
+            outputPath.Text := ExtractFilePath(tempSavePath) + ExtractFileName(tempSavePath) + '_' + OutputModules[outputModuleBox.ItemIndex].Mask
+          else
+            outputPath.Text := ExtractFilePath(tempSavePath) + StringReplace(ExtractFileName(tempSavePath), ExtractFileExt(tempSavePath), '', [rfReplaceAll, rfIgnoreCase])
+                            + '_' + OutputModules[outputModuleBox.ItemIndex].Mask;
 end;
 
 procedure TForm1.projectPathDragDrop(Sender: TObject;
@@ -1249,8 +1326,15 @@ procedure TForm1.saveFileClick(Sender: TObject);
 begin
   with SaveDialog1 do
     if Execute then
-      tempSavePath := ExtractFilePath(SaveDialog1.FileName);
-  outputPath.Text := tempSavePath + OutputModules[outputModuleBox.ItemIndex].Mask;
+      tempSavePath := SaveDialog1.FileName;
+  if tempSavePath.Contains('Def') or tempSavePath.Contains('def') then
+    outputPath.Text := ExtractFilePath(tempSavePath) + OutputModules[outputModuleBox.ItemIndex].Mask
+  else
+    if ExtractFileExt(tempSavePath) = '' then
+      outputPath.Text := tempSavePath + '_' + OutputModules[outputModuleBox.ItemIndex].Mask
+    else
+      outputPath.Text := ExtractFilePath(tempSavePath) + StringReplace(ExtractFileName(tempSavePath), ExtractFileExt(tempSavePath), '', [rfReplaceAll, rfIgnoreCase])
+                      + ExtractFileExt(OutputModules[outputModuleBox.ItemIndex].Mask);
 end;
 
 procedure TForm1.settingsButtonClick(Sender: TObject);
@@ -1282,10 +1366,10 @@ begin
       else
         if Form1.Height <= 420 then
           Form1.Height := Form1.Height + 130;
-      if LANG = 'EN' then
+      //if LANG = 'EN' then
         threadsSwitchLabel.Text := 'Split Render';
-      if LANG = 'RU' then
-        threadsSwitchLabel.Text := 'Рендерить частями';
+      {if LANG = 'RU' then
+        threadsSwitchLabel.Text := 'Рендерить частями';}
       threadsGrid.AniCalculations.AutoShowing := False;
       threadsGrid.Model.ScrollDirections := TScrollDirections.Vertical;
     end
@@ -1299,10 +1383,10 @@ begin
       else
         if Form1.Height <= 550 then
           Form1.Height := Form1.Height - 130;
-      if LANG = 'EN' then
+      //if LANG = 'EN' then
         threadsSwitchLabel.Text := 'Single Render';
-      if LANG = 'RU' then
-        threadsSwitchLabel.Text := 'Рендерить одним файлом';
+      {if LANG = 'RU' then
+        threadsSwitchLabel.Text := 'Рендерить одним файлом';}
     end;
 end;
 

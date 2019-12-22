@@ -17,8 +17,10 @@ uses
   FMX.Controls.Presentation,
   FMX.StdCtrls,
   FMX.Layouts,
+  FMX.Ani,
+  FMX.Effects,
   {$IFDEF MSWINDOWS}
-    Winapi.ShellAPI, Winapi.Windows;
+    FMX.Platform.Win, Winapi.ShellAPI, Winapi.Windows;
   {$ENDIF MSWINDOWS}
   {$IFDEF MACOS}
     Posix.Stdlib, Posix.Unistd, Posix.SysSysctl, Posix.SysTypes;
@@ -32,13 +34,18 @@ type
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
-    Label6: TLabel;
     Label7: TLabel;
     Label8: TLabel;
+    GridPanelLayout1: TGridPanelLayout;
+    GridPanelLayout2: TGridPanelLayout;
+    LogoRotationAnim: TFloatAnimation;
     procedure Label7Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure Image1DblClick(Sender: TObject);
+    procedure LogoRotationAnimFinish(Sender: TObject);
   private
     { Private declarations }
+    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
   end;
@@ -53,9 +60,21 @@ uses
 
 {$R *.fmx}
 
+{$IFDEF MSWINDOWS}
+procedure TForm5.CreateHandle;
+begin
+  inherited CreateHandle;
+
+  var hWnd: HWND := FormToHWND(Self);
+
+  SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) or WS_EX_APPWINDOW);
+  SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or CS_DROPSHADOW);
+end;
+{$ENDIF MSWINDOWS}
 
 procedure TForm5.FormShow(Sender: TObject);
 begin
+  Label1.Text := 'AErender Launcher (' + APPVERSION + ')';
   if Unit1.FFMPEG then
     begin
       Label8.FontColor := $FF1E90FF;
@@ -68,6 +87,11 @@ begin
     end;
 end;
 
+procedure TForm5.Image1DblClick(Sender: TObject);
+begin
+  LogoRotationAnim.Enabled := True;
+end;
+
 procedure TForm5.Label7Click(Sender: TObject);
 begin
   {$IFDEF MSWINDOWS}
@@ -76,6 +100,11 @@ begin
   {$IFDEF MACOS}
     _system(PAnsiChar('open ' + AnsiString('"' + 'http://aerenderlauncher.com' + '"')));
   {$ENDIF MACOS}
+end;
+
+procedure TForm5.LogoRotationAnimFinish(Sender: TObject);
+begin
+  LogoRotationAnim.Enabled := False;
 end;
 
 end.

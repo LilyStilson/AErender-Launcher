@@ -22,12 +22,12 @@ object Form4: TForm4
     object importLabel: TLabel
       Align = Client
       StyledSettings = [Family, FontColor]
-      Size.Width = 342.000000000000000000
+      Margins.Left = 20.000000000000000000
+      Size.Width = 322.000000000000000000
       Size.Height = 33.000000000000000000
       Size.PlatformDefault = False
       TextSettings.Font.Size = 14.000000000000000000
       TextSettings.Font.StyleExt = {00070000000000000004000000}
-      TextSettings.HorzAlign = Center
       Text = 'Import After Effects Project'
       TabOrder = 0
     end
@@ -102,8 +102,8 @@ object Form4: TForm4
       DefaultItemStyles.GroupHeaderStyle = ''
       DefaultItemStyles.GroupFooterStyle = ''
       ShowCheckboxes = True
+      OnChange = compositionsChange
       OnChangeCheck = compositionsChangeCheck
-      OnItemClick = compositionsItemClick
       Viewport.Width = 302.000000000000000000
       Viewport.Height = 269.000000000000000000
     end

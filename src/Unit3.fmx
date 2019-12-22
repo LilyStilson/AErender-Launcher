@@ -35,26 +35,103 @@ object Form3: TForm3
     Size.PlatformDefault = False
     TabOrder = 3
     DisableFocusEffect = True
-    Items.Strings = (
-      'Introduction'
-      'After Effects render engine'
-      'Preparing and Rendering'
-      'Known issues')
     DefaultItemStyles.ItemStyle = ''
     DefaultItemStyles.GroupHeaderStyle = ''
     DefaultItemStyles.GroupFooterStyle = ''
     OnChange = ContentsChange
-    Viewport.Width = 196.000000000000000000
-    Viewport.Height = 563.000000000000000000
+    Viewport.Width = 200.000000000000000000
+    Viewport.Height = 567.000000000000000000
+    object ListBoxGroupHeader1: TListBoxGroupHeader
+      Selectable = False
+      TabOrder = 0
+      Text = 'Introduction'
+    end
+    object ListBoxItem1: TListBoxItem
+      Position.Y = 19.000000000000000000
+      TabOrder = 1
+      Text = 'Introduction'
+    end
+    object ListBoxItem2: TListBoxItem
+      Position.Y = 38.000000000000000000
+      TabOrder = 2
+      Text = 'After Effects Render Engine'
+    end
+    object ListBoxGroupHeader2: TListBoxGroupHeader
+      Selectable = False
+      Position.Y = 57.000000000000000000
+      TabOrder = 3
+      Text = 'User Interface'
+    end
+    object ListBoxItem3: TListBoxItem
+      Position.Y = 76.000000000000000000
+      TabOrder = 5
+      Text = 'Main Window'
+    end
+    object ListBoxItem4: TListBoxItem
+      Position.Y = 95.000000000000000000
+      TabOrder = 6
+      Text = 'Settings Window'
+    end
+    object ListBoxItem8: TListBoxItem
+      Position.Y = 114.000000000000000000
+      TabOrder = 10
+      Text = 'Output Modules Editor'
+    end
+    object ListBoxItem6: TListBoxItem
+      Position.Y = 133.000000000000000000
+      TabOrder = 8
+      Text = 'Import Project Dialog'
+    end
+    object ListBoxItem7: TListBoxItem
+      Position.Y = 152.000000000000000000
+      TabOrder = 9
+      Text = 'Rendering Window'
+    end
+    object ListBoxItem5: TListBoxItem
+      Position.Y = 171.000000000000000000
+      TabOrder = 7
+      Text = 'Help Window'
+    end
+    object ListBoxGroupHeader3: TListBoxGroupHeader
+      Selectable = False
+      Position.Y = 190.000000000000000000
+      TabOrder = 4
+      Text = 'Rendering'
+    end
+    object ListBoxItem9: TListBoxItem
+      Position.Y = 209.000000000000000000
+      TabOrder = 11
+      Text = 'Preparing project'
+    end
+    object ListBoxItem10: TListBoxItem
+      Position.Y = 228.000000000000000000
+      TabOrder = 12
+      Text = 'Rendering'
+    end
+    object ListBoxGroupHeader4: TListBoxGroupHeader
+      Selectable = False
+      Position.Y = 247.000000000000000000
+      TabOrder = 13
+      Text = 'AErender Launcher Script'
+    end
+    object ListBoxItem11: TListBoxItem
+      Position.Y = 266.000000000000000000
+      TabOrder = 14
+      Text = 'Installation'
+    end
+    object ListBoxItem12: TListBoxItem
+      Position.Y = 285.000000000000000000
+      TabOrder = 15
+      Text = 'Usage'
+    end
   end
   object WebBrowser1: TWebBrowser
     Align = Client
-    Size.Width = 755.000000000000000000
+    Size.Width = 750.000000000000000000
     Size.Height = 567.000000000000000000
     Size.PlatformDefault = False
-    Margins.Left = 5.000000000000000000
   end
-  object PresetsConfiguratorToolbar: TToolBar
+  object Toolbar: TToolBar
     Size.Width = 960.000000000000000000
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
@@ -76,5 +153,15 @@ object Form3: TForm3
       Text = 'AErender Launcher Help'
       TabOrder = 1
     end
+  end
+  object Splitter1: TSplitter
+    Align = Left
+    Cursor = crHSplit
+    MinSize = 20.000000000000000000
+    Position.X = 200.000000000000000000
+    Position.Y = 33.000000000000000000
+    Size.Width = 10.000000000000000000
+    Size.Height = 567.000000000000000000
+    Size.PlatformDefault = False
   end
 end
