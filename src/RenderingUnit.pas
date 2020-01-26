@@ -21,6 +21,7 @@ uses
   FMX.ScrollBox,
   FMX.Memo,
   FMX.Effects,
+  AErenderDataParser,
   {$IFDEF MSWINDOWS}
     FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
   {$ENDIF MSWINDOWS}
@@ -85,7 +86,7 @@ var
   RenderGroups: TArray<TRenderGroup>;
   LogIncrement: Integer = 0;
   CurrentTime: TDateTime;
-  AERVERSION: String;
+  //AERVERSION: String;
 
 implementation
 
@@ -154,10 +155,7 @@ end;
 
 procedure TRenderingForm.FormCreate(Sender: TObject);
 begin
-  if AERPATH.Contains('2020') then
-    AERVERSION := '2020'
-  else
-    AERVERSION := '';
+  //
 end;
 
 procedure TRenderingForm.FormShow(Sender: TObject);

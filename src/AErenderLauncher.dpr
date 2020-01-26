@@ -15,7 +15,8 @@ uses
   Unit6 in 'Unit6.pas' {Form6},
   RenderingUnit in 'RenderingUnit.pas' {RenderingForm},
   MathExpParser in 'MathExpParser.pas',
-  OutputModuleEditor in 'OutputModuleEditor.pas' {OutputModuleEditorForm};
+  OutputModuleEditor in 'OutputModuleEditor.pas' {OutputModuleEditorForm},
+  AErenderDataParser in '..\..\AErender Parser\AErenderDataParser.pas';
 
 {$R *.res}
 
