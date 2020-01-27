@@ -355,6 +355,7 @@ begin
                 end;
               finally
                 RenderGroups[i].TRenderProgressBar.Max := AFrames;
+                AFrames := 0;
               end;
 
             RenderGroups[i].TLogMemo.Lines.Add(Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);
