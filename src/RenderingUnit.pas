@@ -334,6 +334,15 @@ begin
           RenderGroups[i].TLogMemo.Lines.Add(Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);
           RenderGroups[i].TLogMemo.GoToTextEnd;
         end;
+        
+        //Try to assign all the known frames to total progressbar value
+        var TotalFrames: Cardinal;
+        for var j := 0 to High(RenderGroups) do
+          if RenderGroups[i].TRenderProgressBar.Max <> 1 then
+            inc (TotalFrames, RenderGroups[i].TRenderProgressBar.Max)
+
+        if TotalProgressBar.Max = 1 then
+          TotalProgressBar.Max := TotalFrames;
 
         for var j := 0 to High(RenderGroups) do
           if (Form1.threadsSwitch.IsChecked) and (not Form1.outFrame.Text.IsEmpty) then

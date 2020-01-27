@@ -1241,10 +1241,10 @@ begin
         begin
           if RenderingUnit.VISIBLE then
             RenderingForm.abortRenderingButtonClick(Sender);
-          if compSwitch.IsChecked or outFrame.Text.IsEmpty then
+          {if compSwitch.IsChecked or outFrame.Text.IsEmpty then
             RenderingForm.TotalProgressBar.Max := Length(LogFiles)
           else
-            RenderingForm.TotalProgressBar.Max := outFrame.Text.ToInteger() + (50 * Length(LogFiles));
+            RenderingForm.TotalProgressBar.Max := outFrame.Text.ToInteger() + (50 * Length(LogFiles));}
           //RenderingForm.framesLabel.Text := '0 / ' + outFrame.Text + ' Frames';
           RenderWindowSender := launchButton;
           RenderingForm.ShowModal;
