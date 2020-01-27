@@ -267,13 +267,13 @@ type
   end;
 var
   Render: TArray<TRenderData>;
-  ADuration: TTimecode;
-  AFrameRate: TFrameRate;
-  AFrames: Cardinal;
   i: Integer;
 begin
   var Finished: Integer := 0;
   var Error: Integer := 0;
+  var ADuration: TTimecode := TTimecode.Create(0, 0, 0, 0);
+  var AFrameRate: TFrameRate := 0;
+  var AFrames: Cardinal := 0;
   SetLength (Render, Length(Unit1.LogFiles));
 
   for var j := 0 to High(Render) do
@@ -330,6 +330,8 @@ begin
               AFrames := 0;
             end;
           end;
+          
+          RenderGroups[i].TRenderProgressLabel.Text := 'D = ' + ADuration.ToSingleString + '; F = ' + AFrameRate.ToString + '; TF = ' + AFrames.ToString;
 
           RenderGroups[i].TLogMemo.Lines.Add(Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);
           RenderGroups[i].TLogMemo.GoToTextEnd;
