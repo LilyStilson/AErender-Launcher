@@ -336,10 +336,10 @@ begin
         end;
         
         //Try to assign all the known frames to total progressbar value
-        var TotalFrames: Cardinal;
+        var TotalFrames: Single;
         for var j := 0 to High(RenderGroups) do
           if RenderGroups[i].TRenderProgressBar.Max <> 1 then
-            inc (TotalFrames, RenderGroups[i].TRenderProgressBar.Max)
+            TotalFrames := TotalFrames + RenderGroups[i].TRenderProgressBar.Max;
 
         if TotalProgressBar.Max = 1 then
           TotalProgressBar.Max := TotalFrames;
