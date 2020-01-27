@@ -305,8 +305,8 @@ begin
                   ADuration := ParseAErenderDurationLogString(Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);
                 except
                   on Exception do
-                    if ADuration.IsEmpty then
-                      ADuration := '';
+                    if ADuration.ToSingleString = '0:00:00:00' then
+                      ADuration := TTimecode.Create(0, 0, 0, 0);
                 end;
 
                 //Try to get FrameRate from log string
@@ -314,15 +314,15 @@ begin
                   AFrameRate := ParseAErenderFrameRateLogString (Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);
                 except
                   on Exception do
-                    if AFrameRate.IsEmpty then
-                      AFrameFate := 0;
+                    if AFrameRate = 0 then
+                      AFrameRate := 0;
                 end;
 
                 //Try to calculate frames based on recieved Duration and FrameRate
-                if (ADuration.IsEmpty = False) and (AFrameRate <> 0) then
+                if (ADuration.ToSingleString <> '0:00:00:00') and (AFrameRate <> 0) then
                   AFrames := TimecodeToFrames(ADuration, AFrameRate);
               except
-                if AFrames.IsEmpty then
+                if AFrames = 0 then
                   AFrames := 0;
               end;
             finally
