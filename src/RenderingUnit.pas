@@ -197,20 +197,6 @@ begin
               RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Right := 5;
               RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Bottom := 5;
 
-              //var MaxFrameValue: Single := 100;
-              {if Form1.threadsSwitch.IsChecked then
-                if AERVERSION = '2020' then
-                  MaxFrameValue := (Form1.threadsGrid.Cells[1, i].ToSingle() - Form1.threadsGrid.Cells[0, i].ToSingle()) * 2 + 80
-                else
-                  MaxFrameValue := Form1.threadsGrid.Cells[1, i].ToSingle() - Form1.threadsGrid.Cells[0, i].ToSingle() + 50
-              else
-                if Form1.outFrame.Text.IsEmpty or Form1.compSwitch.IsChecked then
-                  MaxFrameValue := 1
-                else
-                  if AERVERSION = '2020' then
-                    MaxFrameValue := Form1.outFrame.Text.ToSingle() * 2 + 80
-                  else
-                    MaxFrameValue := Form1.outFrame.Text.ToSingle() + 50;}
               //Initialize GroupBox MainLayout ProgressBar
               RenderGroups[i].TRenderProgressBar := TProgressBar.Create(Self);
               RenderGroups[i].TRenderProgressBar.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
@@ -223,8 +209,7 @@ begin
               RenderGroups[i].TRenderProgressBar.Height := 10;
               RenderGroups[i].TRenderProgressBar.Min := 0;
               RenderGroups[i].TRenderProgressBar.Value := 0;
-              //RenderGroups[i].TRenderProgressBar.Max := MaxFrameValue;
-
+              RenderGroups[i].TRenderProgressBar.Max := 1;
 
               //Initialise GroupBox MainLayout ProgressLabel
               RenderGroups[i].TRenderProgressLabel := TLabel.Create(Self);
@@ -311,56 +296,44 @@ begin
           Render[i].Stream.Free;
         end;
 
-        if Render[i].LogFile.Count > RenderGroups[i].TLogMemo.Lines.Count then
-          begin
-            {if Form1.threadsSwitch.IsChecked or (not Form1.compSwitch.IsChecked and not Form1.outFrame.Text.IsEmpty) then
-              begin
-                RenderGroups[i].TRenderProgressBar.Value := Render[i].LogFile.Count;
-                RenderGroups[i].TRenderProgressLabel.Text := Round((RenderGroups[i].TRenderProgressBar.Value / RenderGroups[i].TRenderProgressBar.Max) * 100).ToString + '%';
-              end
-            else
-              if Form1.outFrame.Text.IsEmpty then
-                begin
-                  RenderGroups[i].TRenderProgressLabel.Text := 'Rendering';
-                end
-              else
-                RenderGroups[i].TRenderProgressLabel.Text := Round((RenderGroups[i].TRenderProgressBar.Value / RenderGroups[i].TRenderProgressBar.Max) * 100).ToString + '%';
-                }
-              //Try to get Duration timecode from log string
+        if Render[i].LogFile.Count > RenderGroups[i].TLogMemo.Lines.Count then begin
+          if RenderGroups[i].TRenderProgressBar.Max = 1 then begin
+            //Try to get Duration timecode from log string
+            try
               try
                 try
-                  try
-                    ADuration := ParseAErenderDurationLogString(Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);
-                  except
-                    on Exception do
-                      if ADuration.IsEmpty then
-                        ADuration := '';
-                  end;
-
-                  //Try to get FrameRate from log string
-                  try
-                    AFrameRate := ParseAErenderFrameRateLogString (Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);
-                  except
-                    on Exception do
-                      if AFrameRate.IsEmpty then
-                        AFrameFate := 0;
-                  end;
-
-                  //Try to calculate frames based on recieved Duration and FrameRate
-                  if (ADuration.IsEmpty = False) and (AFrameRate <> 0) then
-                    AFrames := TimecodeToFrames(ADuration, AFrameRate);
+                  ADuration := ParseAErenderDurationLogString(Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);
                 except
-                  if AFrames.IsEmpty then
-                    AFrames := 0;
+                  on Exception do
+                    if ADuration.IsEmpty then
+                      ADuration := '';
                 end;
-              finally
-                RenderGroups[i].TRenderProgressBar.Max := AFrames;
-                AFrames := 0;
-              end;
 
-            RenderGroups[i].TLogMemo.Lines.Add(Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);
-            RenderGroups[i].TLogMemo.GoToTextEnd;
+                //Try to get FrameRate from log string
+                try
+                  AFrameRate := ParseAErenderFrameRateLogString (Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);
+                except
+                  on Exception do
+                    if AFrameRate.IsEmpty then
+                      AFrameFate := 0;
+                end;
+
+                //Try to calculate frames based on recieved Duration and FrameRate
+                if (ADuration.IsEmpty = False) and (AFrameRate <> 0) then
+                  AFrames := TimecodeToFrames(ADuration, AFrameRate);
+              except
+                if AFrames.IsEmpty then
+                  AFrames := 0;
+              end;
+            finally
+              RenderGroups[i].TRenderProgressBar.Max := AFrames;
+              AFrames := 0;
+            end;
           end;
+
+          RenderGroups[i].TLogMemo.Lines.Add(Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);
+          RenderGroups[i].TLogMemo.GoToTextEnd;
+        end;
 
         for var j := 0 to High(RenderGroups) do
           if (Form1.threadsSwitch.IsChecked) and (not Form1.outFrame.Text.IsEmpty) then
