@@ -81,6 +81,7 @@ object RenderingForm: TRenderingForm
         TabOrder = 3
         object TotalProgressBar: TProgressBar
           Align = Client
+          Max = 1.000000000000000000
           Orientation = Horizontal
           Margins.Left = 15.000000000000000000
           Margins.Top = 5.000000000000000000
@@ -134,13 +135,14 @@ object RenderingForm: TRenderingForm
             Align = Right
             AutoSize = True
             StyledSettings = [Family, FontColor]
-            Position.X = 185.000000000000000000
-            Size.Width = 185.000000000000000000
+            Position.X = 346.000000000000000000
+            Size.Width = 24.000000000000000000
             Size.Height = 22.000000000000000000
             Size.PlatformDefault = False
             TextSettings.Font.Size = 16.000000000000000000
             TextSettings.Font.StyleExt = {00070000000000000004000000}
             TextSettings.HorzAlign = Trailing
+            TextSettings.WordWrap = False
             TextSettings.Trimming = Word
             Text = '0%'
             TabOrder = 0
