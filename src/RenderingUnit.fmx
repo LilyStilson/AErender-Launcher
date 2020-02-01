@@ -3,7 +3,7 @@ object RenderingForm: TRenderingForm
   Top = 0
   Caption = 'Rendering Progress'
   ClientHeight = 400
-  ClientWidth = 400
+  ClientWidth = 529
   Position = MainFormCenter
   StyleBook = Form1.AERModernStyle
   FormFactor.Width = 320
@@ -17,11 +17,12 @@ object RenderingForm: TRenderingForm
     Enabled = False
     Interval = 10
     OnTimer = renderingTimerTimer
-    Left = 224
+    Left = 40
+    Top = 96
   end
   object AErenderLayout: TLayout
     Align = Contents
-    Size.Width = 400.000000000000000000
+    Size.Width = 529.000000000000000000
     Size.Height = 400.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 4
@@ -29,7 +30,7 @@ object RenderingForm: TRenderingForm
       Align = MostBottom
       Position.Y = 290.000000000000000000
       ShowSizeGrip = True
-      Size.Width = 400.000000000000000000
+      Size.Width = 529.000000000000000000
       Size.Height = 110.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
@@ -52,7 +53,7 @@ object RenderingForm: TRenderingForm
       object statusBarSeparator1: TLine
         Align = Right
         LineType = Left
-        Position.X = 249.000000000000000000
+        Position.X = 378.000000000000000000
         Position.Y = 86.000000000000000000
         Size.Width = 10.000000000000000000
         Size.Height = 24.000000000000000000
@@ -64,7 +65,7 @@ object RenderingForm: TRenderingForm
         Margins.Top = 2.500000000000000000
         Margins.Right = 25.000000000000000000
         Margins.Bottom = 2.500000000000000000
-        Position.X = 259.000000000000000000
+        Position.X = 388.000000000000000000
         Position.Y = 88.500000000000000000
         Size.Width = 116.000000000000000000
         Size.Height = 19.000000000000000000
@@ -75,7 +76,7 @@ object RenderingForm: TRenderingForm
       end
       object statusBarTopLayout: TLayout
         Align = Top
-        Size.Width = 400.000000000000000000
+        Size.Width = 529.000000000000000000
         Size.Height = 85.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 3
@@ -87,7 +88,7 @@ object RenderingForm: TRenderingForm
           Margins.Top = 5.000000000000000000
           Margins.Right = 15.000000000000000000
           Margins.Bottom = 5.000000000000000000
-          Size.Width = 370.000000000000000000
+          Size.Width = 499.000000000000000000
           Size.Height = 21.000000000000000000
           Size.PlatformDefault = False
         end
@@ -99,11 +100,12 @@ object RenderingForm: TRenderingForm
           Margins.Bottom = 5.000000000000000000
           Position.X = 15.000000000000000000
           Position.Y = 58.000000000000000000
-          Size.Width = 370.000000000000000000
+          Size.Width = 499.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
           TextSettings.Font.Size = 16.000000000000000000
           TextSettings.Font.StyleExt = {00070000000000000004000000}
+          TextSettings.HorzAlign = Trailing
           TextSettings.Trimming = None
           TabOrder = 0
         end
@@ -114,7 +116,7 @@ object RenderingForm: TRenderingForm
           Margins.Right = 15.000000000000000000
           Position.X = 15.000000000000000000
           Position.Y = 5.000000000000000000
-          Size.Width = 370.000000000000000000
+          Size.Width = 499.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 2
@@ -135,7 +137,7 @@ object RenderingForm: TRenderingForm
             Align = Right
             AutoSize = True
             StyledSettings = [Family, FontColor]
-            Position.X = 346.000000000000000000
+            Position.X = 475.000000000000000000
             Size.Width = 24.000000000000000000
             Size.Height = 22.000000000000000000
             Size.PlatformDefault = False
@@ -153,7 +155,7 @@ object RenderingForm: TRenderingForm
         Align = Top
         LineType = Bottom
         Position.Y = 85.000000000000000000
-        Size.Width = 400.000000000000000000
+        Size.Width = 529.000000000000000000
         Size.Height = 1.000000000000000000
         Size.PlatformDefault = False
         Stroke.Color = xFF151515
@@ -163,25 +165,25 @@ object RenderingForm: TRenderingForm
         Margins.Left = 10.000000000000000000
         Position.X = 10.000000000000000000
         Position.Y = 86.000000000000000000
-        Size.Width = 159.000000000000000000
+        Size.Width = 143.000000000000000000
         Size.Height = 24.000000000000000000
         Size.PlatformDefault = False
         Text = 'Time Elapsed: 00:00:00'
-        TabOrder = 4
+        TabOrder = 5
       end
-      object Line1: TLine
+      object totalFramesLabel: TLabel
         Align = Left
-        LineType = Left
-        Position.X = 169.000000000000000000
+        AutoSize = True
+        Margins.Left = 10.000000000000000000
+        Position.X = 163.000000000000000000
         Position.Y = 86.000000000000000000
-        Size.Width = 10.000000000000000000
         Size.Height = 24.000000000000000000
         Size.PlatformDefault = False
-        Stroke.Color = xFF151515
+        TabOrder = 4
       end
     end
     object RenderingToolBar: TToolBar
-      Size.Width = 400.000000000000000000
+      Size.Width = 529.000000000000000000
       Size.Height = 33.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
@@ -200,21 +202,36 @@ object RenderingForm: TRenderingForm
         TextSettings.WordWrap = False
         TextSettings.Trimming = Word
         Text = 'Rendering Progress'
+        TabOrder = 1
+      end
+      object projectNameLabel: TLabel
+        Align = Right
+        AutoSize = True
+        StyledSettings = [Family, FontColor]
+        Margins.Right = 20.000000000000000000
+        Position.X = 509.000000000000000000
+        Size.Height = 33.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Font.Size = 16.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.HorzAlign = Center
+        TextSettings.WordWrap = False
+        TextSettings.Trimming = Word
         TabOrder = 0
       end
     end
     object VertScrollBox1: TVertScrollBox
       Align = Client
-      Size.Width = 400.000000000000000000
+      Size.Width = 529.000000000000000000
       Size.Height = 257.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 2
-      Viewport.Width = 400.000000000000000000
+      Viewport.Width = 529.000000000000000000
       Viewport.Height = 257.000000000000000000
       object emptyLabel: TLabel
         Align = Client
         StyledSettings = [Family, FontColor]
-        Size.Width = 400.000000000000000000
+        Size.Width = 529.000000000000000000
         Size.Height = 257.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Size = 20.000000000000000000
@@ -296,6 +313,7 @@ object RenderingForm: TRenderingForm
   object StopwatchTimer: TTimer
     Enabled = False
     OnTimer = StopwatchTimerTimer
-    Left = 264
+    Left = 40
+    Top = 48
   end
 end

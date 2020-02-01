@@ -373,14 +373,15 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="OSX32\Release\AErender.entitlements" Configuration="Release" Class="ProjectOSXEntitlements">
+                <DeployFile LocalName="E:\AErender CC\AErender.icns" Configuration="Release" Class="ProjectOSXResource">
                     <Platform Name="OSX32">
+                        <RemoteName>AErender.icns</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="OSX32\Beta\AErenderLauncher" Configuration="Beta" Class="ProjectOutput">
-                    <Platform Name="OSX32">
-                        <RemoteName>AErenderLauncher</RemoteName>
+                <DeployFile LocalName="OSX64\Debug\AErenderLauncher.info.plist" Configuration="Debug" Class="ProjectOSXInfoPList">
+                    <Platform Name="OSX64">
+                        <RemoteName>Info.plist</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -689,15 +690,14 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="E:\AErender CC\AErender.icns" Configuration="Release" Class="ProjectOSXResource">
+                <DeployFile LocalName="OSX32\Release\AErender.entitlements" Configuration="Release" Class="ProjectOSXEntitlements">
                     <Platform Name="OSX32">
-                        <RemoteName>AErender.icns</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="OSX64\Debug\AErenderLauncher.info.plist" Configuration="Debug" Class="ProjectOSXInfoPList">
-                    <Platform Name="OSX64">
-                        <RemoteName>Info.plist</RemoteName>
+                <DeployFile LocalName="OSX32\Beta\AErenderLauncher" Configuration="Beta" Class="ProjectOutput">
+                    <Platform Name="OSX32">
+                        <RemoteName>AErenderLauncher</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

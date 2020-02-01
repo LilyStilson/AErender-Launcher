@@ -56,8 +56,9 @@ type
     Label2: TLabel;
     Button1: TButton;
     timeElapsedLabel: TLabel;
-    Line1: TLine;
     StopwatchTimer: TTimer;
+    projectNameLabel: TLabel;
+    totalFramesLabel: TLabel;
     procedure ShowLogButtonClick (Sender: TObject);
     procedure renderingTimerTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -136,6 +137,7 @@ begin
       emptyLabel.Enabled := True;
       renderingTimer.Enabled := False;
       StopwatchTimer.Enabled := False;
+      projectNameLabel.Text := '';
       totalProgressPercentage.Text := '0%';
       TotalProgressBar.Value := 0;
     end
@@ -176,6 +178,8 @@ begin
         begin
           emptyLabel.Visible := False;
           emptyLabel.Enabled := False;
+
+          projectNameLabel.Text := ExtractFileName(Form1.projectPath.Text);
 
           SetLength (RenderGroups, Length(Unit1.LogFiles));
 
@@ -222,7 +226,7 @@ begin
               RenderGroups[i].TRenderProgressLabel.Margins.Left := 5;
               RenderGroups[i].TRenderProgressLabel.AutoSize := False;
               RenderGroups[i].TRenderProgressLabel.TextSettings.WordWrap := False;
-              RenderGroups[i].TRenderProgressLabel.Text := 'Waiting for aerender';
+              RenderGroups[i].TRenderProgressLabel.Text := 'Waiting for aerender...';
               
               //Initialize GroupBox MainLayout ShowLogButton
               RenderGroups[i].TRenderShowLogButton := TButton.Create(Self);
@@ -329,12 +333,14 @@ begin
         end;
 
         //Try to assign all the known frames to total progressbar value
-        if (TotalProgressBar.Max = 1) then begin
-          var TotalFrames: Single := 1;
+        var TotalFrames: Single := 1;
           for var j := 0 to High(RenderGroups) do
             if RenderGroups[j].TRenderProgressBar.Max <> 1 then
               TotalFrames := TotalFrames + RenderGroups[j].TRenderProgressBar.Max;
+
+        if TotalProgressBar.Max <> TotalFrames then begin
           TotalProgressBar.Max := TotalFrames;
+
         end else begin
           var sum: Integer := 0;
           for var j := 0 to High(RenderGroups) do
@@ -342,6 +348,10 @@ begin
 
           TotalProgressBar.Value := sum;
           totalProgressPercentage.Text := Round((TotalProgressBar.Value / TotalProgressBar.Max) * 100).ToString + '%';
+          if (TotalProgressBar.Max = 0) or (TotalProgressBar.Max = 1) then
+            framesLabel.Text := 'Waiting for aerender...'
+          else
+            framesLabel.Text := TotalProgressBar.Value.ToString + ' / ' + (TotalProgressBar.Max - 1).ToString;
         end;
 
         if RenderGroups[i].TLogMemo.Text.Contains('Finished composition') then
