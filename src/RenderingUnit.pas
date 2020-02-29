@@ -9,6 +9,7 @@ uses
   System.Classes,
   System.Variants,
   System.Diagnostics,
+
   FMX.Types,
   FMX.Controls,
   FMX.Forms,
@@ -21,10 +22,13 @@ uses
   FMX.ScrollBox,
   FMX.Memo,
   FMX.Effects,
+
   AErenderDataParser,
+
   {$IFDEF MSWINDOWS}
     FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
   {$ENDIF MSWINDOWS}
+
   {$IFDEF MACOS}
   Posix.Unistd;
   {$ENDIF MACOS}
@@ -95,7 +99,9 @@ implementation
 {$R *.fmx}
 
 uses
-  Unit1;
+  {$REGION '    AErenderLauncher Liraries    '}
+  MainUnit;
+  {$ENDREGION}
 
 {$IFDEF MSWINDOWS}
 procedure TRenderingForm.CreateHandle;
@@ -131,13 +137,14 @@ begin
           RenderGroups[i].TRenderGroupBoxMainLayout.Free;
           RenderGroups[i].TRenderGroupBox.Free;
 
-          {$IFDEF MSWNDOWS}DeleteFile(Unit1.LogFiles[i]);{$ENDIF MSWINDOWS}
+          {$IFDEF MSWNDOWS}DeleteFile(MainUnit.LogFiles[i]);{$ENDIF MSWINDOWS}
         end;
       emptyLabel.Visible := True;
       emptyLabel.Enabled := True;
       renderingTimer.Enabled := False;
       StopwatchTimer.Enabled := False;
       projectNameLabel.Text := '';
+      framesLabel.Text := '';
       totalProgressPercentage.Text := '0%';
       TotalProgressBar.Value := 0;
     end
@@ -167,9 +174,9 @@ end;
 procedure TRenderingForm.FormShow(Sender: TObject);
 begin
   VISIBLE := True;
-  if Unit1.RenderWindowSender = Form1.launchButton then
+  if MainUnit.RenderWindowSender = MainForm.launchButton then
     begin
-      if Length(Unit1.LogFiles) = 0 then
+      if Length(MainUnit.LogFiles) = 0 then
         begin
           emptyLabel.Visible := True;
           emptyLabel.Enabled := True;
@@ -179,9 +186,9 @@ begin
           emptyLabel.Visible := False;
           emptyLabel.Enabled := False;
 
-          projectNameLabel.Text := ExtractFileName(Form1.projectPath.Text);
+          projectNameLabel.Text := ExtractFileName(MainForm.projectPath.Text);
 
-          SetLength (RenderGroups, Length(Unit1.LogFiles));
+          SetLength (RenderGroups, Length(MainUnit.LogFiles));
 
           for var i := 0 to High (RenderGroups) do
             begin
@@ -193,7 +200,7 @@ begin
               RenderGroups[i].TRenderGroupBox.Margins.Bottom := 5;
               RenderGroups[i].TRenderGroupBox.Position.X := 5;
               RenderGroups[i].TRenderGroupBox.Height := 75;
-              RenderGroups[i].TRenderGroupBox.Text := ExtractFileName(Unit1.LogFiles[i]);
+              RenderGroups[i].TRenderGroupBox.Text := ExtractFileName(MainUnit.LogFiles[i]);
               RenderGroups[i].TRenderGroupBox.Tag := i;
 
               //Initialize GroupBox MainLayout
@@ -274,7 +281,7 @@ begin
   var Finished: Integer := 0;
   var Error: Integer := 0;
 
-  SetLength (Render, Length(Unit1.LogFiles));
+  SetLength (Render, Length(MainUnit.LogFiles));
 
   for var j := 0 to High(Render) do
     begin

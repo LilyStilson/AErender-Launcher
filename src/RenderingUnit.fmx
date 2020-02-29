@@ -5,7 +5,7 @@ object RenderingForm: TRenderingForm
   ClientHeight = 400
   ClientWidth = 529
   Position = MainFormCenter
-  StyleBook = Form1.AERModernStyle
+  Quality = HighQuality
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]

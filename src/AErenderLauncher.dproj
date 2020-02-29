@@ -6,7 +6,7 @@
         <MainSource>AErenderLauncher.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
-        <Platform Condition="'$(Platform)'==''">OSX64</Platform>
+        <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <TargetedPlatforms>4103</TargetedPlatforms>
         <AppType>Application</AppType>
     </PropertyGroup>
@@ -307,28 +307,28 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="Unit1.pas">
-            <Form>Form1</Form>
+        <DCCReference Include="MainUnit.pas">
+            <Form>MainForm</Form>
             <FormType>fmx</FormType>
         </DCCReference>
-        <DCCReference Include="Unit2.pas">
-            <Form>Form2</Form>
+        <DCCReference Include="SettingsUnit.pas">
+            <Form>SettingsForm</Form>
             <FormType>fmx</FormType>
         </DCCReference>
-        <DCCReference Include="Unit3.pas">
-            <Form>Form3</Form>
+        <DCCReference Include="HelpUnit.pas">
+            <Form>HelpForm</Form>
             <FormType>fmx</FormType>
         </DCCReference>
-        <DCCReference Include="Unit4.pas">
-            <Form>Form4</Form>
+        <DCCReference Include="ImportUnit.pas">
+            <Form>ImportForm</Form>
             <FormType>fmx</FormType>
         </DCCReference>
-        <DCCReference Include="Unit5.pas">
-            <Form>Form5</Form>
+        <DCCReference Include="AboutUnit.pas">
+            <Form>AboutForm</Form>
             <FormType>fmx</FormType>
         </DCCReference>
-        <DCCReference Include="Unit6.pas">
-            <Form>Form6</Form>
+        <DCCReference Include="FFMPEGUnit.pas">
+            <Form>FFMPEGForm</Form>
             <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="RenderingUnit.pas">
@@ -336,11 +336,12 @@
             <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="MathExpParser.pas"/>
-        <DCCReference Include="OutputModuleEditor.pas">
+        <DCCReference Include="OutputModuleEditorUnit.pas">
             <Form>OutputModuleEditorForm</Form>
             <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="..\..\AErender Parser\AErenderDataParser.pas"/>
+        <DCCReference Include="AErenderLauncherLocalization.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -373,15 +374,14 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="E:\AErender CC\AErender.icns" Configuration="Release" Class="ProjectOSXResource">
+                <DeployFile LocalName="OSX32\Release\AErender.entitlements" Configuration="Release" Class="ProjectOSXEntitlements">
                     <Platform Name="OSX32">
-                        <RemoteName>AErender.icns</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="OSX64\Debug\AErenderLauncher.info.plist" Configuration="Debug" Class="ProjectOSXInfoPList">
-                    <Platform Name="OSX64">
-                        <RemoteName>Info.plist</RemoteName>
+                <DeployFile LocalName="OSX32\Beta\AErenderLauncher" Configuration="Beta" Class="ProjectOutput">
+                    <Platform Name="OSX32">
+                        <RemoteName>AErenderLauncher</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -690,14 +690,15 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="OSX32\Release\AErender.entitlements" Configuration="Release" Class="ProjectOSXEntitlements">
+                <DeployFile LocalName="E:\AErender CC\AErender.icns" Configuration="Release" Class="ProjectOSXResource">
                     <Platform Name="OSX32">
+                        <RemoteName>AErender.icns</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="OSX32\Beta\AErenderLauncher" Configuration="Beta" Class="ProjectOutput">
-                    <Platform Name="OSX32">
-                        <RemoteName>AErenderLauncher</RemoteName>
+                <DeployFile LocalName="OSX64\Debug\AErenderLauncher.info.plist" Configuration="Debug" Class="ProjectOSXInfoPList">
+                    <Platform Name="OSX64">
+                        <RemoteName>Info.plist</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
