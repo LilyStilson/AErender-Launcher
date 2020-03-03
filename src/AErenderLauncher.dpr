@@ -26,8 +26,9 @@ program AErenderLauncher;
 (*        SOFTWARE.                                                                         *)
 
 uses
-  System.StartUpCopy,
-  FMX.Forms,
+  System.StartUpCopy, System.SysUtils, FMX.Forms,
+
+  SplashScreenUnit in 'SplashScreenUnit.pas' {SplashScreenForm},
   MainUnit in 'MainUnit.pas' {MainForm},
   SettingsUnit in 'SettingsUnit.pas' {SettingsForm},
   HelpUnit in 'HelpUnit.pas' {HelpForm},
@@ -44,6 +45,12 @@ uses
 
 begin
   Application.Initialize;
+
+  SplashScreenForm := TSplashScreenForm.Create(nil);
+  SplashScreenForm.Show;
+
+  Application.ProcessMessages;
+
   Application.CreateForm(TMainForm, MainForm);
   Application.CreateForm(TSettingsForm, SettingsForm);
   Application.CreateForm(THelpForm, HelpForm);
@@ -52,5 +59,6 @@ begin
   Application.CreateForm(TFFMPEGForm, FFMPEGForm);
   Application.CreateForm(TRenderingForm, RenderingForm);
   Application.CreateForm(TOutputModuleEditorForm, OutputModuleEditorForm);
+
   Application.Run;
 end.

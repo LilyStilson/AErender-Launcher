@@ -23,7 +23,7 @@ type
     MainMenu: MainMenuText;
     ProjectFile,
     OutputFile,
-    OpenSaveFileButton,
+    OpenSaveProjectButton,
     OutputModulePreset,
     Properties,
     MissingFiles,
@@ -76,17 +76,21 @@ type
     OutputModule,
     OutputFileNameStructure,
     ProjectTab, CompositionTab, CompositionTimeTab, ImageTab, DateTab,
-    Save, Cancel:String;
+    Save, Cancel: String;
   end;
 
   (*  About Form  *)
   AboutFormText = record
     AErenderLauncher,
     CreatedBy,
-    Decription,
+    Description,
     FromRussiaWithLove,
     FFMPEG,
     Copyright: String;
+  end;
+
+  RenderingFormText = record
+    
   end;
 
   LauncherText = record
@@ -95,6 +99,7 @@ type
     ImportForm: ImportFormText;
     OutputModuleConfiguratorForm: OutputModuleFormText;
     AboutForm: AboutFormText;
+    RenderingForm: RenderingFormText;
     constructor InitFromFile(Path: String);
   end;
 

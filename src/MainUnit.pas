@@ -336,6 +336,7 @@ implementation
 
 uses
   {$REGION '    AErenderLauncher Liraries    '}
+  SplashScreenUnit,
   SettingsUnit,
   HelpUnit,
   ImportUnit,
@@ -995,6 +996,9 @@ begin
   StringColumn1.Width := compGrid.Width - 5;
   StringColumn2.Width := threadsGrid.Width * 0.5;
   StringColumn3.Width := threadsGrid.Width * 0.5;
+
+  SplashScreenForm.Close;
+  SplashScreenForm.Free;
 end;
 
 procedure TMainForm.importConfigItemClick(Sender: TObject);

@@ -6,7 +6,7 @@
         <MainSource>AErenderLauncher.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
-        <Platform Condition="'$(Platform)'==''">Win64</Platform>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>4103</TargetedPlatforms>
         <AppType>Application</AppType>
     </PropertyGroup>
@@ -307,38 +307,33 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
+        <DCCReference Include="SplashScreenUnit.pas">
+            <Form>SplashScreenForm</Form>
+        </DCCReference>
         <DCCReference Include="MainUnit.pas">
             <Form>MainForm</Form>
-            <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="SettingsUnit.pas">
             <Form>SettingsForm</Form>
-            <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="HelpUnit.pas">
             <Form>HelpForm</Form>
-            <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="ImportUnit.pas">
             <Form>ImportForm</Form>
-            <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="AboutUnit.pas">
             <Form>AboutForm</Form>
-            <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="FFMPEGUnit.pas">
             <Form>FFMPEGForm</Form>
-            <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="RenderingUnit.pas">
             <Form>RenderingForm</Form>
-            <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="MathExpParser.pas"/>
         <DCCReference Include="OutputModuleEditorUnit.pas">
             <Form>OutputModuleEditorForm</Form>
-            <FormType>fmx</FormType>
         </DCCReference>
         <DCCReference Include="..\..\AErender Parser\AErenderDataParser.pas"/>
         <DCCReference Include="AErenderLauncherLocalization.pas"/>
@@ -475,6 +470,12 @@
                 <DeployFile LocalName="AErender CC\AErender.icns" Configuration="Beta" Class="ProjectOSXResource">
                     <Platform Name="OSX64">
                         <RemoteName>AErender.icns</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Win64\Debug\AErenderLauncher.rsm" Configuration="Debug" Class="DebugSymbols">
+                    <Platform Name="Win64">
+                        <RemoteName>AErenderLauncher.rsm</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
