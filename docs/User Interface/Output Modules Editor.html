@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<title>Output Modules Editor</title>
+	<style>
+		@font-face {
+			font-family: 'NexaBold';
+			src: url('../fonts/Nexa_Free_Bold-webfont.woff') format('woff');
+		}
+		body {
+			overflow: auto;
+			margin: 0;
+			padding: 0;
+			font-family: Segoe, "Segoe UI", "Helvetica Neue", Verdana, "sans-serif";
+			font-size: 12pt;
+			background-color: #2D2D2D;
+			color: white;
+		}
+		a {
+			color: #1E90FF;
+		}
+		a:hover {
+			color: #00BFFF;
+		}
+		a:active {
+			color: #17579C;
+		}
+		header {
+			margin: 0;
+			padding: 10px 30px;
+			font-family: "NexaBold";
+			color: white;
+			font-size: 18px;
+			background-color: #2A82E2;
+		}
+		h1, h2 {
+			font-family: "NexaBold";
+		}
+		code {
+			font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+			background-color: #202020;
+			border-radius: 5px;
+			padding: 2px 3px;
+		}
+		li {
+			margin: 10px 0px;
+		}
+		.container {
+				display: block; 
+			width: auto;
+			margin: 0px 10px;
+		}
+	</style>
+</head>
+
+<body>
+	<header>
+		<span>AErender Launcher Help</span>
+		<span style="float: right; margin-left: auto;">User Interface</span>
+	</header>
+	<div class="container">
+		<h1>Output Modules Editor</h1>
+        <p>Output Modules Editor is used to create, edit and delete <i>aerender</i> Output Modules, that <b>Launcher</b> can use. If you created any custom After Effects output modules, you must add them here in order to use them with <b>Launcher</b>. </p>
+        <img src="" alt="outputmoduleseditor.png"/>
+		<ul>
+			<li><b>Output Modules list</b> - all names of your output modules are listed there. By default there are only After Effects default modules present. You can <b>add(+)</b> and <b>delete(-)</b> any of the present output modules.</li>
+			<li><b>Preset name</b> - shows how your output module will be called inside <b>Launcher</b>. Please note, that is not the output module itself.</li>
+			<li><b>Output module</b> - After Effects output module name. Please note, that provided output module MUST EXIST in After Effects.</li>
+			<li><b>Output file name structure</b> - is a mask for <i>aerender</i> output file. <i>aerender</i> will automatically fill specific values into that mask. For easier editing, all available masks values are suggested in the tabs under the edit field. All the values splited by categories exactly like in After Effects. You can also drag them onto the field.<br/>
+			<i>Example: </i>Output Module: <code>Photoshop</code><br/>
+			Predefined mask: <code>[compName]_[#####].[fileextension]</code><br/>
+			Output name: <code>Comp 1_00001.psd</code></li>
+		</ul>
+	</div>
+</body>
+</html>

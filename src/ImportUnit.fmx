@@ -105,8 +105,8 @@ object ImportForm: TImportForm
       ShowCheckboxes = True
       OnChange = compositionsChange
       OnChangeCheck = compositionsChangeCheck
-      Viewport.Width = 306.000000000000000000
-      Viewport.Height = 273.000000000000000000
+      Viewport.Width = 302.000000000000000000
+      Viewport.Height = 269.000000000000000000
     end
     object GridPanelLayout1: TGridPanelLayout
       Align = Bottom

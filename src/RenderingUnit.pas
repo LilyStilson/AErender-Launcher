@@ -125,7 +125,8 @@ implementation
 
 uses
   {$REGION '    AErenderLauncher Liraries    '}
-  MainUnit;
+  MainUnit,
+  SettingsUnit;
   {$ENDREGION}
 
 {$IFDEF MSWINDOWS}

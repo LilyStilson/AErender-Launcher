@@ -286,6 +286,8 @@ begin
 
     XMLDocument.Active := True;
 
+    XMLDocument.Encoding := 'utf-8';
+
     RootNode := XMLDocument.DocumentElement;
 
     aerProjectPath.Text := RootNode.Attributes['file'];
@@ -296,7 +298,7 @@ begin
     on Exception do
     begin
       TDialogServiceSync.MessageDialog('Selected file is not compatible with AErender Launcher. Please, provide proper .aer / .xml file for import!', TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
-      ImportForm.Close;
+      //ImportForm.Close;
     end;
   end;
 end;

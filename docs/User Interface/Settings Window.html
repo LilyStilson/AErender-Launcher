@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<title>Settings Window</title>
+	<style>
+		@font-face {
+			font-family: 'NexaBold';
+			src: url('../fonts/Nexa_Free_Bold-webfont.woff') format('woff');
+		}
+		body {
+			overflow: auto;
+			margin: 0;
+			padding: 0;
+			font-family: Segoe, "Segoe UI", "Helvetica Neue", Verdana, "sans-serif";
+			font-size: 12pt;
+			background-color: #2D2D2D;
+			color: white;
+		}
+		a {
+			color: #1E90FF;
+		}
+		a:hover {
+			color: #00BFFF;
+		}
+		a:active {
+			color: #17579C;
+		}
+		header {
+			margin: 0;
+			padding: 10px 30px;
+			font-family: "NexaBold";
+			color: white;
+			font-size: 18px;
+			background-color: #2A82E2;
+		}
+		h1, h2 {
+			font-family: "NexaBold";
+		}
+		code {
+			font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+			background-color: #202020;
+			border-radius: 5px;
+			padding: 2px 3px;
+		}
+		li {
+			margin: 10px 0px;
+		}
+		.container {
+				display: block; 
+			width: auto;
+			margin: 0px 10px;
+		}
+	</style>
+</head>
+
+<body>
+	<header>
+		<span>AErender Launcher Help</span>
+		<span style="float: right; margin-left: auto;">User Interface</span>
+	</header>
+	<div class="container">
+        <h1>Settings Window</h1>
+        <p>All essential Launcher settings are present in this window.</p>
+        <img src="" alt="settingswindow.png"/>
+        <ul>
+            <li><b>After Effects render engine path</b> - is a required field for Launcher to work properly, because all executables will be passed to <i>aerender</i>.</li>
+            <li><b>Style</b> - if you want, you can change Launcher visual style from available ones. If you want, you can creat your own style using RAD Studio FireMonkey style designer (but please, remember to create as much vector style as possible), and submit it via Pool Request on AErender Launcher GitHub page.</li>
+            <li><b>Default projects directory</b> - this path will be passed to Project Open Dialog for easier and faster access to your project files directory.</li>
+            <li><b>Default output directory</b> - this path will be passed to Output Save Dialog for easier and faster access to your output files directory.</li>
+            <li><b>On Render Start</b> - will determine what Launcher will do on render start. Note that <i>Close Launcher</i> parameter will not work, if <b>aerender Handle</b> is enabled.</li>
+            <li><b>Handle aerender processes inside Launcher</b> - or <i>aerender Handle</i> is used to enable  rendering progress display directly inside AErender Launcher.</li>
+            <li><b>Delete temporary files on close</b> - Launcher creates <code>.log</code> and <code>.bat</code> / <code>.command</code> files. This option will enable deletion of this files each time Launcher closes.</li>
+        </ul>
+        <p>Holding <code>Alt</code> / <code>Option</code> key, will display hidden <b>Reset</b> button. <b>Reset Launcher</b> - will remove Launcher configuration and all the created by Launcher files.</p>
+	</div>
+</body>
+</html>

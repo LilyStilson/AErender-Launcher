@@ -1,4 +1,5 @@
 object RenderingForm: TRenderingForm
+  StyleName = 'Main'
   Left = 0
   Top = 0
   Caption = 'Rendering Progress'
@@ -6,6 +7,7 @@ object RenderingForm: TRenderingForm
   ClientWidth = 529
   Position = MainFormCenter
   Quality = HighQuality
+  StyleBook = MainForm.AERModernStyle
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
@@ -165,7 +167,7 @@ object RenderingForm: TRenderingForm
         Margins.Left = 10.000000000000000000
         Position.X = 10.000000000000000000
         Position.Y = 86.000000000000000000
-        Size.Width = 143.000000000000000000
+        Size.Width = 175.000000000000000000
         Size.Height = 24.000000000000000000
         Size.PlatformDefault = False
         Text = 'Time Elapsed: 00:00:00'
@@ -175,7 +177,7 @@ object RenderingForm: TRenderingForm
         Align = Left
         AutoSize = True
         Margins.Left = 10.000000000000000000
-        Position.X = 163.000000000000000000
+        Position.X = 195.000000000000000000
         Position.Y = 86.000000000000000000
         Size.Height = 24.000000000000000000
         Size.PlatformDefault = False

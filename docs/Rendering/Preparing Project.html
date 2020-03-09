@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<title>Prearing and Rendering</title>
+	<style>
+		@font-face {
+			font-family: 'NexaBold';
+			src: url('../fonts/Nexa_Free_Bold-webfont.woff') format('woff');
+		}
+		body {
+			overflow: auto;
+			margin: 0;
+			padding: 0;
+			font-family: Segoe, "Segoe UI", Verdana, "sans-serif";
+			background-color: #2D2D2D;
+			color: white;
+		}
+		a {
+			color: #1E90FF;
+		}
+		a:hover {
+			color: #00BFFF;
+		}
+		a:active {
+			color: #17579C;
+		}
+		header {
+			margin: 0;
+			padding: 10px 30px;
+			font-family: "NexaBold";
+			color: white;
+			font-size: 18px;
+			background-color: #2A82E2;
+		}
+		h1, h2 {
+			font-family: "NexaBold";
+		}
+		.container {
+				display: block; 
+			width: auto;
+			margin: 0px 10px;
+		}
+		</style>
+</head>
+
+<body>
+	<header>
+		<span>AErender Launcher Help</span>
+		<span style="float: right; margin-left: auto;">Rendering</span>
+	</header>
+	<div class="container">
+		<h1>Prearing project</h1>
+		<p>Preparing your project is pretty simple and straightfoward, but you must understand one thing - if your project contains lots of heavy effects and it's total RAM usage hitting the top of your total available RAM, then lots of aerenders could just crash while rendering. To avoid this, you can follow this simple steps:</p>
+		<ul>
+			<li>Try limiting <b>Cache</b> and/or <b>RAM usage</b>. When each <i>aerender</i> process has unlimited access to memory it can cause memory overloading and further rendering crashes.</li>
+			<li>Try optimizing your Adobe After Effects project. Sometimes just some basic project optimization tips like <i>"reducing resolution"</i> or <i>"disabling motion blur with 60 FPS"</i> or even <i>"using less performance-expencive effects/plugins"</i> could help you render your project without any noticeable differences in final result.<br>(as in our case, Mograph Practice benchmark wasn't been able to render even on our fastest test bench, before some optimizations)</li>
+			<li>Allocate more disk space for cache or clean your disc cache inside Adobe After Effects settings. Go to Preferences -> Media & Disk Cache and set bigger disk cache size or clean it there.</li>
+			<li>Finally, try to update your PC configuration: add more RAM, buy better CPU/GPU or replace your cache drive from HDD to SSD.</li>
+		</ul>
+	</div>
+</body>
+</html>

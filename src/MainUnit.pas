@@ -89,6 +89,7 @@ uses
 
   {$REGION '    Additional Liraries    '}
   MathExpParser,
+  AErenderLauncherLocalization,
   {$ENDREGION}
 
   {$REGION '    Windows Only Libraries    '}{$IFDEF MSWINDOWS}
@@ -331,6 +332,7 @@ var
   OutputModules: TArray<OutputModule>;                      (*  All the After Effects output modules here   *)
   TMathParser: MathExpParser.TExpressionParser;             (*  Mathematical parser for frames calculation  *)
   FHandleDragDirectly: Boolean = False;                     (*  For implementation of DragDrop functional   *)
+  Language: TArray<LauncherText>;
 
 implementation
 
@@ -876,7 +878,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 var
   CFG: TextFile;
 begin
-  {$IFDEF MSWINDOWS}DwmCompositionEnabled();{$ENDIF}
+  {$IFDEF MSWINDOWS}DwmCompositionEnabled();{$ENDIF MSWINDOWS}
   FormatSettings.DecimalSeparator := '.';
   MainForm.Width := 600;
   MainForm.Caption := 'AErender Launcher (' + APPVERSION + ')';
@@ -979,12 +981,7 @@ begin
   SettingsForm.onRenderStartBox.ItemIndex := ONRENDERSTART;
   SettingsForm.HandleCheckBox.IsChecked := StrToBool(AERH);
   SettingsForm.delFilesCheckBox.IsChecked := StrToBool(DelTempFiles);
-  if (ParamCount > 0) and (ParamStr(1).Contains('-aer')) then
-    begin
-      ImportUnit.PARAMSTART := True;
-      ImportUnit.XMLPath := ParamStr(2);
-      ImportForm.ShowModal;
-    end;
+
   if memUsageTrackBar.Value = 100 then
     memUsageInfo.Text := 'Unlimited'
   else
@@ -993,12 +990,20 @@ begin
     cacheUsageInfo.Text := 'Unlimited'
   else
     cacheUsageInfo.Text := Trunc(cacheUsageTrackBar.Value).ToString + '%';
+
   StringColumn1.Width := compGrid.Width - 5;
   StringColumn2.Width := threadsGrid.Width * 0.5;
   StringColumn3.Width := threadsGrid.Width * 0.5;
 
   SplashScreenForm.Close;
   SplashScreenForm.Free;
+
+  if (ParamCount > 0) and (ParamStr(1).Contains('-aer')) then
+    begin
+      ImportUnit.PARAMSTART := True;
+      ImportUnit.XMLPath := ParamStr(2);
+      ImportForm.ShowModal;
+    end;
 end;
 
 procedure TMainForm.importConfigItemClick(Sender: TObject);

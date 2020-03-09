@@ -19,7 +19,23 @@ uses
   FMX.StdCtrls,
   FMX.Layouts,
   FMX.Ani,
-  FMX.Effects;
+  FMX.Effects,
+
+  {$IFDEF MSWINDOWS}
+  WinApi.Windows,
+  WinApi.Messages,
+  WinApi.DwmApi,
+  WinApi.UxTheme,
+  FMX.Platform.Win;
+  {$ENDIF MSWINDOWS}
+
+  {$IFDEF MACOS}
+  MacApi.Foundation,
+  MacApi.AppKit,
+  MacApi.ObjectiveC,
+  MacApi.CocoaTypes,
+  FMX.Platform.Mac;
+  {$ENDIF MACOS}
 
 type
   TSplashScreenForm = class(TForm)
@@ -28,18 +44,15 @@ type
     Label1: TLabel;
     Rectangle1: TRectangle;
     Layout1: TLayout;
-    ShadowEffect1: TShadowEffect;
-    //StartupTimer: TTimer;
-    {procedure FormCreate(Sender: TObject);
-    procedure FormPaint(Sender: TObject; Canvas: TCanvas;
-      const ARect: TRectF);
-    procedure StartupTimerTimer(Sender: TObject); }
+    procedure FormCreate(Sender: TObject);
   private
-    //FInitialized: Boolean;
-    //procedure LoadMainForm;
+    {$IFDEF MSWINDOWS}procedure WMNCPaint(var AMessage: TMessage); message WM_NCPAINT;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
   end;
+
+const
+  UseShadow: Boolean = True;
 
 var
   SplashScreenForm: TSplashScreenForm;
@@ -60,35 +73,50 @@ uses
 
 {$R *.fmx}
 
-{procedure TSplashScreenForm.FormCreate(Sender: TObject);
-begin
-  StartupTimer.Enabled := False;
-  StartupTimer.Interval := 500; // can be changed to improve startup speed in later releases
-end;
-
-procedure TSplashScreenForm.FormPaint(Sender: TObject; Canvas: TCanvas;
-  const ARect: TRectF);
-begin
-  StartupTimer.Enabled := not FInitialized;
-end;
-
-procedure TSplashScreenForm.StartupTimerTimer(Sender: TObject);
-begin
-  StartupTimer.Enabled := False;
-  if not FInitialized then begin
-    FInitialized := true;
-    LoadMainForm;
-  end;
-end;
-
-procedure TSplashScreenForm.LoadMainForm;
+{$IFDEF MSWINDOWS}
+procedure TSplashScreenForm.WMNCPaint(var AMessage: TMessage);
 var
-  MainForm: TMainForm;
+  v: PInteger;
+  m: _MARGINS;
+  handle: HWND;
 begin
-  MainForm := TMainForm.Create(Application);
-  MainForm.Show;
-  Application.MainForm := MainForm;
-  Close;
+  if UseShadow then begin
+    New(v);
+    v^ := 2;
+
+    handle := FormToHWND(Self);
+
+    DwmSetWindowAttribute(handle, 2, v, 4);
+
+    m.cxLeftWidth := 0;
+    m.cxRightWidth := 0;
+    m.cyTopHeight := 0;
+    m.cyBottomHeight := 1;
+
+    DwmExtendFrameIntoClientArea(handle, m);
+  end;
+
 end;
-}
+{$ENDIF MSWINDOWS}
+
+procedure TSplashScreenForm.FormCreate(Sender: TObject);
+begin
+  Self.Height := 100;
+  Self.Width := 500;
+
+  {$IFDEF MACOS}
+  var Window: NSWindow := WindowHandleToPlatform(Self.Handle).Wnd;
+
+  Rectangle1.XRadius := 3;
+  Rectangle1.YRadius := 3;
+  Window.setHasShadow(True);
+  Window.invalidateShadow;
+  {$ENDIF MACOS}
+
+  {$IFDEF MSWINDOWS}
+  if UseShadow then
+    DwmCompositionEnabled();
+  {$ENDIF MSWINDOWS}
+end;
+
 end.

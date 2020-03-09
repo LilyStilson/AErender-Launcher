@@ -6,7 +6,7 @@
         <MainSource>AErenderLauncher.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
-        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <Platform Condition="'$(Platform)'==''">OSX64</Platform>
         <TargetedPlatforms>4103</TargetedPlatforms>
         <AppType>Application</AppType>
     </PropertyGroup>
@@ -470,12 +470,6 @@
                 <DeployFile LocalName="AErender CC\AErender.icns" Configuration="Beta" Class="ProjectOSXResource">
                     <Platform Name="OSX64">
                         <RemoteName>AErender.icns</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Win64\Debug\AErenderLauncher.rsm" Configuration="Debug" Class="DebugSymbols">
-                    <Platform Name="Win64">
-                        <RemoteName>AErenderLauncher.rsm</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

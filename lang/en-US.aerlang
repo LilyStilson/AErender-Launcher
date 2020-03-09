@@ -41,7 +41,7 @@
             "EndFrame": "End Frame:",
             "EndFrameHint": "REQUIRED",
             "Calculate": "Calculate",
-            "Launch": "Launcher",
+            "Launch": "Launch",
             "NewVersionAvailable": "New Version Available!", 
             "Download": "Download from GitHub"
         },

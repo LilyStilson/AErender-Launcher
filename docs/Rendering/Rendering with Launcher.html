@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<title>Rendering</title>
+	<style>
+		@font-face {
+			font-family: 'NexaBold';
+			src: url('../fonts/Nexa_Free_Bold-webfont.woff') format('woff');
+		}
+		body {
+			overflow: auto;
+			margin: 0;
+			padding: 0;
+			font-family: Segoe, "Segoe UI", Verdana, "sans-serif";
+			background-color: #2D2D2D;
+			color: white;
+		}
+		a {
+			color: #1E90FF;
+		}
+		a:hover {
+			color: #00BFFF;
+		}
+		a:active {
+			color: #17579C;
+		}
+		header {
+			margin: 0;
+			padding: 10px 30px;
+			font-family: "NexaBold";
+			color: white;
+			font-size: 18px;
+			background-color: #2A82E2;
+		}
+		h1, h2 {
+			font-family: "NexaBold";
+		}
+		.container {
+				display: block; 
+			width: auto;
+			margin: 0px 10px;
+		}
+		</style>
+</head>
+<body>
+	<header>
+		<span>AErender Launcher Help</span>
+		<span style="float: right; margin-left: auto;">Rendering</span>
+	</header>
+    <div class="container">
+		<h1>Rendering with AErender Launcher</h1>
+		<p>There are several rendering modes implemented in <b>AErender Launcher</b>.</p>
+        <ul>
+            <li><b>Single Composition, Single Thread:</b> Standard rendering process, nothing special about that. Could be useful sometimes, especially on Apple computers.</li>
+            <li><b>Single Composition, Multiple Threads:</b> Duration of composition in frames divides automatically to a number of threads. As a result, total render time could be shortened up to the <b>4x times</b> <i>(maybe higher, but it's fastest acceleration that I achived)</i>, because all render processes will be launched simultaneously. And of course, it really depends on your CPU horsepower and available RAM, so try not to overload your computer with all the render threads. Though, you can limit RAM available for each <i>aerender</i> right inside <b>Launcher.</b></li>
+            <li><b>Multiple Compositions, Single Thread for each:</b> You can render up to 100 compositions from one project simultaneously. But you need to type every composition name to make this happen. And again, it's still very dependable on your CPU and RAM.</li>
+		</ul>
+		<p>Upcoming rendering modes</p>
+		<ul>
+			<li>Network multi-machine rendering</li>
+			<li>Automated rendering</li>
+		</ul>
+    </div>
+</body>
+</html>

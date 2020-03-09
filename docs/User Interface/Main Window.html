@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<title>Main Window</title>
+	<style>
+		@font-face {
+			font-family: 'NexaBold';
+			src: url('../fonts/Nexa_Free_Bold-webfont.woff') format('woff');
+		}
+		body {
+			overflow: auto;
+			margin: 0;
+			padding: 0;
+			font-family: Segoe, "Segoe UI", "Helvetica Neue", Verdana, "sans-serif";
+			font-size: 12pt;
+			background-color: #2D2D2D;
+			color: white;
+		}
+		a {
+			color: #1E90FF;
+		}
+		a:hover {
+			color: #00BFFF;
+		}
+		a:active {
+			color: #17579C;
+		}
+		header {
+			margin: 0;
+			padding: 10px 30px;
+			font-family: "NexaBold";
+			color: white;
+			font-size: 18px;
+			background-color: #2A82E2;
+		}
+		h1, h2 {
+			font-family: "NexaBold";
+		}
+		code {
+			font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+			background-color: #202020;
+			border-radius: 5px;
+			padding: 2px 3px;
+		}
+		li {
+			margin: 10px 0px;
+		}
+		.container {
+				display: block; 
+			width: auto;
+			margin: 0px 10px;
+		}
+	</style>
+</head>
+
+<body>
+	<header>
+		<span>AErender Launcher Help</span>
+		<span style="float: right; margin-left: auto;">User Interface</span>
+	</header>
+	<div class="container">
+		<h1>Main Window</h1>
+		<p>All <b>AErender Launcher</b> UI elements correspond to specific <i>aerender</i> flags.</p>
+		<img src="" alt="mainwindow.png"/>
+		<ul>
+			<li><b>Project file path</b> - correspond to <code>-project</code> flag. You can select your project by pressing on a <i>Select File...</i> button or by dropping project directly onto path field.</li>
+			<li><b>Output file path</b> - correspond to <code>-output</code> flag. <i>aerender</i> will output video to selected directory, with the file name you typed + predefined file name or, if you leaved <code>Default</code> as file name, <i>aerender</i> will use just predefined file name from selected <b>Output Module</b>.</li>
+			<li><b>Output Module Preset</b> - correspond to <code>-OMtemplate</code> flag. This defines lossless ouptput module and specific predefined file name mask. <i>aerender</i> will automatically fill specific values into that mask.<br/>
+			<i>Example: </i>Output Module: <code>Photoshop</code><br/>
+			Predefined mask: <code>[compName]_[#####].[fileextension]</code><br/>
+			Output name: <code>Comp 1_00001.psd</code><br/></li>
+			<li><b>Properties section</b>
+				<ul>
+					<li><b>Render with missing files</b> - correspond to <code>-continueOnMissingFootage</code> flag. This will determine will <i>aerender</i> continue render operation even if any source footage item is missing. Only log alert will be shown.</li>
+					<li><b>Play sound when render finishes</b> - correspond to <code>-sound</code> flag. This will turn on and off sound when <i>aerender</i> finishes rendering.</li>
+					<li><b>Threaded rendering</b> - correspond to <code>-mp</code> flag. This will tell <i>aerender</i> to create more rendering processes to render multiple frames simultaneously. Though, I haven't spotted any noticeable difference in render time whether this parameter is enabled or not.</li>
+					<li><b>Custom properties</b> - if enabled, then text in field under that checkbox will be added to an executable. Use that field only if you need some custom flags that is not implemented in Launcher.</li>
+					<li><b>Cache usage limit</b> and <b>Memory usage limit</b> - correspond to <code>-mem_usage</code> flag. This sliders will determine what percentage of your total After Effects cache size and available RAM <i>aerender</i> could use. Use this parameters when your render ended with an error, because of insufficient memory or memory overload.</li>
+				</ul>
+			</li>
+			<li><b>Rendering section</b>
+				<ul><li><b>Compostion</b></li>
+					<ul>
+						<li><b>Single/Multipse composition switch</b> - will turn <i>Multiple composition</i> rendering mode on/off.<br/></li>
+						<li><b>Composition name field</b> - correspond to <code>-comp</code> flag. This field is essential when you need to render specific composition from your project. If you want to render all available compositions from in to out, leave this field empty.</li>
+						<li><b>Multiple compositions grid</b> - is a storage for all your composition's names. When <i>Multiple composition</i> rendering mode is turned on, grid becomes visible and <b>Composition Name</b> field hide. Type all your compositions names in grid. Note that when you type frames into <b>Start Frame</b> or <b>End Frame</b> fields, it will be applied to all your compositions.</li>
+					</ul>
+				</ul>
+				<ul><li><b>Rendering</b></li>
+					<ul>
+						<li><b>Start Frame field</b> - correspond to <code>-s</code> flag. This field will determine the starting frame of the composition. This field could be empty (it will tell <i>aerender</i> to render composition from the start of range).</li>
+						<li><b>End Frame field</b> - correspond to <code>-e</code> flag. This filed will determine the ending frame of the compostion. This field could be empty (it will tell <i>aerender</i> to render composition to the end of range). When <b>Split Render</b> rendering mode is enabled, this field must not be empty.</li>
+						<li><b>Split Render grid</b> - will contain framespans that composition will be splitted into. As for now, contains only information and useful for Launcher itself.</li>
+					</ul>
+				</ul>
+			</li>
+		</ul>
+	</div>
+</body>
+</html>
