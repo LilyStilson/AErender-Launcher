@@ -97,7 +97,9 @@ uses
   {$ENDIF MSWINDOWS}{$ENDREGION}
 
   {$REGION '    macOS Only Libraries    '}{$IFDEF MACOS}
-    Posix.Stdlib, Posix.Unistd, Posix.SysSysctl, Posix.SysTypes;
+    Posix.Stdlib, Posix.Unistd, Posix.SysSysctl, Posix.SysTypes, FMX.Platform.Mac,
+    Mac.CodeBlocks, MacApi.Dialogs,
+    Macapi.Appkit, Macapi.ObjectiveC, Macapi.Foundation, Macapi.Helpers, Macapi.ObjCRuntime, Macapi.CocoaTypes;
   {$ENDIF MACOS}{$ENDREGION}
 
 type
@@ -318,16 +320,17 @@ const
   PLATFORMPATHSEPARATOR = {$IFDEF MSWINDOWS}'\'{$ENDIF MSWINDOWS}
                           {$IFDEF MACOS}'/'{$ENDIF MACOS};
 
+
 var
   MainForm: TMainForm;                                      (*  Main Form Declaration                       *)
-  APPFOLDER, VER, LANG, AERPATH, DEFPRGPATH, DEFOUTPATH,
+  APPFOLDER, VER, AERPATH, DEFPRGPATH, DEFOUTPATH,
   ERR, gitResponse, gitVersion, gitDownload, ffmpegPath,
   AERH, tempSavePath, DelTempFiles: String;                 (*  Required variables for configuration file   *)
   gitRelease: TJsonValue;                                   (*  GitHub API's returning JSON file            *)
   UpdateAvailable: Boolean = False;                         (*  Represents app updates availability         *)
   FFMPEG: Boolean = False;                                  (*  Represents FFMPEG availability              *)
   RenderWindowSender: TButton;                              (*  Who opened Rendering window?                *)
-  STYLE, ONRENDERSTART: Integer;                            (*  Theme and OnRenderStart combobox values     *)
+  LANG, STYLE, ONRENDERSTART: Integer;                            (*  Theme and OnRenderStart combobox values     *)
   LogFiles: TArray<System.String>;                          (*  All the aerender log files here             *)
   OutputModules: TArray<OutputModule>;                      (*  All the After Effects output modules here   *)
   TMathParser: MathExpParser.TExpressionParser;             (*  Mathematical parser for frames calculation  *)
@@ -475,28 +478,38 @@ var
   FSnapshotHandle: THandle;
   FProcessEntry32: TProcessEntry32;
 begin
-  Result := 0;
-  FSnapshotHandle := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-  FProcessEntry32.dwSize := SizeOf(FProcessEntry32);
-  ContinueLoop := Process32First(FSnapshotHandle, FProcessEntry32);
 
-  while Integer(ContinueLoop) <> 0 do
-  begin
-    if ((UpperCase(ExtractFileName(FProcessEntry32.szExeFile)) =
-      UpperCase(ProcessName)) or (UpperCase(FProcessEntry32.szExeFile) =
-      UpperCase(ProcessName))) then
-      Result := Integer(TerminateProcess(
-                        OpenProcess(PROCESS_TERMINATE,
-                                    BOOL(0),
-                                    FProcessEntry32.th32ProcessID),
-                                    0));
-     ContinueLoop := Process32Next(FSnapshotHandle, FProcessEntry32);
+  try
+    FSnapshotHandle := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    FProcessEntry32.dwSize := SizeOf(FProcessEntry32);
+    ContinueLoop := Process32First(FSnapshotHandle, FProcessEntry32);
+
+    while Integer(ContinueLoop) <> 0 do
+    begin
+      if ((UpperCase(ExtractFileName(FProcessEntry32.szExeFile)) =
+        UpperCase(ProcessName)) or (UpperCase(FProcessEntry32.szExeFile) =
+        UpperCase(ProcessName))) then
+        Result := Integer(TerminateProcess(
+                          OpenProcess(PROCESS_TERMINATE,
+                                      BOOL(0),
+                                      FProcessEntry32.th32ProcessID),
+                                      0));
+       ContinueLoop := Process32Next(FSnapshotHandle, FProcessEntry32);
+    end;
+    CloseHandle(FSnapshotHandle);
+    Result := 0;
+  except
+    Result := -1;
   end;
-  CloseHandle(FSnapshotHandle);
 {$ENDIF MSWINDOWS}
 {$IFDEF MACOS}
 begin
-  _system(PAnsiChar('pkill "' + AnsiString(ProcessName) + '"'));
+  try
+    _system(PAnsiChar('pkill "' + AnsiString(ProcessName) + '"'));
+    Result := 0;
+  except
+    Result := -1;
+  end;
 {$ENDIF MACOS}
 end;
 
@@ -567,7 +580,7 @@ begin
 
   RootNode := Config.AddChild('launcherconfig');
 
-  RootNode.AddChild('lang').Text := 'EN';
+  RootNode.AddChild('lang').Text := '0';
   RootNode.AddChild('style').Text := '0';
   RootNode.AddChild('aerender').Text := '';
   RootNode.AddChild('onRenderStart').Text := '0';
@@ -619,7 +632,7 @@ begin
   Config.Active := True;
   RootNode := Config.DocumentElement;
 
-  LANG := RootNode.ChildNodes['lang'].Text;
+  LANG := RootNode.ChildNodes['lang'].Text.ToInteger();
   STYLE := RootNode.ChildNodes['style'].Text.ToInteger();
   AERPATH := RootNode.ChildNodes['aerender'].Text;
   ONRENDERSTART := RootNode.ChildNodes['onRenderStart'].Text.ToInteger();
@@ -670,7 +683,7 @@ begin
 
   RootNode := Config.AddChild('launcherconfig');
 
-  RootNode.AddChild('lang').Text := LANG;
+  RootNode.AddChild('lang').Text := LANG.ToString;
   RootNode.AddChild('style').Text := STYLE.ToString;
   RootNode.AddChild('aerender').Text := AERPATH;
   RootNode.AddChild('onRenderStart').Text := ONRENDERSTART.ToString;
@@ -962,7 +975,6 @@ begin
       AERH := 'True';
       DelTempFiles := 'True';
     end;
-  Lang1.Lang := LANG;
   AEPOpenDialog.InitialDir := DEFPRGPATH;
   SaveDialog1.InitialDir := DEFOUTPATH;
 end;
@@ -1308,11 +1320,36 @@ begin
 end;
 
 procedure TMainForm.openFileClick(Sender: TObject);
+{$IFDEF MACOS}
+var
+  FOpenFile: NSSavePanel;
+  NSWin: NSWindow;
 begin
-  //ShowMessage (AEPOpenDialog.InitialDir + '; ' + DEFPRGPATH);
+  NSWin := WindowHandleToPlatform(Screen.ActiveForm.Handle).Wnd;
+
+  FOpenFile := TNSOpenPanel.Wrap(TNSOpenPanel.OCClass.openPanel);
+  FOpenFile.setDirectory(StrToNSStr(DEFPRGPATH));
+  FOpenFile.setAllowedFileTypes(ArrayToNSArray(['aep']));
+  FOpenFile.setPrompt(StrToNSStr('Open After Effects project'));
+
+  objc_msgSendP2((FOpenFile as ILocalObject).GetObjectID,
+                 sel_getUid(PAnsiChar('beginSheetModalForWindow:completionHandler:')),
+                 (NSWin as ILocalObject).GetObjectID,
+                 TObjCBlock.CreateBlockWithProcedure(
+                 procedure (p1: NSInteger)
+                 begin
+                    if p1 = 0 then
+                      // Handle
+                    else
+                      projectPath.Text := NSStrToStr(FOpenFile.URL.relativePath);
+                 end));
+{$ENDIF MACOS}
+{$IFDEF MSWINDOWS}
+begin
   with AEPOpenDialog do
     if Execute then
       projectPath.Text := AEPOpenDialog.FileName;
+{$ENDIF MSWINDOWS}
 end;
 
 procedure TMainForm.outFrameValidate(Sender: TObject; var Text: string);
@@ -1376,18 +1413,57 @@ begin
 end;
 
 procedure TMainForm.saveFileClick(Sender: TObject);
+{$IFDEF MACOS}
+var
+  FSaveFile: NSSavePanel;
+  NSWin: NSWindow;
+begin
+  NSWin := WindowHandleToPlatform(Screen.ActiveForm.Handle).Wnd;
+
+  FSaveFile :=TNSSavePanel.Wrap(TNSSavePanel.OCClass.savePanel);
+  FSaveFile.setAccessoryView(CreateMessageView('Tip: Leaving "Default" in the field will use Output Module file name'));
+  FSaveFile.setDirectory(StrToNSStr(DEFOUTPATH));
+  FSaveFile.setNameFieldLabel(StrToNSStr('Output file name:'));
+  FSaveFile.setNameFieldStringValue(StrToNSStr('Default'));
+  FSaveFile.setPrompt(StrToNSStr('Save here'));
+
+  objc_msgSendP2((FSaveFile as ILocalObject).GetObjectID,
+                  sel_getUid(PAnsiChar('beginSheetModalForWindow:completionHandler:')),
+                  (NSWin as ILocalObject).GetObjectID,
+                  TObjCBlock.CreateBlockWithProcedure(
+                  procedure (p1: NSInteger)
+                  begin
+                    if p1 = 0 then
+                      // Handle
+                    else
+                      tempSavePath := NSStrToStr(FSaveFile.URL.relativePath);
+                      if tempSavePath.Contains('Def') or tempSavePath.Contains('def') then
+                        outputPath.Text := ExtractFilePath(tempSavePath) + OutputModules[outputModuleBox.ItemIndex].Mask
+                      else
+                        if ExtractFileExt(tempSavePath) = '' then
+                          outputPath.Text := tempSavePath + '_' + OutputModules[outputModuleBox.ItemIndex].Mask
+                        else
+                          outputPath.Text := ExtractFilePath(tempSavePath) + StringReplace(ExtractFileName(tempSavePath), ExtractFileExt(tempSavePath), '', [rfReplaceAll, rfIgnoreCase])
+                                          + ExtractFileExt(OutputModules[outputModuleBox.ItemIndex].Mask);
+                  end));
+{$ENDIF MACOS}
+{$IFDEF MSWINDOWS}
 begin
   with SaveDialog1 do
     if Execute then
-      tempSavePath := SaveDialog1.FileName;
-  if tempSavePath.Contains('Def') or tempSavePath.Contains('def') then
-    outputPath.Text := ExtractFilePath(tempSavePath) + OutputModules[outputModuleBox.ItemIndex].Mask
-  else
-    if ExtractFileExt(tempSavePath) = '' then
-      outputPath.Text := tempSavePath + '_' + OutputModules[outputModuleBox.ItemIndex].Mask
-    else
-      outputPath.Text := ExtractFilePath(tempSavePath) + StringReplace(ExtractFileName(tempSavePath), ExtractFileExt(tempSavePath), '', [rfReplaceAll, rfIgnoreCase])
-                      + ExtractFileExt(OutputModules[outputModuleBox.ItemIndex].Mask);
+      begin
+        tempSavePath := SaveDialog1.FileName;
+
+        if tempSavePath.Contains('Def') or tempSavePath.Contains('def') then
+          outputPath.Text := ExtractFilePath(tempSavePath) + OutputModules[outputModuleBox.ItemIndex].Mask
+        else
+          if ExtractFileExt(tempSavePath) = '' then
+            outputPath.Text := tempSavePath + '_' + OutputModules[outputModuleBox.ItemIndex].Mask
+          else
+            outputPath.Text := ExtractFilePath(tempSavePath) + StringReplace(ExtractFileName(tempSavePath), ExtractFileExt(tempSavePath), '', [rfReplaceAll, rfIgnoreCase])
+                            + ExtractFileExt(OutputModules[outputModuleBox.ItemIndex].Mask);
+      end;
+{$ENDIF MSWINDOWS}
 end;
 
 procedure TMainForm.settingsButtonClick(Sender: TObject);

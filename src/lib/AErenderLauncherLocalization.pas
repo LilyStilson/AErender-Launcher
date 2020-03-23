@@ -27,6 +27,7 @@ type
     ProjectFile,
     OutputFile,
     OpenSaveProjectButton,
+    DarwinDialogTip, DarwinDialogOpen, DarwinDialogSaveNameField, DarwinDialogSave,
     OutputModulePreset,
     Properties,
     MissingFiles,
@@ -151,6 +152,10 @@ begin
     Self.MainForm.ProjectFile                   := LanguageData.P['LauncherText.MainFormText.ProjectFile'].Value;
     Self.MainForm.OutputFile                    := LanguageData.P['LauncherText.MainFormText.OutputFile'].Value;
     Self.MainForm.OpenSaveProjectButton         := LanguageData.P['LauncherText.MainFormText.OpenSaveProjectButton'].Value;
+    Self.MainForm.DarwinDialogTip               := LanguageData.P['LauncherText.MainFormText.DarwinDialogTip'].Value;
+    Self.MainForm.DarwinDialogOpen              := LanguageData.P['LauncherText.MainFormText.DarwinDialogOpen'].Value;
+    Self.MainForm.DarwinDialogSaveNameField     := LanguageData.P['LauncherText.MainFormText.DarwinDialogSaveNameField'].Value;
+    Self.MainForm.DarwinDialogSave              := LanguageData.P['LauncherText.MainFormText.DarwinDialogSave'].Value;
     Self.MainForm.OutputModulePreset            := LanguageData.P['LauncherText.MainFormText.OutputModulePreset'].Value;
     Self.MainForm.Properties                    := LanguageData.P['LauncherText.MainFormText.Properties'].Value;
     Self.MainForm.MissingFiles                  := LanguageData.P['LauncherText.MainFormText.MissingFiles'].Value;

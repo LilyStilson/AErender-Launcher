@@ -6,7 +6,7 @@
         <MainSource>AErenderLauncher.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
-        <Platform Condition="'$(Platform)'==''">OSX64</Platform>
+        <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <TargetedPlatforms>4103</TargetedPlatforms>
         <AppType>Application</AppType>
     </PropertyGroup>
@@ -336,7 +336,9 @@
             <Form>OutputModuleEditorForm</Form>
         </DCCReference>
         <DCCReference Include="..\..\AErender Parser\AErenderDataParser.pas"/>
-        <DCCReference Include="AErenderLauncherLocalization.pas"/>
+        <DCCReference Include="lib\Mac.CodeBlocks.pas"/>
+        <DCCReference Include="lib\AErenderLauncherLocalization.pas"/>
+        <DCCReference Include="lib\MacApi.Dialogs.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

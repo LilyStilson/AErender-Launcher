@@ -159,9 +159,13 @@ begin
           RenderGroups[i].TLogMemo.Free;
           RenderGroups[i].TRenderShowLogButton.Free;
           RenderGroups[i].TRenderProgressLabel.Free;
-          RenderGroups[i].TRenderProgressBar.Free;
+          RenderGroups[i].TRenderProgressBar.Value := 0;
+          RenderGroups[i].TRenderProgressBar.Max := 1;
+          RenderGroups[i].TRenderProgressBar.Destroy;
           RenderGroups[i].TRenderGroupBoxMainLayout.Free;
           RenderGroups[i].TRenderGroupBox.Free;
+
+          RenderGroups[i].Duration.Clear;
 
           {$IFDEF MSWNDOWS}DeleteFile(MainUnit.LogFiles[i]);{$ENDIF MSWINDOWS}
         end;
@@ -173,6 +177,7 @@ begin
       framesLabel.Text := '';
       totalProgressPercentage.Text := '0%';
       TotalProgressBar.Value := 0;
+      TotalProgressBar.Max := 1;
     end
   except
     on Exception do
@@ -333,7 +338,7 @@ begin
           RenderGroups[i].TLogMemo.GoToTextEnd;
           if RenderGroups[i].TRenderProgressBar.Max = 1 then begin
             //Try to get Duration timecode from log string
-            if RenderGroups[i].TRenderProgressBar.Max = 1 then begin
+            //if RenderGroups[i].TRenderProgressBar.Max = 1 then begin
               //Try to get Duration from log string
               if RenderGroups[i].TLogMemo.Lines[RenderGroups[i].TLogMemo.Lines.Count - 1].Contains('Duration: ') then
                 RenderGroups[i].Duration := ParseAErenderDurationLogString(RenderGroups[i].TLogMemo.Lines[RenderGroups[i].TLogMemo.Lines.Count - 1]);
@@ -346,7 +351,7 @@ begin
               if (RenderGroups[i].Duration.ToSingleString <> '0:00:00:00') and (RenderGroups[i].FrameRate <> 0) then begin
                 RenderGroups[i].TRenderProgressBar.Max := TimecodeToFrames(RenderGroups[i].Duration, RenderGroups[i].FrameRate);
               end;
-            end;
+            //end;
 
             //RenderGroups[i].TRenderProgressLabel.Text := 'D = ' + RenderGroups[i].Duration.ToSingleString + '; F = ' + RenderGroups[i].FrameRate.ToString + '; TF = ' + RenderGroups[i].TRenderProgressBar.Max.ToString;
           end;
@@ -373,11 +378,10 @@ begin
 
         if TotalProgressBar.Max <> TotalFrames then begin
           TotalProgressBar.Max := TotalFrames;
-
         end else begin
-          var sum: Integer := 0;
+          var sum: Single := 0;
           for var j := 0 to High(RenderGroups) do
-            inc (sum, RenderGroups[j].TRenderProgressBar.Value.ToString.ToInteger);
+            sum := sum + RenderGroups[j].TRenderProgressBar.Value;
 
           TotalProgressBar.Value := sum;
           totalProgressPercentage.Text := Round((TotalProgressBar.Value / TotalProgressBar.Max) * 100).ToString + '%';
@@ -386,7 +390,6 @@ begin
           else
             framesLabel.Text := TotalProgressBar.Value.ToString + ' / ' + (TotalProgressBar.Max - 1).ToString;
         end;
-
         if RenderGroups[i].TLogMemo.Text.Contains('Finished composition') then
           begin
             Render[i].State := 'finish';

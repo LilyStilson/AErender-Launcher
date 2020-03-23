@@ -92,6 +92,20 @@ type
     delFilesCheckBox: TCheckBox;
     ResetButton: TButton;
     StatusBar1: TStatusBar;
+    Layout1: TLayout;
+    Label4: TLabel;
+    GridPanelLayout1: TGridPanelLayout;
+    dpi100: TRadioButton;
+    dpi125: TRadioButton;
+    dpi150: TRadioButton;
+    dpi200: TRadioButton;
+    settingsFormLayout: TLayout;
+    SettingsToolbar: TToolBar;
+    WindowLabel: TLabel;
+    ToolBar1: TToolBar;
+    Label5: TLabel;
+    ToolBar2: TToolBar;
+    Label6: TLabel;
     procedure langBoxChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure aerenderPathSelectClick(Sender: TObject);
@@ -107,12 +121,17 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       var KeyChar: Char; Shift: TShiftState);
     procedure ResetButtonClick(Sender: TObject);
+    procedure dpi125Change(Sender: TObject);
+    procedure dpi100Change(Sender: TObject);
+    procedure dpi150Change(Sender: TObject);
+    procedure dpi200Change(Sender: TObject);
   private
     { Private declarations }
     {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
   end;
+  procedure ChangeDPI(DPI: Single);
 
 var
   SettingsForm: TSettingsForm;
@@ -143,6 +162,33 @@ begin
   SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or CS_DROPSHADOW);
 end;
 {$ENDIF MSWINDOWS}
+
+procedure ChangeDPI(DPI: Single);
+begin
+  var TempScale: Single := MainForm.mainLayout.Scale.X;
+  var Scale: TPosition := TPosition.Create(TPointF.Create(DPI, DPI));
+
+  if (TempScale > Scale.X) and (TempScale > Scale.Y) then
+    begin
+      MainForm.mainLayout.Scale := Scale;
+      MainForm.Width := Round(MainForm.Width / TempScale);
+      MainForm.Height := Round(MainForm.Height / TempScale);
+
+      SettingsForm.settingsFormLayout.Scale := Scale;
+      SettingsForm.Width := Round(SettingsForm.Width / TempScale);
+      SettingsForm.Height := Round(SettingsForm.Height / TempScale);
+    end
+  else
+    begin
+      MainForm.mainLayout.Scale := Scale;
+      MainForm.Width := Round(MainForm.Width * DPI);
+      MainForm.Height := Round(MainForm.Height * DPI);
+
+      SettingsForm.settingsFormLayout.Scale := Scale;
+      SettingsForm.Width := Round(SettingsForm.Width * DPI);
+      SettingsForm.Height := Round(SettingsForm.Height * DPI);
+    end;
+end;
 
 function ExtractIntegerFromString(s: String): Integer;
 var
@@ -248,6 +294,30 @@ begin
   MainUnit.DelTempFiles := BoolToStr(delFilesCheckBox.IsChecked, True);
 end;
 
+procedure TSettingsForm.dpi100Change(Sender: TObject);
+begin
+  if dpi100.IsChecked then
+    ChangeDPI(1)
+end;
+
+procedure TSettingsForm.dpi125Change(Sender: TObject);
+begin
+  if dpi125.IsChecked then
+    ChangeDPI(1.25)
+end;
+
+procedure TSettingsForm.dpi150Change(Sender: TObject);
+begin
+  if dpi150.IsChecked then
+    ChangeDPI(1.5)
+end;
+
+procedure TSettingsForm.dpi200Change(Sender: TObject);
+begin
+  if dpi200.IsChecked then
+    ChangeDPI(2)
+end;
+
 procedure TSettingsForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   {if not aerenderPath.Text.Contains('aerender') then
@@ -300,10 +370,7 @@ begin
   defaultOutputPath.Text := DEFOUTPATH;
   HandleCheckBox.IsChecked := StrToBool(AERH);
   delFilesCheckBox.IsChecked := StrToBool(DelTempFiles);
-  if LANG = 'EN' then
-    langBox.ItemIndex := 0;
-  if LANG = 'RU' then
-    langBox.ItemIndex := 1;
+  langBox.ItemIndex := LANG;
   {$IFDEF MSWINDOWS}
     aerenderPath.TextPrompt := 'C:\Program Files\Adobe\Adobe After Effects CC\Support Files\aerender.exe';
     OpenDialog1.Filter := 'After Effects Render Engine|aerender.exe';
@@ -330,32 +397,7 @@ end;
 
 procedure TSettingsForm.langBoxChange(Sender: TObject);
 begin
-  case langBox.ItemIndex of
-    0:begin
-        LANG := 'EN';
-        MainForm.Lang1.Lang := 'EN';
-        if MainForm.compSwitch.IsChecked then
-          MainForm.compSwitchLabel.Text := 'Multiple Compositions'
-        else
-          MainForm.compSwitchLabel.Text := 'Single Composition';
-        if MainForm.threadsSwitch.IsChecked then
-          MainForm.threadsSwitchLabel.Text := 'Split Render'
-        else
-          MainForm.threadsSwitchLabel.Text := 'Single Render';
-      end;
-    1:begin
-        LANG := 'RU';
-        MainForm.Lang1.Lang := 'RU';
-        if MainForm.compSwitch.IsChecked then
-          MainForm.compSwitchLabel.Text := 'Несколько композиций'
-        else
-          MainForm.compSwitchLabel.Text := 'Одна композиция';
-        if MainForm.threadsSwitch.IsChecked then
-          MainForm.threadsSwitchLabel.Text := 'Рендерить частями'
-        else
-          MainForm.threadsSwitchLabel.Text := 'Рендерить одним файлом';
-      end;
-  end;
+  //
 end;
 
 procedure TSettingsForm.onRenderStartBoxChange(Sender: TObject);

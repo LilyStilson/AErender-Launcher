@@ -26,8 +26,9 @@ program AErenderLauncher;
 (*        SOFTWARE.                                                                         *)
 
 uses
-  System.StartUpCopy, System.SysUtils, FMX.Forms,
-
+  System.StartUpCopy,
+  System.SysUtils,
+  FMX.Forms,
   SplashScreenUnit in 'SplashScreenUnit.pas' {SplashScreenForm},
   MainUnit in 'MainUnit.pas' {MainForm},
   SettingsUnit in 'SettingsUnit.pas' {SettingsForm},
@@ -39,7 +40,9 @@ uses
   MathExpParser in 'MathExpParser.pas',
   OutputModuleEditorUnit in 'OutputModuleEditorUnit.pas' {OutputModuleEditorForm},
   AErenderDataParser in '..\..\AErender Parser\AErenderDataParser.pas',
-  AErenderLauncherLocalization in 'AErenderLauncherLocalization.pas';
+  Mac.CodeBlocks in 'lib\Mac.CodeBlocks.pas',
+  AErenderLauncherLocalization in 'lib\AErenderLauncherLocalization.pas',
+  MacApi.Dialogs in 'lib\MacApi.Dialogs.pas';
 
 {$R *.res}
 
@@ -52,13 +55,21 @@ begin
   Application.ProcessMessages;
 
   Application.CreateForm(TMainForm, MainForm);
+
   Application.CreateForm(TSettingsForm, SettingsForm);
+
   Application.CreateForm(THelpForm, HelpForm);
+
   Application.CreateForm(TImportForm, ImportForm);
+
   Application.CreateForm(TAboutForm, AboutForm);
+
   Application.CreateForm(TFFMPEGForm, FFMPEGForm);
+
   Application.CreateForm(TRenderingForm, RenderingForm);
+
   Application.CreateForm(TOutputModuleEditorForm, OutputModuleEditorForm);
 
   Application.Run;
 end.
+
