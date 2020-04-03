@@ -75,6 +75,7 @@ uses
   FMX.DialogService.Sync,
   FMX.ComboTrackBar,
   FMX.ImgList,
+  FMX.ComboEdit,
   {$ENDREGION}
 
   {$REGION '    Data Lib Namespaces    '}
@@ -104,9 +105,9 @@ uses
 
 type
   TMainForm = class(TForm)
-    Label1: TLabel;
+    projectPathLabel: TLabel;
     inputFileLayout: TLayout;
-    Label2: TLabel;
+    outputPathLabel: TLabel;
     InputLabels: TLayout;
     pathLayout: TLayout;
     projectPath: TEdit;
@@ -135,45 +136,41 @@ type
     compTopLayout: TLayout;
     compSwitchLabel: TLabel;
     settingsButton: TButton;
-    compCount: TSpinBox;
-    compName: TEdit;
-    LinkControlToPropertyEnabled2: TLinkControlToProperty;
-    LinkControlToPropertyVisible: TLinkControlToProperty;
-    LinkControlToPropertyEnabled3: TLinkControlToProperty;
-    LinkControlToPropertyVisible2: TLinkControlToProperty;
-    LinkControlToPropertyEnabled4: TLinkControlToProperty;
-    LinkControlToPropertyVisible3: TLinkControlToProperty;
-    threadsTopLayout: TLayout;
-    threadsSwitch: TSwitch;
-    threadsSwitchLabel: TLabel;
-    Label3: TLabel;
-    inFrame: TEdit;
-    Label4: TLabel;
-    outFrame: TEdit;
-    threadsGrid: TStringGrid;
-    StringColumn2: TStringColumn;
-    StringColumn3: TStringColumn;
-    calculateButton: TButton;
-    LinkControlToPropertyVisible4: TLinkControlToProperty;
-    LinkControlToPropertyEnabled5: TLinkControlToProperty;
-    LinkControlToPropertyEnabled6: TLinkControlToProperty;
-    LinkControlToPropertyVisible5: TLinkControlToProperty;
-    framesLayout: TLayout;
-    threadsCount: TComboBox;
-    LinkControlToPropertyEnabled7: TLinkControlToProperty;
-    LinkControlToPropertyVisible6: TLinkControlToProperty;
-    AEPOpenDialog: TOpenDialog;
-    SaveDialog1: TSaveDialog;
-    LinkControlToPropertyTextPrompt: TLinkControlToProperty;
-    LinkControlToPropertyEnabled8: TLinkControlToProperty;
-    LinkControlToPropertyEnabled9: TLinkControlToProperty;
-    OnyxBlueStyle: TStyleBook;
-    infoButton: TButton;
-    Image1: TImage;
-    Image2: TImage;
-    launcherLayout: TLayout;
-    outputModuleBox: TComboBox;
-    outputModuleLabel: TLabel;
+    compCount:                      TSpinBox;
+    compName:                       TEdit;
+    LinkControlToPropertyEnabled2:  TLinkControlToProperty;
+    LinkControlToPropertyVisible:   TLinkControlToProperty;
+    LinkControlToPropertyEnabled3:  TLinkControlToProperty;
+    LinkControlToPropertyVisible2:  TLinkControlToProperty;
+    LinkControlToPropertyEnabled4:  TLinkControlToProperty;
+    LinkControlToPropertyVisible3:  TLinkControlToProperty;
+    threadsTopLayout:               TLayout;
+    threadsSwitch:                  TSwitch;
+    threadsSwitchLabel:             TLabel;
+    startFrameLabel:                TLabel;
+    inFrame:                        TEdit;
+    endFrameLabel:                  TLabel;
+    outFrame:                       TEdit;
+    threadsGrid:                    TStringGrid;
+    StringColumn2:                  TStringColumn;
+    StringColumn3:                  TStringColumn;
+    calculateButton:                TButton;
+    LinkControlToPropertyVisible4:  TLinkControlToProperty;
+    LinkControlToPropertyEnabled5:  TLinkControlToProperty;
+    LinkControlToPropertyEnabled6:  TLinkControlToProperty;
+    LinkControlToPropertyVisible5:  TLinkControlToProperty;
+    framesLayout:                   TLayout;
+    AEPOpenDialog:                  TOpenDialog;
+    SaveDialog1:                    TSaveDialog;
+    LinkControlToPropertyEnabled8:  TLinkControlToProperty;
+    LinkControlToPropertyEnabled9:  TLinkControlToProperty;
+    OnyxBlueStyle:                  TStyleBook;
+    infoButton:                     TButton;
+    Image1:                         TImage;
+    Image2:                         TImage;
+    launcherLayout:                 TLayout;
+    outputModuleBox:                TComboBox;
+    outputModuleLabel:              TLabel;
     outputModuleLayout: TLayout;
     renderSettingsLayout: TLayout;
     renderSettings: TComboBox;
@@ -249,6 +246,10 @@ type
     SettingsIcon: TPath;
     InfoIcon: TPath;
     LaunchIcon: TPath;
+    StyleBook1: TStyleBook;
+    threadsCount: TComboEdit;
+    LinkControlToPropertyVisible7: TLinkControlToProperty;
+    LinkControlToPropertyEnabled10: TLinkControlToProperty;
     procedure FormResize(Sender: TObject);
     procedure compSwitchSwitch(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -257,7 +258,7 @@ type
     procedure settingsButtonClick(Sender: TObject);
     procedure threadsSwitchSwitch(Sender: TObject);
     procedure calculateButtonClick(Sender: TObject);
-    procedure threadsCountChange(Sender: TObject);
+    procedure threadsCount1Change(Sender: TObject);
     procedure openFileClick(Sender: TObject);
     procedure launchButtonClick(Sender: TObject);
     procedure saveFileClick(Sender: TObject);
@@ -299,8 +300,8 @@ type
     procedure DragDrop(const Data: TDragObject; const Point: TPointF); override;
   end;
   OutputModule = record
-    Name: String;
-    Module: String;
+    Name,
+    Module,
     Mask: String;
   end;
   function GetPlatformMemorySize: Int64;
@@ -311,12 +312,14 @@ type
   function KillProcess(ProcessName: String): Integer;
   procedure InitOutputModules;
   procedure UpdateOutputModules;
+  procedure SetFormLanguage(const Form: TCommonCustomForm; const LanguageCode: Cardinal);
+  procedure InitLanguage;
   procedure InitConfiguration(Path: String);
   procedure LoadConfiguration(Path: String);
   procedure SaveConfiguration(Path: String);
 
 const
-  APPVERSION = 'v0.8.2-beta';
+  APPVERSION = 'v0.8.5-beta';
   PLATFORMPATHSEPARATOR = {$IFDEF MSWINDOWS}'\'{$ENDIF MSWINDOWS}
                           {$IFDEF MACOS}'/'{$ENDIF MACOS};
 
@@ -330,7 +333,7 @@ var
   UpdateAvailable: Boolean = False;                         (*  Represents app updates availability         *)
   FFMPEG: Boolean = False;                                  (*  Represents FFMPEG availability              *)
   RenderWindowSender: TButton;                              (*  Who opened Rendering window?                *)
-  LANG, STYLE, ONRENDERSTART: Integer;                            (*  Theme and OnRenderStart combobox values     *)
+  LANG, STYLE, ONRENDERSTART: Integer;                      (*  Language, Theme and OnRenderStart values    *)
   LogFiles: TArray<System.String>;                          (*  All the aerender log files here             *)
   OutputModules: TArray<OutputModule>;                      (*  All the After Effects output modules here   *)
   TMathParser: MathExpParser.TExpressionParser;             (*  Mathematical parser for frames calculation  *)
@@ -566,6 +569,99 @@ begin
   MainForm.outputModuleBox.Items.Add('Configure Output Modules...');
 end;
 
+procedure SetFormLanguage(const Form: TCommonCustomForm; const LanguageCode: Cardinal);
+begin
+  //ShowMessage('tag = ' + Form.Tag.ToString + '; Language = ' + Language[LanguageCode].MainForm.MainMenu.FileMenu);
+  case Form.Tag of
+    0:  begin  //MainForm
+      //Set MainMenu items
+      {$IFDEF MACOS}    //Set macOS specific Launcher item text
+      MainForm.launcherItem.Text          := Language[LanguageCode].MainForm.MainMenu.LauncherMenu;
+      MainForm.outModuleEditorItem0.Text  := Language[LanguageCode].MainForm.MainMenu.OutputModuleEditor;
+      MainForm.settingsItem0.Text         := Language[LanguageCode].MainForm.MainMenu.Settings;
+      {$ENDIF MACOS}
+
+      MainForm.fileItem.Text              := Language[LanguageCode].MainForm.MainMenu.FileMenu;
+      MainForm.importConfigItem.Text      := Language[LanguageCode].MainForm.MainMenu.ImportConfiguration;
+      MainForm.exportConfigItem.Text      := Language[LanguageCode].MainForm.MainMenu.ExportConfiguration;
+      MainForm.exitItem.Text              := Language[LanguageCode].MainForm.MainMenu.{$IFDEF MSWINDOWS}Close;{$ENDIF MSWINDOWS}{$IFDEF MACOS}CloseDarwin;{$ENDIF MACOS}
+
+      {$IFDEF MSWINDOWS}
+      MainForm.editItem.Text              := Language[LanguageCode].MainForm.MainMenu.EditMenu;
+      MainForm.outModuleEditorItem.Text   := Language[LanguageCode].MainForm.MainMenu.OutputModuleEditor;
+      MainForm.settingsItem.Text          := Language[LanguageCode].MainForm.MainMenu.Settings;
+      {$ENDIF MSWINDOWS}
+
+      MainForm.helpItem.Text              := Language[LanguageCode].MainForm.MainMenu.HelpMenu;
+      MainForm.aboutItem.Text             := Language[LanguageCode].MainForm.MainMenu.About;
+      MainForm.docsItem.Text              := Language[LanguageCode].MainForm.MainMenu.Documentation;
+
+      MainForm.projectPathLabel.Text      := Language[LanguageCode].MainForm.ProjectFile;
+      MainForm.outputPathLabel.Text       := Language[LanguageCode].MainForm.OutputFile;
+      MainForm.openFile.Text              := Language[LanguageCode].MainForm.OpenSaveProjectButton;
+      MainForm.saveFile.Text              := Language[LanguageCode].MainForm.OpenSaveProjectButton;
+      MainForm.outputModuleLabel.Text     := Language[LanguageCode].MainForm.OutputModulePreset;
+
+      //MainForm.outputModuleBox.Items[MainForm.outputModuleBox.Items.Count - 1] := Language[LanguageCode].MainForm.ConfigureOutputModules;
+
+      MainForm.properties.Text            := Language[LanguageCode].MainForm.Properties;
+      MainForm.missingFilesCheckbox.Text  := Language[LanguageCode].MainForm.MissingFiles;
+      MainForm.soundCheckbox.Text         := Language[LanguageCode].MainForm.Sound;
+      MainForm.threadedRender.Text        := Language[LanguageCode].MainForm.Threaded;
+      MainForm.customCheckbox.Text        := Language[LanguageCode].MainForm.Custom;
+      MainForm.customProp.TextPrompt      := Language[LanguageCode].MainForm.CustomPropHint;
+
+      MainForm.cacheUsageLimitLabel.Text  := Language[LanguageCode].MainForm.CacheUsageLimit;
+      //if MainForm.cacheUsageTrackBar.Value = 100 then
+      //  MainForm.cacheUsageInfo.Text      := Language[LanguageCode].MainForm.Unlimited;
+
+      MainForm.memUsageLabel.Text         := Language[LanguageCode].MainForm.MemUsage;
+      //if MainForm.memUsageTrackBar.Value = 100 then
+      //  MainForm.memUsageInfo.Text        := Language[LanguageCode].MainForm.Unlimited;
+
+      if MainForm.compSwitch.IsChecked then
+        MainForm.compSwitchLabel.Text     := Language[LanguageCode].MainForm.MultiComp
+      else
+        MainForm.compSwitchLabel.Text     := Language[LanguageCode].MainForm.SingleComp;
+
+      MainForm.compName.TextPrompt        := Language[LanguageCode].MainForm.CompNameHint;
+      MainForm.compGrid.Cells[0, 0]       := Language[LanguageCode].MainForm.MultiCompGridHeader;
+
+      if MainForm.threadsSwitch.IsChecked then begin
+        MainForm.threadsSwitchLabel.Text  := Language[LanguageCode].MainForm.SplitRender;
+        MainForm.outFrame.TextPrompt      := Language[LanguageCode].MainForm.EndFrameHint;
+      end else
+        MainForm.threadsSwitchLabel.Text  := Language[LanguageCode].MainForm.SingleRener;
+
+      MainForm.startFrameLabel.Text       := Language[LanguageCode].MainForm.StartFrame;
+      MainForm.endFrameLabel.Text         := Language[LanguageCode].MainForm.EndFrame;
+
+      MainForm.calculateButton.Text       := Language[LanguageCode].MainForm.Calculate;
+
+      MainForm.launchButton.Text          := Language[LanguageCode].MainForm.Launch;
+
+      MainForm.UpdateLabel.Text           := Language[LanguageCode].MainForm.NewVersionAvailable;
+      MainForm.downloadButton.Text        := Language[LanguageCode].MainForm.Download;
+    end;
+    1:  begin  //SettingsForm
+      //
+    end;
+  end;
+end;
+
+procedure InitLanguage;
+begin
+  LANG := 1;
+  var ResourceEN: TResourceStream := TResourceStream.Create(HInstance, 'Language_EN', RT_RCDATA);
+  var ResourceRU: TResourceStream := TResourceStream.Create(HInstance, 'Language_RU', RT_RCDATA);
+
+  Language := [
+                LauncherText.InitFromResourceStream(ResourceEN),
+                LauncherText.InitFromResourceStream(ResourceRU)
+              ];
+  SetFormLanguage(MainForm, LANG);
+end;
+
 procedure InitConfiguration(Path: String);
 var
   Config: IXMLDocument;
@@ -666,7 +762,7 @@ begin
       MainForm.outputModuleBox.Items.Add(OutputModules[i].Name);
       OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
     end;
-  MainForm.outputModuleBox.Items.Add('Configure Output Modules...');
+  MainForm.outputModuleBox.Items.Add(Language[LANG].MainForm.ConfigureOutputModules);
   MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
 end;
 
@@ -768,7 +864,7 @@ var
   Tm: String;
 begin
   try
-    threadsGrid.RowCount := threadsCount.Items[threadsCount.ItemIndex].ToInteger;
+    threadsGrid.RowCount := threadsCount.Text.ToInteger;
     Tm := inFrame.Text;
     if Tm.IsEmpty then
       inFrame.Text := '0';
@@ -776,17 +872,20 @@ begin
     Stop := outFrame.Text.ToInteger;
     threadsGrid.Cells[0, 0] := IntToStr(Start);
     J := Stop - Start;
-    K := J div threadsCount.Items[threadsCount.ItemIndex].ToInteger;
+    K := J div threadsCount.Text.ToInteger;
     threadsGrid.Cells[1, 0] := IntToStr(Start+K);
-    for I := 1 to threadsCount.Items[threadsCount.ItemIndex].ToInteger - 1 do
+    for I := 1 to threadsCount.Text.ToInteger - 1 do
       begin
         threadsGrid.Cells[0, I] := (Start+K*I+1).ToString;
         threadsGrid.Cells[1, I] := (Start+K*(I+1)).ToString;
       end;
-    threadsGrid.Cells[1, threadsCount.Items[threadsCount.ItemIndex].ToInteger-1]:=IntToStr(Stop);
+    threadsGrid.Cells[1, threadsCount.Text.ToInteger - 1]:=IntToStr(Stop);
   except
     on Exception do
-      TDialogServiceSync.MessageDialog('End frame is reqired for calculation!', TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
+      if outFrame.Text = '' then
+        TDialogServiceSync.MessageDialog(Language[LANG].MainForm.CalculateFrameError, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
+      else
+        TDialogServiceSync.MessageDialog(Language[LANG].MainForm.CalculateUnknownError, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
   end;
 end;
 
@@ -807,10 +906,8 @@ begin
       else
         if MainForm.Height <= 420 then
           MainForm.Height := MainForm.Height + 130;
-      //if LANG = 'EN' then
-        compSwitchLabel.Text := 'Multiple Compositions';
-      {if LANG = 'RU' then
-        compSwitchLabel.Text := 'Несколько композиций';}
+
+      compSwitchLabel.Text := Language[LANG].MainForm.MultiComp;
       compGrid.AniCalculations.AutoShowing := False;
       compGrid.RowCount := Round(compCount.Value);
       compGrid.Cells[0, 0] := compName.Text;
@@ -826,10 +923,8 @@ begin
       else
         if MainForm.Height <= 550 then
           MainForm.Height := MainForm.Height - 130;
-      //if LANG = 'EN' then
-        compSwitchLabel.Text := 'Single Composition';
-      {if LANG = 'RU' then
-        compSwitchLabel.Text := 'Одна композиция';}
+
+      compSwitchLabel.Text := Language[LANG].MainForm.SingleComp;
       compName.Text := compGrid.Cells[0, 0];
     end;
 end;
@@ -891,6 +986,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 var
   CFG: TextFile;
 begin
+  InitLanguage;
   {$IFDEF MSWINDOWS}DwmCompositionEnabled();{$ENDIF MSWINDOWS}
   FormatSettings.DecimalSeparator := '.';
   MainForm.Width := 600;
@@ -904,7 +1000,7 @@ begin
                       {$IFDEF MACOS}420{$ENDIF MACOS};
       UpdateInfo.Visible := True;
       UpdateInfo.Enabled := True;
-      downloadButton.Text := 'Download from GitHub (' + gitVersion + ')';
+      downloadButton.Text := Language[LANG].MainForm.Download + ' (' + gitVersion + ')';
       {$IFDEF MSWINDOWS}gitDownload := gitRelease.GetValue<string>('[0].assets[1].browser_download_url');{$ENDIF MSWINDOWS}
       {$IFDEF MACOS}gitDownload := gitRelease.GetValue<string>('[0].assets[0].browser_download_url');{$ENDIF MACOS}
     end
@@ -995,11 +1091,11 @@ begin
   SettingsForm.delFilesCheckBox.IsChecked := StrToBool(DelTempFiles);
 
   if memUsageTrackBar.Value = 100 then
-    memUsageInfo.Text := 'Unlimited'
+    memUsageInfo.Text := Language[LANG].MainForm.Unlimited
   else
     memUsageInfo.Text := Trunc(memUsageTrackBar.Value).ToString + '% (' + Trunc((GetPlatformMemorySize/1024/1024) * (memUsageTrackBar.Value / 100)).ToString + ' MB)';
   if cacheUsageTrackBar.Value = 100 then
-    cacheUsageInfo.Text := 'Unlimited'
+    cacheUsageInfo.Text := Language[LANG].MainForm.Unlimited
   else
     cacheUsageInfo.Text := Trunc(cacheUsageTrackBar.Value).ToString + '%';
 
@@ -1016,6 +1112,7 @@ begin
       ImportUnit.XMLPath := ParamStr(2);
       ImportForm.ShowModal;
     end;
+
 end;
 
 procedure TMainForm.importConfigItemClick(Sender: TObject);
@@ -1476,7 +1573,7 @@ begin
   compGrid.RowCount := Round(compCount.Value);
 end;
 
-procedure TMainForm.threadsCountChange(Sender: TObject);
+procedure TMainForm.threadsCount1Change(Sender: TObject);
 begin
   threadsGrid.RowCount := threadsCount.Items[threadsCount.ItemIndex].ToInteger();
   if not outFrame.Text.IsEmpty then
@@ -1495,10 +1592,9 @@ begin
       else
         if MainForm.Height <= 420 then
           MainForm.Height := MainForm.Height + 130;
-      //if LANG = 'EN' then
-        threadsSwitchLabel.Text := 'Split Render';
-      {if LANG = 'RU' then
-        threadsSwitchLabel.Text := 'Рендерить частями';}
+
+      threadsSwitchLabel.Text := Language[LANG].MainForm.SplitRender;
+      outFrame.TextPrompt     := Language[LANG].MainForm.EndFrameHint;
       threadsGrid.AniCalculations.AutoShowing := False;
       threadsGrid.Model.ScrollDirections := TScrollDirections.Vertical;
     end
@@ -1512,10 +1608,9 @@ begin
       else
         if MainForm.Height <= 550 then
           MainForm.Height := MainForm.Height - 130;
-      //if LANG = 'EN' then
-        threadsSwitchLabel.Text := 'Single Render';
-      {if LANG = 'RU' then
-        threadsSwitchLabel.Text := 'Рендерить одним файлом';}
+
+      threadsSwitchLabel.Text := Language[LANG].MainForm.SingleRener;
+      outFrame.TextPrompt     := '';
     end;
 end;
 
@@ -1528,6 +1623,7 @@ begin
   memUsageInfoEdit.Visible := True;
   memUsageInfoEdit.Enabled := True;
 
+  memUsageInfoEdit.SetFocus;
   memUsageInfoEdit.ResetSelection;
   memUsageInfoEdit.SelectAll;
 end;
@@ -1591,7 +1687,7 @@ end;
 procedure TMainForm.memUsageTrackBarChange(Sender: TObject);
 begin
   if memUsageTrackBar.Value = 100 then
-    memUsageInfo.Text := 'Unlimited'
+    memUsageInfo.Text := Language[LANG].MainForm.Unlimited
   else
     memUsageInfo.Text := Trunc(memUsageTrackBar.Value).ToString + '% (' + Trunc((GetPlatformMemorySize/1024/1024) * (memUsageTrackBar.Value / 100)).ToString + ' MB)';
 end;
@@ -1605,6 +1701,7 @@ begin
   cacheUsageInfoEdit.Visible := True;
   cacheUsageInfoEdit.Enabled := True;
 
+  cacheUsageInfoEdit.SetFocus;
   cacheUsageInfoEdit.ResetSelection;
   cacheUsageInfoEdit.SelectAll;
 end;
@@ -1653,7 +1750,7 @@ end;
 procedure TMainForm.cacheUsageTrackBarChange(Sender: TObject);
 begin
   if cacheUsageTrackBar.Value = 100 then
-    cacheUsageInfo.Text := 'Unlimited'
+    cacheUsageInfo.Text := Language[LANG].MainForm.Unlimited
   else
     cacheUsageInfo.Text := Trunc(cacheUsageTrackBar.Value).ToString + '%';
 end;
