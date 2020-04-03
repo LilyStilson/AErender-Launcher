@@ -26,6 +26,7 @@
             "DarwinDialogSaveNameField": "Output file name:",
             "DarwinDialogSave": "Save here",
             "OutputModulePreset": "Output Module Preset",
+            "ConfigureOutputModules": "Configure Output Modules...",
             "Properties": "Properties",
             "MissingFiles": "Render with missing files",
             "Sound": "Play sound on render finish",
@@ -33,7 +34,7 @@
             "Custom": "Custom Properties",
             "CustomPropHint": "Separate flags with spaces!",
             "CacheUsageLimit": "Cache usage limit",
-            "MemUsage": "Mem usage limit",
+            "MemUsage": "Memory usage limit",
             "Unlimited": "Unlimited",
             "SingleComp": "Single Composition",
             "MultiComp": "Multiple Compositions",
@@ -45,6 +46,8 @@
             "EndFrame": "End Frame:",
             "EndFrameHint": "REQUIRED",
             "Calculate": "Calculate",
+            "CalculateFrameError": "End frame is reqired for calculation!",
+            "CalculateUnknownError": "Unknown calculation error",
             "Launch": "Launch",
             "NewVersionAvailable": "New Version Available!", 
             "Download": "Download from GitHub"
@@ -52,6 +55,7 @@
         "SettingsFormText": {
             "LauncherSettings": "AErender Launcher Settings",
             "RenderEnginePath": "After Effects render engine path",
+            "Language": "Language",
             "Style": "Style",
             "DefaultProjectsDirectory": "Default projects directory",
             "DefaultOutputDirectory": "Default Output Directory",
@@ -90,7 +94,7 @@
         },
         "RenderingFormText": {
             "RenderingProgress": "Rendering Progress",
-            "HandleDisabled": "",
+            "HandleDisabled": "Arender handle disabled. Enable aerender handle in Launcher settings",
             "QueueIsEmpty": "Queue is empty",
             "TotalProgress": "Total Progress",
             "TimeElapsed": "Time Elapsed: ",

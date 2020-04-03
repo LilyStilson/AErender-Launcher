@@ -25,6 +25,8 @@ program AErenderLauncher;
 (*        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE     *)
 (*        SOFTWARE.                                                                         *)
 
+{$R *.dres}
+
 uses
   System.StartUpCopy,
   System.SysUtils,
@@ -55,21 +57,13 @@ begin
   Application.ProcessMessages;
 
   Application.CreateForm(TMainForm, MainForm);
-
   Application.CreateForm(TSettingsForm, SettingsForm);
-
   Application.CreateForm(THelpForm, HelpForm);
-
   Application.CreateForm(TImportForm, ImportForm);
-
   Application.CreateForm(TAboutForm, AboutForm);
-
   Application.CreateForm(TFFMPEGForm, FFMPEGForm);
-
   Application.CreateForm(TRenderingForm, RenderingForm);
-
   Application.CreateForm(TOutputModuleEditorForm, OutputModuleEditorForm);
-
   Application.Run;
 end.
 
