@@ -34,6 +34,7 @@ uses
   System.Classes,
   System.Variants,
   System.Diagnostics,
+  System.Notification,
 
   FMX.Types,
   FMX.Controls,
@@ -51,7 +52,7 @@ uses
   AErenderDataParser,
 
   {$IFDEF MSWINDOWS}
-    FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
+    FMX.TaskBar, FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
   {$ENDIF MSWINDOWS}
 
   {$IFDEF MACOS}
@@ -88,6 +89,7 @@ type
     StopwatchTimer: TTimer;
     projectNameLabel: TLabel;
     totalFramesLabel: TLabel;
+    NotificationC: TNotificationCenter;
     procedure ShowLogButtonClick (Sender: TObject);
     procedure renderingTimerTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -178,6 +180,7 @@ begin
       totalProgressPercentage.Text := '0%';
       TotalProgressBar.Value := 0;
       TotalProgressBar.Max := 1;
+      {$IFDEF MSWNDOWS}MainTaskBar.TaskBarState := 0;{$ENDIF MSWINDOWS}
     end
   except
     on Exception do
@@ -192,6 +195,7 @@ begin
     begin
       abortRenderingButtonClick(Sender);
       TotalProgressBar.Value := 0;
+      {$IFDEF MSWINDOWS}MainTaskBar.TaskBarState := 0;{$ENDIF MSWINDOWS}
     end;
 end;
 
@@ -288,12 +292,14 @@ begin
               RenderGroups[i].TLogMemo.ReadOnly := True;
               RenderGroups[i].TLogMemo.WordWrap := True;
               RenderGroups[i].TLogMemo.Visible := False;
+              RenderGroups[i].TLogMemo.StyledSettings := [TStyledSetting.Size, TStyledSetting.Style, TStyledSetting.FontColor];
               RenderGroups[i].TLogMemo.TextSettings.Font.Family := 'Consolas';
             end;
         end;
       renderingTimer.Enabled := True;
       CurrentTime := Now;
       StopwatchTimer.Enabled := True;
+      {$IFDEF MSWINDOWS}MainTaskBar.TaskBarState := 2;{$ENDIF MSWINDOWS}
     end;
 end;
 
@@ -308,9 +314,12 @@ type
 var
   Render: TArray<TRenderData>;
   i: Integer;
+  Notification: TNotification;
+  Errored: String;
 begin
   var Finished: Integer := 0;
   var Error: Integer := 0;
+  var Completed: Integer := 0;
 
   SetLength (Render, Length(MainUnit.LogFiles));
 
@@ -385,6 +394,7 @@ begin
 
           TotalProgressBar.Value := sum;
           totalProgressPercentage.Text := Round((TotalProgressBar.Value / TotalProgressBar.Max) * 100).ToString + '%';
+          {$IFDEF MSWINDOWS}MainTaskBar.TaskBarProgress := Round((TotalProgressBar.Value / TotalProgressBar.Max) * 100);{$ENDIF MSWINDOWS}
           if (TotalProgressBar.Max = 0) or (TotalProgressBar.Max = 1) then
             framesLabel.Text := 'Waiting for aerender...'
           else
@@ -416,14 +426,44 @@ begin
       if Render[j].State = 'error' then
         inc (Error);
 
+    for var j := 0 to High(RenderGroups) do
+      if RenderGroups[j].TRenderProgressBar.Value = RenderGroups[j].TRenderProgressBar.Max then
+        inc (Completed);
 
-    if (Finished = Length(LogFiles)) or (Error = Length(LogFiles)) then
+    if (Completed = Length(LogFiles)) then
       begin
-        Sleep (2000);
+        Sleep (1000);
         TotalProgressBar.Value := TotalProgressBar.Max;
         totalProgressPercentage.Text := '100%';
         renderingTimer.Enabled := False;
         StopwatchTimer.Enabled := False;
+
+        if Error = 0 then
+          Errored := 'None'
+        else
+          Errored := Error.ToString;
+
+        Notification := NotificationC.CreateNotification;
+        try
+          Notification.Name := 'AERLNotification';
+          Notification.AlertBody := Format( 'Rendering Finished! %s%s%s%s renders finished with error!',
+                                            [#13#10, timeElapsedLabel.Text, #13#10, Errored]    );
+          Notification.Title := 'AErender Launcher';
+          Notification.FireDate := Now;
+          NotificationC.PresentNotification(Notification);
+        finally
+          Notification.DisposeOf;
+        end;
+
+        {$IFDEF MSWINDOWS}
+        FlashWindow(ApplicationHWND, True);
+        if Error = 0 then
+          MainTaskBar.TaskBarState := 0;
+        if (Error > 0) and (Error <> Length(LogFiles)) then
+          MainTaskBar.TaskBarState := 4;
+        if Error = Length(LogFiles) then
+          MainTaskBar.TaskBarState := 3;
+        {$ENDIF MSWINDOWS}
       end;
 end;
 

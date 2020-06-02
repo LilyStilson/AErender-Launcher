@@ -51,6 +51,7 @@ uses
   FMX.Layouts,
   FMX.Edit,
   FMX.Platform,
+  FMX.Objects,
   {$ENDREGION}
 
   {$REGION '  Windows Only Libraries  '}{$IFDEF MSWINDOWS}
@@ -106,6 +107,8 @@ type
     Label5: TLabel;
     ToolBar2: TToolBar;
     Label6: TLabel;
+    refreshAerender: TButton;
+    RefreshIcon: TPath;
     procedure langBoxChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure aerenderPathSelectClick(Sender: TObject);
@@ -125,6 +128,7 @@ type
     procedure dpi100Change(Sender: TObject);
     procedure dpi150Change(Sender: TObject);
     procedure dpi200Change(Sender: TObject);
+    procedure refreshAerenderClick(Sender: TObject);
   private
     { Private declarations }
     {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
@@ -195,11 +199,10 @@ var
   tempstr: String;
 begin
   tempstr := '';
-  for var i := 1 to Length(s) do
-    begin
-      if s[i].IsDigit then
-        tempstr := tempstr + s[i];
-    end;
+  for var i := 1 to Length(s) do begin
+    if s[i].IsDigit then
+      tempstr := tempstr + s[i];
+  end;
   Result := tempstr.ToInteger;
 end;
 
@@ -213,24 +216,14 @@ begin
   {$IFDEF MACOS}AdobeFolderPath := '/Applications/';{$ENDIF MACOS}
 
   maxVer := 0;
-  AdobeFolder := TDirectory.GetDirectories(AdobeFolderPath);
-  for var i := 0 to High(AdobeFolder) do
-    begin
-      if AdobeFolder[i].Contains ('After Effects') then
-        begin
-          SetLength(AEVersions, i + 1);
-          AEVersions[i] := AdobeFolder[i];
-        end;
-    end;
+  AdobeFolder := TDirectory.GetDirectories(AdobeFolderPath, '*After Effects*');
 
-  for var i := 0 to High(AEVersions) do
-    begin
-      if ExtractIntegerFromString(AEVersions[i]) > maxVer then
-        begin
-          maxVer := ExtractIntegerFromString(AEVersions[i]);
-          maxVerStr := AEVersions[i];
-        end;
+  for var i := 0 to High(AdobeFolder) do begin
+    if ExtractIntegerFromString(AdobeFolder[i]) > maxVer then begin
+      maxVer := ExtractIntegerFromString(AdobeFolder[i]);
+      maxVerStr := AdobeFolder[i];
     end;
+  end;
   //ver := maxVer;
   Result := maxVerStr;
 end;
@@ -403,6 +396,17 @@ end;
 procedure TSettingsForm.onRenderStartBoxChange(Sender: TObject);
 begin
   ONRENDERSTART := onRenderStartBox.ItemIndex;
+end;
+
+procedure TSettingsForm.refreshAerenderClick(Sender: TObject);
+begin
+  try
+    aerenderPath.Text := DetectAerender + {$IFDEF MSWINDOWS}'\Support Files\aerender.exe'{$ENDIF MSWINDOWS}   {$IFDEF MACOS}'/aerender'{$ENDIF MACOS};
+  except
+    on E: Exception do begin
+      TDialogServiceSync.MessageDialog(('Can''t detect path to aerender. Try to specify it manually.' + #13#10 + E.ToString()), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
+    end;
+  end;
 end;
 
 procedure TSettingsForm.ResetButtonClick(Sender: TObject);

@@ -30,21 +30,30 @@ program AErenderLauncher;
 uses
   System.StartUpCopy,
   System.SysUtils,
-  FMX.Forms,
-  SplashScreenUnit in 'SplashScreenUnit.pas' {SplashScreenForm},
-  MainUnit in 'MainUnit.pas' {MainForm},
-  SettingsUnit in 'SettingsUnit.pas' {SettingsForm},
-  HelpUnit in 'HelpUnit.pas' {HelpForm},
-  ImportUnit in 'ImportUnit.pas' {ImportForm},
-  AboutUnit in 'AboutUnit.pas' {AboutForm},
-  FFMPEGUnit in 'FFMPEGUnit.pas' {FFMPEGForm},
-  RenderingUnit in 'RenderingUnit.pas' {RenderingForm},
-  MathExpParser in 'MathExpParser.pas',
+  FMX.Forms in 'lib\FMX.Forms.pas',
+  FMX.Graphics in 'lib\FMX.Graphics.pas',
+  FMX.Ani in 'lib\FMX.Ani.pas',
+  SplashScreenUnit in 'SplashScreenUnit.pas'  {SplashScreenForm},
+  MainUnit in 'MainUnit.pas'                  {MainForm},
+  SettingsUnit in 'SettingsUnit.pas'          {SettingsForm},
+  HelpUnit in 'HelpUnit.pas'                  {HelpForm},
+  ImportUnit in 'ImportUnit.pas'              {ImportForm},
+  AboutUnit in 'AboutUnit.pas'                {AboutForm},
+  FFMPEGUnit in 'FFMPEGUnit.pas'              {FFMPEGForm},
+  RenderingUnit in 'RenderingUnit.pas'        {RenderingForm},
   OutputModuleEditorUnit in 'OutputModuleEditorUnit.pas' {OutputModuleEditorForm},
-  AErenderDataParser in '..\..\AErender Parser\AErenderDataParser.pas',
+  {$IFDEF MACOS}
   Mac.CodeBlocks in 'lib\Mac.CodeBlocks.pas',
-  AErenderLauncherLocalization in 'lib\AErenderLauncherLocalization.pas',
-  MacApi.Dialogs in 'lib\MacApi.Dialogs.pas';
+  MacApi.Dialogs in 'lib\MacApi.Dialogs.pas',
+  {$ENDIF MACOS}
+  {$IFDEF MSWINDOWS}
+  FMX.Taskbar in 'lib\FMX.Taskbar.pas',
+  {$ENDIF MSWINDOWS}
+  MathExpParser in 'MathExpParser.pas',
+  AErenderDataParser in '..\..\AErender Parser\AErenderDataParser.pas',
+  AErenderLauncherLocalization in 'lib\AErenderLauncherLocalization.pas';
+
+
 
 {$R *.res}
 

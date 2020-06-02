@@ -899,7 +899,6 @@ object TStyleContainer
     Size.Width = 100.000000000000000000
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
-    Visible = False
     TabOrder = 17
     object TBrushObject
       StyleName = 'foreground'
@@ -923,9 +922,29 @@ object TStyleContainer
         Size.Width = 100.000000000000000000
         Size.Height = 25.000000000000000000
         Size.PlatformDefault = False
-        Stroke.Kind = None
+        Stroke.Color = xFF151515
+        object TColorAnimation
+          StyleName = 'ColorAnimation1Style'
+          Duration = 0.000000000000000000
+          Inverse = True
+          PropertyName = 'Stroke.Color'
+          StartValue = xFF202020
+          StopValue = xFF404040
+          Trigger = 'IsMouseOver=true;IsFocused=false'
+          TriggerInverse = 'IsMouseOver=false;IsFocused=false'
+        end
+        object TColorAnimation
+          StyleName = 'ColorAnimation2Style'
+          Duration = 0.000000000000000000
+          Inverse = True
+          PropertyName = 'Stroke.Color'
+          StartValue = xFF404040
+          StopValue = xFF2A82E2
+          Trigger = 'IsMouseOver=true;IsFocused=true'
+          TriggerInverse = 'IsMouseOver=true;IsFocused=false'
+        end
         object TLayout
-          StyleName = 'ButtonStyleObject'
+          StyleName = 'Layout2'
           Align = FitRight
           Margins.Top = 1.000000000000000000
           Margins.Right = 1.000000000000000000
@@ -936,8 +955,44 @@ object TStyleContainer
           Size.Height = 23.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 0
+          object TRectangle
+            StyleName = 'Rectangle1'
+            Align = Contents
+            Fill.Color = xFF303030
+            HitTest = False
+            Size.Width = 23.075454711914060000
+            Size.Height = 23.000000000000000000
+            Size.PlatformDefault = False
+            Stroke.Kind = None
+            object TColorAnimation
+              StyleName = 'buttonColorAnimation1'
+              Duration = 0.000000000000000000
+              PropertyName = 'Fill.Color'
+              StartValue = xFF202020
+              StopValue = xFF404040
+              Trigger = 'IsMouseOver=true;IsPressed=false;IsFocused=false'
+              TriggerInverse = 'IsMouseOver=false;IsPressed=false;IsFocused=false'
+            end
+            object TColorAnimation
+              StyleName = 'buttonColorAnimation2'
+              Duration = 0.000000000000000000
+              PropertyName = 'Fill.Color'
+              StartValue = xFF404040
+              StopValue = xFF17579C
+              Trigger = 'IsPressed=true;IsMouseOver=true;IsFocused=false'
+            end
+            object TColorAnimation
+              StyleName = 'buttonColorAnimation3'
+              Duration = 0.000000000000000000
+              PropertyName = 'Fill.Color'
+              StartValue = xFF2A82E2
+              StopValue = xFF17579C
+              Trigger = 'IsPressed=true;IsMouseOver=true;IsFocused=true'
+              TriggerInverse = 'IsPressed=false;IsMouseOver=true;IsFocused=true'
+            end
+          end
           object TLayout
-            StyleName = 'Layout1'
+            StyleName = 'Arrow'
             Align = Center
             Margins.Left = 1.000000000000000000
             Size.Width = 10.000000000000000000
@@ -959,33 +1014,11 @@ object TStyleContainer
             end
           end
         end
-        object TColorAnimation
-          StyleName = 'buttonColorAnimation1'
-          Duration = 0.000000000000000000
-          PropertyName = 'Fill.Color'
-          StartValue = xFF202020
-          StopValue = xFF404040
-          Trigger = 'IsMouseOver=true;IsPressed=false;IsFocused=false'
-          TriggerInverse = 'IsMouseOver=false;IsPressed=false;IsFocused=false'
-        end
-        object TColorAnimation
-          StyleName = 'buttonColorAnimation2'
-          Duration = 0.000000000000000000
-          PropertyName = 'Fill.Color'
-          StartValue = xFF404040
-          StopValue = xFF17579C
-          Trigger = 'IsPressed=true;IsMouseOver=true;IsFocused=false'
-        end
-        object TColorAnimation
-          StyleName = 'buttonColorAnimation3'
-          Duration = 0.000000000000000000
-          PropertyName = 'Fill.Color'
-          StartValue = xFF2A82E2
-          StopValue = xFF17579C
-          Trigger = 'IsPressed=true;IsMouseOver=true;IsFocused=true'
-          TriggerInverse = 'IsPressed=false;IsMouseOver=true;IsFocused=true'
-        end
       end
+    end
+    object TBrushObject
+      StyleName = 'selection'
+      Brush.Color = x962A82E2
     end
     object TLayout
       StyleName = 'content'
@@ -993,16 +1026,12 @@ object TStyleContainer
       Locked = True
       Margins.Left = 2.000000000000000000
       Margins.Top = 2.000000000000000000
-      Margins.Right = 27.000000000000000000
+      Margins.Right = 30.000000000000000000
       Margins.Bottom = 2.000000000000000000
-      Size.Width = 71.000000000000000000
+      Size.Width = 68.000000000000000000
       Size.Height = 21.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
-    end
-    object TBrushObject
-      StyleName = 'selection'
-      Brush.Color = x962A82E2
     end
   end
   object TLayout
@@ -1539,7 +1568,7 @@ object TStyleContainer
     end
   end
   object TLayout
-    StyleName = 'progressbarstyle'
+    StyleName = 'progressbarministyle'
     Align = Center
     Size.Width = 66.599998474121090000
     Size.Height = 56.399997711181640000
@@ -1555,21 +1584,15 @@ object TStyleContainer
       Size.Width = 66.599998474121090000
       Size.Height = 56.399997711181640000
       Size.PlatformDefault = False
-      Stroke.Color = xFF151515
+      Stroke.Kind = None
       object TRectangle
         StyleName = 'hindicator'
         Align = Left
         Fill.Color = xFF2A82E2
         Locked = True
         HitTest = False
-        Margins.Left = 1.000000000000000000
-        Margins.Top = 1.000000000000000000
-        Margins.Right = 1.000000000000000000
-        Margins.Bottom = 1.000000000000000000
-        Position.X = 1.000000000000000000
-        Position.Y = 1.000000000000000000
         Size.Width = 50.000000000000000000
-        Size.Height = 54.399997711181640000
+        Size.Height = 56.399997711181640000
         Size.PlatformDefault = False
         Stroke.Kind = None
       end
@@ -1583,20 +1606,15 @@ object TStyleContainer
       Size.Width = 66.599998474121090000
       Size.Height = 56.399997711181640000
       Size.PlatformDefault = False
-      Stroke.Color = xFF151515
+      Stroke.Kind = None
       object TRectangle
         StyleName = 'vindicator'
         Align = Bottom
         Fill.Color = xFF2A82E2
         Locked = True
         HitTest = False
-        Margins.Left = 1.000000000000000000
-        Margins.Top = 1.000000000000000000
-        Margins.Right = 1.000000000000000000
-        Margins.Bottom = 1.000000000000000000
-        Position.X = 1.000000000000000000
-        Position.Y = 34.399997711181640000
-        Size.Width = 64.599998474121090000
+        Position.Y = 35.399997711181640000
+        Size.Width = 66.599998474121090000
         Size.Height = 21.000000000000000000
         Size.PlatformDefault = False
         Stroke.Kind = None
@@ -3931,6 +3949,7 @@ object TStyleContainer
     Size.Width = 125.666671752929700000
     Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
+    Visible = False
     TabOrder = 60
     object TLayout
       Align = Bottom
@@ -4071,6 +4090,71 @@ object TStyleContainer
       Size.Height = 34.000000000000000000
       Size.PlatformDefault = False
       TextSettings.FontColor = claWhite
+    end
+  end
+  object TLayout
+    StyleName = 'progressbarstyle'
+    Align = Center
+    Size.Width = 66.599998474121090000
+    Size.Height = 56.399997711181640000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 62
+    object TRectangle
+      StyleName = 'htrack'
+      Align = Contents
+      Fill.Color = xFF202020
+      Locked = True
+      HitTest = False
+      Size.Width = 66.599998474121090000
+      Size.Height = 56.399997711181640000
+      Size.PlatformDefault = False
+      Stroke.Color = xFF151515
+      object TRectangle
+        StyleName = 'hindicator'
+        Align = Left
+        Fill.Color = xFF2A82E2
+        Locked = True
+        HitTest = False
+        Margins.Left = 1.000000000000000000
+        Margins.Top = 1.000000000000000000
+        Margins.Right = 1.000000000000000000
+        Margins.Bottom = 1.000000000000000000
+        Position.X = 1.000000000000000000
+        Position.Y = 1.000000000000000000
+        Size.Width = 50.000000000000000000
+        Size.Height = 54.399997711181640000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+      end
+    end
+    object TRectangle
+      StyleName = 'vtrack'
+      Align = Contents
+      Fill.Color = xFF202020
+      Locked = True
+      HitTest = False
+      Size.Width = 66.599998474121090000
+      Size.Height = 56.399997711181640000
+      Size.PlatformDefault = False
+      Stroke.Color = xFF151515
+      object TRectangle
+        StyleName = 'vindicator'
+        Align = Bottom
+        Fill.Color = xFF2A82E2
+        Locked = True
+        HitTest = False
+        Margins.Left = 1.000000000000000000
+        Margins.Top = 1.000000000000000000
+        Margins.Right = 1.000000000000000000
+        Margins.Bottom = 1.000000000000000000
+        Position.X = 1.000000000000000000
+        Position.Y = 34.399997711181640000
+        Size.Width = 64.599998474121090000
+        Size.Height = 21.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+      end
     end
   end
 end

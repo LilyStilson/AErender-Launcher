@@ -318,4 +318,8 @@ object RenderingForm: TRenderingForm
     Left = 40
     Top = 48
   end
+  object NotificationC: TNotificationCenter
+    Left = 40
+    Top = 145
+  end
 end

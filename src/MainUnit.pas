@@ -43,6 +43,8 @@ uses
   System.Bindings.Outputs,
   System.Notification,
   System.ImageList,
+  System.Net.URLClient,
+  System.Net.HttpClientComponent,
   {$ENDREGION}
 
   {$REGION '    FMX Namespaces    '}
@@ -136,41 +138,41 @@ type
     compTopLayout: TLayout;
     compSwitchLabel: TLabel;
     settingsButton: TButton;
-    compCount:                      TSpinBox;
-    compName:                       TEdit;
-    LinkControlToPropertyEnabled2:  TLinkControlToProperty;
-    LinkControlToPropertyVisible:   TLinkControlToProperty;
-    LinkControlToPropertyEnabled3:  TLinkControlToProperty;
-    LinkControlToPropertyVisible2:  TLinkControlToProperty;
-    LinkControlToPropertyEnabled4:  TLinkControlToProperty;
-    LinkControlToPropertyVisible3:  TLinkControlToProperty;
-    threadsTopLayout:               TLayout;
-    threadsSwitch:                  TSwitch;
-    threadsSwitchLabel:             TLabel;
-    startFrameLabel:                TLabel;
-    inFrame:                        TEdit;
-    endFrameLabel:                  TLabel;
-    outFrame:                       TEdit;
-    threadsGrid:                    TStringGrid;
-    StringColumn2:                  TStringColumn;
-    StringColumn3:                  TStringColumn;
-    calculateButton:                TButton;
-    LinkControlToPropertyVisible4:  TLinkControlToProperty;
-    LinkControlToPropertyEnabled5:  TLinkControlToProperty;
-    LinkControlToPropertyEnabled6:  TLinkControlToProperty;
-    LinkControlToPropertyVisible5:  TLinkControlToProperty;
-    framesLayout:                   TLayout;
-    AEPOpenDialog:                  TOpenDialog;
-    SaveDialog1:                    TSaveDialog;
-    LinkControlToPropertyEnabled8:  TLinkControlToProperty;
-    LinkControlToPropertyEnabled9:  TLinkControlToProperty;
-    OnyxBlueStyle:                  TStyleBook;
-    infoButton:                     TButton;
-    Image1:                         TImage;
-    Image2:                         TImage;
-    launcherLayout:                 TLayout;
-    outputModuleBox:                TComboBox;
-    outputModuleLabel:              TLabel;
+    compCount: TSpinBox;
+    compName: TEdit;
+    LinkControlToPropertyEnabled2: TLinkControlToProperty;
+    LinkControlToPropertyVisible: TLinkControlToProperty;
+    LinkControlToPropertyEnabled3: TLinkControlToProperty;
+    LinkControlToPropertyVisible2: TLinkControlToProperty;
+    LinkControlToPropertyEnabled4: TLinkControlToProperty;
+    LinkControlToPropertyVisible3: TLinkControlToProperty;
+    threadsTopLayout: TLayout;
+    threadsSwitch: TSwitch;
+    threadsSwitchLabel: TLabel;
+    startFrameLabel: TLabel;
+    inFrame: TEdit;
+    endFrameLabel: TLabel;
+    outFrame: TEdit;
+    threadsGrid: TStringGrid;
+    StringColumn2: TStringColumn;
+    StringColumn3: TStringColumn;
+    calculateButton: TButton;
+    LinkControlToPropertyVisible4: TLinkControlToProperty;
+    LinkControlToPropertyEnabled5: TLinkControlToProperty;
+    LinkControlToPropertyEnabled6: TLinkControlToProperty;
+    LinkControlToPropertyVisible5: TLinkControlToProperty;
+    framesLayout: TLayout;
+    AEPOpenDialog: TOpenDialog;
+    SaveDialog1: TSaveDialog;
+    LinkControlToPropertyEnabled8: TLinkControlToProperty;
+    LinkControlToPropertyEnabled9: TLinkControlToProperty;
+    OnyxBlueStyle: TStyleBook;
+    infoButton: TButton;
+    Image1: TImage;
+    Image2: TImage;
+    launcherLayout: TLayout;
+    outputModuleBox: TComboBox;
+    outputModuleLabel: TLabel;
     outputModuleLayout: TLayout;
     renderSettingsLayout: TLayout;
     renderSettings: TComboBox;
@@ -250,6 +252,7 @@ type
     threadsCount: TComboEdit;
     LinkControlToPropertyVisible7: TLinkControlToProperty;
     LinkControlToPropertyEnabled10: TLinkControlToProperty;
+    UpdateNetHTTPClient: TNetHTTPClient;
     procedure FormResize(Sender: TObject);
     procedure compSwitchSwitch(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -289,6 +292,11 @@ type
     procedure outModuleEditorItem0Click(Sender: TObject);
     procedure winOutModuleEditorItemClick(Sender: TObject);
     procedure inFrameValidate(Sender: TObject; var Text: string);
+    procedure threadsCountChange(Sender: TObject);
+    procedure UpdateNetHTTPClientRequestError(const Sender: TObject;
+      const AError: string);
+    procedure UpdateNetHTTPClientRequestCompleted(const Sender: TObject;
+      const AResponse: IHTTPResponse);
   private
     { Private declarations }
     //{$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
@@ -320,6 +328,7 @@ type
 
 const
   APPVERSION = 'v0.8.5-beta';
+  AERL_REPO_RELEASES = 'https://api.github.com/repos/lilystilson/aerender-launcher/releases';
   PLATFORMPATHSEPARATOR = {$IFDEF MSWINDOWS}'\'{$ENDIF MSWINDOWS}
                           {$IFDEF MACOS}'/'{$ENDIF MACOS};
 
@@ -409,19 +418,15 @@ end;
 
 function GetHTML(URL: String): String;
 var
-  HttpClient: THttpClient;
   HttpResponse: IHttpResponse;
 begin
-  HttpClient := THttpClient.Create;
   try
-    HttpResponse := HttpClient.Get(URL);
+    HttpResponse := MainForm.UpdateNetHTTPClient.Get(URL);
     Result := HttpResponse.ContentAsString();
-    HttpClient.Free;
   except
     on Exception do
       begin
         Result := '404';
-        HttpClient.Free;
       end;
   end;
 end;
@@ -481,7 +486,6 @@ var
   FSnapshotHandle: THandle;
   FProcessEntry32: TProcessEntry32;
 begin
-
   try
     FSnapshotHandle := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     FProcessEntry32.dwSize := SizeOf(FProcessEntry32);
@@ -492,12 +496,8 @@ begin
       if ((UpperCase(ExtractFileName(FProcessEntry32.szExeFile)) =
         UpperCase(ProcessName)) or (UpperCase(FProcessEntry32.szExeFile) =
         UpperCase(ProcessName))) then
-        Result := Integer(TerminateProcess(
-                          OpenProcess(PROCESS_TERMINATE,
-                                      BOOL(0),
-                                      FProcessEntry32.th32ProcessID),
-                                      0));
-       ContinueLoop := Process32Next(FSnapshotHandle, FProcessEntry32);
+        TerminateProcess(OpenProcess(PROCESS_TERMINATE, BOOL(0), FProcessEntry32.th32ProcessID), 0);
+        ContinueLoop := Process32Next(FSnapshotHandle, FProcessEntry32);
     end;
     CloseHandle(FSnapshotHandle);
     Result := 0;
@@ -651,13 +651,13 @@ end;
 
 procedure InitLanguage;
 begin
-  LANG := 1;
+  LANG := 0;
   var ResourceEN: TResourceStream := TResourceStream.Create(HInstance, 'Language_EN', RT_RCDATA);
-  var ResourceRU: TResourceStream := TResourceStream.Create(HInstance, 'Language_RU', RT_RCDATA);
+  //var ResourceRU: TResourceStream := TResourceStream.Create(HInstance, 'Language_RU', RT_RCDATA);
 
   Language := [
-                LauncherText.InitFromResourceStream(ResourceEN),
-                LauncherText.InitFromResourceStream(ResourceRU)
+                LauncherText.InitFromResourceStream(ResourceEN){,
+                LauncherText.InitFromResourceStream(ResourceRU) }
               ];
   SetFormLanguage(MainForm, LANG);
 end;
@@ -819,6 +819,38 @@ begin
   Config.SaveToFile(Path);
 end;
 
+function Open(Path: String): Integer;
+begin
+  {$IFDEF MSWINDOWS}
+    Result := ShellExecute(0, 'open', PWideChar(Path), nil, nil, SW_SHOW);
+  {$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}
+    Result := _system(PAnsiChar('open ' + AnsiString('"' + Path + '"')));
+  {$ENDIF MACOS}
+end;
+
+function Execute(Path: String): Integer;
+begin
+  {$IFDEF MSWINDOWS}
+    Result := ShellExecute(0, 'OPEN', PWideChar(Path), '', '', SW_SHOWNORMAL)
+  {$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}
+    _system(PAnsiChar('chmox +x ' + AnsiString('"' + Path + '"')));
+    Result := _system(PAnsiChar('command ' + AnsiString('"' + Path + '"')));
+  {$ENDIF MACOS}
+end;
+
+function BackgroundExecute(Path: String): Integer;
+begin
+  {$IFDEF MSWINDOWS}
+    Result := ShellExecute(0, 'OPEN', PWideChar(Path), '', '', SW_HIDE)
+  {$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}
+    _system(PAnsiChar('chmox +x ' + AnsiString('"' + Path + '"')));
+    Result := _system(PAnsiChar('command ' + AnsiString('"' + Path + '" & disown')));
+  {$ENDIF MACOS}
+end;
+
 {$ENDREGION}
 
 {$REGION '    Public    '}
@@ -838,8 +870,6 @@ begin
 end;
 
 procedure TMainForm.DragDrop(const Data: TDragObject; const Point: TPointF);
-var
-  S: string;
 begin
   if FHandleDragDirectly then
     if Data.Source <> nil then
@@ -896,7 +926,7 @@ end;
 
 procedure TMainForm.compSwitchSwitch(Sender: TObject);
 begin
-  if compSwitch.IsChecked then
+  {if compSwitch.IsChecked then
     begin
       if UpdateAvailable = True then
         begin
@@ -926,7 +956,7 @@ begin
 
       compSwitchLabel.Text := Language[LANG].MainForm.SingleComp;
       compName.Text := compGrid.Cells[0, 0];
-    end;
+    end;    }
 end;
 
 procedure TMainForm.docsItemClick(Sender: TObject);
@@ -937,12 +967,7 @@ end;
 
 procedure TMainForm.downloadButtonClick(Sender: TObject);
 begin
-  {$IFDEF MSWINDOWS}
-    ShellExecute(0, 'open', PWideChar(gitDownload), nil, nil, SW_SHOW);
-  {$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}
-    _system(PAnsiChar('open ' + AnsiString('"' + gitDownload + '"')));
-  {$ENDIF MACOS}
+  Open(gitDownload);
 end;
 
 procedure TMainForm.exitItemClick(Sender: TObject);
@@ -956,11 +981,11 @@ begin
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
-var
-  CFG: TextFile;
 begin
-  {$IFDEF MSWINDOWS}KillProcess('AfterFX.com');{$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}KillProcess('aerendercore');{$ENDIF MACOS}
+  if SettingsForm.HandleCheckBox.IsChecked then begin
+    {$IFDEF MSWINDOWS}KillProcess('AfterFX.com');{$ENDIF MSWINDOWS}
+    {$IFDEF MACOS}KillProcess('aerendercore');{$ENDIF MACOS}
+  end;
 
   SaveConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
   if StrToBool(DelTempFiles) = True then
@@ -988,29 +1013,14 @@ var
 begin
   InitLanguage;
   {$IFDEF MSWINDOWS}DwmCompositionEnabled();{$ENDIF MSWINDOWS}
-  FormatSettings.DecimalSeparator := '.';
+  //FormatSettings.DecimalSeparator := '.';
+  FormatSettings := TFormatSettings.Invariant;
   MainForm.Width := 600;
+  MainForm.Height := {$IFDEF MSWINDOWS}420{$ENDIF MSWINDOWS}
+                      {$IFDEF MACOS}400{$ENDIF MACOS};
   MainForm.Caption := 'AErender Launcher (' + APPVERSION + ')';
   APPFOLDER :=  {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\'{$ENDIF MSWINDOWS}
                 {$IFDEF MACOS}GetEnvironmentVariable('HOME') + '/Documents/AErender/'{$ENDIF MACOS};
-  UpdateAvailable := IsUpdateAvailable;
-  if UpdateAvailable = True then
-    begin
-      MainForm.Height := {$IFDEF MSWINDOWS}460{$ENDIF MSWINDOWS}
-                      {$IFDEF MACOS}420{$ENDIF MACOS};
-      UpdateInfo.Visible := True;
-      UpdateInfo.Enabled := True;
-      downloadButton.Text := Language[LANG].MainForm.Download + ' (' + gitVersion + ')';
-      {$IFDEF MSWINDOWS}gitDownload := gitRelease.GetValue<string>('[0].assets[1].browser_download_url');{$ENDIF MSWINDOWS}
-      {$IFDEF MACOS}gitDownload := gitRelease.GetValue<string>('[0].assets[0].browser_download_url');{$ENDIF MACOS}
-    end
-  else
-    begin
-      UpdateInfo.Visible := False;
-      UpdateInfo.Enabled := False;
-      MainForm.Height := {$IFDEF MSWINDOWS}420{$ENDIF MSWINDOWS}
-                      {$IFDEF MACOS}400{$ENDIF MACOS};
-    end;
   try
     if GetFFMPEGPath <> '' then
       begin
@@ -1053,16 +1063,18 @@ begin
       try
         LoadConfiguration (APPFOLDER + 'AErenderConfiguration.xml');
       except
-        if (TDialogServiceSync.MessageDialog(('Configuration file is corrupted! Press OK to renew configuration file. Application will be restarted.' + #13#10 +
-                              {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\AErenderConfiguration.xml read error.'{$ENDIF MSWINDOWS}
-                                  {$IFDEF MACOS}'~/Documents/AErender/AErenderConfiguration.xml read error.'{$ENDIF MACOS}),
-              TMsgDlgType.mtError, mbOKCancel, TMsgDlgBtn.mbOK, 0) = 1) then
-            begin
-              System.SysUtils.DeleteFile (APPFOLDER + 'AErenderConfiguration.xml');
-              {$IFDEF MSWINDOWS}ShellExecute(0, 'OPEN', PChar(ParamStr(0)), '', '', SW_SHOWNORMAL);{$ENDIF MSWINDOWS}
-              {$IFDEF MACOS}_system(PAnsiChar('open -a "' + AnsiString(ParamStr(0)) + '" &'));{$ENDIF MACOS}
-            end;
-        Application.Terminate;
+        on Exception do begin
+          if (TDialogServiceSync.MessageDialog(('Configuration file is corrupted! Press OK to renew configuration file. Application will be restarted.' + #13#10 +
+                                {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\AErenderConfiguration.xml read error.'{$ENDIF MSWINDOWS}
+                                    {$IFDEF MACOS}'~/Documents/AErender/AErenderConfiguration.xml read error.'{$ENDIF MACOS}),
+                TMsgDlgType.mtError, mbOKCancel, TMsgDlgBtn.mbOK, 0) = 1) then
+              begin
+                System.SysUtils.DeleteFile (APPFOLDER + 'AErenderConfiguration.xml');
+                {$IFDEF MSWINDOWS}ShellExecute(0, 'OPEN', PChar(ParamStr(0)), '', '', SW_SHOWNORMAL);{$ENDIF MSWINDOWS}
+                {$IFDEF MACOS}_system(PAnsiChar('open -a "' + AnsiString(ParamStr(0)) + '" & disown'));{$ENDIF MACOS}
+              end;
+          Halt;
+        end;
       end;
     end
   else
@@ -1113,6 +1125,8 @@ begin
       ImportForm.ShowModal;
     end;
 
+  //  Check updates in separate thread to fasten startup
+  MainForm.UpdateNetHTTPClient.Get(AERL_REPO_RELEASES);
 end;
 
 procedure TMainForm.importConfigItemClick(Sender: TObject);
@@ -1216,7 +1230,7 @@ begin
     begin
       if threadsSwitch.IsChecked then
         begin
-          threads := threadsCount.Items[threadsCount.ItemIndex].ToInteger;
+          threads := threadsCount.Text.ToInteger;
           SetLength (LogFiles, threads);
         end
       else
@@ -1379,21 +1393,7 @@ begin
                   end
             {$ENDIF MACOS}
           end;
-      {$REGION '  Notifications Invoker [Windows]  '}
-      {$IFDEF MSWINDOWS}
-      Notification := NotificationC.CreateNotification;
-      try
-        Notification.Name := 'AERLNotification';
-        Notification.AlertBody := 'Rendering Started!';
-        Notification.Title := 'AErender Launcher';
-        Notification.FireDate := Now;
-        NotificationC.PresentNotification(Notification);
-      finally
-        Notification.DisposeOf;
-      end;
-      {$ENDIF MSWINDOWS}
-      {$ENDREGION}
-      Sleep (2000);
+      Sleep (1000);
       if SettingsForm.HandleCheckBox.IsChecked then
         begin
           if RenderingUnit.VISIBLE then
@@ -1519,6 +1519,7 @@ begin
 
   FSaveFile :=TNSSavePanel.Wrap(TNSSavePanel.OCClass.savePanel);
   FSaveFile.setAccessoryView(CreateMessageView('Tip: Leaving "Default" in the field will use Output Module file name'));
+  //FSaveFile.setAccessoryView();
   FSaveFile.setDirectory(StrToNSStr(DEFOUTPATH));
   FSaveFile.setNameFieldLabel(StrToNSStr('Output file name:'));
   FSaveFile.setNameFieldStringValue(StrToNSStr('Default'));
@@ -1575,14 +1576,21 @@ end;
 
 procedure TMainForm.threadsCount1Change(Sender: TObject);
 begin
-  threadsGrid.RowCount := threadsCount.Items[threadsCount.ItemIndex].ToInteger();
+  threadsGrid.RowCount := threadsCount.Text.ToInteger();
   if not outFrame.Text.IsEmpty then
     calculateButtonClick(Sender);
 end;
 
+procedure TMainForm.threadsCountChange(Sender: TObject);
+begin
+  if not outFrame.Text.IsEmpty then
+    calculateButtonClick(Sender);
+  threadsCount.ResetFocus;
+end;
+
 procedure TMainForm.threadsSwitchSwitch(Sender: TObject);
 begin
-  if threadsSwitch.IsChecked then
+  {if threadsSwitch.IsChecked then
     begin
       if UpdateAvailable = True then
         begin
@@ -1611,7 +1619,40 @@ begin
 
       threadsSwitchLabel.Text := Language[LANG].MainForm.SingleRener;
       outFrame.TextPrompt     := '';
-    end;
+    end;     }
+end;
+
+procedure TMainForm.UpdateNetHTTPClientRequestCompleted(
+  const Sender: TObject; const AResponse: IHTTPResponse);
+begin
+  gitRelease := TJsonObject.ParseJSONValue(AResponse.ContentAsString(TEncoding.UTF8));
+  gitVersion := gitRelease.A[0].P['tag_name'].Value;
+
+  if APPVERSION = gitVersion  then
+    UpdateAvailable := False
+  else
+    UpdateAvailable := True;
+
+  if UpdateAvailable then begin
+    MainForm.Height := {$IFDEF MSWINDOWS}460{$ENDIF MSWINDOWS}  {$IFDEF MACOS}420{$ENDIF MACOS};
+    MainForm.UpdateInfo.Visible := True;
+    MainForm.UpdateInfo.Enabled := True;
+    MainForm.downloadButton.Text := Language[LANG].MainForm.Download + ' (' + gitVersion + ')';
+    {$IFDEF MSWINDOWS}gitDownload := gitRelease.A[0].P['assets'].A[1].P['browser_download_url'].Value;{$ENDIF MSWINDOWS}
+    {$IFDEF MACOS}gitDownload := gitRelease.A[0].P['assets'].A[0].P['browser_download_url'].Value;{$ENDIF MACOS}
+  end else begin
+    MainForm.Height := {$IFDEF MSWINDOWS}420{$ENDIF MSWINDOWS}  {$IFDEF MACOS}400{$ENDIF MACOS};
+    MainForm.UpdateInfo.Visible := False;
+    MainForm.UpdateInfo.Enabled := False;
+  end;
+end;
+
+procedure TMainForm.UpdateNetHTTPClientRequestError(const Sender: TObject;
+  const AError: string);
+begin
+  gitVersion := APPVERSION;
+  UpdateAvailable := False;
+  //ShowMessage(AError);
 end;
 
 procedure TMainForm.memUsageInfoClick(Sender: TObject);

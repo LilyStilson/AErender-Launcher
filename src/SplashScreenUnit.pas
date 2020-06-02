@@ -105,12 +105,36 @@ begin
   Self.Width := 500;
 
   {$IFDEF MACOS}
+  Self.Transparency := True;
+
   var Window: NSWindow := WindowHandleToPlatform(Self.Handle).Wnd;
+  Window.setHasShadow(True);
+
+  {var aView: NSView := TNSView.Wrap(TNSView.OCClass.alloc);
+  aView.setWantsLayer(True);
+  aView.layer.setFrame(aView.frame);
+  aView.layer.setCornerRadius(3);
+  aView.layer.setMasksToBounds(True);
+
+  var dropShadow: NSShadow := TNSShadow.Wrap(TNSShadow.OCClass.alloc);
+  dropShadow.setShadowColor(TNSColor.Wrap(TNSColor.OCClass.blackColor));
+  dropShadow.setShadowBlurRadius(10);
+
+  aView.setShadow(dropShadow);
+
+  Window.setOpaque(False);
+  Window.setBackgroundColor(TNSColor.Wrap(TNSColor.OCClass.clearColor));
+  Window.setContentView(aView);
+  Window.makeKeyAndOrderFront(nil);
+  Window.setLevel(NSStatusWindowLevel);}
+
+  Window.setOpaque(True);
+  //Window.setStyleMask(NSResizableWindowMask);
+  Window.setShowsToolbarButton(False);
 
   Rectangle1.XRadius := 3;
   Rectangle1.YRadius := 3;
-  Window.setHasShadow(True);
-  Window.invalidateShadow;
+
   {$ENDIF MACOS}
 
   {$IFDEF MSWINDOWS}
