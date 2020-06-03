@@ -56,7 +56,7 @@ uses
   {$ENDIF MSWINDOWS}
 
   {$IFDEF MACOS}
-  Posix.Unistd;
+  Posix.Unistd, FMX.Platform.Mac;
   {$ENDIF MACOS}
 
 type

@@ -2,7 +2,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
   Left = 0
   Top = 0
   Caption = 'Output Modules'
-  ClientHeight = 400
+  ClientHeight = 402
   ClientWidth = 700
   Position = MainFormCenter
   Quality = HighQuality
@@ -18,16 +18,15 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
   object propertiesLayout: TLayout
     Align = Client
     Size.Width = 491.000000000000000000
-    Size.Height = 337.000000000000000000
+    Size.Height = 339.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 1
     object outputModuleNameLayout: TLayout
       Align = Top
-      Position.Y = 30.000000000000000000
       Size.Width = 491.000000000000000000
       Size.Height = 30.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 1
+      TabOrder = 0
       object outputModuleLabel: TLabel
         Align = Left
         Margins.Left = 10.000000000000000000
@@ -52,42 +51,12 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
         OnTyping = outputModuleTyping
       end
     end
-    object presetNameLayout: TLayout
-      Align = Top
-      Size.Width = 491.000000000000000000
-      Size.Height = 30.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 0
-      object presetNameLabel: TLabel
-        Align = Left
-        Margins.Left = 10.000000000000000000
-        Position.X = 10.000000000000000000
-        Size.Width = 120.000000000000000000
-        Size.Height = 30.000000000000000000
-        Size.PlatformDefault = False
-        Text = 'Preset name'
-        TabOrder = 0
-      end
-      object presetName: TEdit
-        Touch.InteractiveGestures = [LongTap, DoubleTap]
-        Align = Client
-        TabOrder = 1
-        Margins.Top = 4.000000000000000000
-        Margins.Right = 5.000000000000000000
-        Margins.Bottom = 4.000000000000000000
-        Size.Width = 356.000000000000000000
-        Size.Height = 22.000000000000000000
-        Size.PlatformDefault = False
-        TextPrompt = 'Specify preset name'
-        OnTyping = presetNameTyping
-      end
-    end
     object filenameBuilderLayout: TLayout
       Align = Client
       Size.Width = 491.000000000000000000
-      Size.Height = 277.000000000000000000
+      Size.Height = 309.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 2
+      TabOrder = 1
       object fileMaskLabel: TLabel
         Align = Top
         Margins.Left = 5.000000000000000000
@@ -103,25 +72,6 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
         Text = 'Output file name structure'
         TabOrder = 0
       end
-      object fileMask: TMemo
-        Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
-        DataDetectorTypes = []
-        TextSettings.WordWrap = True
-        OnChange = fileMaskChange
-        Align = Top
-        Margins.Left = 5.000000000000000000
-        Margins.Right = 5.000000000000000000
-        Position.X = 5.000000000000000000
-        Position.Y = 27.000000000000000000
-        Size.Width = 481.000000000000000000
-        Size.Height = 50.000000000000000000
-        Size.PlatformDefault = False
-        TabOrder = 1
-        OnDragOver = fileMaskDragOver
-        OnDragDrop = fileMaskDragDrop
-        Viewport.Width = 481.000000000000000000
-        Viewport.Height = 50.000000000000000000
-      end
       object TabControl1: TTabControl
         Align = Client
         Margins.Left = 5.000000000000000000
@@ -129,23 +79,24 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
         Margins.Right = 5.000000000000000000
         Margins.Bottom = 5.000000000000000000
         Size.Width = 481.000000000000000000
-        Size.Height = 190.000000000000000000
+        Size.Height = 222.000000000000000000
         Size.PlatformDefault = False
         TabIndex = 0
         TabOrder = 2
         TabPosition = PlatformDefault
         Sizes = (
-          481s
-          168s
-          481s
-          168s
-          481s
-          168s
-          481s
-          168s
-          481s
-          168s)
+          477s
+          196s
+          477s
+          196s
+          477s
+          196s
+          477s
+          196s
+          477s
+          196s)
         object projectTab: TTabItem
+          CanFocus = False
           CustomIcon = <
             item
             end>
@@ -156,7 +107,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
           StyleLookup = ''
           TabOrder = 0
           Text = 'Project'
-          ExplicitSize.cx = 47.000000000000000000
+          ExplicitSize.cx = 50.000000000000000000
           ExplicitSize.cy = 22.000000000000000000
           object projectTabFlow: TFlowLayout
             Align = Client
@@ -164,8 +115,8 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
             Margins.Top = 5.000000000000000000
             Margins.Right = 5.000000000000000000
             Margins.Bottom = 5.000000000000000000
-            Size.Width = 471.000000000000000000
-            Size.Height = 158.000000000000000000
+            Size.Width = 467.000000000000000000
+            Size.Height = 186.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 0
             Justify = Center
@@ -174,6 +125,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
           end
         end
         object compTab: TTabItem
+          CanFocus = False
           CustomIcon = <
             item
             end>
@@ -192,8 +144,8 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
             Margins.Top = 5.000000000000000000
             Margins.Right = 5.000000000000000000
             Margins.Bottom = 5.000000000000000000
-            Size.Width = 471.000000000000000000
-            Size.Height = 158.000000000000000000
+            Size.Width = 467.000000000000000000
+            Size.Height = 186.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 0
             Justify = Center
@@ -202,6 +154,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
           end
         end
         object compTimeTab: TTabItem
+          CanFocus = False
           CustomIcon = <
             item
             end>
@@ -220,8 +173,8 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
             Margins.Top = 5.000000000000000000
             Margins.Right = 5.000000000000000000
             Margins.Bottom = 5.000000000000000000
-            Size.Width = 471.000000000000000000
-            Size.Height = 158.000000000000000000
+            Size.Width = 467.000000000000000000
+            Size.Height = 186.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 0
             Justify = Center
@@ -230,6 +183,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
           end
         end
         object imageTab: TTabItem
+          CanFocus = False
           CustomIcon = <
             item
             end>
@@ -248,8 +202,8 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
             Margins.Top = 5.000000000000000000
             Margins.Right = 5.000000000000000000
             Margins.Bottom = 5.000000000000000000
-            Size.Width = 471.000000000000000000
-            Size.Height = 158.000000000000000000
+            Size.Width = 467.000000000000000000
+            Size.Height = 186.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 0
             Justify = Center
@@ -258,6 +212,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
           end
         end
         object dateTab: TTabItem
+          CanFocus = False
           CustomIcon = <
             item
             end>
@@ -276,8 +231,8 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
             Margins.Top = 5.000000000000000000
             Margins.Right = 5.000000000000000000
             Margins.Bottom = 5.000000000000000000
-            Size.Width = 471.000000000000000000
-            Size.Height = 158.000000000000000000
+            Size.Width = 467.000000000000000000
+            Size.Height = 186.000000000000000000
             Size.PlatformDefault = False
             TabOrder = 0
             Justify = Center
@@ -285,6 +240,22 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
             FlowDirection = LeftToRight
           end
         end
+      end
+      object fileMask: TEdit
+        Touch.InteractiveGestures = [LongTap, DoubleTap]
+        Align = Top
+        TabOrder = 1
+        Position.X = 5.000000000000000000
+        Position.Y = 27.000000000000000000
+        Margins.Left = 5.000000000000000000
+        Margins.Right = 5.000000000000000000
+        Size.Width = 481.000000000000000000
+        Size.Height = 50.000000000000000000
+        Size.PlatformDefault = False
+        TextPrompt = 'Type or drag from bottom panel available parameters'
+        OnTyping = fileMaskTyping
+        OnDragOver = fileMaskDragOver
+        OnDragDrop = fileMaskDragDrop
       end
     end
   end
@@ -313,7 +284,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
     Align = Left
     Position.Y = 33.000000000000000000
     Size.Width = 200.000000000000000000
-    Size.Height = 337.000000000000000000
+    Size.Height = 339.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 2
     DisableFocusEffect = True
@@ -321,119 +292,8 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
     DefaultItemStyles.GroupHeaderStyle = ''
     DefaultItemStyles.GroupFooterStyle = ''
     OnChange = outputModulesBoxChange
-    Viewport.Width = 200.000000000000000000
-    Viewport.Height = 337.000000000000000000
-  end
-  object GridPanelLayout1: TGridPanelLayout
-    Align = Bottom
-    Position.Y = 370.000000000000000000
-    Size.Width = 700.000000000000000000
-    Size.Height = 30.000000000000000000
-    Size.PlatformDefault = False
-    TabOrder = 3
-    ColumnCollection = <
-      item
-        SizeStyle = Absolute
-        Value = 30.000000000000000000
-      end
-      item
-        SizeStyle = Absolute
-        Value = 30.000000000000000000
-      end
-      item
-        SizeStyle = Absolute
-        Value = 65.000000000000000000
-      end
-      item
-        SizeStyle = Absolute
-        Value = 75.000000000000000000
-      end
-      item
-        Value = 100.000000000000000000
-      end
-      item
-        SizeStyle = Absolute
-        Value = 75.000000000000000000
-      end>
-    ControlCollection = <
-      item
-        Column = 0
-        Control = addModuleButton
-        Row = 0
-      end
-      item
-        Column = 1
-        Control = removeModuleButton
-        Row = 0
-      end
-      item
-        Column = 3
-        Control = saveModulesButton
-        Row = 0
-      end
-      item
-        Column = 5
-        Control = cancelButton
-        Row = 0
-      end>
-    RowCollection = <
-      item
-        Value = 100.000000000000000000
-      end>
-    object addModuleButton: TButton
-      Align = Client
-      StyledSettings = [Family, FontColor]
-      Margins.Left = 3.000000000000000000
-      Margins.Top = 3.000000000000000000
-      Margins.Right = 3.000000000000000000
-      Margins.Bottom = 3.000000000000000000
-      Size.Width = 24.000000000000000000
-      Size.Height = 24.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 0
-      Text = '+'
-      OnClick = addModuleButtonClick
-    end
-    object removeModuleButton: TButton
-      Align = Client
-      Margins.Left = 3.000000000000000000
-      Margins.Top = 3.000000000000000000
-      Margins.Right = 3.000000000000000000
-      Margins.Bottom = 3.000000000000000000
-      Size.Width = 24.000000000000000000
-      Size.Height = 24.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 1
-      Text = '-'
-      OnClick = removeModuleButtonClick
-    end
-    object saveModulesButton: TButton
-      Align = Client
-      ModalResult = 8
-      Margins.Left = 5.000000000000000000
-      Margins.Top = 5.000000000000000000
-      Margins.Right = 5.000000000000000000
-      Margins.Bottom = 5.000000000000000000
-      Size.Width = 65.000000000000000000
-      Size.Height = 20.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 2
-      Text = 'Save'
-      OnClick = saveModulesButtonClick
-    end
-    object cancelButton: TButton
-      Align = Client
-      Margins.Left = 5.000000000000000000
-      Margins.Top = 5.000000000000000000
-      Margins.Right = 5.000000000000000000
-      Margins.Bottom = 5.000000000000000000
-      Size.Width = 65.000000000000000000
-      Size.Height = 20.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 3
-      Text = 'Cancel'
-      OnClick = cancelButtonClick
-    end
+    Viewport.Width = 196.000000000000000000
+    Viewport.Height = 335.000000000000000000
   end
   object Splitter1: TSplitter
     Align = Left
@@ -442,15 +302,131 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
     Position.X = 200.000000000000000000
     Position.Y = 33.000000000000000000
     Size.Width = 9.000000000000000000
-    Size.Height = 337.000000000000000000
+    Size.Height = 339.000000000000000000
     Size.PlatformDefault = False
-    object Line1: TLine
-      Align = Contents
-      HitTest = False
-      LineType = Bottom
-      Size.Width = 9.000000000000000000
-      Size.Height = 337.000000000000000000
+  end
+  object StatusBar1: TStatusBar
+    Anchors = []
+    Position.Y = 372.000000000000000000
+    ShowSizeGrip = False
+    Size.Width = 700.000000000000000000
+    Size.Height = 30.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 3
+    object GridPanelLayout1: TGridPanelLayout
+      Align = Bottom
+      Size.Width = 700.000000000000000000
+      Size.Height = 30.000000000000000000
       Size.PlatformDefault = False
+      TabOrder = 0
+      ColumnCollection = <
+        item
+          SizeStyle = Absolute
+          Value = 30.000000000000000000
+        end
+        item
+          SizeStyle = Absolute
+          Value = 30.000000000000000000
+        end
+        item
+          SizeStyle = Absolute
+          Value = 65.000000000000000000
+        end
+        item
+          SizeStyle = Absolute
+          Value = 75.000000000000000000
+        end
+        item
+          Value = 100.000000000000000000
+        end
+        item
+          SizeStyle = Absolute
+          Value = 75.000000000000000000
+        end>
+      ControlCollection = <
+        item
+          Column = 0
+          Control = addModuleButton
+          Row = 0
+        end
+        item
+          Column = 1
+          Control = removeModuleButton
+          Row = 0
+        end
+        item
+          Column = 3
+          Control = saveModulesButton
+          Row = 0
+        end
+        item
+          Column = 5
+          Control = cancelButton
+          Row = 0
+        end>
+      RowCollection = <
+        item
+          Value = 100.000000000000000000
+        end>
+      object addModuleButton: TButton
+        Align = Client
+        StyledSettings = [Family, FontColor]
+        Margins.Left = 3.000000000000000000
+        Margins.Top = 3.000000000000000000
+        Margins.Right = 3.000000000000000000
+        Margins.Bottom = 3.000000000000000000
+        Size.Width = 24.000000000000000000
+        Size.Height = 24.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        Text = '+'
+        TextSettings.Font.Size = 18.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        OnClick = addModuleButtonClick
+      end
+      object removeModuleButton: TButton
+        Align = Client
+        StyledSettings = [Family, FontColor]
+        Margins.Left = 3.000000000000000000
+        Margins.Top = 3.000000000000000000
+        Margins.Right = 3.000000000000000000
+        Margins.Bottom = 3.000000000000000000
+        Size.Width = 24.000000000000000000
+        Size.Height = 24.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+        Text = '-'
+        TextSettings.Font.Size = 16.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        OnClick = removeModuleButtonClick
+      end
+      object saveModulesButton: TButton
+        Align = Client
+        ModalResult = 8
+        Margins.Left = 5.000000000000000000
+        Margins.Top = 5.000000000000000000
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Size.Width = 65.000000000000000000
+        Size.Height = 20.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        Text = 'Save'
+        OnClick = saveModulesButtonClick
+      end
+      object cancelButton: TButton
+        Align = Client
+        Margins.Left = 5.000000000000000000
+        Margins.Top = 5.000000000000000000
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Size.Width = 65.000000000000000000
+        Size.Height = 20.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 3
+        Text = 'Cancel'
+        OnClick = cancelButtonClick
+      end
     end
   end
 end

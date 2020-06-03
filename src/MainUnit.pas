@@ -308,13 +308,10 @@ type
     procedure DragDrop(const Data: TDragObject; const Point: TPointF); override;
   end;
   OutputModule = record
-    Name,
     Module,
     Mask: String;
   end;
   function GetPlatformMemorySize: Int64;
-  function GetHTML(URL: String): String;
-  function IsUpdateAvailable: Boolean;
   function GetFFMPEGPath: WideString;
   function GetDirectoryFiles(Directory: String): TArray<System.String>;
   function KillProcess(ProcessName: String): Integer;
@@ -416,38 +413,6 @@ begin
   {$ENDIF MACOS}
 end;
 
-function GetHTML(URL: String): String;
-var
-  HttpResponse: IHttpResponse;
-begin
-  try
-    HttpResponse := MainForm.UpdateNetHTTPClient.Get(URL);
-    Result := HttpResponse.ContentAsString();
-  except
-    on Exception do
-      begin
-        Result := '404';
-      end;
-  end;
-end;
-
-function IsUpdateAvailable: Boolean;
-begin
-  gitResponse := GetHTML('https://api.github.com/repos/lilystilson/aerender-launcher/releases');
-  if not (gitResponse = '404') then
-    begin
-      gitRelease := TJsonObject.ParseJSONValue(gitResponse);
-      gitVersion := gitRelease.GetValue<string>('[0].tag_name');
-    end
-  else
-    gitVersion := APPVERSION;
-
-  if APPVERSION = gitVersion  then
-    Result := False
-  else
-    Result := True;
-end;
-
 function GetFFMPEGPath: WideString;
 var
   AERenderDirectory: String;
@@ -520,43 +485,33 @@ procedure InitOutputModules;
 begin
   SetLength (OutputModules, 10);
 
-  OutputModules[0].Name := 'Lossless';
   OutputModules[0].Module := 'Lossless';
   OutputModules[0].Mask := '[compName].[fileExtension]';
 
-  OutputModules[1].Name := 'AIFF 48kHz';
   OutputModules[1].Module := 'AIFF 48kHz';
   OutputModules[1].Mask := '[compName].[fileExtension]';
 
-  OutputModules[2].Name := 'Alpha Only';
   OutputModules[2].Module := 'Alpha Only';
   OutputModules[2].Mask := '[compName].[fileExtension]';
 
-  OutputModules[3].Name := 'AVI DV NTSC 48kHz';
   OutputModules[3].Module := 'AVI DV NTSC 48kHz';
   OutputModules[3].Mask := '[compName].[fileExtension]';
 
-  OutputModules[4].Name := 'AVI DV PAL 48kHz';
   OutputModules[4].Module := 'AVI DV PAL 48kHz';
   OutputModules[4].Mask := '[compName].[fileExtension]';
 
-  OutputModules[5].Name := 'Lossless with Alpha';
   OutputModules[5].Module := 'Lossless with Alpha';
   OutputModules[5].Mask := '[compName].[fileExtension]';
 
-  OutputModules[6].Name := 'Multi-Machine Sequence';
   OutputModules[6].Module := 'Multi-Machine Sequence';
   OutputModules[6].Mask := '[compName]_[#####].[fileExtension]';
 
-  OutputModules[7].Name := 'Photoshop';
   OutputModules[7].Module := 'Photoshop';
   OutputModules[7].Mask := '[compName]_[#####].[fileExtension]';
 
-  OutputModules[8].Name := 'Save Current Preview';
   OutputModules[8].Module := 'Save Current Preview';
   OutputModules[8].Mask := '[compName].[fileExtension]';
 
-  OutputModules[9].Name := 'TIFF Sequence with Alpha';
   OutputModules[9].Module := 'TIFF Sequence with Alpha';
   OutputModules[9].Mask := '[compName]_[#####].[fileExtension]';
 end;
@@ -565,7 +520,7 @@ procedure UpdateOutputModules;
 begin
   MainForm.outputModuleBox.Items.Clear;
   for var i := 0 to High(OutputModules) do
-    MainForm.outputModuleBox.Items.Add(OutputModules[i].Name);
+    MainForm.outputModuleBox.Items.Add(OutputModules[i].Module);
   MainForm.outputModuleBox.Items.Add('Configure Output Modules...');
 end;
 
@@ -708,9 +663,8 @@ begin
   for var i := 0 to High(OutputModules) do
     begin
       var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
-      ModuleNode.AddChild('name').Text := OutputModules[i].Name;
       ModuleNode.AddChild('moduleName').Text := OutputModules[i].Module;
-      MainForm.outputModuleBox.Items.Add(OutputModules[i].Name);
+      MainForm.outputModuleBox.Items.Add(OutputModules[i].Module);
       ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
     end;
 
@@ -757,9 +711,8 @@ begin
   SetLength (OutputModules, RootNode.ChildNodes['outputModule'].ChildNodes.Count);
   for var i := 0 to High(OutputModules) do
     begin
-      OutputModules[i].Name := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['name'].Text;
       OutputModules[i].Module := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['moduleName'].Text;
-      MainForm.outputModuleBox.Items.Add(OutputModules[i].Name);
+      MainForm.outputModuleBox.Items.Add(OutputModules[i].Module);
       OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
     end;
   MainForm.outputModuleBox.Items.Add(Language[LANG].MainForm.ConfigureOutputModules);
@@ -811,7 +764,6 @@ begin
   for var i := 0 to High(OutputModules) do
     begin
       var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
-      ModuleNode.AddChild('name').Text := OutputModules[i].Name;
       ModuleNode.AddChild('moduleName').Text := OutputModules[i].Module;
       ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
     end;
@@ -1047,9 +999,9 @@ begin
   {$ENDIF MSWINDOWS}
   {$IFDEF MACOS}
   editItem.Free;
-  exitItem.ShortCut := TextToShortCut('Cmd+Q');
-  exportConfigItem.ShortCut := TextToShortCut('Cmd+E');
-  importConfigItem.ShortCut := TextToShortCut('Cmd+I');
+  exitItem.Free;
+  //exportConfigItem.ShortCut := TextToShortCut('Cmd+E');
+  //importConfigItem.ShortCut := TextToShortCut('Cmd+I');
   {$ENDIF MACOS}
   if DirectoryExists (APPFOLDER) then
     AssignFile (CFG, APPFOLDER + 'AErenderConfiguration.xml')

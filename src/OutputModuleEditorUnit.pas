@@ -69,12 +69,8 @@ type
     outputModuleNameLayout: TLayout;
     outputModuleLabel: TLabel;
     outputModule: TEdit;
-    presetNameLayout: TLayout;
-    presetNameLabel: TLabel;
-    presetName: TEdit;
     filenameBuilderLayout: TLayout;
     fileMaskLabel: TLabel;
-    fileMask: TMemo;
     compTabFlow: TFlowLayout;
     TabControl1: TTabControl;
     projectTab: TTabItem;
@@ -93,7 +89,8 @@ type
     saveModulesButton: TButton;
     cancelButton: TButton;
     Splitter1: TSplitter;
-    Line1: TLine;
+    StatusBar1: TStatusBar;
+    fileMask: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure outputModulesBoxChange(Sender: TObject);
     procedure fileMaskDragOver(Sender: TObject; const Data: TDragObject;
@@ -101,15 +98,14 @@ type
     procedure fileMaskDragDrop(Sender: TObject; const Data: TDragObject;
       const Point: TPointF);
     procedure addModuleButtonClick(Sender: TObject);
-    procedure presetNameTyping(Sender: TObject);
     procedure cancelButtonClick(Sender: TObject);
     procedure removeModuleButtonClick(Sender: TObject);
     procedure outputModuleTyping(Sender: TObject);
-    procedure fileMaskChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure saveModulesButtonClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure fileMaskTyping(Sender: TObject);
   private
     { Private declarations }
     {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
@@ -149,12 +145,6 @@ end;
 {$ENDIF MSWINDOWS}
 
 {$IFDEF MACOS}
-{function NSWindowFromForm(Form: TCommonCustomForm): NSWindow;
-begin
-  var Obj: TOCLocal := (FMX.Platform.Mac.WindowHandleToPlatform(OutputModuleEditorForm.Handle) as TOCLocal);
-  Result := NSWindow(TOCLocalAccess(Obj).Super);
-end;}
-
 procedure NSWindowEditStateChange (State: Boolean);
 begin
   var Window: NSWindow := WindowHandleToPlatform(OutputModuleEditorForm.Handle).Wnd;
@@ -166,23 +156,39 @@ begin
 end;
 {$ENDIF MACOS}
 
+function CompareOutputModules(a, b: TArray<MainUnit.OutputModule>): Boolean;
+begin
+  for var i := 0 to High(a) do
+    if (a[i].Module = b[i].Module) and (a[i].Mask = b[i].Mask) then
+      Result := True
+    else begin
+      Result := False;
+      break;
+    end;
+end;
+
 procedure TOutputModuleEditorForm.cancelButtonClick(Sender: TObject);
 begin
   MainUnit.OutputModules := TempOutputModules;
+  SetLength(MainUnit.OutputModules, Length(TempOutputModules));
   OutputModuleEditorForm.Close;
-end;
-
-procedure TOutputModuleEditorForm.fileMaskChange(Sender: TObject);
-begin
-  MainUnit.OutputModules[outputModulesBox.ItemIndex].Mask := fileMask.Text;
-  {$IFDEF MACOS}NSWindowEditStateChange(True);{$ENDIF MACOS}
 end;
 
 procedure TOutputModuleEditorForm.fileMaskDragDrop(Sender: TObject;
   const Data: TDragObject; const Point: TPointF);
 begin
+  // Get current iterator index
+  var IIndex: Integer := fileMask.SelStart;
+
+  // Add data to TEdit
   if Data.Source <> nil then
-    fileMask.Text := fileMask.Text + TButton(Data.Source).Text;
+    fileMask.Text := fileMask.Text.Insert(fileMask.SelStart, TButton(Data.Source).Text);
+
+  // Move iterator to the end of added element
+  fileMask.SelStart := IIndex + TButton(Data.Source).Text.Length;
+
+  // Invoke typing event to remember new values
+  fileMaskTyping(Sender);
 end;
 
 procedure TOutputModuleEditorForm.fileMaskDragOver(Sender: TObject;
@@ -190,6 +196,12 @@ procedure TOutputModuleEditorForm.fileMaskDragOver(Sender: TObject;
   var Operation: TDragOperation);
 begin
   Operation := TDragOperation.Link;
+end;
+
+procedure TOutputModuleEditorForm.fileMaskTyping(Sender: TObject);
+begin
+  MainUnit.OutputModules[outputModulesBox.ItemIndex].Mask := fileMask.Text;
+  {$IFDEF MACOS}NSWindowEditStateChange(True);{$ENDIF MACOS}
 end;
 
 procedure TOutputModuleEditorForm.FormClose(Sender: TObject;
@@ -202,7 +214,7 @@ end;
 procedure TOutputModuleEditorForm.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
-  if MainUnit.OutputModules <> TempOutputModules then
+  if not CompareOutputModules(MainUnit.OutputModules, TempOutputModules) then
     case TDialogServiceSync.MessageDialog('Output modules was modified. Save changes?', TMsgDlgType.mtConfirmation, mbYesNoCancel, TMsgDlgBtn.mbYes, 0) of
       6: begin CanClose := True; saveModulesButtonClick(Sender); end;
       7: begin CanClose := True; cancelButtonClick(Sender); end;
@@ -251,8 +263,9 @@ end;
 procedure TOutputModuleEditorForm.FormShow(Sender: TObject);
 begin
   TempOutputModules := MainUnit.OutputModules;
+  SetLength(TempOutputModules, Length(MainUnit.OutputModules));
   for var i := 0 to High(MainUnit.OutputModules) do
-    outputModulesBox.Items.Add(MainUnit.OutputModules[i].Name);
+    outputModulesBox.Items.Add(MainUnit.OutputModules[i].Module);
   outputModulesBox.ItemIndex := 0;
   {$IFDEF MACOS}NSWindowEditStateChange(False);{$ENDIF MACOS}
 end;
@@ -261,7 +274,6 @@ procedure TOutputModuleEditorForm.outputModulesBoxChange(Sender: TObject);
 begin
   if outputModulesBox.ItemIndex > -1 then
     begin
-      presetName.Text := MainUnit.OutputModules[outputModulesBox.ItemIndex].Name;
       outputModule.Text := MainUnit.OutputModules[outputModulesBox.ItemIndex].Module;
       fileMask.Text := MainUnit.OutputModules[outputModulesBox.ItemIndex].Mask;
     end;
@@ -269,14 +281,8 @@ end;
 
 procedure TOutputModuleEditorForm.outputModuleTyping(Sender: TObject);
 begin
+  outputModulesBox.Items[outputModulesBox.ItemIndex] := outputModule.Text;
   MainUnit.OutputModules[outputModulesBox.ItemIndex].Module := outputModule.Text;
-  {$IFDEF MACOS}NSWindowEditStateChange(True);{$ENDIF MACOS}
-end;
-
-procedure TOutputModuleEditorForm.presetNameTyping(Sender: TObject);
-begin
-  outputModulesBox.Items[outputModulesBox.ItemIndex] := presetName.Text;
-  MainUnit.OutputModules[outputModulesBox.ItemIndex].Name := presetName.Text;
   {$IFDEF MACOS}NSWindowEditStateChange(True);{$ENDIF MACOS}
 end;
 
@@ -284,7 +290,6 @@ procedure TOutputModuleEditorForm.removeModuleButtonClick(Sender: TObject);
 begin
   var tempIndex: Integer := outputModulesBox.ItemIndex;
 
-  MainUnit.OutputModules[tempIndex].Name := '';
   MainUnit.OutputModules[tempIndex].Module := '';
   MainUnit.OutputModules[tempIndex].Mask := '';
 
@@ -301,13 +306,14 @@ end;
 procedure TOutputModuleEditorForm.saveModulesButtonClick(Sender: TObject);
 begin
   TempOutputModules := MainUnit.OutputModules;
+  SetLength(TempOutputModules, Length(MainUnit.OutputModules));
   UpdateOutputModules;
   OutputModuleEditorForm.Close;
 end;
 
 procedure TOutputModuleEditorForm.addModuleButtonClick(Sender: TObject);
 begin
-  SetLength (MainUnit.OutputModules, Length (MainUnit.OutputModules) + 1);
+  SetLength (MainUnit.OutputModules, Length(MainUnit.OutputModules) + 1);
   outputModulesBox.Items.Insert(High(MainUnit.OutputModules), 'Untitled');
   outputModulesBox.ItemIndex := High(MainUnit.OutputModules);
   {$IFDEF MACOS}NSWindowEditStateChange(True);{$ENDIF MACOS}
