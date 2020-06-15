@@ -1,5 +1,5 @@
 <h1 align="center"><img src="https://i.imgur.com/cbN81vX.png" alt="AErender Launcher"></img></h1>
-<p align="center">GUI for Adobe After Effects aerender console interface with various features.</p>
+<p align="center">GUI for Adobe After Effects aerender console interface with various features. Comes bundled with <a href="https://github.com/LilyStilson/AErender-Launcher-Script">AErender Launcher Script</a>.</p>
 
 <div align="center">
   <a href="https://discord.gg/Bh2MkxG"><img src="https://img.shields.io/discord/553694764004933633?label=discord" alt="discord"></img></a>
