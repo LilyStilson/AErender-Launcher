@@ -46,8 +46,6 @@
             "EndFrame": "Конечный кадр:",
             "EndFrameHint": "ОБЯЗАТЕЛЬНО",
             "Calculate": "Рассчитать",
-            "CalculateFrameError": "Конечный кадр необходим для рассчёта!",
-            "CalculateUnknownError": "Неизвестная ошибка рассчёта",
             "Launch": "Запуск",
             "NewVersionAvailable": "Доступна новая версия!", 
             "Download": "Скачать с GitHub"
@@ -55,12 +53,18 @@
         "SettingsFormText": {
             "LauncherSettings": "Настройки AErender Launcher",
             "RenderEnginePath": "Путь к модулю рендеринга After Effects",
-            "Language": "Язык",
-            "Style": "Стиль",
             "DefaultProjectsDirectory": "Стандартная директория проектов",
             "DefaultOutputDirectory": "Стандартная директория выходных файлов",
+            "UserInterface": "Интерфейс",
+            "Style": "Стиль",
+            "Language": "Язык",
+            "InterfaceScale": "Размер интерфейса",
+            "Behaviour": "Поведение",
             "OnRenderStart": "По началу рендеринга",
-            "HandleAerender": "Отображать прогресс рендеринга в Launcher'е",
+            "DoNothing": "Ничего не делать",
+            "MinimizeLauncher": "Свернуть программу",
+            "CloseLauncher": "Закрыть программу",
+            "HandleAerender": "Отображать прогресс рендеринга в Launcher",
             "DeleteTemporary": "Удалять временные файлы после закрытия"
         },
         "ImportFormText": {
@@ -77,11 +81,12 @@
             "PrepareForSplitRendering": "Подготовить к рендерингу частями",
             "SelectAll": "Выбрать всё",
             "DeselectAll": "Снять выделение",
-            "Import": "Импортировать"
+            "Import": "Импортировать",
+            "IncompatibleFile": "Выбранный файл несовместим с AErender Launcher. Пожалуйста, укажите корректный .aer / .xml файл для импорта!"
         },
         "OutputModuleFormText": {
             "OutputModulePresetConfigurator": "Конфигуратор предустановок модулей вывода", 
-            "PresetName": "Название предустановки",
+            "Imported": "(импортирован)",
             "OutputModule": "Модуль вывода",
             "OutputFileNameStructure": "Структура имени выходного файла",
             "ProjectTab": "Проект", 
@@ -93,21 +98,36 @@
             "Cancel": "Отмена"
         },
         "RenderingFormText": {
-            "RenderingProgress": "",
-            "HandleDisabled": "",
-            "QueueIsEmpty": "",
-            "TotalProgress": "",
-            "TimeElapsed": "",
-            "AbortRendering": ""
+            "RenderingProgress": "Прогресс рендеринга",
+            "HandleDisabled": "Отображение прогресса рендеринга отключено. Включите отображение прогресса рендеринга в настройках.",
+            "QueueIsEmpty": "Очередь пуста",
+            "TotalProgress": "Общий прогресс",
+            "TimeElapsed": "Время рендеринга: ",
+            "AbortRendering": "Прервать рендеринг"
         },
         "AboutFormText": {
-            "AErenderLauncher": "",
-            "CreatedBy": "",
-            "Description": "",
-            "FromRussiaWithLove": "",
-            "FFMPEG": "",
-            "FFMPEGNotFound": "",
-            "Copyright": ""
+            "AErenderLauncher": "О программе AErender Launcher",
+            "CreatedBy": "Создана Lin Stilson // Дальнейшая разработка Lily Stilson",
+            "Description": "Продвинутый интерфейс для модуля рендеринга Adobe After Effects",
+            "FromRussiaWithLove": "Из России с 💙",
+            "FFMPEG": "FFMPEG: Обнаружен в ",
+            "FFMPEGNotFound": "FFMPEG не обнаружен! Функция будет отключена.",
+            "Copyright": "Adobe After Effects и Adobe After Effects Render Engine частная собственность Adobe Systems inc."
+        },
+        "ErrorText":{
+            "MemoryValueInvalid": "недействительное значение памяти. Используйте <value unit> или <value>.",
+            "CacheValueInvalid": "недействительное процентное значение. Используйте <value %> или <value>.",
+            "CalculateFrameError": "End frame is reqired for calculation!",
+            "CalculateUnknownError": "Unknown calculation error",
+            "ConfigCorrupted": "Configuration file is corrupted! Press OK to renew configuration file. Application will be restarted.",
+            "aerenderInvalid": "Selected aerender path is not valid. Choose another path to aerender.",
+            "aerenderUndetectable": "Failed to detect aerender automatically. Provide path to aerender manually.",
+            "errorsOccured": "The following error(s) has occured: ",
+            "aerenderIsEmpty": "Путь к aerender не указан",
+            "projectIsEmpty": "Путь к проекту не указан",
+            "outputIsEmpty": "Выходной путь не указан",
+            "compositionIsEmpty": "Название композиции не указано",
+            "multiCompIsEmpty": "Названия не всех композиций указаны в списке"
         }
     }
 }

@@ -46,8 +46,6 @@
             "EndFrame": "End Frame:",
             "EndFrameHint": "REQUIRED",
             "Calculate": "Calculate",
-            "CalculateFrameError": "End frame is reqired for calculation!",
-            "CalculateUnknownError": "Unknown calculation error",
             "Launch": "Launch",
             "NewVersionAvailable": "New Version Available!", 
             "Download": "Download from GitHub"
@@ -55,11 +53,17 @@
         "SettingsFormText": {
             "LauncherSettings": "AErender Launcher Settings",
             "RenderEnginePath": "After Effects render engine path",
-            "Language": "Language",
-            "Style": "Style",
             "DefaultProjectsDirectory": "Default projects directory",
             "DefaultOutputDirectory": "Default Output Directory",
+            "UserInterface": "User Interface",
+            "Style": "Style",
+            "Language": "Language",
+            "InterfaceScale": "Interface Scale",
+            "Behaviour": "Behaviour",
             "OnRenderStart": "On Render Start",
+            "DoNothing": "Do nothing",
+            "MinimizeLauncher": "Minimize Launcher",
+            "CloseLauncher": "Close Launcher",
             "HandleAerender": "Handle aerender processes inside Launcher",
             "DeleteTemporary": "Delete temporary files on close"
         },
@@ -77,11 +81,12 @@
             "PrepareForSplitRendering": "Prepare for split rendering",
             "SelectAll": "Select All",
             "DeselectAll": "Deselect All",
-            "Import": "Import"
+            "Import": "Import",
+            "IncompatibleFile": "Selected file is not compatible with AErender Launcher. Please, provide proper .aer / .xml file for import!"
         },
         "OutputModuleFormText": {
             "OutputModulePresetConfigurator": "Output module presets configurator", 
-            "PresetName": "Preset name",
+            "Imported": "(imported)",
             "OutputModule": "Output module",
             "OutputFileNameStructure": "Output file name structure",
             "ProjectTab": "Project", 
@@ -108,6 +113,21 @@
             "FFMPEG": "FFMPEG: Found at ",
             "FFMPEGNotFound": "FFMPEG not found! Feature will be disabled.",
             "Copyright": "Adobe After Effects and Adobe After Effects Render Engine are property of Adobe Systems inc."
+        },
+        "ErrorText":{
+            "MemoryValueInvalid": "is not a valid memory value. Try <value unit> or <value> instead.",
+            "CacheValueInvalid": "is not a valid percentage value. Try <value %> or <value> instead.",
+            "CalculateFrameError": "End frame is reqired for calculation!",
+            "CalculateUnknownError": "Unknown calculation error",
+            "ConfigCorrupted": "Configuration file is corrupted! Press OK to renew configuration file. Application will be restarted.",
+            "aerenderInvalid": "Selected aerender path is not valid. Choose another path to aerender.",
+            "aerenderUndetectable": "Failed to detect aerender automatically. Provide path to aerender manually.",
+            "errorsOccured": "The following error(s) has occured: ",
+            "aerenderIsEmpty": "aerender path is not specified",
+            "projectIsEmpty": "Project path is not specified",
+            "outputIsEmpty": "Output path is not specified",
+            "compositionIsEmpty": "Composition name is not specified",
+            "multiCompIsEmpty": "Not all compositions names are specified in composition list"
         }
     }
 }

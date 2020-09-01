@@ -77,11 +77,12 @@
             "PrepareForSplitRendering": "",
             "SelectAll": "",
             "DeselectAll": "",
-            "Import": ""
+            "Import": "",
+            "IncompatibleFile": ""
         },
         "OutputModuleFormText": {
             "OutputModulePresetConfigurator": "", 
-            "PresetName": "",
+            "Imported": "",
             "OutputModule": "",
             "OutputFileNameStructure": "",
             "ProjectTab": "", 
