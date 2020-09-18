@@ -81,7 +81,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
         Size.Width = 481.000000000000000000
         Size.Height = 222.000000000000000000
         Size.PlatformDefault = False
-        TabIndex = 0
+        TabIndex = 3
         TabOrder = 2
         TabPosition = PlatformDefault
         Sizes = (
@@ -100,7 +100,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
           CustomIcon = <
             item
             end>
-          IsSelected = True
+          IsSelected = False
           Size.Width = 47.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
@@ -187,7 +187,7 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
           CustomIcon = <
             item
             end>
-          IsSelected = False
+          IsSelected = True
           Size.Width = 43.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False

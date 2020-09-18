@@ -106,6 +106,7 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure fileMaskTyping(Sender: TObject);
+    procedure SetLanguage(LanguageCode: Integer);
   private
     { Private declarations }
     {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
@@ -158,6 +159,7 @@ end;
 
 function CompareOutputModules(a, b: TArray<MainUnit.OutputModule>): Boolean;
 begin
+  Result := False;
   for var i := 0 to High(a) do
     if (a[i].Module = b[i].Module) and (a[i].Mask = b[i].Mask) then
       Result := True
@@ -165,6 +167,26 @@ begin
       Result := False;
       break;
     end;
+end;
+
+procedure TOutputModuleEditorForm.SetLanguage(LanguageCode: Integer);
+begin
+  OutputModuleEditorForm.Caption  := Language[LanguageCode].OutputModuleConfiguratorForm.OutputModulePresetConfigurator;
+  WindowLabel.Text                := Language[LanguageCode].OutputModuleConfiguratorForm.OutputModulePresetConfigurator;
+
+  outputModuleLabel.Text          := Language[LanguageCode].OutputModuleConfiguratorForm.OutputModule;
+  outputModule.TextPrompt         := Language[LanguageCode].OutputModuleConfiguratorForm.OutputModulePrompt;
+  fileMaskLabel.Text              := Language[LanguageCode].OutputModuleConfiguratorForm.OutputFileNameStructure;
+  fileMask.TextPrompt             := Language[LanguageCode].OutputModuleConfiguratorForm.OutputFileNamePrompt;
+
+  projectTab.Text                 := Language[LanguageCode].OutputModuleConfiguratorForm.ProjectTab;
+  compTab.Text                    := Language[LanguageCode].OutputModuleConfiguratorForm.CompositionTab;
+  compTimeTab.Text                := Language[LanguageCode].OutputModuleConfiguratorForm.CompositionTimeTab;
+  imageTab.Text                   := Language[LanguageCode].OutputModuleConfiguratorForm.ImageTab;
+  dateTab.Text                    := Language[LanguageCode].OutputModuleConfiguratorForm.DateTab;
+
+  saveModulesButton.Text          := Language[LanguageCode].OutputModuleConfiguratorForm.Save;
+  cancelButton.Text               := Language[LanguageCode].OutputModuleConfiguratorForm.Cancel;
 end;
 
 procedure TOutputModuleEditorForm.cancelButtonClick(Sender: TObject);
@@ -215,7 +237,7 @@ procedure TOutputModuleEditorForm.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
   if not CompareOutputModules(MainUnit.OutputModules, TempOutputModules) then
-    case TDialogServiceSync.MessageDialog('Output modules was modified. Save changes?', TMsgDlgType.mtConfirmation, mbYesNoCancel, TMsgDlgBtn.mbYes, 0) of
+    case TDialogServiceSync.MessageDialog(Language[LANG].OutputModuleConfiguratorForm.CloseDialog, TMsgDlgType.mtConfirmation, mbYesNoCancel, TMsgDlgBtn.mbYes, 0) of
       6: begin CanClose := True; saveModulesButtonClick(Sender); end;
       7: begin CanClose := True; cancelButtonClick(Sender); end;
       2: CanClose := False;
@@ -226,6 +248,7 @@ end;
 
 procedure TOutputModuleEditorForm.FormCreate(Sender: TObject);
 begin
+  outputModulesBox.AniCalculations.Animation := True;
   if FlagButton = nil then
     begin
       SetLength (FlagButton, Length(AvailableFlags));
@@ -265,7 +288,10 @@ begin
   TempOutputModules := MainUnit.OutputModules;
   SetLength(TempOutputModules, Length(MainUnit.OutputModules));
   for var i := 0 to High(MainUnit.OutputModules) do
-    outputModulesBox.Items.Add(MainUnit.OutputModules[i].Module);
+    if MainUnit.OutputModules[i].Imported then
+      outputModulesBox.Items.Add(MainUnit.OutputModules[i].Module + ' ' + Language[LANG].OutputModuleConfiguratorForm.Imported)
+    else
+      outputModulesBox.Items.Add(MainUnit.OutputModules[i].Module);
   outputModulesBox.ItemIndex := 0;
   {$IFDEF MACOS}NSWindowEditStateChange(False);{$ENDIF MACOS}
 end;
@@ -276,6 +302,10 @@ begin
     begin
       outputModule.Text := MainUnit.OutputModules[outputModulesBox.ItemIndex].Module;
       fileMask.Text := MainUnit.OutputModules[outputModulesBox.ItemIndex].Mask;
+      if MainUnit.OutputModules[outputModulesBox.ItemIndex].Imported then
+        outputModule.Enabled := False
+      else
+        outputModule.Enabled := True;
     end;
 end;
 
@@ -307,7 +337,7 @@ procedure TOutputModuleEditorForm.saveModulesButtonClick(Sender: TObject);
 begin
   TempOutputModules := MainUnit.OutputModules;
   SetLength(TempOutputModules, Length(MainUnit.OutputModules));
-  UpdateOutputModules;
+  MainForm.UpdateOutputModules;
   OutputModuleEditorForm.Close;
 end;
 
