@@ -1,4 +1,4 @@
-unit RenderingUnit;
+﻿unit RenderingUnit;
 
 (*        AErender Launcher                                                                 *)
 (*        RenderingUnit.pas                                                                 *)
@@ -34,7 +34,7 @@ uses
   System.Classes,
   System.Variants,
   System.Diagnostics,
-  System.Notification,
+  System.Generics.Collections,
 
   FMX.Types,
   FMX.Controls,
@@ -48,20 +48,22 @@ uses
   FMX.ScrollBox,
   FMX.Memo,
   FMX.Effects,
+  FMX.BufferedLayout,
+  FMX.BehaviorManager,
 
   AErenderDataParser,
 
   {$IFDEF MSWINDOWS}
-    FMX.TaskBar, FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
+    System.Notification, FMX.TaskBar, FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
   {$ENDIF MSWINDOWS}
 
   {$IFDEF MACOS}
-  Posix.Unistd, FMX.Platform.Mac;
+  Posix.Unistd, FMX.Platform.Mac, MacApi.Foundation, MacApi.AppKit, MacApi.ObjectiveC, MacApi.CocoaTypes;
   {$ENDIF MACOS}
 
 type
   TRenderingForm = class(TForm)
-    Title: TLabel;
+    WindowTitle: TLabel;
     RenderingStatusBar: TStatusBar;
     totalProgressBottomLabel: TLabel;
     statusBarSeparator1: TLine;
@@ -89,7 +91,7 @@ type
     StopwatchTimer: TTimer;
     projectNameLabel: TLabel;
     totalFramesLabel: TLabel;
-    NotificationC: TNotificationCenter;
+    BufferedLayout1: TBufferedLayout;
     procedure ShowLogButtonClick (Sender: TObject);
     procedure renderingTimerTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -97,6 +99,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure StopwatchTimerTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure SetLanguage(LanguageCode: Integer);
   private
     { Private declarations }
   public
@@ -104,12 +107,17 @@ type
     {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   end;
   TRenderGroup = record
-    TRenderGroupBox: TGroupBox;
-      TRenderGroupBoxMainLayout: TLayout;
-        TRenderProgressBar: TProgressBar;
-        TRenderProgressLabel: TLabel;
-        TRenderShowLogButton: TButton;
-      TLogMemo: TMemo;
+    // Visible components
+    RenderPanel: TPanel;
+    CompNameLabel: TLabel;
+    LogButton: TButton;   // It will be styled
+    FramesLabel: TLabel;
+    StatusLabel: TLabel;
+    RenderingProgress: TProgressBar;
+    WaitProgress: TAniIndicator;
+    LogMemo: TMemo;
+
+    // Invisible components
     Duration: TTimecode;
     FrameRate: TFrameRate;
   end;
@@ -117,9 +125,16 @@ type
 var
   RenderingForm: TRenderingForm;
   VISIBLE: Boolean = False;
+
+  ///  We are using TArray<> here, because TList<> generates Access Violation error
+  ///  when populated with non-existent items. We need a constructor for that, but duh...
+  ///  Also, we can't use TObjectList<>, since TRenderGroup is a record,
+  ///  not a class - also no constructor, duh...
+  ///  So, it's easier to use simple TArray<>, that we'll have to reset when render finishes
   RenderGroups: TArray<TRenderGroup>;
-  LogIncrement: Integer = 0;
   CurrentTime: TDateTime;
+
+  { TODO -oLily Stilson -cRendering Unit - macOS : Add NSApplication.requestUserAttention for macOS when Rendering is finished }
 
 implementation
 
@@ -142,7 +157,7 @@ begin
 end;
 {$ENDIF MSWINDOWS}
 
-function LimitInt (I: Integer): Integer;
+function IntToCardinal (I: Integer): Cardinal;
 begin
   if I < 0 then
     Result := 0
@@ -150,27 +165,41 @@ begin
     Result := I;
 end;
 
+procedure TRenderingForm.SetLanguage(LanguageCode: Integer);
+begin
+  RenderingForm.Caption     := Language[LanguageCode].RenderingForm.RenderingProgress;
+  WindowTitle.Text          := Language[LanguageCode].RenderingForm.RenderingProgress;
+
+  //emptyLabel.Text         := Language[LanguageCode].RenderingForm.QueueIsEmpty;
+  totalProgressLabel.Text   := Language[LanguageCode].RenderingForm.TotalProgress;
+  abortRenderingButton.Text := Language[LanguageCode].RenderingForm.AbortRendering;
+
+  timeElapsedLabel.Text     := Language[LanguageCode].RenderingForm.TimeElapsed + '00:00:00';
+end;
+
 procedure TRenderingForm.abortRenderingButtonClick(Sender: TObject);
 begin
   try
     begin
+      // RU: Уничтожаем процесс After Effects'а
       {$IFDEF MSWINDOWS}KillProcess('AfterFX.com');{$ENDIF MSWINDOWS}
       {$IFDEF MACOS}KillProcess('aerendercore');{$ENDIF MACOS}
-      for var i := 0 to High(RenderGroups) do
-        begin
-          RenderGroups[i].TLogMemo.Free;
-          RenderGroups[i].TRenderShowLogButton.Free;
-          RenderGroups[i].TRenderProgressLabel.Free;
-          RenderGroups[i].TRenderProgressBar.Value := 0;
-          RenderGroups[i].TRenderProgressBar.Max := 1;
-          RenderGroups[i].TRenderProgressBar.Destroy;
-          RenderGroups[i].TRenderGroupBoxMainLayout.Free;
-          RenderGroups[i].TRenderGroupBox.Free;
 
-          RenderGroups[i].Duration.Clear;
+      // RU: Очищаем массив с путями к логам
+      Finalize(LogFiles);
 
-          {$IFDEF MSWNDOWS}DeleteFile(MainUnit.LogFiles[i]);{$ENDIF MSWINDOWS}
-        end;
+      // RU: Уничтожаем созданные в рантайме компоненты
+      for var i := 0 to High(RenderGroups) do begin
+        FreeAndNil(RenderGroups[i].RenderPanel);
+      end;
+
+      // RU: Сбрасываем массив с группами прогресса
+      Finalize(RenderGroups);
+
+      // RU: Отключаем ограничение на запуск рендеринга
+      isRendering := False;
+
+      // RU: Отключаем таймер и вовзращаем первые значения
       emptyLabel.Visible := True;
       emptyLabel.Enabled := True;
       renderingTimer.Enabled := False;
@@ -180,6 +209,8 @@ begin
       totalProgressPercentage.Text := '0%';
       TotalProgressBar.Value := 0;
       TotalProgressBar.Max := 1;
+
+      // RU: Сброс состояния на панели задач
       {$IFDEF MSWNDOWS}MainTaskBar.TaskBarState := 0;{$ENDIF MSWINDOWS}
     end
   except
@@ -191,6 +222,9 @@ end;
 procedure TRenderingForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   VISIBLE := False;
+
+  // RU:  При закрытии формы, если рендеринг закончен
+  //      очистить окно
   if TotalProgressBar.Value = TotalProgressBar.Max then
     begin
       abortRenderingButtonClick(Sender);
@@ -201,9 +235,13 @@ end;
 
 procedure TRenderingForm.FormCreate(Sender: TObject);
 begin
+  // RU:  Сброс главного прогрессбара до нуля
   TotalProgressBar.Min := 0;
   TotalProgressBar.Max := 1;
   TotalProgressBar.Value := 0;
+
+  // RU:  Активация плавного скроллинга списка потоков
+  VertScrollBox1.AniCalculations.Animation := True;
 end;
 
 procedure TRenderingForm.FormShow(Sender: TObject);
@@ -211,7 +249,8 @@ begin
   VISIBLE := True;
   if MainUnit.RenderWindowSender = MainForm.launchButton then
     begin
-      if Length(MainUnit.LogFiles) = 0 then
+      isRendering := True;
+      if Length(LogFiles) = 0 then
         begin
           emptyLabel.Visible := True;
           emptyLabel.Enabled := True;
@@ -223,284 +262,323 @@ begin
 
           projectNameLabel.Text := ExtractFileName(MainForm.projectPath.Text);
 
-          SetLength (RenderGroups, Length(MainUnit.LogFiles));
+          // RU:  Этот момент необходимо держать в голове
+          //      Поскольку мы используем тут динамический массив TArray,
+          //      то когда мы задаём ему какой-то размер, он будет сохранять
+          //      все элементы внутри, даже если каждый из них будет FreeAndNil()
+          SetLength(RenderGroups, Length(MainUnit.LogFiles));
 
-          for var i := 0 to High (RenderGroups) do
-            begin
-              //Initialize GroupBox
-              RenderGroups[i].TRenderGroupBox := TGroupBox.Create(Self);
-              RenderGroups[i].TRenderGroupBox.Parent := VertScrollBox1;
-              RenderGroups[i].TRenderGroupBox.Align := TAlignLayout.Top;
-              RenderGroups[i].TRenderGroupBox.Margins.Left := 5;
-              RenderGroups[i].TRenderGroupBox.Margins.Bottom := 5;
-              RenderGroups[i].TRenderGroupBox.Position.X := 5;
-              RenderGroups[i].TRenderGroupBox.Height := 75;
-              RenderGroups[i].TRenderGroupBox.Text := ExtractFileName(MainUnit.LogFiles[i]);
-              RenderGroups[i].TRenderGroupBox.Tag := i;
+          /// RU: Создание компонентов, демонстрирующих прогресс
+          for var i := 0 to High(RenderGroups) do begin
+              //  RU: Создание фоновой TPanel
+              RenderGroups[i].RenderPanel := TPanel.Create(Self);
+              RenderGroups[i].RenderPanel.Parent  := VertScrollBox1;
+              RenderGroups[i].RenderPanel.Margins := TBounds.Create(TRectF.Create(8, 8, 8, 0));
+              RenderGroups[i].RenderPanel.Align   := TAlignLayout.Top;
+              RenderGroups[i].RenderPanel.Height  := 48;
+              RenderGroups[i].RenderPanel.EnableDragHighlight := True;
 
-              //Initialize GroupBox MainLayout
-              RenderGroups[i].TRenderGroupBoxMainLayout := TLayout.Create(Self);
-              RenderGroups[i].TRenderGroupBoxMainLayout.Parent := RenderGroups[i].TRenderGroupBox;
-              RenderGroups[i].TRenderGroupBoxMainLayout.Align := TAlignLayout.Top;
-              RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Left := 5;
-              RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Top := 20;
-              RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Right := 5;
-              RenderGroups[i].TRenderGroupBoxMainLayout.Margins.Bottom := 5;
+              //  RU: Создание названия композиции
+              RenderGroups[i].CompNameLabel := TLabel.Create(Self);
+              RenderGroups[i].CompNameLabel.Parent          := RenderGroups[i].RenderPanel;
+              RenderGroups[i].CompNameLabel.Align           := TAlignLayout.MostLeft;
+              RenderGroups[i].CompNameLabel.Margins         := TBounds.Create(TRectF.Create(16, 8, 0, 8));
+              RenderGroups[i].CompNameLabel.Text            := ExtractFileName(MainUnit.LogFiles[i]).Replace(ExtractFileExt(MainUnit.LogFiles[i]), '');
+              RenderGroups[i].CompNameLabel.Font.Size       := 16;
+              RenderGroups[i].CompNameLabel.StyledSettings  := [TStyledSetting.Family, TStyledSetting.Style, TStyledSetting.FontColor];
+              RenderGroups[i].CompNameLabel.WordWrap        := False;
+              RenderGroups[i].CompNameLabel.AutoSize        := True;
+              RenderGroups[i].CompNameLabel.HitTest         := False;
 
-              //Initialize GroupBox MainLayout ProgressBar
-              RenderGroups[i].TRenderProgressBar := TProgressBar.Create(Self);
-              RenderGroups[i].TRenderProgressBar.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
-              RenderGroups[i].TRenderProgressBar.Align := TAlignLayout.Top;
-              RenderGroups[i].TRenderProgressBar.Orientation := TOrientation.Horizontal;
-              RenderGroups[i].TRenderProgressBar.StyleLookup := 'progressbarstyle';
-              RenderGroups[i].TRenderProgressBar.Margins.Left := 5;
-              RenderGroups[i].TRenderProgressBar.Margins.Top := 10;
-              RenderGroups[i].TRenderProgressBar.Margins.Right := 5;
-              RenderGroups[i].TRenderProgressBar.Height := 10;
-              RenderGroups[i].TRenderProgressBar.Min := 0;
-              RenderGroups[i].TRenderProgressBar.Value := 0;
-              RenderGroups[i].TRenderProgressBar.Max := 1;
+              //  RU: Создание лейбла с кол-вом кадров
+              RenderGroups[i].FramesLabel := TLabel.Create(Self);
+              RenderGroups[i].FramesLabel.Parent      := RenderGroups[i].RenderPanel;
+              RenderGroups[i].FramesLabel.Margins     := TBounds.Create(TRectF.Create(8, 0, 16, 0));
+              RenderGroups[i].FramesLabel.AutoSize    := True;
+              RenderGroups[i].FramesLabel.WordWrap    := False;
+              RenderGroups[i].FramesLabel.Align       := TAlignLayout.MostRight;
+              RenderGroups[i].FramesLabel.StyledSettings  := [TStyledSetting.Family, TStyledSetting.FontColor];
+              RenderGroups[i].FramesLabel.Font.Size   := 16;
+              //RenderGroups[i].FramesLabel.Font.Style  := [TFontStyle.fsBold];
+              RenderGroups[i].FramesLabel.TextAlign   := TTextAlign.Trailing;
+              RenderGroups[i].FramesLabel.Text        := '...';
+              RenderGroups[i].FramesLabel.HitTest     := False;
 
-              //Initialise GroupBox MainLayout ProgressLabel
-              RenderGroups[i].TRenderProgressLabel := TLabel.Create(Self);
-              RenderGroups[i].TRenderProgressLabel.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
-              RenderGroups[i].TRenderProgressLabel.Align := TAlignLayout.Client;
-              RenderGroups[i].TRenderProgressLabel.Margins.Left := 5;
-              RenderGroups[i].TRenderProgressLabel.AutoSize := False;
-              RenderGroups[i].TRenderProgressLabel.TextSettings.WordWrap := False;
-              RenderGroups[i].TRenderProgressLabel.Text := 'Waiting for aerender...';
-              
-              //Initialize GroupBox MainLayout ShowLogButton
-              RenderGroups[i].TRenderShowLogButton := TButton.Create(Self);
-              RenderGroups[i].TRenderShowLogButton.Parent := RenderGroups[i].TRenderGroupBoxMainLayout;
-              RenderGroups[i].TRenderShowLogButton.Align := TAlignLayout.Right;
-              RenderGroups[i].TRenderShowLogButton.Width := 150;
-              RenderGroups[i].TRenderShowLogButton.Margins.Top := 5;
-              RenderGroups[i].TRenderShowLogButton.Margins.Right := 5;
-              RenderGroups[i].TRenderShowLogButton.Margins.Bottom := 5;
-              RenderGroups[i].TRenderShowLogButton.Text := 'Toggle Render Log';
-              RenderGroups[i].TRenderShowLogButton.Tag := i;
-              RenderGroups[i].TRenderShowLogButton.OnClick := ShowLogButtonClick;
+              // RU:  Создание кнопки отображения логов
+              RenderGroups[i].LogButton := TButton.Create(Self);
+              RenderGroups[i].LogButton.Parent      := RenderGroups[i].RenderPanel;
+              RenderGroups[i].LogButton.Align       := TAlignLayout.MostRight;
+              RenderGroups[i].LogButton.StyleLookup := 'logbuttonstyle';
+              RenderGroups[i].LogButton.Width       := 48;
+              RenderGroups[i].LogButton.Position.X  := 9999;
+              RenderGroups[i].LogButton.Tag         := i;
+              RenderGroups[i].LogButton.OnClick     := ShowLogButtonClick;
 
-              //Initialise GroupBox LogMemo
-              RenderGroups[i].TLogMemo := TMemo.Create(Self);
-              RenderGroups[i].TLogMemo.Parent := RenderGroups[i].TRenderGroupBox;
-              RenderGroups[i].TLogMemo.Align := TAlignLayout.Client;
-              RenderGroups[i].TLogMemo.Margins.Left := 5;
-              RenderGroups[i].TLogMemo.Margins.Right := 5;
-              RenderGroups[i].TLogMemo.Margins.Bottom := 5;
-              RenderGroups[i].TLogMemo.ReadOnly := True;
-              RenderGroups[i].TLogMemo.WordWrap := True;
-              RenderGroups[i].TLogMemo.Visible := False;
-              RenderGroups[i].TLogMemo.StyledSettings := [TStyledSetting.Size, TStyledSetting.Style, TStyledSetting.FontColor];
-              RenderGroups[i].TLogMemo.TextSettings.Font.Family := 'Consolas';
+              // RU:  Создание надписи над прогрессбаром
+              RenderGroups[i].StatusLabel := TLabel.Create(Self);
+              RenderGroups[i].StatusLabel.Parent          := RenderGroups[i].RenderPanel;
+              RenderGroups[i].StatusLabel.Align           := TAlignLayout.Top;
+              RenderGroups[i].StatusLabel.Margins         := TBounds.Create(TRectF.Create(16, 8, 0, 0));
+              RenderGroups[i].StatusLabel.StyledSettings  := [TStyledSetting.Family, TStyledSetting.FontColor];
+              RenderGroups[i].StatusLabel.Font.Style      := [TFontStyle.fsBold];
+              RenderGroups[i].StatusLabel.Text            := Language[LANG].RenderingForm.WaitingForAerender;
+              RenderGroups[i].StatusLabel.HitTest         := False;
+
+              // RU:  Создание прогрессбара
+              RenderGroups[i].RenderingProgress := TProgressBar.Create(Self);
+              RenderGroups[i].RenderingProgress.Align       := TAlignLayout.Client;
+              RenderGroups[i].RenderingProgress.Parent      := RenderGroups[i].RenderPanel;
+              RenderGroups[i].RenderingProgress.Margins     := TBounds.Create(TRectF.Create(16, 4, 0, 16));
+              RenderGroups[i].RenderingProgress.Height      := 4;
+              RenderGroups[i].RenderingProgress.Value       := 0;
+              RenderGroups[i].RenderingProgress.Max         := 1;
+              RenderGroups[i].RenderingProgress.StyleLookup := 'progressbarministyle';
+              RenderGroups[i].RenderingProgress.HitTest     := False;
+
+              // RU:  Создание "заглушки"
+              RenderGroups[i].WaitProgress := TAniIndicator.Create(Self);
+              RenderGroups[i].WaitProgress.Align        := TAlignLayout.Client;
+              RenderGroups[i].WaitProgress.Parent       := RenderGroups[i].RenderPanel;
+              RenderGroups[i].WaitProgress.Margins      := TBounds.Create(TRectF.Create(16, 4, 0, 16));
+              RenderGroups[i].WaitProgress.Height       := 4;
+              RenderGroups[i].WaitProgress.StyleLookup  := 'aniindicatorhorzstyle';
+              RenderGroups[i].WaitProgress.Enabled      := True;
+              RenderGroups[i].WaitProgress.HitTest      := False;
+
+              // RU:  Создание Memo для отображения логов
+              RenderGroups[i].LogMemo := TMemo.Create(Self);
+              RenderGroups[i].LogMemo.Parent          := RenderGroups[i].RenderPanel;
+              RenderGroups[i].LogMemo.Align           := TAlignLayout.MostBottom;
+              RenderGroups[i].LogMemo.Height          := 192;
+              RenderGroups[i].LogMemo.Visible         := False;
+              RenderGroups[i].LogMemo.StyledSettings  := [TStyledSetting.Style, TStyledSetting.FontColor];
+              RenderGroups[i].LogMemo.Font.Family     := 'Consolas';
+              RenderGroups[i].LogMemo.Font.Size       := 12;
+              RenderGroups[i].LogMemo.ScrollAnimation := TBehaviorBoolean.True;
+              RenderGroups[i].LogMemo.WordWrap        := True;
             end;
         end;
+
+      // RU: Запуск таймера рендеринга и секундомера
       renderingTimer.Enabled := True;
       CurrentTime := Now;
       StopwatchTimer.Enabled := True;
-      {$IFDEF MSWINDOWS}MainTaskBar.TaskBarState := 2;{$ENDIF MSWINDOWS}
+      //{$IFDEF MSWINDOWS}MainTaskBar.TaskBarState := 2;{$ENDIF MSWINDOWS}
     end;
 end;
 
 procedure TRenderingForm.renderingTimerTimer(Sender: TObject);
+// RU:  Нам нужно создать какой-то тип данных, где для
+//      каждого потока мы будем читать, хранить и отображать
+//      то, что творится в логах.
+//      TStringList является тем, где TMemo хранит весь текст,
+//      посему он и будет использоваться для хранилища логов внутри программы.
 type
-  TRenderData = record
-    LogFile: TStrings;
-    Data: TStrings;
-    Stream: TStream;
-    State: String[6];
+  TRenderData = record      // Непосредственно тип
+    LogFile: TStringList;   // Сюда считываем лог
+    //Data: TStringList;    // Не ебу, нахуй это нужно, но почему-то я его тут обозначил. Далее в коде оно нигде не использовалось.
+    Stream: TStream;        // Поток, даннве из котрого будут передаваться в переменную LogFile
+    State: Integer;         // Обозначим для состояния рендеринга три цифры: -1 (ошибка), 0 (завершён), 1 (рендерится)
   end;
 var
   Render: TArray<TRenderData>;
-  i: Integer;
-  Notification: TNotification;
-  Errored: String;
 begin
   var Finished: Integer := 0;
   var Error: Integer := 0;
   var Completed: Integer := 0;
 
-  SetLength (Render, Length(MainUnit.LogFiles));
+  // RU: Создаём элементы в массиве с данными логов
+  SetLength(Render, Length(LogFiles));
 
-  for var j := 0 to High(Render) do
-    begin
-      Render[j].Data := TStrings.Create;
-      Render[j].State := '';
-    end;
+// RU: Пока оставлю это в комментарии. Когда пойму, зачем это - восстановлю
+//  for var j := 0 to High(Render) do
+//    begin
+//      Render[j].Data := TStringList.Create;
+//      Render[j].State := '';
+//    end;
 
-  for i := 0 to High(Render) do
-    begin
-      Render[i].LogFile := TStringList.Create;
-      Render[i].LogFile.Encoding.UTF8;
+  for var i := 0 to High(Render) do begin
+    // RU: Создаём хранилище для содержимого логов и устанавливаем ему кодировку
+    Render[i].LogFile := TStringList.Create;
+    Render[i].LogFile.DefaultEncoding := TEncoding.UTF8;
 
+    try
+      // RU:  Создаём поток, из которого потом перенесём данные в хранилище содержимого логов
+      //      То есть, фактически, каждый раз файл лога считывается заново,
+      //      держать в памяти всегда его не получится, да и смысла нет - он постоянно обновляется
+      Render[i].Stream := TFileStream.Create(LogFiles[i], fmOpenRead or fmShareDenyNone);
       try
-        Render[i].Stream := TFileStream.Create(LogFiles[i], fmOpenRead or fmShareDenyNone);
-        try
-          Render[i].LogFile.LoadFromStream(Render[i].Stream);
-        finally
-          Render[i].Stream.Free;
-        end;
-
-        if Render[i].LogFile.Count > RenderGroups[i].TLogMemo.Lines.Count then begin
-          RenderGroups[i].TLogMemo.Lines.Add(Render[i].LogFile[RenderGroups[i].TLogMemo.Lines.Count]);
-          RenderGroups[i].TLogMemo.GoToTextEnd;
-          if RenderGroups[i].TRenderProgressBar.Max = 1 then begin
-            //Try to get Duration timecode from log string
-            //if RenderGroups[i].TRenderProgressBar.Max = 1 then begin
-              //Try to get Duration from log string
-              if RenderGroups[i].TLogMemo.Lines[RenderGroups[i].TLogMemo.Lines.Count - 1].Contains('Duration: ') then
-                RenderGroups[i].Duration := ParseAErenderDurationLogString(RenderGroups[i].TLogMemo.Lines[RenderGroups[i].TLogMemo.Lines.Count - 1]);
-
-              //Try to get FrameRate from log string
-              if RenderGroups[i].TLogMemo.Lines[RenderGroups[i].TLogMemo.Lines.Count - 1].Contains('Frame Rate: ') then
-                RenderGroups[i].FrameRate := ParseAErenderFrameRateLogString (RenderGroups[i].TLogMemo.Lines[RenderGroups[i].TLogMemo.Lines.Count - 1]);
-
-              //Try to calculate frames based on recieved Duration and FrameRate
-              if (RenderGroups[i].Duration.ToSingleString <> '0:00:00:00') and (RenderGroups[i].FrameRate <> 0) then begin
-                RenderGroups[i].TRenderProgressBar.Max := TimecodeToFrames(RenderGroups[i].Duration, RenderGroups[i].FrameRate);
-              end;
-            //end;
-
-            //RenderGroups[i].TRenderProgressLabel.Text := 'D = ' + RenderGroups[i].Duration.ToSingleString + '; F = ' + RenderGroups[i].FrameRate.ToString + '; TF = ' + RenderGroups[i].TRenderProgressBar.Max.ToString;
-          end;
-        end;
-
-        if RenderGroups[i].TRenderProgressBar.Max <> 1 then begin
-          try
-            var AERP: TAErenderFrameData := ParseAErenderFrameLogString(RenderGroups[i].TLogMemo.Lines[RenderGroups[i].TLogMemo.Lines.Count - 1]);
-            RenderGroups[i].TRenderProgressBar.Value := AERP.Frame;
-            RenderGroups[i].TRenderProgressLabel.Text := 'Rendering: '
-                                                        + Round((RenderGroups[i].TRenderProgressBar.Value / RenderGroups[i].TRenderProgressBar.Max) * 100).ToString + '% ('
-                                                        + RenderGroups[i].TRenderProgressBar.Value.ToString + ' / ' + RenderGroups[i].TRenderProgressBar.Max.ToString + ')';
-          except
-            on Exception do
-              RenderGroups[i].TRenderProgressBar.Value := 0;
-          end;
-        end;
-
-        //Try to assign all the known frames to total progressbar value
-        var TotalFrames: Single := 1;
-          for var j := 0 to High(RenderGroups) do
-            if RenderGroups[j].TRenderProgressBar.Max <> 1 then
-              TotalFrames := TotalFrames + RenderGroups[j].TRenderProgressBar.Max;
-
-        if TotalProgressBar.Max <> TotalFrames then begin
-          TotalProgressBar.Max := TotalFrames;
-        end else begin
-          var sum: Single := 0;
-          for var j := 0 to High(RenderGroups) do
-            sum := sum + RenderGroups[j].TRenderProgressBar.Value;
-
-          TotalProgressBar.Value := sum;
-          totalProgressPercentage.Text := Round((TotalProgressBar.Value / TotalProgressBar.Max) * 100).ToString + '%';
-          {$IFDEF MSWINDOWS}MainTaskBar.TaskBarProgress := Round((TotalProgressBar.Value / TotalProgressBar.Max) * 100);{$ENDIF MSWINDOWS}
-          if (TotalProgressBar.Max = 0) or (TotalProgressBar.Max = 1) then
-            framesLabel.Text := 'Waiting for aerender...'
-          else
-            framesLabel.Text := TotalProgressBar.Value.ToString + ' / ' + (TotalProgressBar.Max - 1).ToString;
-        end;
-        if RenderGroups[i].TLogMemo.Text.Contains('Finished composition') then
-          begin
-            Render[i].State := 'finish';
-            RenderGroups[i].TRenderProgressLabel.Text := 'Finished';
-            RenderGroups[i].TRenderProgressBar.Value := RenderGroups[i].TRenderProgressBar.Max;
-          end;
-        if RenderGroups[i].TLogMemo.Text.Contains('aerender ERROR') or RenderGroups[i].TLogMemo.Text.Contains('aerender Error') then
-          begin
-            Render[i].State := 'error';
-            RenderGroups[i].TRenderProgressLabel.Text := 'ERROR: See log for more info';
-            RenderGroups[i].TRenderProgressBar.Value := RenderGroups[i].TRenderProgressBar.Max;
-            RenderGroups[i].TRenderProgressBar.StyleLookup := 'progressbarerrorstyle'
-          end;
+        Render[i].LogFile.LoadFromStream(Render[i].Stream);
       finally
-        Render[i].LogFile.Free;
+        Render[i].Stream.Free;
       end;
-    end;
 
-    for var j := 0 to High(Render) do
-      if Render[j].State = 'finish' then
-        inc (Finished);
+      // RU:  Если количество строк в файле лога оказалось больше, чем в LogMemo у конкретного
+      //      потока, то нужно добавить эту строку в LogMemo и произвести её парсинг
+      if Render[i].LogFile.Count > RenderGroups[i].LogMemo.Lines.Count then begin
+        // RU: Добавляем строку и иттератор LogMemo посылаем в самый низ
+        RenderGroups[i].LogMemo.Lines.Add(Render[i].LogFile[RenderGroups[i].LogMemo.Lines.Count]);
+        RenderGroups[i].LogMemo.GoToTextEnd;
 
-    for var j := 0 to High(Render) do
-      if Render[j].State = 'error' then
-        inc (Error);
+        // RU:  При создании прогрессбара, мы обозначили его максимум как 1
+        //      Это поможет нам определить, какой поток уже узнал своё максимальное
+        //      количество кадров, а какой ещё нет
+        //      Тут, мы пытаемся получить какую-то базовую информацию о том,
+        //      что мы сейчас будем рендерить
+        if RenderGroups[i].RenderingProgress.Max = 1 then begin
+            //  RU: Если строка в конце лога содержит 'Duration: ',
+            //      то мы пытаемся вытащить из неё длительность области рендеринга
+            if RenderGroups[i].LogMemo.Lines[RenderGroups[i].LogMemo.Lines.Count - 1].Contains('Duration: ') then
+              RenderGroups[i].Duration := ParseAErenderDurationLogString(RenderGroups[i].LogMemo.Lines[RenderGroups[i].LogMemo.Lines.Count - 1]);
 
-    for var j := 0 to High(RenderGroups) do
-      if RenderGroups[j].TRenderProgressBar.Value = RenderGroups[j].TRenderProgressBar.Max then
-        inc (Completed);
+            //  RU: Если строка в конце лога содержит 'Frame Rate: ',
+            //      то мы пытаемся вытащить из неё частоту кадров композиции
+            if RenderGroups[i].LogMemo.Lines[RenderGroups[i].LogMemo.Lines.Count - 1].Contains('Frame Rate: ') then
+              RenderGroups[i].FrameRate := ParseAErenderFrameRateLogString (RenderGroups[i].LogMemo.Lines[RenderGroups[i].LogMemo.Lines.Count - 1]);
 
-    if (Completed = Length(LogFiles)) then
-      begin
-        Sleep (1000);
-        TotalProgressBar.Value := TotalProgressBar.Max;
-        totalProgressPercentage.Text := '100%';
-        renderingTimer.Enabled := False;
-        StopwatchTimer.Enabled := False;
-
-        if Error = 0 then
-          Errored := 'None'
-        else
-          Errored := Error.ToString;
-
-        Notification := NotificationC.CreateNotification;
-        try
-          Notification.Name := 'AERLNotification';
-          Notification.AlertBody := Format( 'Rendering Finished! %s%s%s%s renders finished with error!',
-                                            [#13#10, timeElapsedLabel.Text, #13#10, Errored]    );
-          Notification.Title := 'AErender Launcher';
-          Notification.FireDate := Now;
-          NotificationC.PresentNotification(Notification);
-        finally
-          Notification.DisposeOf;
+            //  RU: Если у нас есть длительность и частота кадров,
+            //      То нам нужно вычислить конечное значение кадров для прогрессбара
+            //      И ещё, нужно скрыть WaitProgress
+            if (RenderGroups[i].Duration.ToSingleString <> '0:00:00:00') and (RenderGroups[i].FrameRate <> 0) then begin
+              RenderGroups[i].RenderingProgress.Max := TimecodeToFrames(RenderGroups[i].Duration, RenderGroups[i].FrameRate);
+              RenderGroups[i].WaitProgress.Visible := False;
+              RenderGroups[i].WaitProgress.Enabled := False;
+            end;
         end;
-
-        {$IFDEF MSWINDOWS}
-        FlashWindow(ApplicationHWND, True);
-        if Error = 0 then
-          MainTaskBar.TaskBarState := 0;
-        if (Error > 0) and (Error <> Length(LogFiles)) then
-          MainTaskBar.TaskBarState := 4;
-        if Error = Length(LogFiles) then
-          MainTaskBar.TaskBarState := 3;
-        {$ENDIF MSWINDOWS}
       end;
+
+      // RU:  Подсчитываем общее количество кадров
+      //      Тип Single, потому что у прогрессбаров значения этого типа
+      var TotalFrames: Single := 1;
+        for var j := 0 to High(RenderGroups) do
+          if RenderGroups[j].RenderingProgress.Max <> 1 then
+            TotalFrames := TotalFrames + RenderGroups[j].RenderingProgress.Max;
+
+      // RU: Начинаем отображение прогресса, только если у нас известно конечное значение кадров
+      if RenderGroups[i].RenderingProgress.Max <> 1 then begin
+        // RU:  Пробуем парсить последнюю строку лога
+        //      Пока в строке не появятся нужные данные, функция ParseAErenderFrameLogString
+        //      будет выплёвывать исключения. Если мы ловим это исключение,
+        //      то прогрессбару присваиваем ЕГО ЖЕ значение. Потому что, при окончании рендеринга, может быть
+        //      выкинуто исключение и из-за этого общий прогрессбар обосрётся
+        //      Таким образом, мы отсеиваем все строки, до момента как aerender начинает показывать прогресс
+        try
+          var AERP: TAErenderFrameData := ParseAErenderFrameLogString(RenderGroups[i].LogMemo.Lines[RenderGroups[i].LogMemo.Lines.Count - 1]);
+          RenderGroups[i].RenderingProgress.Value := AERP.Frame;
+          RenderGroups[i].StatusLabel.Text := Language[LANG].RenderingForm.Rendering;
+          RenderGroups[i].FramesLabel.Text := Format('%s / %s', [RenderGroups[i].RenderingProgress.Value.ToString, RenderGroups[i].RenderingProgress.Max.ToString]);
+        except
+          on Exception do
+            RenderGroups[i].RenderingProgress.Value := RenderGroups[i].RenderingProgress.Value;
+        end;
+      end;
+
+      // RU: Проверяем, закончен рендеринг или нет
+      if RenderGroups[i].LogMemo.Text.Contains('Finished composition') then begin
+        Render[i].State := 0;
+        RenderGroups[i].StatusLabel.Text := Language[LANG].RenderingForm.RenderingFinished;
+        RenderGroups[i].RenderingProgress.Value := RenderGroups[i].RenderingProgress.Max;
+      end;
+      // RU: Проверяем, была ошибка или нет
+      if RenderGroups[i].LogMemo.Text.Contains('aerender ERROR') or RenderGroups[i].LogMemo.Text.Contains('aerender Error') then begin
+        Render[i].State := -1;
+        RenderGroups[i].WaitProgress.Visible := False;
+        RenderGroups[i].WaitProgress.Enabled := False;
+        RenderGroups[i].StatusLabel.Text := Language[LANG].RenderingForm.RenderingError;
+        RenderGroups[i].RenderingProgress.Value := RenderGroups[i].RenderingProgress.Max;
+        RenderGroups[i].RenderingProgress.StyleLookup := 'progressbarminierrorstyle'
+      end;
+
+      // RU: Общему прогрессбару устанавливаем текущее значение
+      if TotalProgressBar.Max <> TotalFrames then begin
+        TotalProgressBar.Max := TotalFrames;
+      end else begin
+        // RU: Подсчитываем общее текущее значение и присваиваем его
+        var sum: Single := 0;
+        for var j := 0 to High(RenderGroups) do
+          if Render[j].State <> -1 then
+            sum := sum + RenderGroups[j].RenderingProgress.Value;
+
+        TotalProgressBar.Value := sum;
+        totalProgressPercentage.Text := Round((TotalProgressBar.Value / TotalProgressBar.Max) * 100).ToString + '%';
+        {$IFDEF MSWINDOWS}MainTaskBar.TaskBarProgress := Round((TotalProgressBar.Value / TotalProgressBar.Max) * 100);{$ENDIF MSWINDOWS}
+        if (TotalProgressBar.Max = 0) or (TotalProgressBar.Max = 1) then
+          framesLabel.Text := Language[LANG].RenderingForm.WaitingForAerender
+        else
+          framesLabel.Text := TotalProgressBar.Value.ToString + ' / ' + (TotalProgressBar.Max - 1).ToString;
+      end;
+    finally
+      FreeAndNil(Render[i].LogFile);  // RU: Уничтожаем контейнер с логом, чтобы не было проблем
+    end;
+  end;
+
+  {for var i := 0 to High(Render) do
+    if Render[i].State = 0 then
+      inc (Finished);
+
+  for var i := 0 to High(Render) do
+    if Render[i].State = -1 then
+      inc (Error);}
+
+  // RU:  Подсчитываем, сколько потоков завершили рендеринг
+  //      Если рендеринг завершился с ошибкой, всё равно учитываем
+  //      иначе таймер никогда не остановится
+  for var i := 0 to High(RenderGroups) do
+    if RenderGroups[i].RenderingProgress.Value = RenderGroups[i].RenderingProgress.Max then
+      inc (Completed);
+
+  // RU:  Если количество потоков, завершивших рендеринг совпадает
+  //      с общим количеством потоков - всё окей, можно останавливать таймер
+  if (Completed = Length(LogFiles)) then
+    begin
+      // RU: Останавливаем секундомер
+      StopwatchTimer.Enabled := False;
+
+      for var i := 0 to High(RenderGroups) do
+        if Render[i].State <> -1 then
+          RenderGroups[i].StatusLabel.Text := Language[LANG].RenderingForm.RenderingFinished;
+
+      // RU: Полностью очищаем массив с данными логов
+      Finalize(Render);
+
+      TotalProgressBar.Value := TotalProgressBar.Max;
+      totalProgressPercentage.Text := '100%';
+
+      {$IFDEF MSWINDOWS}
+      FlashWindow(ApplicationHWND, True);
+      //if Error = 0 then
+        MainTaskBar.TaskBarState := 0;
+      {if (Error > 0) and (Error <> Length(LogFiles)) then
+        MainTaskBar.TaskBarState := 4;
+      if Error = Length(LogFiles) then
+        MainTaskBar.TaskBarState := 3;}
+      {$ENDIF MSWINDOWS}
+
+      {$IFDEF MACOS}
+      var Application: NSApplication := TNSApplication.Wrap(TNSApplication.OCClass.sharedApplication);
+      Application.requestUserAttention(NSCriticalRequest);
+      {$ENDIF MACOS}
+
+      renderingTimer.Enabled := False;
+    end;
 end;
 
 procedure TRenderingForm.ShowLogButtonClick (Sender: TObject);
 begin
-  var visibleMemos: Integer := 0;
-  if RenderGroups[TButton(Sender).Tag].TLogMemo.Visible = False then
-    begin
-      RenderGroups[TButton(Sender).Tag].TLogMemo.Visible := True;
-      RenderGroups[TButton(Sender).Tag].TRenderGroupBox.Height := RenderGroups[TButton(Sender).Tag].TRenderGroupBox.Height + 175;
-
-      for var i := 0 to High(RenderGroups) do
-        if RenderGroups[i].TLogMemo.Visible = True then
-          inc (visibleMemos);
-      if visibleMemos <> 0 then
-        LogIncrement := 175
-      else
-        LogIncrement := 0;
-    end
-  else
-    begin
-      RenderGroups[TButton(Sender).Tag].TLogMemo.Visible := False;
-      RenderGroups[TButton(Sender).Tag].TRenderGroupBox.Height := RenderGroups[TButton(Sender).Tag].TRenderGroupBox.Height - 175;
-
-      for var i := 0 to High(RenderGroups) do
-        if RenderGroups[i].TLogMemo.Visible = True then
-          inc (visibleMemos);
-      if visibleMemos <> 0 then
-        LogIncrement := 175
-      else
-        LogIncrement := 0;
-    end;
+  if RenderGroups[TButton(Sender).Tag].LogMemo.Visible = False then begin
+    RenderGroups[TButton(Sender).Tag].LogMemo.Visible := True;
+    RenderGroups[TButton(Sender).Tag].RenderPanel.Height := RenderGroups[TButton(Sender).Tag].RenderPanel.Height + 192;
+  end else begin
+    RenderGroups[TButton(Sender).Tag].LogMemo.Visible := False;
+    RenderGroups[TButton(Sender).Tag].RenderPanel.Height := RenderGroups[TButton(Sender).Tag].RenderPanel.Height - 192;
+  end;
 end;
 
 procedure TRenderingForm.StopwatchTimerTimer(Sender: TObject);
 begin
-  timeElapsedLabel.Text := 'Time Elapsed: ' + FormatDateTime('hh:nn:ss', Now - CurrentTime);
+  //timeElapsedLabel.Text := Language[LANG].RenderingForm.TimeElapsed + FormatDateTime('hh:nn:ss', Now - CurrentTime);
 end;
 
 end.
+
+
