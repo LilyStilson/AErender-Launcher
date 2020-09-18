@@ -6,6 +6,8 @@ uses
   System.Types, System.Character, System.Variants, System.IOUtils, System.SysUtils, System.Classes, System.JSON;
 
 type
+  /// I didn't used it anywhere, but I'll leave it here
+  /// Maybe this will come useful someday
   TLanguageCode = record
     const
       EN: Cardinal = 0;
@@ -16,8 +18,8 @@ type
   (*  Main Menu values  *)
   MainMenuText = record
     LauncherMenu, FileMenu, EditMenu, HelpMenu,
-    ImportConfiguration, ExportConfiguration, Close,
-    CloseDarwin, OutputModuleEditor, Settings,
+    RecentProjects, ImportConfiguration, ExportConfiguration,
+    Close, CloseDarwin, OutputModuleEditor, Settings,
     Documentation, About: String
   end;
 
@@ -44,7 +46,7 @@ type
     CompNameHint, MultiCompGridHeader,
     StartFrame, EndFrame,
     EndFrameHint,
-    Calculate, CalculateFrameError, CalculateUnknownError,
+    Calculate,
     Launch,
     NewVersionAvailable, Download: String
   end;
@@ -53,10 +55,14 @@ type
   SettingsFormText = record
     LauncherSettings, 
     RenderEnginePath,
-    Style,
     DefaultProjectsDirectory,
     DefaultOutputDirectory,
-    OnRenderStart,
+    UserInterface,
+    Style,
+    Language, LangChange,
+    InterfaceScale,
+    Behaviour,
+    OnRenderStart, DoNothing, MinimizeLauncher, CloseLauncher,
     HandleAerender,
     DeleteTemporary: String;
   end;
@@ -77,11 +83,11 @@ type
   (*  Output Modules Editor Form  *)
   OutputModuleFormText = record
     OutputModulePresetConfigurator, 
-    PresetName,
-    OutputModule,
-    OutputFileNameStructure,
+    Imported,
+    OutputModule, OutputModulePrompt,
+    OutputFileNameStructure, OutputFileNamePrompt,
     ProjectTab, CompositionTab, CompositionTimeTab, ImageTab, DateTab,
-    Save, Cancel: String;
+    Save, Cancel, CloseDialog: String;
   end;
 
   (*  About Form  *)
@@ -100,7 +106,29 @@ type
     QueueIsEmpty,
     TotalProgress,
     TimeElapsed,
-    AbortRendering: String;
+    AbortRendering,
+    WaitingForAerender,
+    Rendering,
+    RenderingError,
+    RenderingFinished: String;
+  end;
+
+  ErrorText = record
+    MemoryValueInvalid,
+    CacheValueInvalid,
+    CalculateFrameError,
+    CalculateUnknownError,
+    ConfigCorrupted,
+    aerenderInvalid,
+    aerenderUndetectable,
+    errorsOccured,
+    aerenderIsEmpty,
+    projectIsEmpty,
+    outputIsEmpty,
+    compositionIsEmpty,
+    multiCompIsEmpty,
+    isCurrentlyRendering,
+    IncompatibleFile: String;
   end;
 
   LauncherText = record
@@ -111,10 +139,19 @@ type
     OutputModuleConfiguratorForm: OutputModuleFormText;
     AboutForm: AboutFormText;
     RenderingForm: RenderingFormText;
+    Errors: ErrorText;
     Result: Integer;
+
+    /// <summary>
+    /// Creates AErender Launcher Language data from specified .aerlang JSON file.
+    /// </summary>
     constructor InitFromFile(Path: String);
     constructor InitFromStringList(StringList: TStringList);
     constructor InitFromResourceStream(Stream: TResourceStream);
+
+    /// <summary>
+    /// Parses .aerlang JSON file
+    /// </summary
     function ParseJSONLanguage(const LanguageData: TJsonValue): LauncherText;
   end;
 
@@ -135,6 +172,7 @@ begin
   Result.MainForm.MainMenu.FileMenu             := LanguageData.P['LauncherText'].P['MainFormText'].P['MainMenuText'].P['FileMenu'].Value;
   Result.MainForm.MainMenu.EditMenu             := LanguageData.P['LauncherText'].P['MainFormText'].P['MainMenuText'].P['EditMenu'].Value;
   Result.MainForm.MainMenu.HelpMenu             := LanguageData.P['LauncherText'].P['MainFormText'].P['MainMenuText'].P['HelpMenu'].Value;
+  Result.MainForm.MainMenu.RecentProjects       := LanguageData.P['LauncherText'].P['MainFormText'].P['MainMenuText'].P['RecentProjects'].Value;
   Result.MainForm.MainMenu.ImportConfiguration  := LanguageData.P['LauncherText'].P['MainFormText'].P['MainMenuText'].P['ImportConfiguration'].Value;
   Result.MainForm.MainMenu.ExportConfiguration  := LanguageData.P['LauncherText'].P['MainFormText'].P['MainMenuText'].P['ExportConfiguration'].Value;
   Result.MainForm.MainMenu.Close                := LanguageData.P['LauncherText'].P['MainFormText'].P['MainMenuText'].P['Close'].Value;
@@ -173,8 +211,6 @@ begin
   Result.MainForm.EndFrame                      := LanguageData.P['LauncherText'].P['MainFormText'].P['EndFrame'].Value;
   Result.MainForm.EndFrameHint                  := LanguageData.P['LauncherText'].P['MainFormText'].P['EndFrameHint'].Value;
   Result.MainForm.Calculate                     := LanguageData.P['LauncherText'].P['MainFormText'].P['Calculate'].Value;
-  Result.MainForm.CalculateFrameError           := LanguageData.P['LauncherText'].P['MainFormText'].P['CalculateFrameError'].Value;
-  Result.MainForm.CalculateUnknownError         := LanguageData.P['LauncherText'].P['MainFormText'].P['CalculateUnknownError'].Value;
   Result.MainForm.Launch                        := LanguageData.P['LauncherText'].P['MainFormText'].P['Launch'].Value;
   Result.MainForm.NewVersionAvailable           := LanguageData.P['LauncherText'].P['MainFormText'].P['NewVersionAvailable'].Value;
   Result.MainForm.Download                      := LanguageData.P['LauncherText'].P['MainFormText'].P['Download'].Value;
@@ -183,10 +219,18 @@ begin
   {$REGION '    Settings Form Text    '}
   Result.SettingsForm.LauncherSettings          := LanguageData.P['LauncherText'].P['SettingsFormText'].P['LauncherSettings'].Value;
   Result.SettingsForm.RenderEnginePath          := LanguageData.P['LauncherText'].P['SettingsFormText'].P['RenderEnginePath'].Value;
-  Result.SettingsForm.Style                     := LanguageData.P['LauncherText'].P['SettingsFormText'].P['Style'].Value;
   Result.SettingsForm.DefaultProjectsDirectory  := LanguageData.P['LauncherText'].P['SettingsFormText'].P['DefaultProjectsDirectory'].Value;
   Result.SettingsForm.DefaultOutputDirectory    := LanguageData.P['LauncherText'].P['SettingsFormText'].P['DefaultOutputDirectory'].Value;
+  Result.SettingsForm.UserInterface             := LanguageData.P['LauncherText'].P['SettingsFormText'].P['UserInterface'].Value;
+  Result.SettingsForm.Style                     := LanguageData.P['LauncherText'].P['SettingsFormText'].P['Style'].Value;
+  Result.SettingsForm.Language                  := LanguageData.P['LauncherText'].P['SettingsFormText'].P['Language'].Value;
+  Result.SettingsForm.LangChange                := LanguageData.P['LauncherText'].P['SettingsFormText'].P['LangChange'].Value;
+  Result.SettingsForm.InterfaceScale            := LanguageData.P['LauncherText'].P['SettingsFormText'].P['InterfaceScale'].Value;
+  Result.SettingsForm.Behaviour                 := LanguageData.P['LauncherText'].P['SettingsFormText'].P['Behaviour'].Value;
   Result.SettingsForm.OnRenderStart             := LanguageData.P['LauncherText'].P['SettingsFormText'].P['OnRenderStart'].Value;
+  Result.SettingsForm.DoNothing                 := LanguageData.P['LauncherText'].P['SettingsFormText'].P['DoNothing'].Value;
+  Result.SettingsForm.MinimizeLauncher          := LanguageData.P['LauncherText'].P['SettingsFormText'].P['MinimizeLauncher'].Value;
+  Result.SettingsForm.CloseLauncher             := LanguageData.P['LauncherText'].P['SettingsFormText'].P['CloseLauncher'].Value;
   Result.SettingsForm.HandleAerender            := LanguageData.P['LauncherText'].P['SettingsFormText'].P['HandleAerender'].Value;
   Result.SettingsForm.DeleteTemporary           := LanguageData.P['LauncherText'].P['SettingsFormText'].P['DeleteTemporary'].Value;
   {$ENDREGION}
@@ -210,9 +254,10 @@ begin
 
   {$REGION '    Output Module Configurator Form Text    '}
   Result.OutputModuleConfiguratorForm.OutputModulePresetConfigurator  := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['OutputModulePresetConfigurator'].Value;
-  Result.OutputModuleConfiguratorForm.PresetName                      := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['PresetName'].Value;
   Result.OutputModuleConfiguratorForm.OutputModule                    := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['OutputModule'].Value;
+  Result.OutputModuleConfiguratorForm.OutputModulePrompt              := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['OutputModulePrompt'].Value;
   Result.OutputModuleConfiguratorForm.OutputFileNameStructure         := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['OutputFileNameStructure'].Value;
+  Result.OutputModuleConfiguratorForm.OutputFileNamePrompt            := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['OutputFileNamePrompt'].Value;
   Result.OutputModuleConfiguratorForm.ProjectTab                      := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['ProjectTab'].Value;
   Result.OutputModuleConfiguratorForm.CompositionTab                  := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['CompositionTab'].Value;
   Result.OutputModuleConfiguratorForm.CompositionTimeTab              := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['CompositionTimeTab'].Value;
@@ -220,6 +265,7 @@ begin
   Result.OutputModuleConfiguratorForm.DateTab                         := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['DateTab'].Value;
   Result.OutputModuleConfiguratorForm.Save                            := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['Save'].Value;
   Result.OutputModuleConfiguratorForm.Cancel                          := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['Cancel'].Value;
+  Result.OutputModuleConfiguratorForm.CloseDialog                     := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['CloseDialog'].Value;
   {$ENDREGION}
 
   {$REGION '    Rendering Form Text    '}
@@ -229,6 +275,10 @@ begin
   Result.RenderingForm.TotalProgress            := LanguageData.P['LauncherText'].P['RenderingFormText'].P['TotalProgress'].Value;
   Result.RenderingForm.TimeElapsed              := LanguageData.P['LauncherText'].P['RenderingFormText'].P['TimeElapsed'].Value;
   Result.RenderingForm.AbortRendering           := LanguageData.P['LauncherText'].P['RenderingFormText'].P['AbortRendering'].Value;
+  Result.RenderingForm.WaitingForAerender       := LanguageData.P['LauncherText'].P['RenderingFormText'].P['WaitingForAerender'].Value;
+  Result.RenderingForm.Rendering                := LanguageData.P['LauncherText'].P['RenderingFormText'].P['Rendering'].Value;
+  Result.RenderingForm.RenderingError           := LanguageData.P['LauncherText'].P['RenderingFormText'].P['RenderingError'].Value;
+  Result.RenderingForm.RenderingFinished        := LanguageData.P['LauncherText'].P['RenderingFormText'].P['RenderingFinished'].Value;
   {$ENDREGION}
 
   {$REGION '    About Form Text    '}
@@ -239,6 +289,24 @@ begin
   Result.AboutForm.FFMPEG                       := LanguageData.P['LauncherText'].P['AboutFormText'].P['FFMPEG'].Value;
   Result.AboutForm.FFMPEGNotFound               := LanguageData.P['LauncherText'].P['AboutFormText'].P['FFMPEGNotFound'].Value;
   Result.AboutForm.Copyright                    := LanguageData.P['LauncherText'].P['AboutFormText'].P['Copyright'].Value;
+  {$ENDREGION}
+
+  {$REGION '    Errors Text    '}
+  Result.Errors.MemoryValueInvalid              := LanguageData.P['LauncherText'].P['ErrorText'].P['MemoryValueInvalid'].Value;
+  Result.Errors.CacheValueInvalid               := LanguageData.P['LauncherText'].P['ErrorText'].P['CacheValueInvalid'].Value;
+  Result.Errors.CalculateFrameError             := LanguageData.P['LauncherText'].P['ErrorText'].P['CalculateFrameError'].Value;
+  Result.Errors.CalculateUnknownError           := LanguageData.P['LauncherText'].P['ErrorText'].P['CalculateUnknownError'].Value;
+  Result.Errors.ConfigCorrupted                 := LanguageData.P['LauncherText'].P['ErrorText'].P['ConfigCorrupted'].Value;
+  Result.Errors.aerenderInvalid                 := LanguageData.P['LauncherText'].P['ErrorText'].P['aerenderInvalid'].Value;
+  Result.Errors.aerenderUndetectable            := LanguageData.P['LauncherText'].P['ErrorText'].P['aerenderUndetectable'].Value;
+  Result.Errors.errorsOccured                   := LanguageData.P['LauncherText'].P['ErrorText'].P['errorsOccured'].Value;
+  Result.Errors.aerenderIsEmpty                 := LanguageData.P['LauncherText'].P['ErrorText'].P['aerenderIsEmpty'].Value;
+  Result.Errors.projectIsEmpty                  := LanguageData.P['LauncherText'].P['ErrorText'].P['projectIsEmpty'].Value;  
+  Result.Errors.outputIsEmpty                   := LanguageData.P['LauncherText'].P['ErrorText'].P['outputIsEmpty'].Value;
+  Result.Errors.compositionIsEmpty              := LanguageData.P['LauncherText'].P['ErrorText'].P['compositionIsEmpty'].Value;
+  Result.Errors.multiCompIsEmpty                := LanguageData.P['LauncherText'].P['ErrorText'].P['multiCompIsEmpty'].Value;
+  Result.Errors.isCurrentlyRendering            := LanguageData.P['LauncherText'].P['ErrorText'].P['isCurrentlyRendering'].Value;
+  Result.Errors.IncompatibleFile                := LanguageData.P['LauncherText'].P['ErrorText'].P['IncompatibleFile'].Value;
   {$ENDREGION}
 end;
 
