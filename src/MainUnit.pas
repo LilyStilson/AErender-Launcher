@@ -324,8 +324,8 @@ type
   procedure InitLanguage(PATH: String);
 
 const
-  APPVERSION = 'v0.8.2-beta';
-  APPVERSION_DEMO = 'v0.8.5-beta';
+  APPVERSION = 'v0.8.5-beta';
+  //APPVERSION_DEMO = 'v0.8.5-beta';
   AERL_REPO_RELEASES = 'https://api.github.com/repos/lilystilson/aerender-launcher/releases';
   PLATFORMPATHSEPARATOR = {$IFDEF MSWINDOWS}'\'{$ENDIF MSWINDOWS}
                           {$IFDEF MACOS}'/'{$ENDIF MACOS};
@@ -1179,8 +1179,8 @@ begin
   MainForm.Width := 600;
   MainForm.Height := {$IFDEF MSWINDOWS}420{$ENDIF MSWINDOWS}
                       {$IFDEF MACOS}400{$ENDIF MACOS};
-  MainForm.Caption := 'AErender Launcher (' + APPVERSION_DEMO + ')';
-  //MainForm.Caption := 'AErender Launcher (' + APPVERSION + ')';
+  //MainForm.Caption := 'AErender Launcher (' + APPVERSION_DEMO + ')';
+  MainForm.Caption := 'AErender Launcher (' + APPVERSION + ')';
   APPFOLDER :=  {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\'{$ENDIF MSWINDOWS}
                 {$IFDEF MACOS}GetEnvironmentVariable('HOME') + '/Documents/AErender/'{$ENDIF MACOS};
   {$IFDEF MSWINDOWS}
