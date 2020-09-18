@@ -1,0 +1,302 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Condition="Exists('$(BDS)\bin\CodeGear.Deployment.targets')" Project="$(BDS)\bin\CodeGear.Deployment.targets"/>
+    <ProjectExtensions>
+        <ProjectFileVersion>12</ProjectFileVersion>
+    </ProjectExtensions>
+    <PropertyGroup/>
+    <ItemGroup Condition="'$(Platform)'=='iOSDevice64'"/>
+    <ItemGroup Condition="'$(Platform)'=='Win64'">
+        <DeployFile Include="AErender CC\icon_UWP_44.png" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
+            <RemoteName>Logo44x44.png</RemoteName>
+            <DeployClass>UWP_DelphiLogo44</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="..\lang\ru-RU.aerlang" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher\</RemoteDir>
+            <RemoteName>ru-RU.aerlang</RemoteName>
+            <DeployClass>ProjectFile</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="AErender CC\icon_UWP_150.png" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
+            <RemoteName>Logo150x150.png</RemoteName>
+            <DeployClass>UWP_DelphiLogo150</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="..\lang\en-US.aerlang" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher\</RemoteDir>
+            <RemoteName>en-US.aerlang</RemoteName>
+            <DeployClass>ProjectFile</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="Win64\Debug\AErender_Launcher.exe" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher\</RemoteDir>
+            <RemoteName>AErender_Launcher.exe</RemoteName>
+            <DeployClass>ProjectOutput</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+            <Required>True</Required>
+        </DeployFile>
+        <DeployFile Include="Win64\Beta\AErender_Launcher.exe" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher\</RemoteDir>
+            <RemoteName>AErender_Launcher.exe</RemoteName>
+            <DeployClass>ProjectOutput</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+            <Required>True</Required>
+        </DeployFile>
+    </ItemGroup>
+    <ItemGroup Condition="'$(Platform)'=='Win32'">
+        <DeployFile Include="E:\AErender CC\icon_UWP_44.png" Condition="'$(Config)'=='Release'">
+            <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
+            <RemoteName>Logo44x44.png</RemoteName>
+            <DeployClass>UWP_DelphiLogo44</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="..\lang\en-US.aerlang" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher\</RemoteDir>
+            <RemoteName>en-US.aerlang</RemoteName>
+            <DeployClass>ProjectFile</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="AErender CC\icon_UWP_44.png" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
+            <RemoteName>Logo44x44.png</RemoteName>
+            <DeployClass>UWP_DelphiLogo44</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="..\lang\ru-RU.aerlang" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher\</RemoteDir>
+            <RemoteName>ru-RU.aerlang</RemoteName>
+            <DeployClass>ProjectFile</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="E:\AErender CC\icon_UWP_150.png" Condition="'$(Config)'=='Release'">
+            <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
+            <RemoteName>Logo150x150.png</RemoteName>
+            <DeployClass>UWP_DelphiLogo150</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="Win32\Beta\AErender_Launcher.exe" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher\</RemoteDir>
+            <RemoteName>AErender_Launcher.exe</RemoteName>
+            <DeployClass>ProjectOutput</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+            <Required>True</Required>
+        </DeployFile>
+        <DeployFile Include="Win32\Beta\AppxManifest.xml" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher\</RemoteDir>
+            <RemoteName>AppxManifest.xml</RemoteName>
+            <DeployClass>ProjectUWPManifest</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="AErender CC\icon_UWP_150.png" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
+            <RemoteName>Logo150x150.png</RemoteName>
+            <DeployClass>UWP_DelphiLogo150</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+    </ItemGroup>
+    <ItemGroup Condition="'$(Platform)'=='OSX64'">
+        <DeployFile Include="OSX64\Debug\AErenderLauncher.info.plist" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher.app\Contents\</RemoteDir>
+            <RemoteName>Info.plist</RemoteName>
+            <DeployClass>ProjectOSXInfoPList</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="..\lang\en-US.aerlang" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher.app\Contents\Resources\StartUp\</RemoteDir>
+            <RemoteName>en-US.aerlang</RemoteName>
+            <DeployClass>ProjectFile</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="..\lang\ru-RU.aerlang" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher.app\Contents\Resources\StartUp\</RemoteDir>
+            <RemoteName>ru-RU.aerlang</RemoteName>
+            <DeployClass>ProjectFile</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="OSX64\Beta\AErender_Launcher" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher.app\Contents\MacOS\</RemoteDir>
+            <RemoteName>AErender_Launcher</RemoteName>
+            <DeployClass>ProjectOutput</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+            <Required>True</Required>
+        </DeployFile>
+        <DeployFile Include="OSX64\Beta\AErender_Launcher.dSYM" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher.app\..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF\</RemoteDir>
+            <RemoteName>AErender_Launcher</RemoteName>
+            <DeployClass>ProjectOSXDebug</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="..\lang\ru-RU.aerlang" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher.app\Contents\Resources\StartUp\</RemoteDir>
+            <RemoteName>ru-RU.aerlang</RemoteName>
+            <DeployClass>ProjectFile</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="OSX64\Debug\AErender_Launcher" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher.app\Contents\MacOS\</RemoteDir>
+            <RemoteName>AErender_Launcher</RemoteName>
+            <DeployClass>ProjectOutput</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+            <Required>True</Required>
+        </DeployFile>
+        <DeployFile Include="OSX64\Debug\AErenderLauncher.dSYM" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher.app\..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF\</RemoteDir>
+            <RemoteName>AErenderLauncher</RemoteName>
+            <DeployClass>ProjectOSXDebug</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="AErender CC\AErender.icns" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher.app\Contents\Resources\</RemoteDir>
+            <RemoteName>AErender_Launcher.icns</RemoteName>
+            <DeployClass>ProjectOSXResource</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="OSX64\Beta\AErender_Launcher.info.plist" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher.app\Contents\</RemoteDir>
+            <RemoteName>Info.plist</RemoteName>
+            <DeployClass>ProjectOSXInfoPList</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="E:\AErender CC\AErender.icns" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher.app\Contents\Resources\</RemoteDir>
+            <RemoteName>AErenderLauncher.icns</RemoteName>
+            <DeployClass>ProjectOSXResource</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="$(BDS)\Redist\osx64\libcgsqlite3.dylib">
+            <RemoteDir>AErender_Launcher.app\Contents\MacOS\</RemoteDir>
+            <RemoteName>libcgsqlite3.dylib</RemoteName>
+            <DeployClass>DependencyModule</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="..\lang\en-US.aerlang" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher.app\Contents\Resources\StartUp\</RemoteDir>
+            <RemoteName>en-US.aerlang</RemoteName>
+            <DeployClass>ProjectFile</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="OSX64\Debug\AErenderLauncher.entitlements" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher.app\..\</RemoteDir>
+            <RemoteName>AErenderLauncher.entitlements</RemoteName>
+            <DeployClass>ProjectOSXEntitlements</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="OSX64\Beta\AErender_Launcher.entitlements" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher.app\..\</RemoteDir>
+            <RemoteName>AErender_Launcher.entitlements</RemoteName>
+            <DeployClass>ProjectOSXEntitlements</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+    </ItemGroup>
+    <ItemGroup Condition="'$(Platform)'=='Android'"/>
+    <ItemGroup Condition="'$(Platform)'=='iOSSimulator'">
+        <DeployFile Include="$(BDS)\Redist\iossimulator\libcgunwind.1.0.dylib">
+            <RemoteDir>AErender_Launcher.app\</RemoteDir>
+            <RemoteName>libcgunwind.1.0.dylib</RemoteName>
+            <DeployClass>DependencyModule</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="$(BDS)\Redist\iossimulator\libpcre.dylib">
+            <RemoteDir>AErender_Launcher.app\</RemoteDir>
+            <RemoteName>libpcre.dylib</RemoteName>
+            <DeployClass>DependencyModule</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+    </ItemGroup>
+    <ItemGroup Condition="'$(Platform)'=='Android64'"/>
+</Project>
