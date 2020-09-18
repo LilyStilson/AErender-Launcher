@@ -9,6 +9,7 @@
                 "FileMenu": "",
                 "EditMenu": "",
                 "HelpMenu": "",
+                "RecentProjects": "",
                 "ImportConfiguration": "",
                 "ExportConfiguration": "",
                 "Close": "",
@@ -46,8 +47,6 @@
             "EndFrame": "",
             "EndFrameHint": "",
             "Calculate": "",
-            "CalculateFrameError": "",
-            "CalculateUnknownError": "",
             "Launch": "",
             "NewVersionAvailable": "", 
             "Download": ""
@@ -55,11 +54,18 @@
         "SettingsFormText": {
             "LauncherSettings": "",
             "RenderEnginePath": "",
-            "Language": "",
-            "Style": "",
             "DefaultProjectsDirectory": "",
             "DefaultOutputDirectory": "",
+            "UserInterface": "",
+            "Style": "",
+            "Language": "",
+            "LangChange": "",
+            "InterfaceScale": "",
+            "Behaviour": "",
             "OnRenderStart": "",
+            "DoNothing": "",
+            "MinimizeLauncher": "",
+            "CloseLauncher": "",
             "HandleAerender": "",
             "DeleteTemporary": ""
         },
@@ -77,21 +83,23 @@
             "PrepareForSplitRendering": "",
             "SelectAll": "",
             "DeselectAll": "",
-            "Import": "",
-            "IncompatibleFile": ""
+            "Import": ""
         },
         "OutputModuleFormText": {
             "OutputModulePresetConfigurator": "", 
             "Imported": "",
             "OutputModule": "",
+            "OutputModulePrompt": "",
             "OutputFileNameStructure": "",
+            "OutputFileNamePrompt": "",
             "ProjectTab": "", 
             "CompositionTab": "", 
             "CompositionTimeTab": "", 
             "ImageTab": "", 
             "DateTab": "",
             "Save": "", 
-            "Cancel": ""
+            "Cancel": "",
+            "CloseDialog": ""
         },
         "RenderingFormText": {
             "RenderingProgress": "",
@@ -99,7 +107,11 @@
             "QueueIsEmpty": "",
             "TotalProgress": "",
             "TimeElapsed": "",
-            "AbortRendering": ""
+            "AbortRendering": "",
+            "WaitingForAerender": "",
+            "Rendering": "",
+            "RenderingError": "",
+            "RenderingFinished": ""
         },
         "AboutFormText": {
             "AErenderLauncher": "",
@@ -109,6 +121,23 @@
             "FFMPEG": "",
             "FFMPEGNotFound": "",
             "Copyright": ""
+        },
+        "ErrorText":{
+            "MemoryValueInvalid": "",
+            "CacheValueInvalid": "",
+            "CalculateFrameError": "",
+            "CalculateUnknownError": "",
+            "ConfigCorrupted": "",
+            "aerenderInvalid": "",
+            "aerenderUndetectable": "",
+            "errorsOccured": "",
+            "aerenderIsEmpty": "",
+            "projectIsEmpty": "",
+            "outputIsEmpty": "",
+            "compositionIsEmpty": "",
+            "multiCompIsEmpty": "",
+            "isCurrentlyRendering": "",
+            "IncompatibleFile": ""
         }
     }
 }

@@ -1,7 +1,7 @@
 {
     "language": "ru-RU",
     "author": "Lily Stilson",
-    "completion": "%%%%",
+    "completion": "100%",
     "LauncherText": {
         "MainFormText": {
             "MainMenuText": {
@@ -9,13 +9,14 @@
                 "FileMenu": "Файл",
                 "EditMenu": "Правка",
                 "HelpMenu": "Помощь",
+                "RecentProjects": "Недавние проекты",
                 "ImportConfiguration": "Импорт Конфигурации",
                 "ExportConfiguration": "Экспорт Конфигурации",
                 "Close": "Выход",
                 "CloseDarwin": "Закрыть",
                 "OutputModuleEditor": "Редактор модулей вывода",
                 "Settings": "Настройки",
-                "Documentation": "Документация",
+                "Documentation": "Документация (онлайн)",
                 "About": "О программе"
             },
             "ProjectFile": "Файл проекта",
@@ -58,6 +59,7 @@
             "UserInterface": "Интерфейс",
             "Style": "Стиль",
             "Language": "Язык",
+            "LangChange": "Изменения вступят в силу после перезапуска программы!",
             "InterfaceScale": "Размер интерфейса",
             "Behaviour": "Поведение",
             "OnRenderStart": "По началу рендеринга",
@@ -81,21 +83,23 @@
             "PrepareForSplitRendering": "Подготовить к рендерингу частями",
             "SelectAll": "Выбрать всё",
             "DeselectAll": "Снять выделение",
-            "Import": "Импортировать",
-            "IncompatibleFile": "Выбранный файл несовместим с AErender Launcher. Пожалуйста, укажите корректный .aer / .xml файл для импорта!"
+            "Import": "Импортировать"
         },
         "OutputModuleFormText": {
             "OutputModulePresetConfigurator": "Конфигуратор предустановок модулей вывода", 
             "Imported": "(импортирован)",
             "OutputModule": "Модуль вывода",
+            "OutputModulePrompt": "Укажите модуль вывода",
             "OutputFileNameStructure": "Структура имени выходного файла",
+            "OutputFileNamePrompt": "Напечатайте или перетащите из панели ниже доступные параметры",
             "ProjectTab": "Проект", 
             "CompositionTab": "Композиция", 
             "CompositionTimeTab": "Время композиции", 
             "ImageTab": "Изображение", 
             "DateTab": "Дата",
             "Save": "Сохранить", 
-            "Cancel": "Отмена"
+            "Cancel": "Отмена",
+            "CloseDialog": "Модули вывода были изменены. Сохранить изменения?"
         },
         "RenderingFormText": {
             "RenderingProgress": "Прогресс рендеринга",
@@ -103,7 +107,11 @@
             "QueueIsEmpty": "Очередь пуста",
             "TotalProgress": "Общий прогресс",
             "TimeElapsed": "Время рендеринга: ",
-            "AbortRendering": "Прервать рендеринг"
+            "AbortRendering": "Прервать рендеринг",
+            "WaitingForAerender":"Ожидание aerender...",
+            "Rendering":"Рендеринг",
+            "RenderingError": "ОШИБКА: См. журнал для дополнительной информации",
+            "RenderingFinished": "Рендеринг завершён"
         },
         "AboutFormText": {
             "AErenderLauncher": "О программе AErender Launcher",
@@ -117,17 +125,19 @@
         "ErrorText":{
             "MemoryValueInvalid": "недействительное значение памяти. Используйте <value unit> или <value>.",
             "CacheValueInvalid": "недействительное процентное значение. Используйте <value %> или <value>.",
-            "CalculateFrameError": "End frame is reqired for calculation!",
-            "CalculateUnknownError": "Unknown calculation error",
-            "ConfigCorrupted": "Configuration file is corrupted! Press OK to renew configuration file. Application will be restarted.",
-            "aerenderInvalid": "Selected aerender path is not valid. Choose another path to aerender.",
-            "aerenderUndetectable": "Failed to detect aerender automatically. Provide path to aerender manually.",
-            "errorsOccured": "The following error(s) has occured: ",
+            "CalculateFrameError": "Конечный кадр необходим для рассчётов!",
+            "CalculateUnknownError": "Неизвестная ошибка рассчётов",
+            "ConfigCorrupted": "Файл конфигурации повреждён! Нажмите OK, чтобы обновить файл конфигурации. Программа будет перезапущена.",
+            "aerenderInvalid": "Выбранный путь к aerender недействителен. Выберите другой путь к aerender.",
+            "aerenderUndetectable": "Не удалось автоматически определить путь к aerender. Укажите путь к aerender вручную.",
+            "errorsOccured": "Произошли следующие ошибки: ",
             "aerenderIsEmpty": "Путь к aerender не указан",
             "projectIsEmpty": "Путь к проекту не указан",
             "outputIsEmpty": "Выходной путь не указан",
             "compositionIsEmpty": "Название композиции не указано",
-            "multiCompIsEmpty": "Названия не всех композиций указаны в списке"
+            "multiCompIsEmpty": "Названия не всех композиций указаны в списке",
+            "isCurrentlyRendering": "Рендеринг уже в процессе! Дождитесь, пока текущий рендеринг завершится. Окно прогресса будет открыто.",
+            "IncompatibleFile": "Выбранный файл несовместим с AErender Launcher. Пожалуйста, укажите корректный .aer / .xml файл для импорта!"
         }
     }
 }

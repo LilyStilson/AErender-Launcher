@@ -9,13 +9,14 @@
                 "FileMenu": "File",
                 "EditMenu": "Edit",
                 "HelpMenu": "Help",
+                "RecentProjects": "Recent projects",
                 "ImportConfiguration": "Import Configuration",
                 "ExportConfiguration": "Export Configuration",
                 "Close": "Exit",
                 "CloseDarwin": "Quit",
                 "OutputModuleEditor": "Output Module Editor",
                 "Settings": "Settings",
-                "Documentation": "Documentation",
+                "Documentation": "Documentation (online)",
                 "About": "About"
             },
             "ProjectFile": "Project File Path",
@@ -25,7 +26,7 @@
             "DarwinDialogOpen": "Open After Effects project",
             "DarwinDialogSaveNameField": "Output file name:",
             "DarwinDialogSave": "Save here",
-            "OutputModulePreset": "Output Module Preset",
+            "OutputModulePreset": "Output Module",
             "ConfigureOutputModules": "Configure Output Modules...",
             "Properties": "Properties",
             "MissingFiles": "Render with missing files",
@@ -58,6 +59,7 @@
             "UserInterface": "User Interface",
             "Style": "Style",
             "Language": "Language",
+            "LangChange": "Changes will take effect after restarting the program!",
             "InterfaceScale": "Interface Scale",
             "Behaviour": "Behaviour",
             "OnRenderStart": "On Render Start",
@@ -81,21 +83,23 @@
             "PrepareForSplitRendering": "Prepare for split rendering",
             "SelectAll": "Select All",
             "DeselectAll": "Deselect All",
-            "Import": "Import",
-            "IncompatibleFile": "Selected file is not compatible with AErender Launcher. Please, provide proper .aer / .xml file for import!"
+            "Import": "Import"
         },
         "OutputModuleFormText": {
             "OutputModulePresetConfigurator": "Output module presets configurator", 
             "Imported": "(imported)",
             "OutputModule": "Output module",
+            "OutputModulePrompt": "Specify output module",
             "OutputFileNameStructure": "Output file name structure",
+            "OutputFileNamePrompt": "Type or drag from bottom panel available parameters",
             "ProjectTab": "Project", 
             "CompositionTab": "Composition", 
             "CompositionTimeTab": "Composition time", 
             "ImageTab": "Image", 
             "DateTab": "Date",
             "Save": "Save", 
-            "Cancel": "Cancel"
+            "Cancel": "Cancel",
+            "CloseDialog": "Output modules was modified. Save changes?"
         },
         "RenderingFormText": {
             "RenderingProgress": "Rendering Progress",
@@ -103,7 +107,11 @@
             "QueueIsEmpty": "Queue is empty",
             "TotalProgress": "Total Progress",
             "TimeElapsed": "Time Elapsed: ",
-            "AbortRendering": "Abort rendering"
+            "AbortRendering": "Abort rendering",
+            "WaitingForAerender":"Waiting for aerender...",
+            "Rendering":"Rendering",
+            "RenderingError": "ERROR: See log for more info",
+            "RenderingFinished": "Rendering finished"
         },
         "AboutFormText": {
             "AErenderLauncher": "About AErender Launcher",
@@ -127,7 +135,9 @@
             "projectIsEmpty": "Project path is not specified",
             "outputIsEmpty": "Output path is not specified",
             "compositionIsEmpty": "Composition name is not specified",
-            "multiCompIsEmpty": "Not all compositions names are specified in composition list"
+            "multiCompIsEmpty": "Not all compositions names are specified in composition list",
+            "isCurrentlyRendering": "Rendering is already in progress! Wait untill current rendering finshes. Rendering progress window will open.",
+            "IncompatibleFile": "Selected file is not compatible with AErender Launcher. Please, provide proper .aer / .xml file for import!"
         }
     }
 }
