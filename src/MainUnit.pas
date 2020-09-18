@@ -45,6 +45,7 @@ uses
   System.ImageList,
   System.Net.URLClient,
   System.Net.HttpClientComponent,
+  System.Generics.Collections,
   {$ENDREGION}
 
   {$REGION '    FMX Namespaces    '}
@@ -78,6 +79,7 @@ uses
   FMX.ComboTrackBar,
   FMX.ImgList,
   FMX.ComboEdit,
+  FMX.BufferedLayout,
   {$ENDREGION}
 
   {$REGION '    Data Lib Namespaces    '}
@@ -130,7 +132,6 @@ type
     compLayout: TLayout;
     bottomButtonsLayout: TLayout;
     launchButton: TButton;
-    Lang1: TLang;
     threadsLayout: TLayout;
     compGrid: TStringGrid;
     StringColumn1: TStringColumn;
@@ -210,37 +211,20 @@ type
     AERModernStyle: TStyleBook;
     settingsIconFill: TFillRGBEffect;
     infoIconFill: TFillRGBEffect;
-    MenuBar1: TMenuBar;
-    winFileItem: TMenuItem;
-    winImportConfigurationItem: TMenuItem;
-    winExportConfigItem: TMenuItem;
-    winMenuBarSeparator1: TMenuItem;
-    winExitItem: TMenuItem;
-    winEditItem: TMenuItem;
-    winHelpItem: TMenuItem;
-    winSettingsItem: TMenuItem;
-    winDocItem: TMenuItem;
-    winMenuBarSeparator2: TMenuItem;
-    winAboutItem: TMenuItem;
     AERModernAnimatedStyle: TStyleBook;
-    NotificationC: TNotificationCenter;
-    MenuItem1: TMenuItem;
     UpdateLabel: TLabel;
     downloadButton: TButton;
     ffmpegCheckBox: TCheckBox;
     ffmpegConfigButton: TButton;
     ffmpegConcateLayout: TLayout;
     LinkControlToPropertyEnabled11: TLinkControlToProperty;
-    renderingBlurEffect: TBlurEffect;
     mainLayout: TLayout;
-    FloatAnimation1: TFloatAnimation;
     GridPanelLayout1: TGridPanelLayout;
     GridPanelLayout2: TGridPanelLayout;
     Layout1: TLayout;
     Layout2: TLayout;
     GridPanelLayout3: TGridPanelLayout;
     UpdateInfo: TStatusBar;
-    winOutModuleEditorItem: TMenuItem;
     outModuleEditorItem0: TMenuItem;
     editItem: TMenuItem;
     outModuleEditorItem: TMenuItem;
@@ -248,11 +232,13 @@ type
     SettingsIcon: TPath;
     InfoIcon: TPath;
     LaunchIcon: TPath;
-    StyleBook1: TStyleBook;
     threadsCount: TComboEdit;
     LinkControlToPropertyVisible7: TLinkControlToProperty;
     LinkControlToPropertyEnabled10: TLinkControlToProperty;
     UpdateNetHTTPClient: TNetHTTPClient;
+    Button1: TButton;
+    recentItem: TMenuItem;
+    separatorItem3: TMenuItem;
     procedure FormResize(Sender: TObject);
     procedure compSwitchSwitch(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -297,6 +283,17 @@ type
       const AError: string);
     procedure UpdateNetHTTPClientRequestCompleted(const Sender: TObject;
       const AResponse: IHTTPResponse);
+    procedure ReadAERQ(Path: String);
+    procedure SetLanguage(LanguageCode: Integer);
+    procedure UpdateOutputModules;
+    procedure threadsCountTyping(Sender: TObject);
+    procedure threadsCountExit(Sender: TObject);
+    procedure AddToRecents(Item: String);
+    procedure RecentProjectSelected(Sender: TObject);
+    procedure InflateRecents;
+    procedure ReInflateRecents;
+    procedure compGridEditingDone(Sender: TObject; const ACol,
+      ARow: Integer);
   private
     { Private declarations }
     //{$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
@@ -310,21 +307,25 @@ type
   OutputModule = record
     Module,
     Mask: String;
+    Imported: Boolean;
   end;
   function GetPlatformMemorySize: Int64;
   function GetFFMPEGPath: WideString;
   function GetDirectoryFiles(Directory: String): TArray<System.String>;
   function KillProcess(ProcessName: String): Integer;
   procedure InitOutputModules;
-  procedure UpdateOutputModules;
-  procedure SetFormLanguage(const Form: TCommonCustomForm; const LanguageCode: Cardinal);
-  procedure InitLanguage;
   procedure InitConfiguration(Path: String);
   procedure LoadConfiguration(Path: String);
   procedure SaveConfiguration(Path: String);
+  function Open(Path: String): Integer;
+  function Execute(Path: String): Integer;
+  function BackgroundExecute(Path: String): Integer;
+  procedure ChangeLanguage(LanguageCode: Integer);
+  procedure InitLanguage(PATH: String);
 
 const
-  APPVERSION = 'v0.8.5-beta';
+  APPVERSION = 'v0.8.2-beta';
+  APPVERSION_DEMO = 'v0.8.5-beta';
   AERL_REPO_RELEASES = 'https://api.github.com/repos/lilystilson/aerender-launcher/releases';
   PLATFORMPATHSEPARATOR = {$IFDEF MSWINDOWS}'\'{$ENDIF MSWINDOWS}
                           {$IFDEF MACOS}'/'{$ENDIF MACOS};
@@ -340,11 +341,18 @@ var
   FFMPEG: Boolean = False;                                  (*  Represents FFMPEG availability              *)
   RenderWindowSender: TButton;                              (*  Who opened Rendering window?                *)
   LANG, STYLE, ONRENDERSTART: Integer;                      (*  Language, Theme and OnRenderStart values    *)
-  LogFiles: TArray<System.String>;                          (*  All the aerender log files here             *)
+  LogFiles: TArray<String>;                                 (*  All the aerender log files here             *)
   OutputModules: TArray<OutputModule>;                      (*  All the After Effects output modules here   *)
+  OMCount: Cardinal;
+  //TempOutputModule: OutputModule;                         (*  Temporary Output Module used from import    *)
   TMathParser: MathExpParser.TExpressionParser;             (*  Mathematical parser for frames calculation  *)
   FHandleDragDirectly: Boolean = False;                     (*  For implementation of DragDrop functional   *)
+  PARAMSTART: Boolean = False;
+  isRendering: Boolean = False;
   Language: TArray<LauncherText>;
+  Recents: array [0..9] of String;
+  RecentsMenuItems: TArray<TMenuItem>;
+  //TempThreadsStr: String = '';
 
 implementation
 
@@ -487,134 +495,43 @@ begin
 
   OutputModules[0].Module := 'Lossless';
   OutputModules[0].Mask := '[compName].[fileExtension]';
+  OutputModules[0].Imported := False;
 
   OutputModules[1].Module := 'AIFF 48kHz';
   OutputModules[1].Mask := '[compName].[fileExtension]';
+  OutputModules[1].Imported := False;
 
   OutputModules[2].Module := 'Alpha Only';
   OutputModules[2].Mask := '[compName].[fileExtension]';
+  OutputModules[2].Imported := False;
 
   OutputModules[3].Module := 'AVI DV NTSC 48kHz';
   OutputModules[3].Mask := '[compName].[fileExtension]';
+  OutputModules[3].Imported := False;
 
   OutputModules[4].Module := 'AVI DV PAL 48kHz';
   OutputModules[4].Mask := '[compName].[fileExtension]';
+  OutputModules[4].Imported := False;
 
   OutputModules[5].Module := 'Lossless with Alpha';
   OutputModules[5].Mask := '[compName].[fileExtension]';
+  OutputModules[5].Imported := False;
 
   OutputModules[6].Module := 'Multi-Machine Sequence';
   OutputModules[6].Mask := '[compName]_[#####].[fileExtension]';
+  OutputModules[6].Imported := False;
 
   OutputModules[7].Module := 'Photoshop';
   OutputModules[7].Mask := '[compName]_[#####].[fileExtension]';
+  OutputModules[7].Imported := False;
 
   OutputModules[8].Module := 'Save Current Preview';
   OutputModules[8].Mask := '[compName].[fileExtension]';
+  OutputModules[8].Imported := False;
 
   OutputModules[9].Module := 'TIFF Sequence with Alpha';
   OutputModules[9].Mask := '[compName]_[#####].[fileExtension]';
-end;
-
-procedure UpdateOutputModules;
-begin
-  MainForm.outputModuleBox.Items.Clear;
-  for var i := 0 to High(OutputModules) do
-    MainForm.outputModuleBox.Items.Add(OutputModules[i].Module);
-  MainForm.outputModuleBox.Items.Add('Configure Output Modules...');
-end;
-
-procedure SetFormLanguage(const Form: TCommonCustomForm; const LanguageCode: Cardinal);
-begin
-  //ShowMessage('tag = ' + Form.Tag.ToString + '; Language = ' + Language[LanguageCode].MainForm.MainMenu.FileMenu);
-  case Form.Tag of
-    0:  begin  //MainForm
-      //Set MainMenu items
-      {$IFDEF MACOS}    //Set macOS specific Launcher item text
-      MainForm.launcherItem.Text          := Language[LanguageCode].MainForm.MainMenu.LauncherMenu;
-      MainForm.outModuleEditorItem0.Text  := Language[LanguageCode].MainForm.MainMenu.OutputModuleEditor;
-      MainForm.settingsItem0.Text         := Language[LanguageCode].MainForm.MainMenu.Settings;
-      {$ENDIF MACOS}
-
-      MainForm.fileItem.Text              := Language[LanguageCode].MainForm.MainMenu.FileMenu;
-      MainForm.importConfigItem.Text      := Language[LanguageCode].MainForm.MainMenu.ImportConfiguration;
-      MainForm.exportConfigItem.Text      := Language[LanguageCode].MainForm.MainMenu.ExportConfiguration;
-      MainForm.exitItem.Text              := Language[LanguageCode].MainForm.MainMenu.{$IFDEF MSWINDOWS}Close;{$ENDIF MSWINDOWS}{$IFDEF MACOS}CloseDarwin;{$ENDIF MACOS}
-
-      {$IFDEF MSWINDOWS}
-      MainForm.editItem.Text              := Language[LanguageCode].MainForm.MainMenu.EditMenu;
-      MainForm.outModuleEditorItem.Text   := Language[LanguageCode].MainForm.MainMenu.OutputModuleEditor;
-      MainForm.settingsItem.Text          := Language[LanguageCode].MainForm.MainMenu.Settings;
-      {$ENDIF MSWINDOWS}
-
-      MainForm.helpItem.Text              := Language[LanguageCode].MainForm.MainMenu.HelpMenu;
-      MainForm.aboutItem.Text             := Language[LanguageCode].MainForm.MainMenu.About;
-      MainForm.docsItem.Text              := Language[LanguageCode].MainForm.MainMenu.Documentation;
-
-      MainForm.projectPathLabel.Text      := Language[LanguageCode].MainForm.ProjectFile;
-      MainForm.outputPathLabel.Text       := Language[LanguageCode].MainForm.OutputFile;
-      MainForm.openFile.Text              := Language[LanguageCode].MainForm.OpenSaveProjectButton;
-      MainForm.saveFile.Text              := Language[LanguageCode].MainForm.OpenSaveProjectButton;
-      MainForm.outputModuleLabel.Text     := Language[LanguageCode].MainForm.OutputModulePreset;
-
-      //MainForm.outputModuleBox.Items[MainForm.outputModuleBox.Items.Count - 1] := Language[LanguageCode].MainForm.ConfigureOutputModules;
-
-      MainForm.properties.Text            := Language[LanguageCode].MainForm.Properties;
-      MainForm.missingFilesCheckbox.Text  := Language[LanguageCode].MainForm.MissingFiles;
-      MainForm.soundCheckbox.Text         := Language[LanguageCode].MainForm.Sound;
-      MainForm.threadedRender.Text        := Language[LanguageCode].MainForm.Threaded;
-      MainForm.customCheckbox.Text        := Language[LanguageCode].MainForm.Custom;
-      MainForm.customProp.TextPrompt      := Language[LanguageCode].MainForm.CustomPropHint;
-
-      MainForm.cacheUsageLimitLabel.Text  := Language[LanguageCode].MainForm.CacheUsageLimit;
-      //if MainForm.cacheUsageTrackBar.Value = 100 then
-      //  MainForm.cacheUsageInfo.Text      := Language[LanguageCode].MainForm.Unlimited;
-
-      MainForm.memUsageLabel.Text         := Language[LanguageCode].MainForm.MemUsage;
-      //if MainForm.memUsageTrackBar.Value = 100 then
-      //  MainForm.memUsageInfo.Text        := Language[LanguageCode].MainForm.Unlimited;
-
-      if MainForm.compSwitch.IsChecked then
-        MainForm.compSwitchLabel.Text     := Language[LanguageCode].MainForm.MultiComp
-      else
-        MainForm.compSwitchLabel.Text     := Language[LanguageCode].MainForm.SingleComp;
-
-      MainForm.compName.TextPrompt        := Language[LanguageCode].MainForm.CompNameHint;
-      MainForm.compGrid.Cells[0, 0]       := Language[LanguageCode].MainForm.MultiCompGridHeader;
-
-      if MainForm.threadsSwitch.IsChecked then begin
-        MainForm.threadsSwitchLabel.Text  := Language[LanguageCode].MainForm.SplitRender;
-        MainForm.outFrame.TextPrompt      := Language[LanguageCode].MainForm.EndFrameHint;
-      end else
-        MainForm.threadsSwitchLabel.Text  := Language[LanguageCode].MainForm.SingleRener;
-
-      MainForm.startFrameLabel.Text       := Language[LanguageCode].MainForm.StartFrame;
-      MainForm.endFrameLabel.Text         := Language[LanguageCode].MainForm.EndFrame;
-
-      MainForm.calculateButton.Text       := Language[LanguageCode].MainForm.Calculate;
-
-      MainForm.launchButton.Text          := Language[LanguageCode].MainForm.Launch;
-
-      MainForm.UpdateLabel.Text           := Language[LanguageCode].MainForm.NewVersionAvailable;
-      MainForm.downloadButton.Text        := Language[LanguageCode].MainForm.Download;
-    end;
-    1:  begin  //SettingsForm
-      //
-    end;
-  end;
-end;
-
-procedure InitLanguage;
-begin
-  LANG := 0;
-  var ResourceEN: TResourceStream := TResourceStream.Create(HInstance, 'Language_EN', RT_RCDATA);
-  //var ResourceRU: TResourceStream := TResourceStream.Create(HInstance, 'Language_RU', RT_RCDATA);
-
-  Language := [
-                LauncherText.InitFromResourceStream(ResourceEN){,
-                LauncherText.InitFromResourceStream(ResourceRU) }
-              ];
-  SetFormLanguage(MainForm, LANG);
+  OutputModules[9].Imported := False;
 end;
 
 procedure InitConfiguration(Path: String);
@@ -660,16 +577,69 @@ begin
   ChildNode := RootNode.AddChild('outputModule');
   ChildNode.Attributes['selected'] := '0';
 
-  for var i := 0 to High(OutputModules) do
-    begin
-      var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
-      ModuleNode.AddChild('moduleName').Text := OutputModules[i].Module;
-      MainForm.outputModuleBox.Items.Add(OutputModules[i].Module);
-      ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
-    end;
+  for var i := 0 to High(OutputModules) do begin
+    var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
+    ModuleNode.AddChild('moduleName').Text := OutputModules[i].Module;
+    ModuleNode.Attributes['imported'] := 'False';
+    ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
+  end;
 
   MainForm.outputModuleBox.Items.Add('Configure Output Modules...');
+
+  ChildNode := RootNode.AddChild('recentProjects');
+  for var i := 0 to 9 do
+    ChildNode.AddChild('project').Text := '(empty)';
+
   Config.SaveToFile(Path);
+end;
+
+procedure LoadLegacyConfiguration(Path: String);
+var
+  Config: IXMLDocument;
+  RootNode: IXMLNode;
+begin
+  Config := TXMLDocument.Create(nil);
+  Config.LoadFromFile(Path);
+  Config.Active := True;
+  RootNode := Config.DocumentElement;
+
+  LANG := RootNode.ChildNodes['lang'].Text.ToInteger();
+  STYLE := RootNode.ChildNodes['style'].Text.ToInteger();
+  AERPATH := RootNode.ChildNodes['aerender'].Text;
+  ONRENDERSTART := RootNode.ChildNodes['onRenderStart'].Text.ToInteger();
+  DEFPRGPATH := RootNode.ChildNodes['defprgpath'].Text;
+  DEFOUTPATH := RootNode.ChildNodes['defoutpath'].Text;
+  AERH := RootNode.ChildNodes['handle'].Text;
+  DelTempFiles := RootNode.ChildNodes['delTempFiles'].Text;
+
+  MainForm.projectPath.Text := RootNode.ChildNodes['projectPath'].Text;
+  MainForm.outputPath.Text := RootNode.ChildNodes['outputPath'].Text;
+  tempSavePath := RootNode.ChildNodes['tempSavePath'].Text;
+
+  MainForm.compName.Text := RootNode.ChildNodes['comp'].Text;
+  MainForm.inFrame.Text := RootNode.ChildNodes['startFrame'].Text;
+  MainForm.outFrame.Text := RootNode.ChildNodes['endFrame'].Text;
+
+  MainForm.missingFilesCheckbox.IsChecked := RootNode.ChildNodes['missingFiles'].Text.ToBoolean();
+  MainForm.soundCheckbox.IsChecked := RootNode.ChildNodes['sound'].Text.ToBoolean();
+  MainForm.threadedRender.IsChecked := RootNode.ChildNodes['thread'].Text.ToBoolean();
+  MainForm.customCheckbox.IsChecked := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
+  MainForm.customProp.Text := RootNode.ChildNodes['prop'].Text;
+
+  MainForm.memUsageTrackBar.Value := RootNode.ChildNodes['memoryLimit'].Text.ToSingle();
+  MainForm.cacheUsageTrackBar.Value := RootNode.ChildNodes['cacheLimit'].Text.ToSingle();
+
+  //MainUnit.OMCount := RootNode.ChildNodes['outputModule'].ChildNodes.Count;
+  SetLength (OutputModules, RootNode.ChildNodes['outputModule'].ChildNodes.Count);
+  for var i := 0 to High(OutputModules) do
+    begin
+      OutputModules[i].Module := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['moduleName'].Text;
+      OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
+      OutputModules[i].Imported := False;
+    end;
+  //MainForm.UpdateOutputModules;
+  //MainForm.outputModuleBox.Items.Add(Language[LANG].MainForm.ConfigureOutputModules);
+  MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
 end;
 
 procedure LoadConfiguration(Path: String);
@@ -709,13 +679,16 @@ begin
   MainForm.cacheUsageTrackBar.Value := RootNode.ChildNodes['cacheLimit'].Text.ToSingle();
 
   SetLength (OutputModules, RootNode.ChildNodes['outputModule'].ChildNodes.Count);
-  for var i := 0 to High(OutputModules) do
-    begin
-      OutputModules[i].Module := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['moduleName'].Text;
-      MainForm.outputModuleBox.Items.Add(OutputModules[i].Module);
-      OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
-    end;
-  MainForm.outputModuleBox.Items.Add(Language[LANG].MainForm.ConfigureOutputModules);
+  for var i := 0 to High(OutputModules) do begin
+    OutputModules[i].Module := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['moduleName'].Text;
+    OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
+    OutputModules[i].Imported := StrToBool(RootNode.ChildNodes['outputModule'].ChildNodes[i].Attributes['imported']);
+  end;
+
+  for var i := 0 to 9 do begin
+    Recents[i] := RootNode.ChildNodes['recentProjects'].ChildNodes[i].Text;
+  end;
+
   MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
 end;
 
@@ -759,14 +732,24 @@ begin
   RootNode.AddChild('cacheLimit').Text := MainForm.cacheUsageTrackBar.Value.ToString;
 
   ChildNode := RootNode.AddChild('outputModule');
+
   ChildNode.Attributes['selected'] := MainForm.outputModuleBox.ItemIndex.ToString;
 
-  for var i := 0 to High(OutputModules) do
-    begin
-      var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
-      ModuleNode.AddChild('moduleName').Text := OutputModules[i].Module;
-      ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
-    end;
+  for var i := 0 to High(OutputModules) do begin
+    var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
+    ModuleNode.Attributes['imported'] := BoolToStr(OutputModules[i].Imported, True);
+    ModuleNode.AddChild('moduleName').Text := OutputModules[i].Module;
+    ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
+  end;
+
+  ChildNode := RootNode.AddChild('recentProjects');
+
+  for var i := 0 to 9 do begin
+    if Recents[i] = '' then
+      ChildNode.AddChild('project').Text := '(empty)'
+    else
+      ChildNode.AddChild('project').Text := Recents[i]
+  end;
 
   Config.SaveToFile(Path);
 end;
@@ -803,6 +786,49 @@ begin
   {$ENDIF MACOS}
 end;
 
+function GetOMIndex(AOutputModule: OutputModule): Integer;
+begin
+  Result := -1;
+  for var i := 0 to High(OutputModules) do
+    if (AOutputModule.Module = OutputModules[i].Module) and (AOutputModule.Mask = OutputModules[i].Mask) then begin
+      Result := i;
+      break;
+    end;
+end;
+
+procedure ChangeLanguage(LanguageCode: Integer);
+begin
+  MainForm.SetLanguage(LanguageCode);
+  SettingsForm.SetLanguage(LanguageCode);
+  ImportForm.SetLanguage(LanguageCode);
+  AboutForm.SetLanguage(LanguageCode);
+  RenderingForm.SetLanguage(LanguageCode);
+  OutputModuleEditorForm.SetLanguage(LanguageCode);
+end;
+
+procedure InitLanguage(PATH: String);
+begin
+  //LANG := 1;
+  var ResourceEN: TResourceStream := TResourceStream.Create(HInstance, 'Language_EN', RT_RCDATA);
+  var ResourceRU: TResourceStream := TResourceStream.Create(HInstance, 'Language_RU', RT_RCDATA);
+  Language := [
+                LauncherText.InitFromResourceStream(ResourceEN),
+                LauncherText.InitFromResourceStream(ResourceRU)
+              ];
+
+  ChangeLanguage(LANG);
+end;
+
+function GetRecentIndex(Item: String): Integer;
+begin
+  for var i := 0 to 9 do
+    if Item = Recents[i] then begin
+      Result := i;
+      break
+    end else
+      Result := -1;
+end;
+
 {$ENDREGION}
 
 {$REGION '    Public    '}
@@ -835,6 +861,196 @@ end;
 
 {$REGION '    Published    '}
 
+/// This will add from Recents[] array every instance to the
+/// recentsItem
+procedure TMainForm.InflateRecents;
+begin
+  SetLength(RecentsMenuItems, 10);
+  for var i := 0 to High(RecentsMenuItems) do begin
+    if (Recents[i] <> '(empty)') and (Recents[i] <> '') then begin
+      try
+        RecentsMenuItems[i] := TMenuItem.Create(Self);
+        RecentsMenuItems[i].Text := Recents[i];
+        RecentsMenuItems[i].Parent := recentItem;
+        RecentsMenuItems[i].OnClick := RecentProjectSelected;
+      except
+        on Exception do
+          //
+      end;
+    end;
+  end;
+end;
+
+/// This will FreeAndNil every menu item from recentItem
+/// and then populate it again anew
+procedure TMainForm.ReInflateRecents;
+begin
+  for var i := 0 to 9 do begin
+    FreeAndNil(RecentsMenuItems[i]);
+  end;
+
+  Finalize(RecentsMenuItems);
+
+  InflateRecents;
+end;
+
+/// This will add instance to Recents[] and call
+/// ReInflateRecents() to update recentItem
+procedure TMainForm.AddToRecents(Item: String);
+begin
+  // Firstly, add to array new item, replacing last one
+  if GetRecentIndex(Item) <> -1 then begin
+    for var i := GetRecentIndex(Item) downto 1 do begin
+      var t: String := Recents[i];
+      Recents[i] := Recents[i - 1];
+      Recents[i - 1] := t;
+    end;
+  end else begin
+    for var i := 9 downto 1 do begin
+      var t: String := Recents[i];
+      Recents[i] := Recents[i - 1];
+      Recents[i - 1] := t;
+    end;
+    Recents[0] := Item;
+  end;
+
+  ReInflateRecents;
+end;
+
+procedure TMainForm.RecentProjectSelected(Sender: TObject);
+begin
+  //ShowMessage('selected');
+  //var Selected: TMenuItem := TMenuItem(Sender);
+
+  projectPath.Text  := TMenuItem(Sender).Text;
+  threadsSwitch.IsChecked := False;
+  compSwitch.IsChecked    := False;
+
+  AddToRecents(TMenuItem(Sender).Text);
+end;
+
+procedure TMainForm.SetLanguage(LanguageCode: Integer);
+begin
+  //Set MainMenu items
+//  {$IFDEF MACOS}    //Set macOS specific Launcher item text
+//  MainForm.launcherItem.Text          := Language[LanguageCode].MainForm.MainMenu.LauncherMenu;
+//  MainForm.outModuleEditorItem0.Text  := Language[LanguageCode].MainForm.MainMenu.OutputModuleEditor;
+//  MainForm.settingsItem0.Text         := Language[LanguageCode].MainForm.MainMenu.Settings;
+//  {$ENDIF MACOS}
+//
+  {$IFDEF MSWINDOWS}
+  MainForm.fileItem.Text              := Language[LanguageCode].MainForm.MainMenu.FileMenu;
+  MainForm.recentItem.Text            := Language[LanguageCode].MainForm.MainMenu.RecentProjects;
+  MainForm.importConfigItem.Text      := Language[LanguageCode].MainForm.MainMenu.ImportConfiguration;
+  MainForm.exportConfigItem.Text      := Language[LanguageCode].MainForm.MainMenu.ExportConfiguration;
+  MainForm.exitItem.Text              := Language[LanguageCode].MainForm.MainMenu.{$IFDEF MSWINDOWS}Close;{$ENDIF MSWINDOWS}{$IFDEF MACOS}CloseDarwin;{$ENDIF MACOS}
+
+
+  MainForm.editItem.Text              := Language[LanguageCode].MainForm.MainMenu.EditMenu;
+  MainForm.outModuleEditorItem.Text   := Language[LanguageCode].MainForm.MainMenu.OutputModuleEditor;
+  MainForm.settingsItem.Text          := Language[LanguageCode].MainForm.MainMenu.Settings;
+
+
+  MainForm.helpItem.Text              := Language[LanguageCode].MainForm.MainMenu.HelpMenu;
+  MainForm.aboutItem.Text             := Language[LanguageCode].MainForm.MainMenu.About;
+  MainForm.docsItem.Text              := Language[LanguageCode].MainForm.MainMenu.Documentation;
+  {$ENDIF MSWINDOWS}
+
+  MainForm.projectPathLabel.Text      := Language[LanguageCode].MainForm.ProjectFile;
+  MainForm.outputPathLabel.Text       := Language[LanguageCode].MainForm.OutputFile;
+  MainForm.openFile.Text              := Language[LanguageCode].MainForm.OpenSaveProjectButton;
+  MainForm.saveFile.Text              := Language[LanguageCode].MainForm.OpenSaveProjectButton;
+  MainForm.outputModuleLabel.Text     := Language[LanguageCode].MainForm.OutputModulePreset;
+
+  MainForm.properties.Text            := Language[LanguageCode].MainForm.Properties;
+  MainForm.missingFilesCheckbox.Text  := Language[LanguageCode].MainForm.MissingFiles;
+  MainForm.soundCheckbox.Text         := Language[LanguageCode].MainForm.Sound;
+  MainForm.threadedRender.Text        := Language[LanguageCode].MainForm.Threaded;
+  MainForm.customCheckbox.Text        := Language[LanguageCode].MainForm.Custom;
+  MainForm.customProp.TextPrompt      := Language[LanguageCode].MainForm.CustomPropHint;
+
+  MainForm.cacheUsageLimitLabel.Text  := Language[LanguageCode].MainForm.CacheUsageLimit;
+
+  MainForm.memUsageLabel.Text         := Language[LanguageCode].MainForm.MemUsage;
+
+  if MainForm.compSwitch.IsChecked then
+    MainForm.compSwitchLabel.Text     := Language[LanguageCode].MainForm.MultiComp
+  else
+    MainForm.compSwitchLabel.Text     := Language[LanguageCode].MainForm.SingleComp;
+
+  MainForm.compName.TextPrompt        := Language[LanguageCode].MainForm.CompNameHint;
+  MainForm.compGrid.Columns[0].Header := Language[LanguageCode].MainForm.MultiCompGridHeader;
+
+  if MainForm.threadsSwitch.IsChecked then begin
+    MainForm.threadsSwitchLabel.Text  := Language[LanguageCode].MainForm.SplitRender;
+    MainForm.outFrame.TextPrompt      := Language[LanguageCode].MainForm.EndFrameHint;
+  end else
+    MainForm.threadsSwitchLabel.Text  := Language[LanguageCode].MainForm.SingleRener;
+
+  MainForm.startFrameLabel.Text       := Language[LanguageCode].MainForm.StartFrame;
+  MainForm.endFrameLabel.Text         := Language[LanguageCode].MainForm.EndFrame;
+
+  MainForm.calculateButton.Text       := Language[LanguageCode].MainForm.Calculate;
+
+  MainForm.launchButton.Text          := Language[LanguageCode].MainForm.Launch;
+
+  MainForm.UpdateLabel.Text           := Language[LanguageCode].MainForm.NewVersionAvailable;
+  MainForm.downloadButton.Text        := Language[LanguageCode].MainForm.Download;
+end;
+
+procedure TMainForm.UpdateOutputModules;
+begin
+  if (outputModuleBox.Count <> 0) then
+    outputModuleBox.Clear;
+
+  for var i := 0 to High(OutputModules) do
+    if OutputModules[i].Imported then
+      outputModuleBox.Items.Add(OutputModules[i].Module + ' ' + Language[LANG].OutputModuleConfiguratorForm.Imported)
+    else
+      outputModuleBox.Items.Add(OutputModules[i].Module);
+  outputModuleBox.Items.Add(Language[LANG].MainForm.ConfigureOutputModules);
+  outputModuleBox.ItemIndex := 0;
+end;
+
+procedure TMainForm.ReadAERQ(Path: String);
+begin
+  var AERQXMLDocument: IXMLDocument := TXMLDocument.Create(nil);
+  AERQXMLDocument.ParseOptions := [poAsyncLoad];
+  AERQXMLDocument.LoadFromFile(Path);
+  AERQXMLDocument.Encoding := 'utf-8';
+
+  AERQXMLDocument.Active := True;
+  var RootNode: IXMLNode := AERQXMLDocument.DocumentElement;
+
+  projectPath.Text := RootNode.Attributes['project'];
+  outputPath.Text := RootNode.ChildNodes['queueItem'].Attributes['outputFolder'];
+  tempSavePath := RootNode.ChildNodes['queueItem'].Attributes['outputFolder'];
+
+  /// Add new Output Module to library if it don't exist
+  if StrToBool(RootNode.ChildNodes['queueItem'].ChildNodes['outputModule'].Attributes['use']) then begin
+    var TempOutputModule: OutputModule;
+    TempOutputModule.Module := RootNode.ChildNodes['queueItem'].ChildNodes['outputModule'].ChildNodes['module'].Text;
+    TempOutputModule.Mask   := RootNode.ChildNodes['queueItem'].ChildNodes['outputModule'].ChildNodes['mask'].Text;
+
+    if not (GetOMIndex(TempOutputModule) = -1) then begin
+      outputModuleBox.ItemIndex := GetOMIndex(TempOutputModule);
+    end else begin
+      SetLength(OutputModules, Length(OutputModules) + 1);
+      OutputModules[High(OutputModules)].Module   := RootNode.ChildNodes['queueItem'].ChildNodes['outputModule'].ChildNodes['module'].Text;
+      OutputModules[High(OutputModules)].Mask     := RootNode.ChildNodes['queueItem'].ChildNodes['outputModule'].ChildNodes['mask'].Text;
+      OutputModules[High(OutputModules)].Imported := True;
+
+      outputModuleBox.Items.Insert(outputModuleBox.Items.Count - 1, OutputModules[High(OutputModules)].Module + ' (imported)');
+      outputModuleBox.ItemIndex := outputModuleBox.Items.Count - 2;
+    end;
+  end;
+  outputModuleBoxChange(nil);
+
+  compName.Text := RootNode.ChildNodes['queueItem'].ChildNodes['composition'].ChildNodes['name'].Text;
+  inFrame.Text  := RootNode.ChildNodes['queueItem'].ChildNodes['composition'].ChildNodes['rangeStart'].Text;
+  outFrame.Text := RootNode.ChildNodes['queueItem'].ChildNodes['composition'].ChildNodes['rangeEnd'].Text;
+end;
+
 procedure TMainForm.aboutItemClick(Sender: TObject);
 begin
   AboutForm.Show;
@@ -858,16 +1074,16 @@ begin
     threadsGrid.Cells[1, 0] := IntToStr(Start+K);
     for I := 1 to threadsCount.Text.ToInteger - 1 do
       begin
-        threadsGrid.Cells[0, I] := (Start+K*I+1).ToString;
-        threadsGrid.Cells[1, I] := (Start+K*(I+1)).ToString;
+        threadsGrid.Cells[0, I] := (Start + K * I + 1).ToString;
+        threadsGrid.Cells[1, I] := (Start + K * (I + 1)).ToString;
       end;
-    threadsGrid.Cells[1, threadsCount.Text.ToInteger - 1]:=IntToStr(Stop);
+    threadsGrid.Cells[1, threadsCount.Text.ToInteger - 1] := IntToStr(Stop);
   except
     on Exception do
       if outFrame.Text = '' then
-        TDialogServiceSync.MessageDialog(Language[LANG].MainForm.CalculateFrameError, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
+        TDialogServiceSync.MessageDialog(Language[LANG].Errors.CalculateFrameError, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
       else
-        TDialogServiceSync.MessageDialog(Language[LANG].MainForm.CalculateUnknownError, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
+        TDialogServiceSync.MessageDialog(Language[LANG].Errors.CalculateUnknownError, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
   end;
 end;
 
@@ -878,37 +1094,32 @@ end;
 
 procedure TMainForm.compSwitchSwitch(Sender: TObject);
 begin
-  {if compSwitch.IsChecked then
-    begin
-      if UpdateAvailable = True then
-        begin
-          if MainForm.Height <= 470 then
-            MainForm.Height := MainForm.Height + 130;
-        end
-      else
-        if MainForm.Height <= 420 then
+  if compSwitch.IsChecked then begin
+    if UpdateAvailable = True then
+      begin
+        if MainForm.Height <= 470 then
           MainForm.Height := MainForm.Height + 130;
+      end
+    else
+      if MainForm.Height <= 420 then
+        MainForm.Height := MainForm.Height + 130;
 
-      compSwitchLabel.Text := Language[LANG].MainForm.MultiComp;
-      compGrid.AniCalculations.AutoShowing := False;
-      compGrid.RowCount := Round(compCount.Value);
-      compGrid.Cells[0, 0] := compName.Text;
-      compGrid.Model.ScrollDirections := TScrollDirections.Vertical;
-    end
-  else
-    begin
-      if UpdateAvailable = True then
-        begin
-          if MainForm.Height >= 580 then
-            MainForm.Height := MainForm.Height - 130
-        end
-      else
-        if MainForm.Height <= 550 then
-          MainForm.Height := MainForm.Height - 130;
+    compSwitchLabel.Text := Language[LANG].MainForm.MultiComp;
 
-      compSwitchLabel.Text := Language[LANG].MainForm.SingleComp;
-      compName.Text := compGrid.Cells[0, 0];
-    end;    }
+    compGrid.RowCount := Round(compCount.Value);
+    compGrid.Cells[0, 0] := compName.Text;
+    compGrid.Model.ScrollDirections := TScrollDirections.Vertical;
+  end else begin
+    if UpdateAvailable = True then begin
+        if MainForm.Height >= 580 then
+          MainForm.Height := MainForm.Height - 130
+    end else
+      if MainForm.Height <= 550 then
+        MainForm.Height := MainForm.Height - 130;
+
+    compSwitchLabel.Text := Language[LANG].MainForm.SingleComp;
+    compName.Text := compGrid.Cells[0, 0];
+  end;
 end;
 
 procedure TMainForm.docsItemClick(Sender: TObject);
@@ -963,69 +1174,55 @@ procedure TMainForm.FormCreate(Sender: TObject);
 var
   CFG: TextFile;
 begin
-  InitLanguage;
   {$IFDEF MSWINDOWS}DwmCompositionEnabled();{$ENDIF MSWINDOWS}
-  //FormatSettings.DecimalSeparator := '.';
   FormatSettings := TFormatSettings.Invariant;
   MainForm.Width := 600;
   MainForm.Height := {$IFDEF MSWINDOWS}420{$ENDIF MSWINDOWS}
                       {$IFDEF MACOS}400{$ENDIF MACOS};
-  MainForm.Caption := 'AErender Launcher (' + APPVERSION + ')';
+  MainForm.Caption := 'AErender Launcher (' + APPVERSION_DEMO + ')';
+  //MainForm.Caption := 'AErender Launcher (' + APPVERSION + ')';
   APPFOLDER :=  {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\'{$ENDIF MSWINDOWS}
                 {$IFDEF MACOS}GetEnvironmentVariable('HOME') + '/Documents/AErender/'{$ENDIF MACOS};
-  try
-    if GetFFMPEGPath <> '' then
-      begin
-        FFMPEG := True;
-        ffmpegPath := GetFFMPEGPath;
-        ffmpegCheckBox.Enabled := True;
-      end
-    else
-      raise Exception.Create('FFMPEG not found');
-  except
-    on Exception do
-      begin
-        FFMPEG := False;
-        ffmpegCheckBox.Enabled := False;
-        ffmpegCheckBox.Hint := 'FFMPEG is not found at' + {$IFDEF MSWINDOWS} 'C:\ProgramData\AErender\' {$ENDIF MSWINDOWS}
-                                                          {$IFDEF MACOS} '~/Documents/AErender/' {$ENDIF MACOS} + 'directory';
-      end;
-  end;
   {$IFDEF MSWINDOWS}
-  launcherItem.Free;
+  FreeAndNil(launcherItem);
   exitItem.ShortCut := TextToShortCut('Alt+F4');
   exportConfigItem.ShortCut := TextToShortCut('Ctrl+E');
   importConfigItem.ShortCut := TextToShortCut('Ctrl+I');
   {$ENDIF MSWINDOWS}
   {$IFDEF MACOS}
-  editItem.Free;
-  exitItem.Free;
-  //exportConfigItem.ShortCut := TextToShortCut('Cmd+E');
-  //importConfigItem.ShortCut := TextToShortCut('Cmd+I');
+  FreeAndNil(editItem);
+  FreeAndNil(exitItem);
   {$ENDIF MACOS}
-  if DirectoryExists (APPFOLDER) then
-    AssignFile (CFG, APPFOLDER + 'AErenderConfiguration.xml')
+
+  if DirectoryExists(APPFOLDER) then
+    AssignFile(CFG, APPFOLDER + 'AErenderConfiguration.xml')
   else
     begin
-      CreateDir (APPFOLDER);
-      AssignFile (CFG, APPFOLDER + 'AErenderConfiguration.xml');
+      CreateDir(APPFOLDER);
+      AssignFile(CFG, APPFOLDER + 'AErenderConfiguration.xml');
     end;
   if FileExists(APPFOLDER + 'AErenderConfiguration.xml') then
     begin
       try
-        LoadConfiguration (APPFOLDER + 'AErenderConfiguration.xml');
+        LoadConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
       except
         on Exception do begin
-          if (TDialogServiceSync.MessageDialog(('Configuration file is corrupted! Press OK to renew configuration file. Application will be restarted.' + #13#10 +
-                                {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\AErenderConfiguration.xml read error.'{$ENDIF MSWINDOWS}
-                                    {$IFDEF MACOS}'~/Documents/AErender/AErenderConfiguration.xml read error.'{$ENDIF MACOS}),
+          try
+            LoadLegacyConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
+          except
+            on Exception do begin
+              if (TDialogServiceSync.MessageDialog(('Configuration file is corrupted! Press OK to renew configuration file. Application will be restarted.' + #13#10 +
+                                {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\AErenderConfiguration.xml'{$ENDIF MSWINDOWS}
+                                    {$IFDEF MACOS}'~/Documents/AErender/AErenderConfiguration.xml'{$ENDIF MACOS}),
                 TMsgDlgType.mtError, mbOKCancel, TMsgDlgBtn.mbOK, 0) = 1) then
               begin
-                System.SysUtils.DeleteFile (APPFOLDER + 'AErenderConfiguration.xml');
+                System.SysUtils.DeleteFile(APPFOLDER + 'AErenderConfiguration.xml');
                 {$IFDEF MSWINDOWS}ShellExecute(0, 'OPEN', PChar(ParamStr(0)), '', '', SW_SHOWNORMAL);{$ENDIF MSWINDOWS}
                 {$IFDEF MACOS}_system(PAnsiChar('open -a "' + AnsiString(ParamStr(0)) + '" & disown'));{$ENDIF MACOS}
               end;
-          Halt;
+              Halt;
+            end;
+          end;
         end;
       end;
     end
@@ -1037,6 +1234,15 @@ begin
     end;
   AEPOpenDialog.InitialDir := DEFPRGPATH;
   SaveDialog1.InitialDir := DEFOUTPATH;
+
+  InflateRecents;
+
+  outputModuleBox.ListBox.AniCalculations.Animation := True;
+
+  compGrid.AniCalculations.AutoShowing := False;
+  compGrid.AniCalculations.Animation := True;
+
+  threadsGrid.AniCalculations.Animation := True;
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
@@ -1049,6 +1255,18 @@ end;
 
 procedure TMainForm.FormShow(Sender: TObject);
 begin
+  //// Check for available languages
+  // It's better to do it in a Show thread, since OnCreate event of main form
+  // don't have access to other forms that are not yet created
+  if DirectoryExists(APPFOLDER + 'lang' + PLATFORMPATHSEPARATOR) then begin
+    //LangFolder := TDirectory.GetFiles(APPFOLDER + 'lang' + PLATFORMPATHSEPARATOR);
+    {TODO -oLilyStilson -cLanguage : Set form language from existing file / or load it to resource and set}
+  end else begin
+    //CreateDir(APPFOLDER + 'lang' + PLATFORMPATHSEPARATOR);
+    InitLanguage(APPFOLDER + 'lang' + PLATFORMPATHSEPARATOR);
+  end;
+
+  UpdateOutputModules;
   SettingsForm.styleBox.ItemIndex := STYLE;
   SettingsForm.onRenderStartBox.ItemIndex := ONRENDERSTART;
   SettingsForm.HandleCheckBox.IsChecked := StrToBool(AERH);
@@ -1070,12 +1288,33 @@ begin
   SplashScreenForm.Close;
   SplashScreenForm.Free;
 
-  if (ParamCount > 0) and (ParamStr(1).Contains('-aer')) then
-    begin
-      ImportUnit.PARAMSTART := True;
-      ImportUnit.XMLPath := ParamStr(2);
-      ImportForm.ShowModal;
-    end;
+  if (ParamCount > 0) and (ParamStr(1) = '-aer') then begin
+    ImportUnit.PARAMSTART := True;
+    ImportUnit.XMLPath := ParamStr(2);
+    ImportForm.ShowModal;
+  end else if (ParamStr(1) = '-aerq') then begin
+    MainUnit.PARAMSTART := True;
+    ReadAERQ(ParamStr(2));
+  end;
+
+  try
+    if GetFFMPEGPath <> '' then
+      begin
+        FFMPEG := True;
+        ffmpegPath := GetFFMPEGPath;
+        //ffmpegCheckBox.Enabled := True;
+      end
+    else
+      raise Exception.Create('FFMPEG not found');
+  except
+    on Exception do
+      begin
+        FFMPEG := False;
+        //ffmpegCheckBox.Enabled := False;
+        //ffmpegCheckBox.Hint := 'FFMPEG is not found at' + {$IFDEF MSWINDOWS} 'C:\ProgramData\AErender\' {$ENDIF MSWINDOWS}
+        //                                                  {$IFDEF MACOS} '~/Documents/AErender/' {$ENDIF MACOS} + 'directory';
+      end;
+  end;
 
   //  Check updates in separate thread to fasten startup
   MainForm.UpdateNetHTTPClient.Get(AERL_REPO_RELEASES);
@@ -1121,251 +1360,259 @@ type
 var
   threads, comps, emptyComps: Integer;
   PATH, logPath, prgPath: String;
-  execFile: array [1..100] of exec;
+  execFile: array [1..128] of exec;
 
   Notification: TNotification;
 begin
   //Error Codes
-  //if LANG = 'EN' then
-    begin
-      emptyComps := 0;
-      if AERPATH.IsEmpty then
-        ERR := ERR + #13#10 + '[Error 1]: aerender path not specified';
-      if projectPath.Text.IsEmpty then
-        ERR := ERR + #13#10 + '[Error 2]: Project path not specified';
-      if outputPath.Text.IsEmpty then
-        ERR := ERR + #13#10 + '[Error 3]: Output path not specified';
-      if compName.Text.IsEmpty then
-        ERR := ERR + #13#10 + '[Error 4]: Composition name not specified';
-      if compSwitch.IsChecked then
-        begin
-          for var i := 0 to compCount.Value.ToString.ToInteger-1 do
-            if compGrid.Cells[0, i].IsEmpty then
-              inc (emptyComps);
-          if emptyComps > 0 then
-            ERR := ERR + #13#10 + '[Error 5]: Not all compositions specified in composition list';
-        end;
-      if OutputModules[outputModuleBox.ItemIndex].Module.IsEmpty then
-        ERR := ERR + #13#10 + '[Error 6]: Output Module in selected Output Module Preset is not specified';
-    end;
-  {else
-    begin
-      emptyComps := 0;
-      if AERPATH.IsEmpty then
-        ERR := ERR + #13#10 + '[Error 1]: Путь к aerender не указан';
-      if projectPath.Text.IsEmpty then
-        ERR := ERR + #13#10 + '[Error 2]: Путь к проекту не указан';
-      if outputPath.Text.IsEmpty then
-        ERR := ERR + #13#10 + '[Error 3]: Выходной путь не указан';
-      if compName.Text.IsEmpty then
-        ERR := ERR + #13#10 + '[Error 4]: Название композиции не указано';
-      if compSwitch.IsChecked then
-        begin
-          for var i := 0 to compCount.Value.ToString.ToInteger-1 do
-            if compGrid.Cells[0, i].IsEmpty then
-              inc (emptyComps);
-          if emptyComps > 0 then
-            ERR := ERR + #13#10 + '[Error 5]: Названия не всех композиций указаны в списке';
-        end;
-    end;}
+  if not (SettingsForm.HandleCheckBox.IsChecked and isRendering) then begin
+    emptyComps := 0;
+    if AERPATH.IsEmpty then
+      ERR := ERR + #13#10 + '[Error 1]: ' + Language[LANG].Errors.aerenderIsEmpty;
+    if projectPath.Text.IsEmpty then
+      ERR := ERR + #13#10 + '[Error 2]: ' + Language[LANG].Errors.projectIsEmpty;
+    if outputPath.Text.IsEmpty then
+      ERR := ERR + #13#10 + '[Error 3]: ' + Language[LANG].Errors.outputIsEmpty;
+    if compName.Text.IsEmpty then
+      ERR := ERR + #13#10 + '[Error 4]: ' + Language[LANG].Errors.compositionIsEmpty;
+    if compSwitch.IsChecked then
+      begin
+        for var i := 0 to compCount.Value.ToString.ToInteger - 1 do
+          if compGrid.Cells[0, i].IsEmpty then
+            inc(emptyComps);
+        if emptyComps > 0 then
+          ERR := ERR + #13#10 + '[Error 5]: ' + Language[LANG].Errors.multiCompIsEmpty;
+      end;
 
-  //Proceed if no errors occured
-  if not ERR.IsEmpty then
-    begin
-      //if LANG = 'EN' then
-        TDialogServiceSync.MessageDialog(('The following error(s) has occured: ' + ERR), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
-      {if LANG = 'RU' then
-        TDialogServiceSync.MessageDialog(('Произошли следующие ошибки: ' + ERR), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0); }
-      ERR := '';
-    end
-  else
-    begin
-      if threadsSwitch.IsChecked then
-        begin
-          threads := threadsCount.Text.ToInteger;
-          SetLength (LogFiles, threads);
-        end
-      else
-        begin
-          threads := 1;
-          if Length(LogFiles) = 0 then
-            SetLength (LogFiles, threads);
-        end;
-      if compSwitch.IsChecked then
-        begin
-          comps := StrToInt(compCount.Value.ToString);
-          SetLength (LogFiles, comps);
-        end
-      else
-        begin
-          comps := 1;
-          if Length(LogFiles) = 0 then
-            SetLength (LogFiles, comps);
-        end;
-
-      for var j := 0 to comps-1 do
-        for var i := 1 to threads do
+    //Proceed if no errors occured
+    if not ERR.IsEmpty then
+      begin
+        TDialogServiceSync.MessageDialog((Language[LANG].Errors.errorsOccured + ERR), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
+        ERR := '';
+      end
+    else
+      begin
+        if threadsSwitch.IsChecked then
           begin
-            //Script compiling section
-            if SettingsForm.HandleCheckBox.IsChecked then
-              execFile[i].script := '(';
+            threads := threadsCount.Text.ToInteger;
+            SetLength (LogFiles, threads);
+          end
+        else
+          begin
+            threads := 1;
+            if Length(LogFiles) = 0 then
+              SetLength (LogFiles, threads);
+          end;
+        if compSwitch.IsChecked then
+          begin
+            comps := StrToInt(compCount.Value.ToString);
+            SetLength (LogFiles, comps);
+          end
+        else
+          begin
+            comps := 1;
+            if Length(LogFiles) = 0 then
+              SetLength (LogFiles, comps);
+          end;
 
-            if comps = 1 then
-              logPath := APPFOLDER + compName.Text + '_' + i.ToString
-            else
-              logPath := APPFOLDER + compGrid.Cells[0, j] + '_' + i.ToString;
+        for var j := 0 to comps-1 do
+          for var i := 1 to threads do
+            begin
+              /// Script compiling section
 
-            PATH := outputPath.Text;
-            //PATH.Insert(PATH.Length - 12, '_' + compGrid.Cells[0, j] + '_' + i.ToString);
+              // Clear the string
+              execFile[i].script := '';
 
-            if outputPath.Text.Contains('[projectName]' + PLATFORMPATHSEPARATOR) then
-              begin
-                PATH := StringReplace(PATH, '[projectName]', ExtractFileName(projectPath.Text), [rfReplaceAll, rfIgnoreCase]);
-                if not DirectoryExists(ExtractFilePath(PATH)) then
-                  CreateDir(ExtractFilePath(PATH));
-              end;
+              // Add encoding header to ensure that our CMD on Windows will use UTF-8
+              {$IFDEF MSWINDOWS}
+              execFile[i].script := 'chcp 65001' + #13#10;
+              {$ENDIF MSWINDOWS}
 
-            if threadsSwitch.IsChecked then
-              begin
-                var FilePath: String := ExtractFilePath(PATH);
-                var FileName: String := StringReplace(ExtractFileName(PATH), ExtractFileExt(PATH), '', [rfReplaceAll, rfIgnoreCase]);
-                var FileExt:  String := ExtractFileExt(PATH);
-                PATH := FilePath + FileName + '_' + i.ToString + FileExt;
-              end;
+              // Make console output data from it if progress display is enabled
+              // Made by using default in Shell and Bash  ( command ) > data/output/path.log
+              // Open bracket here
+              if SettingsForm.HandleCheckBox.IsChecked then
+                execFile[i].script := execFile[i].script + '(';
 
-            if compSwitch.IsChecked then
-              if not outputPath.Text.Contains('[compName]') then
+              // Ensure that logs paths won't comflict with each other
+              if comps = 1 then
+                logPath := APPFOLDER + compName.Text + '_' + i.ToString
+              else
+                logPath := APPFOLDER + compGrid.Cells[0, j] + '_' + i.ToString;
+
+              // Add Pass output path to temporary wariable
+              PATH := outputPath.Text;
+
+              // Create folder if '[projectName]/' or '[projectName]\' is used
+              // Because aerender won't do it for you
+              if outputPath.Text.Contains('[projectName]' + PLATFORMPATHSEPARATOR) then
+                begin
+                  PATH := StringReplace(PATH, '[projectName]', ExtractFileName(projectPath.Text), [rfReplaceAll, rfIgnoreCase]);
+                  if not DirectoryExists(ExtractFilePath(PATH)) then
+                    CreateDir(ExtractFilePath(PATH));
+                end;
+
+              // Adjust file output path if split render is enabled
+              // because they can conflict
+              if threadsSwitch.IsChecked then
                 begin
                   var FilePath: String := ExtractFilePath(PATH);
                   var FileName: String := StringReplace(ExtractFileName(PATH), ExtractFileExt(PATH), '', [rfReplaceAll, rfIgnoreCase]);
                   var FileExt:  String := ExtractFileExt(PATH);
-                  PATH := FilePath + FileName + '_' + compGrid.Cells[0, j] + FileExt;
+                  PATH := FilePath + FileName + '_' + i.ToString + FileExt;
                 end;
 
-
-
-            execFile[i].script := execFile[i].script + '"' + AERPATH + '" ' + '-project "' + projectPath.Text + '" -output "' + PATH + '" ';
-
-            if compSwitch.IsChecked then
-              execFile[i].script := execFile[i].script + '-comp "' + compGrid.Cells[0, j] + '" '
-            else
-              execFile[i].script := execFile[i].script + '-comp "' + compName.Text + '" ';
-
-            if threadsSwitch.IsChecked then
-              begin
-                execFile[i].script := execFile[i].script + '-s "' + threadsGrid.Cells[0, i-1] + '" ';
-                execFile[i].script := execFile[i].script + '-e "' + threadsGrid.Cells[1, i-1] + '" ';
-              end
-            else
-              begin
-                if not inFrame.Text.IsEmpty then
-                  execFile[i].script := execFile[i].script + '-s "' + inFrame.Text + '" ';
-                if not outFrame.Text.IsEmpty then
-                  execFile[i].script := execFile[i].script + '-e "' + outFrame.Text + '" ';
-              end;
-
-            if soundCheckbox.IsChecked then
-              execFile[i].script := execFile[i].script + '-sound ON ';
-
-            if threadedRender.IsChecked then
-              execFile[i].script := execFile[i].script + '-mp ';
-
-            if missingFilesCheckbox.IsChecked then
-              execFile[i].script := execFile[i].script + '-continueOnMissingFootage ';
-
-            if outputModuleBox.ItemIndex <> -1 then
-              execFile[i].script := execFile[i].script + '-OMtemplate "' + OutputModules[outputModuleBox.ItemIndex].Module + '" ';
-
-            execFile[i].script := execFile[i].script + '-mem_usage "' + Trunc(memUsageTrackBar.Value).ToString + '" "' + Trunc(cacheUsageTrackBar.Value).ToString + '" ';
-
-            if customCheckbox.IsChecked then
-                  execFile[i].script := execFile[i].script + customProp.Text;
-
-            if SettingsForm.HandleCheckBox.IsChecked then
-              begin
-                execFile[i].script := execFile[i].script + ') > "' + logPath + '.log"';
-
-                if threadsSwitch.IsChecked then
-                  LogFiles[i-1] := logPath + '.log'
-                else
-                  LogFiles[j] := logPath + '.log';
-              end;
-
-            //File section
-            {$IFDEF MSWINDOWS}
+              // Adjust file output path if multi comp render is enabled
+              // because they can conflict
               if compSwitch.IsChecked then
-                AssignFile (execFile[i].F, 'C:\ProgramData\AErender\aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.bat')
-              else
-                AssignFile (execFile[i].F, 'C:\ProgramData\AErender\aerender' + i.ToString + '.bat');
-              Rewrite (execFile[i].F);
-              Writeln (execFile[i].F, execFile[i].script);
-              //Writeln (execFile[i].F, '@PAUSE');
-              CloseFile (execFile[i].F);
-              if SettingsForm.HandleCheckBox.IsChecked then
-                if compSwitch.IsChecked then
-                  ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_HIDE)
-                else
-                  ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_HIDE)
-              else
-                if compSwitch.IsChecked then
-                  ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_SHOWNORMAL)
-                else
-                  ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_SHOWNORMAL)
-            {$ENDIF MSWINOWS}
-            {$IFDEF MACOS}
+                if not outputPath.Text.Contains('[compName]') then
+                  begin
+                    var FilePath: String := ExtractFilePath(PATH);
+                    var FileName: String := StringReplace(ExtractFileName(PATH), ExtractFileExt(PATH), '', [rfReplaceAll, rfIgnoreCase]);
+                    var FileExt:  String := ExtractFileExt(PATH);
+                    PATH := FilePath + FileName + '_' + compGrid.Cells[0, j] + FileExt;
+                  end;
+
+              /// Begin executable compiling section
+              // Add aerender path to script
+              execFile[i].script := execFile[i].script + '"' + AERPATH + '" ' + '-project "' + projectPath.Text + '" -output "' + PATH + '" ';
+
+              // Add comp name to script
               if compSwitch.IsChecked then
-                AssignFile (execFile[i].F, GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command')
+                execFile[i].script := execFile[i].script + '-comp "' + compGrid.Cells[0, j] + '" '
               else
-                AssignFile (execFile[i].F, GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command');
-              Rewrite (execFile[i].F);
-              Writeln (execFile[i].F, execFile[i].script);
-              //Writeln (execFile[i].F, 'read -p "Press any key to continue..."');
-              CloseFile (execFile[i].F);
+                execFile[i].script := execFile[i].script + '-comp "' + compName.Text + '" ';
+
+              // Add start and end ranges to script
+              if threadsSwitch.IsChecked then
+                begin
+                  execFile[i].script := execFile[i].script + '-s "' + threadsGrid.Cells[0, i-1] + '" ';
+                  execFile[i].script := execFile[i].script + '-e "' + threadsGrid.Cells[1, i-1] + '" ';
+                end
+              else
+                begin
+                  if not inFrame.Text.IsEmpty then
+                    execFile[i].script := execFile[i].script + '-s "' + inFrame.Text + '" ';
+                  if not outFrame.Text.IsEmpty then
+                    execFile[i].script := execFile[i].script + '-e "' + outFrame.Text + '" ';
+                end;
+
+              // Add sound flag to script
+              if soundCheckbox.IsChecked then
+                execFile[i].script := execFile[i].script + '-sound ON ';
+
+              // Add multiprocessing flag to script
+              if threadedRender.IsChecked then
+                execFile[i].script := execFile[i].script + '-mp ';
+
+              // Add missing footage flag to script
+              if missingFilesCheckbox.IsChecked then
+                execFile[i].script := execFile[i].script + '-continueOnMissingFootage ';
+
+              // Add output module flag to script
+              if outputModuleBox.ItemIndex <> -1 then
+                execFile[i].script := execFile[i].script + '-OMtemplate "' + OutputModules[outputModuleBox.ItemIndex].Module + '" ';
+
+              // Add memory usage flags to script
+              execFile[i].script := execFile[i].script + '-mem_usage "' + Trunc(memUsageTrackBar.Value).ToString + '" "' + Trunc(cacheUsageTrackBar.Value).ToString + '" ';
+
+              // Add whatever user typed parameters to script
+              if customCheckbox.IsChecked then
+                execFile[i].script := execFile[i].script + customProp.Text;
+
               if SettingsForm.HandleCheckBox.IsChecked then
+                begin
+                  execFile[i].script := execFile[i].script + ') > "' + logPath + '.log"';
+
+                  if threadsSwitch.IsChecked then
+                    LogFiles[i-1] := logPath + '.log'
+                  else
+                    LogFiles[j] := logPath + '.log';
+                end;
+
+              //File section
+              {$IFDEF MSWINDOWS}
                 if compSwitch.IsChecked then
-                  begin
-                    _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
-                    _system(PAnsiChar('command "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command" & disown')));
-                  end
+                  AssignFile (execFile[i].F, 'C:\ProgramData\AErender\aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.bat', CP_UTF8)
                 else
-                  begin
-                    _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
-                    _system(PAnsiChar('command "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command" & disown')));
-                  end
-              else
+                  AssignFile (execFile[i].F, 'C:\ProgramData\AErender\aerender' + i.ToString + '.bat', CP_UTF8);
+                Rewrite (execFile[i].F);
+                Writeln (execFile[i].F, execFile[i].script);
+                //Writeln (execFile[i].F, '@PAUSE');
+                CloseFile (execFile[i].F);
+                if SettingsForm.HandleCheckBox.IsChecked then
+                  if compSwitch.IsChecked then
+                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_HIDE)
+                  else
+                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_HIDE)
+                else
+                  if compSwitch.IsChecked then
+                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_SHOWNORMAL)
+                  else
+                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_SHOWNORMAL)
+                    //Execute('C:\ProgramData\AErender\aerender' + i.ToString + '.bat');
+              {$ENDIF MSWINOWS}
+              {$IFDEF MACOS}
                 if compSwitch.IsChecked then
-                  begin
-                    _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
-                    _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
-                  end
+                  AssignFile (execFile[i].F, GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command', CP_UTF8)
                 else
-                  begin
-                    _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
-                    _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
-                  end
-            {$ENDIF MACOS}
-          end;
-      Sleep (1000);
-      if SettingsForm.HandleCheckBox.IsChecked then
-        begin
-          if RenderingUnit.VISIBLE then
-            RenderingForm.abortRenderingButtonClick(Sender);
-          {if compSwitch.IsChecked or outFrame.Text.IsEmpty then
-            RenderingForm.TotalProgressBar.Max := Length(LogFiles)
-          else
-            RenderingForm.TotalProgressBar.Max := outFrame.Text.ToInteger() + (50 * Length(LogFiles));}
-          //RenderingForm.framesLabel.Text := '0 / ' + outFrame.Text + ' Frames';
-          RenderWindowSender := launchButton;
-          RenderingForm.ShowModal;
-        end
-      else
-        //OnRenderStart Actions
-        case SettingsForm.onRenderStartBox.ItemIndex of
-          1:begin
-              WindowState := TWindowState.wsMinimized;
+                  AssignFile (execFile[i].F, GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command', CP_UTF8);
+                Rewrite (execFile[i].F);
+                Writeln (execFile[i].F, execFile[i].script);
+                //Writeln (execFile[i].F, 'read -p "Press any key to continue..."');
+                CloseFile (execFile[i].F);
+                if SettingsForm.HandleCheckBox.IsChecked then
+                  if compSwitch.IsChecked then
+                    begin
+                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
+                      _system(PAnsiChar('command "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command" & disown')));
+                    end
+                  else
+                    begin
+                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
+                      _system(PAnsiChar('command "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command" & disown')));
+                    end
+                else
+                  if compSwitch.IsChecked then
+                    begin
+                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
+                      _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
+                    end
+                  else
+                    begin
+                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
+                      _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
+                      //Execute(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"');
+                    end
+              {$ENDIF MACOS}
             end;
-        end
-    end;
+        // Wait untill aerender launches
+        Sleep (1000);
+        if SettingsForm.HandleCheckBox.IsChecked then
+          begin
+            if RenderingUnit.VISIBLE then
+              RenderingForm.abortRenderingButtonClick(Sender);
+            {if compSwitch.IsChecked or outFrame.Text.IsEmpty then
+              RenderingForm.TotalProgressBar.Max := Length(LogFiles)
+            else
+              RenderingForm.TotalProgressBar.Max := outFrame.Text.ToInteger() + (50 * Length(LogFiles));}
+            //RenderingForm.framesLabel.Text := '0 / ' + outFrame.Text + ' Frames';
+            RenderWindowSender := launchButton;
+            RenderingForm.ShowModal;
+          end
+        else
+          //OnRenderStart Actions
+          case SettingsForm.onRenderStartBox.ItemIndex of
+            1:begin
+                WindowState := TWindowState.wsMinimized;
+              end;
+          end
+      end;
+  end else begin
+    TDialogServiceSync.MessageDialog(Language[LANG].Errors.isCurrentlyRendering, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
+    RenderWindowSender := infoButton;
+    RenderingForm.ShowModal;
+  end;
 end;
 
 procedure TMainForm.openFileClick(Sender: TObject);
@@ -1391,6 +1638,7 @@ begin
                       // Handle
                     else
                       projectPath.Text := NSStrToStr(FOpenFile.URL.relativePath);
+                      AddToRecents(projectPath.Text);
                  end));
 {$ENDIF MACOS}
 {$IFDEF MSWINDOWS}
@@ -1399,6 +1647,7 @@ begin
     if Execute then
       projectPath.Text := AEPOpenDialog.FileName;
 {$ENDIF MSWINDOWS}
+  AddToRecents(projectPath.Text);
 end;
 
 procedure TMainForm.outFrameValidate(Sender: TObject; var Text: string);
@@ -1426,7 +1675,7 @@ end;
 
 procedure TMainForm.outputModuleBoxChange(Sender: TObject);
 begin
-  if outputModuleBox.ItemIndex = outputModuleBox.Count-1 then
+  if (outputModuleBox.ItemIndex = outputModuleBox.Count - 1) and (outputModuleBox.Count <> 0) then
     begin
       OutputModuleEditorForm.Show;
       outputModuleBox.ItemIndex := 0;
@@ -1470,7 +1719,7 @@ begin
   NSWin := WindowHandleToPlatform(Screen.ActiveForm.Handle).Wnd;
 
   FSaveFile :=TNSSavePanel.Wrap(TNSSavePanel.OCClass.savePanel);
-  FSaveFile.setAccessoryView(CreateMessageView('Tip: Leaving "Default" in the field will use Output Module file name'));
+  FSaveFile.setAccessoryView(CreateMessageView(Language[LANG].MainForm.DarwinDialogTip));
   //FSaveFile.setAccessoryView();
   FSaveFile.setDirectory(StrToNSStr(DEFOUTPATH));
   FSaveFile.setNameFieldLabel(StrToNSStr('Output file name:'));
@@ -1526,6 +1775,12 @@ begin
   compGrid.RowCount := Round(compCount.Value);
 end;
 
+procedure TMainForm.compGridEditingDone(Sender: TObject; const ACol,
+  ARow: Integer);
+begin
+  compName.Text := compGrid.Cells[0, 0];
+end;
+
 procedure TMainForm.threadsCount1Change(Sender: TObject);
 begin
   threadsGrid.RowCount := threadsCount.Text.ToInteger();
@@ -1535,14 +1790,40 @@ end;
 
 procedure TMainForm.threadsCountChange(Sender: TObject);
 begin
-  if not outFrame.Text.IsEmpty then
+  if not outFrame.Text.IsEmpty then begin
+    if StrToInt(threadsCount.Text) > 128 then
+      threadsCount.StyleLookup := 'comboediterrorstyle'
+    else
+      threadsCount.StyleLookup := 'comboeditstyle';
     calculateButtonClick(Sender);
-  threadsCount.ResetFocus;
+  end;
+ // threadsCount.Text := TempThreadsStr;
+end;
+
+procedure TMainForm.threadsCountExit(Sender: TObject);
+begin
+  //ShowMessage('Focus Lost');
+  //threadsCount.Text := TempThreadsStr;
+end;
+
+procedure TMainForm.threadsCountTyping(Sender: TObject);
+begin
+  // Workaround... that won't work
+  // Text in ComboEdit will be resetted to default value,
+  // if you type in something that is not in it's list.
+  // We must remember what text was in the ComboEdit field
+  //TempThreadsStr := threadsCount.Text;
+  if not threadsCount.Text.IsEmpty then begin
+    if StrToInt(threadsCount.Text) > 128 then
+      threadsCount.StyleLookup := 'comboediterrorstyle'
+    else
+      threadsCount.StyleLookup := 'comboeditstyle';
+  end;
 end;
 
 procedure TMainForm.threadsSwitchSwitch(Sender: TObject);
 begin
-  {if threadsSwitch.IsChecked then
+  if threadsSwitch.IsChecked then
     begin
       if UpdateAvailable = True then
         begin
@@ -1571,7 +1852,7 @@ begin
 
       threadsSwitchLabel.Text := Language[LANG].MainForm.SingleRener;
       outFrame.TextPrompt     := '';
-    end;     }
+    end;
 end;
 
 procedure TMainForm.UpdateNetHTTPClientRequestCompleted(
@@ -1663,12 +1944,7 @@ begin
         memUsageTrackBar.Value := (100 * memUsageInfoEdit.Text.ToInteger()) / (GetPlatformMemorySize / 1024 / 1024);
       except
         on Exception do
-          begin
-            //if LANG = 'EN' then
-              TDialogServiceSync.MessageDialog((Text + ' is not a valid memory value. Try <value unit> or <value> instead.'), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
-            //if LANG = 'RU' then
-            //  MessageDlg((Text + ' недействительное значение памяти. Используйте <value unit> или <value>.'), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
-          end;
+          TDialogServiceSync.MessageDialog((Text + ' ' + Language[LANG].Errors.MemoryValueInvalid), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
       end;
     end;
   memUsageInfo.Visible := True;
@@ -1724,12 +2000,7 @@ begin
         cacheUsageInfoEdit.Text := '100';
   except
     on Exception do
-      begin
-        //if LANG = 'EN' then
-          TDialogServiceSync.MessageDialog((Text + ' is invalid percentage value. Try <value %> or <value> instead.'), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
-        //if LANG = 'RU' then
-        //  MessageDlg((Text + ' недействительное процентное значение. Используйте <value %> или <value>.'), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
-      end;
+      TDialogServiceSync.MessageDialog((Text + ' ' + Language[LANG].Errors.CacheValueInvalid), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
   end;
   tempText := '';
   cacheUsageTrackBar.Value := cacheUsageInfoEdit.Text.ToSingle();
