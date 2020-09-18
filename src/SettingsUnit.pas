@@ -59,7 +59,9 @@ uses
   {$ENDIF MSWINDOWS}{$ENDREGION}
 
   {$REGION '  macOS Only Libraries  '}{$IFDEF MACOS}
-    Posix.Stdlib, Posix.Unistd, Posix.SysSysctl, Posix.SysTypes;
+    Posix.Stdlib, Posix.Unistd, Posix.SysSysctl, Posix.SysTypes,
+    MacApi.Dialogs, Mac.CodeBlocks, FMX.Platform.Mac,
+    Macapi.Appkit, Macapi.ObjectiveC, Macapi.Foundation, Macapi.Helpers, Macapi.ObjCRuntime, Macapi.CocoaTypes;
   {$ENDIF MACOS}{$ENDREGION}
 
 type
@@ -69,16 +71,16 @@ type
     Button1: TButton;
     langLayout: TLayout;
     aerenderPathLayout: TLayout;
-    Label1: TLabel;
+    aerenderPathLabel: TLabel;
     aerenderPath: TEdit;
     aerenderPathSelect: TButton;
     OpenDialog1: TOpenDialog;
     defaultProjectsLayout: TLayout;
-    Label2: TLabel;
+    defProjPathLabel: TLabel;
     defaultProjectsPath: TEdit;
     Button2: TButton;
     defaultOutputLayout: TLayout;
-    Label3: TLabel;
+    defOutPathLabel: TLabel;
     defaultOutputPath: TEdit;
     Button3: TButton;
     styleLayout: TLayout;
@@ -93,7 +95,7 @@ type
     delFilesCheckBox: TCheckBox;
     ResetButton: TButton;
     StatusBar1: TStatusBar;
-    Layout1: TLayout;
+    dpiChangeLayout: TLayout;
     Label4: TLabel;
     GridPanelLayout1: TGridPanelLayout;
     dpi100: TRadioButton;
@@ -103,12 +105,11 @@ type
     settingsFormLayout: TLayout;
     SettingsToolbar: TToolBar;
     WindowLabel: TLabel;
-    ToolBar1: TToolBar;
-    Label5: TLabel;
-    ToolBar2: TToolBar;
-    Label6: TLabel;
     refreshAerender: TButton;
     RefreshIcon: TPath;
+    UIExpander: TExpander;
+    BehaviourExpander: TExpander;
+    langChangeLabel: TLabel;
     procedure langBoxChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure aerenderPathSelectClick(Sender: TObject);
@@ -129,6 +130,7 @@ type
     procedure dpi150Change(Sender: TObject);
     procedure dpi200Change(Sender: TObject);
     procedure refreshAerenderClick(Sender: TObject);
+    procedure SetLanguage(LanguageCode: Integer);
   private
     { Private declarations }
     {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
@@ -208,7 +210,7 @@ end;
 
 function DetectAerender: String;
 var
-  AdobeFolder, AEVersions: TArray<String>;
+  AdobeFolder: TArray<String>;
   maxVer: Integer;
   maxVerStr, AdobeFolderPath: String;
 begin
@@ -225,61 +227,157 @@ begin
     end;
   end;
   //ver := maxVer;
-  Result := maxVerStr;
+  if maxVerStr = '' then
+    raise Exception.Create('Adobe After Effects may not be installed on this computer.')
+  else
+    Result := maxVerStr;
+end;
+
+procedure TSettingsForm.SetLanguage(LanguageCode: Integer);
+begin
+  SettingsForm.Caption    := Language[LanguageCode].SettingsForm.LauncherSettings;
+  WindowLabel.Text        := Language[LanguageCode].SettingsForm.LauncherSettings;
+
+  aerenderPathLabel.Text  := Language[LanguageCode].SettingsForm.RenderEnginePath;
+  defProjPathLabel.Text   := Language[LanguageCode].SettingsForm.DefaultProjectsDirectory;
+  defOutPathLabel.Text    := Language[LanguageCode].SettingsForm.DefaultOutputDirectory;
+
+  UIExpander.Text         := Language[LanguageCode].SettingsForm.UserInterface;
+  styleLabel.Text         := Language[LanguageCode].SettingsForm.Style;
+  langLabel.Text          := Language[LanguageCode].SettingsForm.Language;
+
+  BehaviourExpander.Text  := Language[LanguageCode].SettingsForm.Behaviour;
+  HandleCheckBox.Text     := Language[LanguageCode].SettingsForm.HandleAerender;
+  delFilesCheckBox.Text   := Language[LanguageCode].SettingsForm.DeleteTemporary;
+  onRenderStartLabel.Text := Language[LanguageCode].SettingsForm.OnRenderStart;
+
+  onRenderStartBox.Items.Clear;
+  onRenderStartBox.Items.AddStrings([
+    Language[LanguageCode].SettingsForm.DoNothing,
+    Language[LanguageCode].SettingsForm.MinimizeLauncher,
+    Language[LanguageCode].SettingsForm.CloseLauncher
+  ]);
+  onRenderStartBox.ItemIndex := ONRENDERSTART;
+
 end;
 
 procedure TSettingsForm.aerenderPathSelectClick(Sender: TObject);
+{$IFDEF MACOS}
+var
+  FOpenFile: NSSavePanel;
+  NSWin: NSWindow;
 begin
-  With OpenDialog1 do
+  NSWin := WindowHandleToPlatform(Screen.ActiveForm.Handle).Wnd;
+
+  FOpenFile := TNSOpenPanel.Wrap(TNSOpenPanel.OCClass.openPanel);
+  FOpenFile.setDirectory(StrToNSStr('/Applications'));
+  FOpenFile.setAllowedFileTypes(ArrayToNSArray(['public.data']));
+  FOpenFile.setPrompt(StrToNSStr('Select aerender'));
+
+  objc_msgSendP2((FOpenFile as ILocalObject).GetObjectID,
+                 sel_getUid(PAnsiChar('beginSheetModalForWindow:completionHandler:')),
+                 (NSWin as ILocalObject).GetObjectID,
+                 TObjCBlock.CreateBlockWithProcedure(
+                 procedure (p1: NSInteger)
+                 begin
+                    if p1 = 0 then
+                      // Handle
+                    else begin
+                      aerenderPath.Text := NSStrToStr(FOpenFile.URL.relativePath);
+                      //AERPATH := OpenDialog1.FileName;
+                    end;
+                 end));
+{$ENDIF MACOS}
+{$IFDEF MSWINDOWS}
+begin
+  with OpenDialog1 do
     if Execute then
       begin
         aerenderPath.Text := OpenDialog1.FileName;
-        AERPATH := OpenDialog1.FileName;
+        //AERPATH := OpenDialog1.FileName;
       end;
+{$ENDIF MSWINDOWS}
+  AERPATH := aerenderPath.Text;
 end;
 
 procedure TSettingsForm.Button1Click(Sender: TObject);
 begin
-  {if not aerenderPath.Text.Contains('aerender') then
-    if MainUnit.LANG = 'EN' then
-      MessageDlg(('Please specify valid Adobe After Effects render engine path!'), TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0)
-    else
-      MessageDlg(('Пожалуйста, укажите путь к модулю рендеринга After Effects!'), TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0)
-  else        }
-    begin
-      SettingsForm.Close;
-      AERPATH := aerenderPath.Text;
-      MainForm.AEPOpenDialog.InitialDir := defaultProjectsPath.Text;
-      MainForm.SaveDialog1.InitialDir := defaultOutputPath.Text;
-    end;
+  SettingsForm.Close;
+  //AERPATH := aerenderPath.Text;
+  //MainForm.AEPOpenDialog.InitialDir := defaultProjectsPath.Text;
+  //MainForm.SaveDialog1.InitialDir := defaultOutputPath.Text;
 end;
 
 procedure TSettingsForm.Button2Click(Sender: TObject);
+{$IFDEF MACOS}
+var
+  FOpenFile: NSOpenPanel;
+  NSWin: NSWindow;
+begin
+  NSWin := WindowHandleToPlatform(Screen.ActiveForm.Handle).Wnd;
+
+  FOpenFile := TNSOpenPanel.Wrap(TNSOpenPanel.OCClass.openPanel);
+  FOpenFile.setDirectory(StrToNSStr('~/Documents'));
+  //FOpenFile.setAllowedFileTypes(ArrayToNSArray(['aep']));
+  //FOpenFile.setPrompt(StrToNSStr(''));
+  FOpenFile.setCanChooseFiles(False);
+  FOpenFile.setCanChooseDirectories(True);
+
+  objc_msgSendP2((FOpenFile as ILocalObject).GetObjectID,
+                 sel_getUid(PAnsiChar('beginSheetModalForWindow:completionHandler:')),
+                 (NSWin as ILocalObject).GetObjectID,
+                 TObjCBlock.CreateBlockWithProcedure(
+                 procedure (p1: NSInteger)
+                 begin
+                    if p1 = 0 then
+                      // Handle
+                    else
+                      defaultProjectsPath.Text := NSStrToStr(FOpenFile.URL.relativePath);
+                 end));
+{$ENDIF MACOS}
+{$IFDEF MSWINDOWS}
 var
   PATH: String;
 begin
-  {$IFDEF MSWINDOWS}
     SelectDirectory ('Select Default Projects Directory', '%USERPROFILE%\Documents', PATH);
     defaultProjectsPath.Text := PATH;
-  {$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}
-    SelectDirectory ('Select Default Projects Directory', '~/Documents', PATH);
-    defaultProjectsPath.Text := PATH;
-  {$ENDIF MACOS}
+{$ENDIF MSWINDOWS}
 end;
 
 procedure TSettingsForm.Button3Click(Sender: TObject);
+{$IFDEF MACOS}
+var
+  FOpenFile: NSOpenPanel;
+  NSWin: NSWindow;
+begin
+  NSWin := WindowHandleToPlatform(Screen.ActiveForm.Handle).Wnd;
+
+  FOpenFile := TNSOpenPanel.Wrap(TNSOpenPanel.OCClass.openPanel);
+  FOpenFile.setDirectory(StrToNSStr('~/Documents'));
+  //FOpenFile.setAllowedFileTypes(ArrayToNSArray(['aep']));
+  //FOpenFile.setPrompt(StrToNSStr(''));
+  FOpenFile.setCanChooseFiles(False);
+  FOpenFile.setCanChooseDirectories(True);
+
+  objc_msgSendP2((FOpenFile as ILocalObject).GetObjectID,
+                 sel_getUid(PAnsiChar('beginSheetModalForWindow:completionHandler:')),
+                 (NSWin as ILocalObject).GetObjectID,
+                 TObjCBlock.CreateBlockWithProcedure(
+                 procedure (p1: NSInteger)
+                 begin
+                    if p1 = 0 then
+                      // Handle
+                    else
+                      defaultOutputPath.Text := NSStrToStr(FOpenFile.URL.relativePath);
+                 end));
+{$ENDIF MACOS}
+{$IFDEF MSWINDOWS}
 var
   PATH: String;
 begin
-  {$IFDEF MSWINDOWS}
-    SelectDirectory ('Select Default Output Directory', '%USERPROFILE%\Documents', PATH);
-    defaultOutputPath.Text := PATH;
-  {$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}
-    SelectDirectory ('Select Default Output Directory', '~/Documents', PATH);
-    defaultOutputPath.Text := PATH;
-  {$ENDIF POSX}
+  SelectDirectory ('Select Default Output Directory', '%USERPROFILE%\Documents', PATH);
+  defaultOutputPath.Text := PATH;
+{$ENDIF MSWINDOWS}
 end;
 
 procedure TSettingsForm.delFilesCheckBoxChange(Sender: TObject);
@@ -313,25 +411,18 @@ end;
 
 procedure TSettingsForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  {if not aerenderPath.Text.Contains('aerender') then
-    begin
-      if MainUnit.LANG = 'EN' then
-        MessageDlg(('Please specify the Adobe After Effects render engine path!'), TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0)
-      else
-        MessageDlg(('Пожалуйста, укажите путь к модулю рендеринга After Effects!'), TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0);
-      CanClose := False;
-    end
-  else}
-    begin
-      CanClose := True;
-      SettingsForm.Close;
-      AERPATH := aerenderPath.Text;
-      DEFPRGPATH := defaultProjectsPath.Text;
-      DEFOUTPATH := defaultOutputPath.Text;
-    end;
+  CanClose := True;
+  SettingsForm.Close;
+  AERPATH := aerenderPath.Text;
+  LANG := langBox.ItemIndex;
+  DEFPRGPATH := defaultProjectsPath.Text;
+  DEFOUTPATH := defaultOutputPath.Text;
+  ONRENDERSTART := onRenderStartBox.ItemIndex;
 end;
 
 procedure TSettingsForm.FormCreate(Sender: TObject);
+var
+   LangFiles: TArray<String>;
 begin
   try
     if AERPATH.IsEmpty then
@@ -341,9 +432,7 @@ begin
     on Exception do
       AERPATH := '';
   end;
-
   {$IFDEF MSWINDOWS}OpenDialog1.InitialDir := 'C:\Program Files\Adobe';{$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}OpenDialog1.InitialDir := '/Applications'{$ENDIF MACOS};
 end;
 
 procedure TSettingsForm.FormKeyDown(Sender: TObject; var Key: Word;
@@ -364,6 +453,7 @@ begin
   HandleCheckBox.IsChecked := StrToBool(AERH);
   delFilesCheckBox.IsChecked := StrToBool(DelTempFiles);
   langBox.ItemIndex := LANG;
+  onRenderStartBox.ItemIndex := ONRENDERSTART;
   {$IFDEF MSWINDOWS}
     aerenderPath.TextPrompt := 'C:\Program Files\Adobe\Adobe After Effects CC\Support Files\aerender.exe';
     OpenDialog1.Filter := 'After Effects Render Engine|aerender.exe';
@@ -379,23 +469,31 @@ begin
   if HandleCheckBox.IsChecked then
     begin
       AERH := 'True';
-      RenderingForm.emptyLabel.Text := 'Queue is Empty'
+      RenderingForm.emptyLabel.Text := Language[LANG].RenderingForm.QueueIsEmpty;
     end
   else
     begin
       AERH := 'False';
-      RenderingForm.emptyLabel.Text := 'Aerender handle disabled. Enable aerender handle in Launcher settings.';
+      RenderingForm.emptyLabel.Text := Language[LANG].RenderingForm.HandleDisabled;
     end;
 end;
 
 procedure TSettingsForm.langBoxChange(Sender: TObject);
 begin
-  //
+  /// We need to have our langBox in focus, since this event
+  /// will be invoked by the OnShow event of the form
+  if (not langChangeLabel.Visible) and (langBox.IsFocused) then begin
+    UIExpander.Height := 112;
+    LANG := langBox.ItemIndex;
+    langChangeLabel.Text := Language[LANG].SettingsForm.LangChange;
+    langChangeLabel.Visible := True;
+  end;
+  //MainUnit.ChangeLanguage(langBox.ItemIndex);
 end;
 
 procedure TSettingsForm.onRenderStartBoxChange(Sender: TObject);
 begin
-  ONRENDERSTART := onRenderStartBox.ItemIndex;
+  //ONRENDERSTART := onRenderStartBox.ItemIndex;
 end;
 
 procedure TSettingsForm.refreshAerenderClick(Sender: TObject);
@@ -404,7 +502,7 @@ begin
     aerenderPath.Text := DetectAerender + {$IFDEF MSWINDOWS}'\Support Files\aerender.exe'{$ENDIF MSWINDOWS}   {$IFDEF MACOS}'/aerender'{$ENDIF MACOS};
   except
     on E: Exception do begin
-      TDialogServiceSync.MessageDialog(('Can''t detect path to aerender. Try to specify it manually.' + #13#10 + E.ToString()), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
+      TDialogServiceSync.MessageDialog((Language[LANG].Errors.aerenderUndetectable + #13#10 + E.ToString()), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
     end;
   end;
 end;
@@ -426,55 +524,64 @@ begin
   case styleBox.ItemIndex of
     0:begin
         STYLE := 0;
-        MainForm.StyleBook := MainForm.AERModernStyle;
 
         MainForm.SettingsIcon.Fill.Color := $FFFFFFFF;
         MainForm.InfoIcon.Fill.Color := $FFFFFFFF;
         MainForm.LaunchIcon.Fill.Color := $FFFFFFFF;
+        SettingsForm.RefreshIcon.Fill.Color := $FFFFFFFF;
 
         MainForm.memUsageTrackBar.Margins.Top := 5;
         MainForm.cacheUsageTrackBar.Margins.Top := 5;
+
+        MainForm.StyleBook := MainForm.AERModernStyle;
+        MainForm.Invalidate;
         SettingsForm.StyleBook := MainForm.AERModernStyle;
         HelpForm.StyleBook := MainForm.AERModernStyle;
         ImportForm.StyleBook := MainForm.AERModernStyle;
         AboutForm.StyleBook := MainForm.AERModernStyle;
-        FFMPEGForm.StyleBook := MainForm.AERModernStyle;
+        //FFMPEGForm.StyleBook := MainForm.AERModernStyle;
         RenderingForm.StyleBook := MainForm.AERModernStyle;
         OutputModuleEditorForm.StyleBook := MainForm.AERModernStyle;
       end;
     1:begin
         STYLE := 1;
-        MainForm.StyleBook := MainForm.AERModernAnimatedStyle;
 
         MainForm.SettingsIcon.Fill.Color := $FFFFFFFF;
         MainForm.InfoIcon.Fill.Color := $FFFFFFFF;
         MainForm.LaunchIcon.Fill.Color := $FFFFFFFF;
+        SettingsForm.RefreshIcon.Fill.Color := $FFFFFFFF;
 
         MainForm.memUsageTrackBar.Margins.Top := 5;
         MainForm.cacheUsageTrackBar.Margins.Top := 5;
+
+        MainForm.StyleBook := MainForm.AERModernAnimatedStyle;
+        MainForm.Invalidate;
         SettingsForm.StyleBook := MainForm.AERModernAnimatedStyle;
         HelpForm.StyleBook := MainForm.AERModernAnimatedStyle;
         ImportForm.StyleBook := MainForm.AERModernAnimatedStyle;
         AboutForm.StyleBook := MainForm.AERModernAnimatedStyle;
-        FFMPEGForm.StyleBook := MainForm.AERModernAnimatedStyle;
+        //FFMPEGForm.StyleBook := MainForm.AERModernAnimatedStyle;
         RenderingForm.StyleBook := MainForm.AERModernAnimatedStyle;
         OutputModuleEditorForm.StyleBook := MainForm.AERModernAnimatedStyle;
       end;
     2:begin
         STYLE := 2;
-        MainForm.StyleBook := MainForm.OnyxBlueStyle;
 
         MainForm.SettingsIcon.Fill.Color := $FF000000;
         MainForm.InfoIcon.Fill.Color := $FF000000;
         MainForm.LaunchIcon.Fill.Color := $FF000000;
+        SettingsForm.RefreshIcon.Fill.Color := $FF000000;
 
         MainForm.memUsageTrackBar.Margins.Top := 0;
         MainForm.cacheUsageTrackBar.Margins.Top := 0;
+
+        MainForm.StyleBook := MainForm.OnyxBlueStyle;
+        MainForm.Invalidate;
         SettingsForm.StyleBook := MainForm.OnyxBlueStyle;
         HelpForm.StyleBook := MainForm.OnyxBlueStyle;
         ImportForm.StyleBook := MainForm.OnyxBlueStyle;
         AboutForm.StyleBook := MainForm.OnyxBlueStyle;
-        FFMPEGForm.StyleBook := MainForm.OnyxBlueStyle;
+        //FFMPEGForm.StyleBook := MainForm.OnyxBlueStyle;
         RenderingForm.StyleBook := MainForm.OnyxBlueStyle;
         OutputModuleEditorForm.StyleBook := MainForm.OnyxBlueStyle;
       end;

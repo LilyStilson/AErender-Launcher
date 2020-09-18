@@ -5,7 +5,7 @@ object SettingsForm: TSettingsForm
   BorderIcons = [biSystemMenu]
   BorderStyle = SizeToolWin
   Caption = 'AErender Launcher Settings'
-  ClientHeight = 420
+  ClientHeight = 438
   ClientWidth = 552
   Position = MainFormCenter
   Quality = HighQuality
@@ -21,17 +21,58 @@ object SettingsForm: TSettingsForm
   object settingsFormLayout: TLayout
     Align = Contents
     Size.Width = 552.000000000000000000
-    Size.Height = 420.000000000000000000
+    Size.Height = 438.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 7
+    object OpenDialog1: TOpenDialog
+      Filter = 'After Effects Render Engine|aerender.exe'
+      Left = 24
+      Top = 408
+    end
+    object SettingsToolbar: TToolBar
+      Size.Width = 552.000000000000000000
+      Size.Height = 33.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object WindowLabel: TLabel
+        Align = Left
+        AutoSize = True
+        StyledSettings = [Family, FontColor]
+        Margins.Left = 20.000000000000000000
+        Position.X = 20.000000000000000000
+        Size.Width = 208.000000000000000000
+        Size.Height = 33.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Font.Size = 16.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.WordWrap = False
+        Text = 'AErender Launcher Settings'
+        TabOrder = 0
+      end
+      object ResetButton: TButton
+        Align = Client
+        Enabled = False
+        Margins.Left = 25.000000000000000000
+        Margins.Top = 5.000000000000000000
+        Margins.Right = 5.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Size.Width = 294.000000000000000000
+        Size.Height = 23.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        Text = 'Reset Launcher Configuration'
+        Visible = False
+        OnClick = ResetButtonClick
+      end
+    end
     object aerenderPathLayout: TLayout
       Align = Top
       Position.Y = 33.000000000000000000
       Size.Width = 552.000000000000000000
       Size.Height = 55.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 1
-      object Label1: TLabel
+      TabOrder = 2
+      object aerenderPathLabel: TLabel
         Align = Top
         StyledSettings = [Family, Size, FontColor]
         Margins.Left = 5.000000000000000000
@@ -156,19 +197,111 @@ object SettingsForm: TSettingsForm
         end
       end
     end
+    object BehaviourExpander: TExpander
+      Align = Top
+      StyledSettings = [Family, Size, FontColor]
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 10.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Margins.Bottom = 10.000000000000000000
+      Position.X = 5.000000000000000000
+      Position.Y = 268.000000000000000000
+      ShowCheck = False
+      Size.Width = 542.000000000000000000
+      Size.Height = 130.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Behaviour'
+      TabOrder = 3
+      ContentSize = '105'
+      object Layout2: TLayout
+        Align = Top
+        Size.Width = 542.000000000000000000
+        Size.Height = 32.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        object HandleCheckBox: TCheckBox
+          Align = Client
+          Hint = 'Not available on macOS now!'
+          IsChecked = True
+          Margins.Left = 10.000000000000000000
+          Margins.Right = 10.000000000000000000
+          Size.Width = 522.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          Text = 'Handle aerender processes inside Launcher'
+          OnChange = HandleCheckBoxChange
+        end
+      end
+      object Layout3: TLayout
+        Align = Top
+        Position.Y = 32.000000000000000000
+        Size.Width = 542.000000000000000000
+        Size.Height = 32.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+        object delFilesCheckBox: TCheckBox
+          Align = Client
+          IsChecked = True
+          Margins.Left = 10.000000000000000000
+          Margins.Right = 10.000000000000000000
+          Size.Width = 522.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          Text = 'Delete temporary files on close'
+          OnChange = delFilesCheckBoxChange
+        end
+      end
+      object onRenderStartLayout: TLayout
+        Align = Top
+        Position.Y = 64.000000000000000000
+        Size.Width = 542.000000000000000000
+        Size.Height = 32.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        object onRenderStartBox: TComboBox
+          Align = Client
+          Items.Strings = (
+            'Do nothing'
+            'Minimize Launcher'
+            'Close Launcher')
+          ItemIndex = 0
+          Margins.Top = 5.000000000000000000
+          Margins.Right = 5.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Size.Width = 367.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          OnChange = onRenderStartBoxChange
+        end
+        object onRenderStartLabel: TLabel
+          Align = Left
+          Margins.Left = 10.000000000000000000
+          Position.X = 10.000000000000000000
+          Size.Width = 160.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'On render start'
+          TabOrder = 1
+        end
+      end
+    end
     object defaultOutputLayout: TLayout
       Align = Top
-      Position.Y = 88.000000000000000000
+      Position.Y = 120.000000000000000000
       Size.Width = 552.000000000000000000
-      Size.Height = 33.000000000000000000
+      Size.Height = 32.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 2
-      object Label3: TLabel
+      TabOrder = 4
+      object defOutPathLabel: TLabel
         Align = Left
         Margins.Left = 10.000000000000000000
         Position.X = 10.000000000000000000
         Size.Width = 160.000000000000000000
-        Size.Height = 33.000000000000000000
+        Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         Text = 'Default output directory'
         TabOrder = 0
@@ -181,7 +314,7 @@ object SettingsForm: TSettingsForm
         Margins.Right = 5.000000000000000000
         Margins.Bottom = 5.000000000000000000
         Size.Width = 349.000000000000000000
-        Size.Height = 23.000000000000000000
+        Size.Height = 22.000000000000000000
         Size.PlatformDefault = False
       end
       object Button3: TButton
@@ -192,7 +325,7 @@ object SettingsForm: TSettingsForm
         Position.X = 524.000000000000000000
         Position.Y = 5.000000000000000000
         Size.Width = 23.000000000000000000
-        Size.Height = 23.000000000000000000
+        Size.Height = 22.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 2
         Text = '...'
@@ -201,17 +334,17 @@ object SettingsForm: TSettingsForm
     end
     object defaultProjectsLayout: TLayout
       Align = Top
-      Position.Y = 121.000000000000000000
+      Position.Y = 88.000000000000000000
       Size.Width = 552.000000000000000000
-      Size.Height = 33.000000000000000000
+      Size.Height = 32.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 3
-      object Label2: TLabel
+      TabOrder = 5
+      object defProjPathLabel: TLabel
         Align = Left
         Margins.Left = 10.000000000000000000
         Position.X = 10.000000000000000000
         Size.Width = 160.000000000000000000
-        Size.Height = 33.000000000000000000
+        Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         Text = 'Default projects directory'
         TabOrder = 0
@@ -224,7 +357,7 @@ object SettingsForm: TSettingsForm
         Margins.Right = 5.000000000000000000
         Margins.Bottom = 5.000000000000000000
         Size.Width = 349.000000000000000000
-        Size.Height = 23.000000000000000000
+        Size.Height = 22.000000000000000000
         Size.PlatformDefault = False
       end
       object Button2: TButton
@@ -235,372 +368,248 @@ object SettingsForm: TSettingsForm
         Position.X = 524.000000000000000000
         Position.Y = 5.000000000000000000
         Size.Width = 23.000000000000000000
-        Size.Height = 23.000000000000000000
+        Size.Height = 22.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 2
         Text = '...'
         OnClick = Button2Click
       end
     end
-    object langLayout: TLayout
+    object UIExpander: TExpander
       Align = Top
-      Enabled = False
-      Position.Y = 55.000000000000000000
-      Size.Width = 442.000000000000000000
-      Size.Height = 33.000000000000000000
+      StyledSettings = [Family, Size, FontColor]
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+      Margins.Left = 5.000000000000000000
+      Margins.Top = 10.000000000000000000
+      Margins.Right = 5.000000000000000000
+      Position.X = 5.000000000000000000
+      Position.Y = 162.000000000000000000
+      ShowCheck = False
+      Size.Width = 542.000000000000000000
+      Size.Height = 96.000000000000000000
       Size.PlatformDefault = False
-      Visible = False
-      TabOrder = 4
-      object langBox: TComboBox
-        Align = Client
-        Items.Strings = (
-          'English'
-          'Russian')
-        ItemIndex = 0
-        Margins.Top = 5.000000000000000000
-        Margins.Right = 5.000000000000000000
-        Margins.Bottom = 5.000000000000000000
-        Size.Width = 267.000000000000000000
-        Size.Height = 23.000000000000000000
-        Size.PlatformDefault = False
-        TabOrder = 0
-        OnChange = langBoxChange
-      end
-      object langLabel: TLabel
-        Align = Left
-        Margins.Left = 10.000000000000000000
-        Position.X = 10.000000000000000000
-        Size.Width = 160.000000000000000000
-        Size.Height = 33.000000000000000000
-        Size.PlatformDefault = False
-        Text = 'Language'
-        TabOrder = 1
-      end
-    end
-    object Layout1: TLayout
-      Align = Top
-      Position.Y = 217.000000000000000000
-      Size.Width = 552.000000000000000000
-      Size.Height = 33.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 5
-      object Label4: TLabel
-        Align = Left
-        Margins.Left = 10.000000000000000000
-        Position.X = 10.000000000000000000
-        Size.Width = 160.000000000000000000
-        Size.Height = 33.000000000000000000
-        Size.PlatformDefault = False
-        Text = 'Interface scale'
-        TabOrder = 0
-      end
-      object GridPanelLayout1: TGridPanelLayout
-        Align = Client
-        Size.Width = 382.000000000000000000
-        Size.Height = 33.000000000000000000
-        Size.PlatformDefault = False
-        TabOrder = 1
-        ColumnCollection = <
-          item
-            Value = 25.000000000000010000
-          end
-          item
-            Value = 24.999999999999990000
-          end
-          item
-            Value = 25.000000000000000000
-          end
-          item
-            Value = 25.000000000000010000
-          end>
-        ControlCollection = <
-          item
-            Column = 0
-            Control = dpi100
-            Row = 0
-          end
-          item
-            Column = 1
-            Control = dpi125
-            Row = 0
-          end
-          item
-            Column = 2
-            Control = dpi150
-            Row = 0
-          end
-          item
-            Column = 3
-            Control = dpi200
-            Row = 0
-          end>
-        RowCollection = <
-          item
-            Value = 100.000000000000000000
-          end
-          item
-            SizeStyle = Auto
-          end>
-        object dpi100: TRadioButton
-          Align = Client
-          IsChecked = True
-          Margins.Left = 2.000000000000000000
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 2.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Size.Width = 91.500000000000000000
-          Size.Height = 23.000000000000000000
-          Size.PlatformDefault = False
-          StyleLookup = 'ulleftradiobuttonstyle'
-          TabOrder = 0
-          Text = '100%'
-          OnChange = dpi100Change
-        end
-        object dpi125: TRadioButton
-          Align = Client
-          Margins.Left = 2.000000000000000000
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 2.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Size.Width = 91.500000000000000000
-          Size.Height = 23.000000000000000000
-          Size.PlatformDefault = False
-          StyleLookup = 'ulcenterradiobuttonstyle'
-          TabOrder = 1
-          Text = '125%'
-          OnChange = dpi125Change
-        end
-        object dpi150: TRadioButton
-          Align = Client
-          Margins.Left = 2.000000000000000000
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 2.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Size.Width = 91.500000000000000000
-          Size.Height = 23.000000000000000000
-          Size.PlatformDefault = False
-          StyleLookup = 'ulcenterradiobuttonstyle'
-          TabOrder = 2
-          Text = '150%'
-          OnChange = dpi150Change
-        end
-        object dpi200: TRadioButton
-          Align = Client
-          Margins.Left = 2.000000000000000000
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 2.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Size.Width = 91.500000000000000000
-          Size.Height = 23.000000000000000000
-          Size.PlatformDefault = False
-          StyleLookup = 'ulrightradiobuttonstyle'
-          TabOrder = 3
-          Text = '200%'
-          OnChange = dpi200Change
-        end
-      end
-    end
-    object Layout2: TLayout
-      Align = Top
-      Position.Y = 313.000000000000000000
-      Size.Width = 552.000000000000000000
-      Size.Height = 33.000000000000000000
-      Size.PlatformDefault = False
+      Text = 'User Interface'
       TabOrder = 6
-      object HandleCheckBox: TCheckBox
-        Align = Client
-        Hint = 'Not available on macOS now!'
-        IsChecked = True
-        Margins.Left = 10.000000000000000000
-        Margins.Right = 10.000000000000000000
-        Size.Width = 532.000000000000000000
-        Size.Height = 33.000000000000000000
+      ContentSize = '71'
+      object styleLayout: TLayout
+        Align = Top
+        Size.Width = 542.000000000000000000
+        Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
-        Text = 'Handle aerender processes inside Launcher'
-        OnChange = HandleCheckBoxChange
+        object styleBox: TComboBox
+          Align = Client
+          Items.Strings = (
+            'AErender Modern'
+            'AErender Modern Animated'
+            'Onyx Blue (Old Style)')
+          ItemIndex = 0
+          Margins.Top = 5.000000000000000000
+          Margins.Right = 5.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Size.Width = 367.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          OnChange = styleBoxChange
+        end
+        object styleLabel: TLabel
+          Align = Left
+          Margins.Left = 10.000000000000000000
+          Position.X = 10.000000000000000000
+          Size.Width = 160.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Style'
+          TabOrder = 1
+        end
       end
-    end
-    object Layout3: TLayout
-      Align = Top
-      Position.Y = 346.000000000000000000
-      Size.Width = 552.000000000000000000
-      Size.Height = 33.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 7
-      object delFilesCheckBox: TCheckBox
-        Align = Client
-        IsChecked = True
-        Margins.Left = 10.000000000000000000
-        Margins.Right = 10.000000000000000000
-        Size.Width = 532.000000000000000000
+      object dpiChangeLayout: TLayout
+        Align = Top
+        Enabled = False
+        Position.Y = 64.000000000000000000
+        Size.Width = 542.000000000000000000
         Size.Height = 33.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 0
-        Text = 'Delete temporary files on close'
-        OnChange = delFilesCheckBoxChange
-      end
-    end
-    object onRenderStartLayout: TLayout
-      Align = Top
-      Position.Y = 280.000000000000000000
-      Size.Width = 552.000000000000000000
-      Size.Height = 33.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 8
-      object onRenderStartBox: TComboBox
-        Align = Client
-        Items.Strings = (
-          'Do nothing'
-          'Minimize Launcher'
-          'Close Launcher')
-        ItemIndex = 0
-        Margins.Top = 5.000000000000000000
-        Margins.Right = 5.000000000000000000
-        Margins.Bottom = 5.000000000000000000
-        Size.Width = 377.000000000000000000
-        Size.Height = 23.000000000000000000
-        Size.PlatformDefault = False
-        TabOrder = 0
-        OnChange = onRenderStartBoxChange
-      end
-      object onRenderStartLabel: TLabel
-        Align = Left
-        Margins.Left = 10.000000000000000000
-        Position.X = 10.000000000000000000
-        Size.Width = 160.000000000000000000
-        Size.Height = 33.000000000000000000
-        Size.PlatformDefault = False
-        Text = 'On render start'
+        Visible = False
         TabOrder = 1
+        object Label4: TLabel
+          Align = Left
+          Margins.Left = 10.000000000000000000
+          Position.X = 10.000000000000000000
+          Size.Width = 160.000000000000000000
+          Size.Height = 33.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Interface scale'
+          TabOrder = 0
+        end
+        object GridPanelLayout1: TGridPanelLayout
+          Align = Client
+          Size.Width = 372.000000000000000000
+          Size.Height = 33.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 1
+          ColumnCollection = <
+            item
+              Value = 25.000000000000010000
+            end
+            item
+              Value = 24.999999999999990000
+            end
+            item
+              Value = 25.000000000000000000
+            end
+            item
+              Value = 25.000000000000010000
+            end>
+          ControlCollection = <
+            item
+              Column = 0
+              Control = dpi100
+              Row = 0
+            end
+            item
+              Column = 1
+              Control = dpi125
+              Row = 0
+            end
+            item
+              Column = 2
+              Control = dpi150
+              Row = 0
+            end
+            item
+              Column = 3
+              Control = dpi200
+              Row = 0
+            end>
+          RowCollection = <
+            item
+              Value = 100.000000000000000000
+            end
+            item
+              SizeStyle = Auto
+            end>
+          object dpi100: TRadioButton
+            Align = Client
+            IsChecked = True
+            Margins.Left = 2.000000000000000000
+            Margins.Top = 5.000000000000000000
+            Margins.Right = 2.000000000000000000
+            Margins.Bottom = 5.000000000000000000
+            Size.Width = 89.000000000000000000
+            Size.Height = 23.000000000000000000
+            Size.PlatformDefault = False
+            StyleLookup = 'ulleftradiobuttonstyle'
+            TabOrder = 0
+            Text = '100%'
+            OnChange = dpi100Change
+          end
+          object dpi125: TRadioButton
+            Align = Client
+            Margins.Left = 2.000000000000000000
+            Margins.Top = 5.000000000000000000
+            Margins.Right = 2.000000000000000000
+            Margins.Bottom = 5.000000000000000000
+            Size.Width = 89.000000000000000000
+            Size.Height = 23.000000000000000000
+            Size.PlatformDefault = False
+            StyleLookup = 'ulcenterradiobuttonstyle'
+            TabOrder = 1
+            Text = '125%'
+            OnChange = dpi125Change
+          end
+          object dpi150: TRadioButton
+            Align = Client
+            Margins.Left = 2.000000000000000000
+            Margins.Top = 5.000000000000000000
+            Margins.Right = 2.000000000000000000
+            Margins.Bottom = 5.000000000000000000
+            Size.Width = 89.000000000000000000
+            Size.Height = 23.000000000000000000
+            Size.PlatformDefault = False
+            StyleLookup = 'ulcenterradiobuttonstyle'
+            TabOrder = 2
+            Text = '150%'
+            OnChange = dpi150Change
+          end
+          object dpi200: TRadioButton
+            Align = Client
+            Margins.Left = 2.000000000000000000
+            Margins.Top = 5.000000000000000000
+            Margins.Right = 2.000000000000000000
+            Margins.Bottom = 5.000000000000000000
+            Size.Width = 89.000000000000000000
+            Size.Height = 23.000000000000000000
+            Size.PlatformDefault = False
+            StyleLookup = 'ulrightradiobuttonstyle'
+            TabOrder = 3
+            Text = '200%'
+            OnChange = dpi200Change
+          end
+        end
       end
-    end
-    object OpenDialog1: TOpenDialog
-      Filter = 'After Effects Render Engine|aerender.exe'
-      Top = 392
-    end
-    object ResetButton: TButton
-      Align = Client
-      Enabled = False
-      Size.Width = 442.000000000000000000
-      Size.Height = 26.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 9
-      Text = 'Reset Launcher Configuration'
-      Visible = False
-      OnClick = ResetButtonClick
+      object langLayout: TLayout
+        Align = Top
+        Position.Y = 32.000000000000000000
+        Size.Width = 542.000000000000000000
+        Size.Height = 32.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        object langBox: TComboBox
+          Align = Client
+          Items.Strings = (
+            'English'
+            #1056#1091#1089#1089#1082#1080#1081' (Russian)')
+          ItemIndex = 0
+          Margins.Top = 5.000000000000000000
+          Margins.Right = 5.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Size.Width = 367.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          OnChange = langBoxChange
+        end
+        object langLabel: TLabel
+          Align = Left
+          Margins.Left = 10.000000000000000000
+          Position.X = 10.000000000000000000
+          Size.Width = 160.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Language'
+          TabOrder = 1
+        end
+      end
+      object langChangeLabel: TLabel
+        Align = Top
+        StyledSettings = [Family, Size, Style]
+        Margins.Left = 8.000000000000000000
+        Margins.Right = 8.000000000000000000
+        Position.X = 8.000000000000000000
+        Position.Y = 64.000000000000000000
+        Size.Width = 526.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.FontColor = xFF2A82E2
+        TextSettings.HorzAlign = Center
+        Text = 'Changes will take effect after restarting the program'
+        Visible = False
+      end
     end
     object StatusBar1: TStatusBar
-      Position.Y = 388.000000000000000000
+      Position.Y = 406.000000000000000000
       ShowSizeGrip = True
       Size.Width = 552.000000000000000000
       Size.Height = 32.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 10
+      TabOrder = 0
       object Button1: TButton
         Align = Center
         TabOrder = 1
         Text = 'Ok'
         OnClick = Button1Click
-      end
-    end
-    object styleLayout: TLayout
-      Align = Top
-      Position.Y = 184.000000000000000000
-      Size.Width = 552.000000000000000000
-      Size.Height = 33.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 11
-      object styleBox: TComboBox
-        Align = Client
-        Items.Strings = (
-          'AErender Modern'
-          'AErender Modern Animated'
-          'Onyx Blue (Old Style)')
-        ItemIndex = 0
-        Margins.Top = 5.000000000000000000
-        Margins.Right = 5.000000000000000000
-        Margins.Bottom = 5.000000000000000000
-        Size.Width = 377.000000000000000000
-        Size.Height = 23.000000000000000000
-        Size.PlatformDefault = False
-        TabOrder = 0
-        OnChange = styleBoxChange
-      end
-      object styleLabel: TLabel
-        Align = Left
-        Margins.Left = 10.000000000000000000
-        Position.X = 10.000000000000000000
-        Size.Width = 160.000000000000000000
-        Size.Height = 33.000000000000000000
-        Size.PlatformDefault = False
-        Text = 'Style'
-        TabOrder = 1
-      end
-    end
-    object SettingsToolbar: TToolBar
-      Size.Width = 552.000000000000000000
-      Size.Height = 33.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 0
-      object WindowLabel: TLabel
-        Align = Left
-        AutoSize = True
-        StyledSettings = [Family, FontColor]
-        Margins.Left = 20.000000000000000000
-        Position.X = 20.000000000000000000
-        Size.Width = 208.000000000000000000
-        Size.Height = 33.000000000000000000
-        Size.PlatformDefault = False
-        TextSettings.Font.Size = 16.000000000000000000
-        TextSettings.Font.StyleExt = {00070000000000000004000000}
-        TextSettings.WordWrap = False
-        Text = 'AErender Launcher Settings'
-        TabOrder = 0
-      end
-    end
-    object ToolBar1: TToolBar
-      Margins.Top = 10.000000000000000000
-      Position.Y = 164.000000000000000000
-      Size.Width = 552.000000000000000000
-      Size.Height = 20.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 12
-      object Label5: TLabel
-        Align = Left
-        AutoSize = True
-        StyledSettings = [Family, FontColor]
-        Margins.Left = 20.000000000000000000
-        Position.X = 20.000000000000000000
-        Size.Width = 80.000000000000000000
-        Size.Height = 20.000000000000000000
-        Size.PlatformDefault = False
-        TextSettings.Font.StyleExt = {00070000000000000004000000}
-        TextSettings.WordWrap = False
-        Text = 'User Interface'
-        TabOrder = 0
-      end
-    end
-    object ToolBar2: TToolBar
-      Margins.Top = 10.000000000000000000
-      Position.Y = 260.000000000000000000
-      Size.Width = 552.000000000000000000
-      Size.Height = 20.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 13
-      object Label6: TLabel
-        Align = Left
-        AutoSize = True
-        StyledSettings = [Family, FontColor]
-        Margins.Left = 20.000000000000000000
-        Position.X = 20.000000000000000000
-        Size.Width = 58.000000000000000000
-        Size.Height = 20.000000000000000000
-        Size.PlatformDefault = False
-        TextSettings.Font.StyleExt = {00070000000000000004000000}
-        TextSettings.WordWrap = False
-        Text = 'Behaviour'
-        TabOrder = 0
       end
     end
   end
