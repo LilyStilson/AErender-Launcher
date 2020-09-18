@@ -54,20 +54,21 @@ uses
 type
   TAboutForm = class(TForm)
     Image1: TImage;
-    Label1: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
-    Label7: TLabel;
-    Label8: TLabel;
+    LauncherLabel: TLabel;
+    AuthorsLabel: TLabel;
+    DescriptionLabel: TLabel;
+    FromRussiaWithLoveLabel: TLabel;
+    CopyrightsLabel: TLabel;
+    WebsiteLabel: TLabel;
+    FFmpegLabel: TLabel;
     GridPanelLayout1: TGridPanelLayout;
     GridPanelLayout2: TGridPanelLayout;
     LogoRotationAnim: TFloatAnimation;
-    procedure Label7Click(Sender: TObject);
+    procedure WebsiteLabelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Image1DblClick(Sender: TObject);
     procedure LogoRotationAnimFinish(Sender: TObject);
+    procedure SetLanguage(LanguageCode: Integer);
   private
     { Private declarations }
     {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
@@ -99,18 +100,27 @@ begin
 end;
 {$ENDIF MSWINDOWS}
 
+procedure TAboutForm.SetLanguage(LanguageCode: Integer);
+begin
+  AboutForm.Caption             := Language[LanguageCode].AboutForm.AErenderLauncher;
+  AuthorsLabel.Text             := Language[LanguageCode].AboutForm.CreatedBy;
+  DescriptionLabel.Text         := Language[LanguageCode].AboutForm.Description;
+  FromRussiaWithLoveLabel.Text  := Language[LanguageCode].AboutForm.FromRussiaWithLove;
+  CopyrightsLabel.Text          := Language[LanguageCode].AboutForm.Copyright;
+end;
+
 procedure TAboutForm.FormShow(Sender: TObject);
 begin
-  Label1.Text := 'AErender Launcher (' + APPVERSION + ')';
+  LauncherLabel.Text := 'AErender Launcher (' + APPVERSION + ')';
   if MainUnit.FFMPEG then
     begin
-      Label8.FontColor := $FF1E90FF;
-      Label8.Text := 'FFMPEG: Found at ' + MainUnit.ffmpegPath;
+      FFmpegLabel.FontColor := $FF1E90FF;
+      FFmpegLabel.Text := Language[LANG].AboutForm.FFMPEG + MainUnit.ffmpegPath;
     end
   else
     begin
-      Label8.FontColor := $FFDDDDDD;
-      Label8.Text := 'FFMPEG: Undetected. Feature will be disabled.';
+      FFmpegLabel.FontColor := $FFDDDDDD;
+      FFmpegLabel.Text := Language[LANG].AboutForm.FFMPEGNotFound;
     end;
 end;
 
@@ -119,7 +129,7 @@ begin
   LogoRotationAnim.Enabled := True;
 end;
 
-procedure TAboutForm.Label7Click(Sender: TObject);
+procedure TAboutForm.WebsiteLabelClick(Sender: TObject);
 begin
   {$IFDEF MSWINDOWS}
     ShellExecute(0, 'open', PWideChar('http://aerenderlauncher.com'), nil, nil, SW_SHOW);
