@@ -2,7 +2,7 @@
 {                                                       }
 {              Delphi FireMonkey Platform               }
 {                                                       }
-{ Copyright(c) 2011-2018 Embarcadero Technologies, Inc. }
+{ Copyright(c) 2011-2020 Embarcadero Technologies, Inc. }
 {              All rights reserved                      }
 {                                                       }
 {*******************************************************}
@@ -33,14 +33,14 @@ type
   private
     FColor: TAlphaColor;
     FOffset: Single;
-    function GetColor: TAlphaColor;
     procedure SetColor(const Value: TAlphaColor);
+    procedure SetOffset(const Value: Single);
   public
     procedure Assign(Source: TPersistent); override;
     property IntColor: TAlphaColor read FColor write FColor;
   published
-    property Color: TAlphaColor read GetColor write SetColor;
-    property Offset: Single read FOffset write FOffset nodefault;
+    property Color: TAlphaColor read FColor write SetColor;
+    property Offset: Single read FOffset write SetOffset nodefault;
   end;
 
 { TGradientPoints }
@@ -48,6 +48,8 @@ type
   TGradientPoints = class(TCollection)
   private
     function GetPoint(Index: Integer): TGradientPoint;
+  protected
+    procedure Update(Item: TCollectionItem); override;
   public
     property Points[Index: Integer]: TGradientPoint read GetPoint; default;
   end;
@@ -79,6 +81,7 @@ type
     procedure SetStyle(const Value: TGradientStyle);
     function IsRadialStored: Boolean;
     procedure SetRadialTransform(const Value: TTransform);
+    procedure SetPoints(const Value: TGradientPoints);
   public
     constructor Create;
     destructor Destroy; override;
@@ -93,7 +96,7 @@ type
     property Color: TAlphaColor write SetColor;
     property Color1: TAlphaColor write SetColor1;
   published
-    property Points: TGradientPoints read FPoints write FPoints;
+    property Points: TGradientPoints read FPoints write SetPoints;
     property Style: TGradientStyle read FStyle write SetStyle default TGradientStyle.Linear;
     { linear }
     property StartPosition: TPosition read FStartPosition write SetStartPosition stored IsLinearStored;
@@ -414,6 +417,8 @@ type
     DefaultFontSize: Single = 12.0;
     DefaultFontFamily = 'Tahoma';
     MaxFontSize: Single = 512.0;
+  public class var
+    FontService: IFMXSystemFontService;
   private
     FSize: Single;
     FFamily: TFontName;
@@ -428,8 +433,6 @@ type
     procedure SetStyleExt(const Value: TFontStyleExt);
     procedure ReadStyleExt(AStream: TStream);
     procedure WriteStyleExt(AStream: TStream);
-  private class var
-    FFontSvc: IFMXSystemFontService;
   protected
     procedure DefineProperties(Filer: TFiler); override;
     function DefaultFamily: string; virtual;
@@ -467,15 +470,15 @@ type
   public
     class function GetImageSize(const AFileName: string): TPointF; virtual; abstract;
     class function IsValid(const AStream: TStream): Boolean; virtual; abstract;
-    function LoadFromFile(const AFileName: string; const Bitmap: TBitmapSurface;
-      const MaxSizeLimit: Cardinal = 0): Boolean; virtual; abstract;
+    function LoadFromFile(const AFileName: string; const ABitmap: TBitmapSurface;
+      const AMaxSizeLimit: Cardinal = 0): Boolean; virtual; abstract;
     function LoadThumbnailFromFile(const AFileName: string; const AFitWidth, AFitHeight: Single;
-      const UseEmbedded: Boolean; const Bitmap: TBitmapSurface): Boolean; virtual; abstract;
-    function LoadFromStream(const AStream: TStream; const Bitmap: TBitmapSurface;
-      const MaxSizeLimit: Cardinal = 0): Boolean; virtual; abstract;
-    function SaveToFile(const AFileName: string; const Bitmap: TBitmapSurface; const SaveParams: PBitmapCodecSaveParams = nil): Boolean; virtual; abstract;
-    function SaveToStream(const AStream: TStream; const Bitmap: TBitmapSurface; const Extension: string;
-      const SaveParams: PBitmapCodecSaveParams = nil): Boolean; virtual; abstract;
+      const UseEmbedded: Boolean; const ABitmap: TBitmapSurface): Boolean; virtual; abstract;
+    function LoadFromStream(const AStream: TStream; const ABitmap: TBitmapSurface;
+      const AMaxSizeLimit: Cardinal = 0): Boolean; virtual; abstract;
+    function SaveToFile(const AFileName: string; const ABitmap: TBitmapSurface; const ASaveParams: PBitmapCodecSaveParams = nil): Boolean; virtual; abstract;
+    function SaveToStream(const AStream: TStream; const ABitmap: TBitmapSurface; const AExtension: string;
+      const ASaveParams: PBitmapCodecSaveParams = nil): Boolean; virtual; abstract;
   end;
   TCustomBitmapCodecClass = class of TCustomBitmapCodec;
 
@@ -484,59 +487,96 @@ type
   EBitmapCodecManagerException = class(Exception);
 
   TBitmapCodecManager = class sealed
-  public type
-    TBitmapCodecClassDescriptor = record
+  private type
+    TCodecDescriptor = record
       Extension: string;
       Description: string;
-      BitmapCodecClass: TCustomBitmapCodecClass;
+      CodecClass: TCustomBitmapCodecClass;
       CanSave: Boolean;
+      function ToFilterString: string;
     end;
-  strict private type
-    TBitmapCodecDescriptorField = (Extension, Description);
   strict private
-    class var FBitmapCodecClassDescriptors: TList<TBitmapCodecClassDescriptor>;
-    class function FindBitmapCodecDescriptor(const Name: string; const Field: TBitmapCodecDescriptorField): TBitmapCodecClassDescriptor;
-    class function GuessCodecClass(const Name: string; const Field: TBitmapCodecDescriptorField):
-      TCustomBitmapCodecClass;
-  private
+    class var FCodecsDescriptors: TList<TCodecDescriptor>;
+    class function SameExtension(const ALeft, ARight: string): Boolean;
+    class function FindCodecClass(const AFileExtension: string; var ACodecClass: TCustomBitmapCodecClass): Boolean;
+    class function FindWritableCodecClass(const AFileExtension: string; var ACodecClass: TCustomBitmapCodecClass): Boolean;
+    class function GuessCodecClass(const AFileExtension: string): TCustomBitmapCodecClass;
+    class function GetCodecsDescriptors: TList<TCodecDescriptor>; static;
+    class property CodecsDescriptors: TList<TCodecDescriptor> read GetCodecsDescriptors;
   public
     // Reserved for internal use only - do not call directly!
     class procedure UnInitialize;
-    // Register a bitmap codec class with a file extension, description
-    class procedure RegisterBitmapCodecClass(const Extension, Description: string; const CanSave: Boolean;
-      const BitmapCodecClass: TCustomBitmapCodecClass);
-    class procedure UnregisterBitmapCodecClass(const Extension: string);
-    // Helpful function
+
+    { Registration and Unregistration }
+
+    /// <summary>Register a bitmap codec class with a specified file extension and description.</summary>
+    /// <remarks>If codec with specified <c>AFileExtension</c> was already registered or <c>AFileExtension</c> is empty
+    /// or <c>ACodecClass</c> is nil will raise <c>EBitmapCodecManagerException</c>.</remarks>
+    class procedure RegisterBitmapCodecClass(const AFileExtension, ADescription: string; const ACanSave: Boolean;
+      const ACodecClass: TCustomBitmapCodecClass);
+    /// <summary>Unregisters codec with specified file extension <c>AFileExtension</c>.</summary>
+    class procedure UnregisterBitmapCodecClass(const AFileExtension: string);
+
+    { Helpers }
+
+    /// <summary>Returns list of supported image file extensions separated by ';'.</summary>
     class function GetFileTypes: string;
+    /// <summary>Returns filter presentation of supported image types for TXXXDialog components.</summary>
     class function GetFilterString: string;
+    /// <summary>Returns true, if codec with specified file extension was registered.</summary>
     class function CodecExists(const AFileName: string): Boolean; overload;
+    /// <summary>Returns image size for specified file by <c>AFileName</c>.</summary>
     class function GetImageSize(const AFileName: string): TPointF;
-    class function LoadFromFile(const AFileName: string; const Bitmap: TBitmapSurface;
-      const MaxSizeLimit: Cardinal = 0): Boolean;
+
+    { Loading}
+
+    /// <summary>Loads image from file by <c>AFileName</c> to Bitmap surface <c>ABitmap</c>. If image successfully
+    /// loaded, it returns true, otherwise - false.</summary>
+    /// <remarks>If <c>ABitmap</c> is nil, it will raise <c>EBitmapCodecManagerException</c>.</remarks>
+    class function LoadFromFile(const AFileName: string; const ABitmap: TBitmapSurface;
+      const AMaxSizeLimit: Cardinal = 0): Boolean;
+    /// <summary>Loads image thumbnail with specified size <c>AFitWidth</c> and <c>AFitHeight</c> by file name
+    /// <c>AFileName</c>. If image successfully loaded, it returns true, otherwise - false.</summary>
+    /// <remarks>If <c>ABitmap</c> is nil, it will raise <c>EBitmapCodecManagerException</c>.</remarks>
     class function LoadThumbnailFromFile(const AFileName: string; const AFitWidth, AFitHeight: Single;
-      const UseEmbedded: Boolean; const Bitmap: TBitmapSurface): Boolean;
-    class function LoadFromStream(const AStream: TStream; const Bitmap: TBitmapSurface;
-      const MaxSizeLimit: Cardinal = 0): Boolean;
-    class function SaveToStream(const AStream: TStream; const Bitmap: TBitmapSurface; const Extension: string;
-      SaveParams: PBitmapCodecSaveParams = nil): Boolean; overload;
-    class function SaveToFile(const AFileName: string; const Bitmap: TBitmapSurface; const SaveParams: PBitmapCodecSaveParams = nil): Boolean;
+      const AUseEmbedded: Boolean; const ABitmap: TBitmapSurface): Boolean;
+    /// <summary>Loads image from the stream <c>AStream</c>. If image successfully loaded, it returns true,
+    /// otherwise - false.</summary>
+    /// <remarks>If <c>ABitmap</c> or <c>AStream</c> is nil, it will raise <c>EBitmapCodecManagerException</c>.</remarks>
+    class function LoadFromStream(const AStream: TStream; const ABitmap: TBitmapSurface;
+      const AMaxSizeLimit: Cardinal = 0): Boolean;
+
+    { Saving}
+
+    /// <summary>Saves bitmap <c>ABitmap</c> to the stream <c>AStream</c> with using codec with specified extension
+    /// <c>AExtension</c>. Optionally, you can specify save options. For example, the quality. If image successfully
+    /// saved to the stream, it returns true, otherwise - false.</summary>
+    /// <remarks>If <c>ABitmap</c> or <c>AStream</c> is nil, it will raise <c>EBitmapCodecManagerException</c>.</remarks>
+    class function SaveToStream(const AStream: TStream; const ABitmap: TBitmapSurface; const AExtension: string;
+      const ASaveParams: PBitmapCodecSaveParams = nil): Boolean; overload;
+    /// <summary>Saves bitmap <c>ABitmap</c> to the file <c>AFileName</c> . It uses codec extracted by <c>FileName</c>
+    /// extension. Optionally, you can specify save options. For example, the quality. If image successfully saved to
+    /// the file, it returns true, otherwise - false.</summary>
+    /// <remarks>If <c>ABitmap</c> is nil, it will raise <c>EBitmapCodecManagerException</c>.</remarks>
+    class function SaveToFile(const AFileName: string; const ABitmap: TBitmapSurface;
+      const ASaveParams: PBitmapCodecSaveParams = nil): Boolean;
   end;
 
 { TImageTypeChecker }
 
-  /// <summary>Helper class for BitmapCodec</summary>
+  /// <summary>Helper class for BitmapCodec.</summary>
   TImageTypeChecker = class
   private type
     TImageData = record
-      DataType: String;
+      DataType: string;
       Length: Integer;
       Header: array[0..3] of Byte;
     end;
   public
-    /// <summary>Analizes the header to guess the image format of he given file</summary>
-    class function GetType(AFileName: String): String; overload;
-    /// <summary>Analizes the header to guess the image format of he given stream</summary>
-    class function GetType(AData: TStream): String; overload;
+    /// <summary>Analyzes the header to guess the image format of he given file.</summary>
+    class function GetType(const AFileName: string): string; overload;
+    /// <summary>Analyzes the header to guess the image format of he given stream.</summary>
+    class function GetType(const AData: TStream): string; overload;
   end;
 
 { TBitmap }
@@ -1065,6 +1105,8 @@ type
       const AOpacity: Single; const ACornerType: TCornerType = TCornerType.Round); overload;
     procedure FillRect(const ARect: TRectF; const XRadius, YRadius: Single; const ACorners: TCorners;
       const AOpacity: Single; const ABrush: TBrush; const ACornerType: TCornerType = TCornerType.Round); overload;
+    procedure FillRect(const ARect: TRectF; const AOpacity: Single); overload;
+    procedure FillRect(const ARect: TRectF; const AOpacity: Single; const ABrush: TBrush); overload;
     procedure FillPath(const APath: TPathData; const AOpacity: Single); overload;
     procedure FillPath(const APath: TPathData; const AOpacity: Single; const ABrush: TBrush); overload;
     procedure FillEllipse(const ARect: TRectF; const AOpacity: Single); overload;
@@ -1373,11 +1415,11 @@ type
 implementation
 
 uses
-  System.UIConsts, System.Math, System.TypInfo, System.Character, FMX.Consts, FMX.Platform, FMX.TextLayout, FMX.Utils;
+  System.UIConsts, System.Math, System.TypInfo, System.Character, System.Generics.Defaults, FMX.Consts, FMX.Platform, FMX.TextLayout, FMX.Utils;
 
 { TImageTypeChecker }
 
-class function TImageTypeChecker.GetType(AFileName: string): string;
+class function TImageTypeChecker.GetType(const AFileName: string): string;
 var
   LStream: TStream;
 begin
@@ -1391,7 +1433,7 @@ begin
   end;
 end;
 
-class function TImageTypeChecker.GetType(AData: TStream): String;
+class function TImageTypeChecker.GetType(const AData: TStream): String;
 var
   LBuffer : TBytes;
   I: Integer;
@@ -1408,7 +1450,7 @@ const
     (DataType: SJPGImageExtension;  Length: 4; Header: (255,216,255,225))  // jpg (canon)
   );
 begin
-  Result := String.Empty;
+  Result := string.Empty;
   SetLength(LBuffer, MaxImageDataLength);
   LOldPos := AData.Position;
   try
@@ -1419,7 +1461,7 @@ begin
         if (CompareMem(@ImageData[I].Header[0], LBuffer, ImageData[i].Length) ) then
         begin
           Result := ImageData[I].DataType;
-          break;
+          Break;
         end;
       end;
     end;
@@ -1441,14 +1483,22 @@ begin
     inherited;
 end;
 
-function TGradientPoint.GetColor: TAlphaColor;
-begin
-  Result := FColor;
-end;
-
 procedure TGradientPoint.SetColor(const Value: TAlphaColor);
 begin
-  FColor := Value;
+  if FColor <> Value then
+  begin
+    FColor := Value;
+    Changed(False);
+  end;
+end;
+
+procedure TGradientPoint.SetOffset(const Value: Single);
+begin
+  if not SameValue(FOffset, Value, Single.Epsilon) then
+  begin
+    FOffset := Value;
+    Changed(False);
+  end;
 end;
 
 { TGradientPoints }
@@ -1456,6 +1506,18 @@ end;
 function TGradientPoints.GetPoint(Index: Integer): TGradientPoint;
 begin
   Result := TGradientPoint(Items[Index]);
+end;
+
+procedure TGradientPoints.Update(Item: TCollectionItem);
+begin
+  inherited;
+  if Item = nil then
+    Exit;
+
+  Sort(TComparer<TCollectionItem>.Construct(function(const Left, Right: TCollectionItem): Integer
+    begin
+      Result := CompareValue(TGradientPoint(Left).Offset, TGradientPoint(Right).Offset);
+    end));
 end;
 
 { TGradient }
@@ -1656,6 +1718,11 @@ begin
     if Assigned(FOnChanged) then
       FOnChanged(Self);
   end;
+end;
+
+procedure TGradient.SetPoints(const Value: TGradientPoints);
+begin
+  FPoints.Assign(Value);
 end;
 
 procedure TGradient.SetStyle(const Value: TGradientStyle);
@@ -2384,21 +2451,31 @@ begin
 end;
 
 function TFont.DefaultFamily: string;
+var
+  Service: IFMXSystemFontService;
 begin
-  if FFontSvc = nil then
-    TPlatformServices.Current.SupportsPlatformService(IFMXSystemFontService, FFontSvc);
-  if FFontSvc <> nil then
-    Result := FFontSvc.GetDefaultFontFamilyName
+  if FontService = nil then
+  begin
+    TPlatformServices.Current.SupportsPlatformService(IFMXSystemFontService, Service);
+    FontService := Service;
+  end;  
+  if FontService <> nil then
+    Result := FontService.GetDefaultFontFamilyName
   else
     Result := DefaultFontFamily;
 end;
 
 function TFont.DefaultSize: Single;
+var
+  Service: IFMXSystemFontService;
 begin
-  if FFontSvc = nil then
-    TPlatformServices.Current.SupportsPlatformService(IFMXSystemFontService, FFontSvc);
-  if FFontSvc <> nil then
-    Result := FFontSvc.GetDefaultFontSize
+  if FontService = nil then
+  begin
+    TPlatformServices.Current.SupportsPlatformService(IFMXSystemFontService, Service);
+    FontService := Service;
+  end;
+  if FontService <> nil then
+    Result := FontService.GetDefaultFontSize
   else
     Result := DefaultFontSize;
 end;
@@ -2939,128 +3016,155 @@ end;
 
 class procedure TBitmapCodecManager.UnInitialize;
 begin
-  FreeAndNil(FBitmapCodecClassDescriptors);
+  FreeAndNil(FCodecsDescriptors);
 end;
 
-class function TBitmapCodecManager.FindBitmapCodecDescriptor(const Name: string;
-  const Field: TBitmapCodecDescriptorField): TBitmapCodecClassDescriptor;
+class function TBitmapCodecManager.FindCodecClass(const AFileExtension: string; var ACodecClass: TCustomBitmapCodecClass): Boolean;
 var
-  LResult: Boolean;
-  LDescriptor: TBitmapCodecClassDescriptor;
+  Descriptor: TCodecDescriptor;
 begin
-  FillChar(Result, SizeOf(Result), 0);
-  if FBitmapCodecClassDescriptors <> nil then
-    for LDescriptor in FBitmapCodecClassDescriptors do
+  Result := False;
+  ACodecClass := nil;
+  for Descriptor in CodecsDescriptors do
+    if SameExtension(AFileExtension, Descriptor.Extension) then
     begin
-      case Field of
-        TBitmapCodecDescriptorField.Extension: LResult := SameText(Name, LDescriptor.Extension, loUserLocale);
-        TBitmapCodecDescriptorField.Description: LResult := SameText(Name, LDescriptor.Description, loUserLocale);
-      else
-        LResult := False;
-      end;
-      if LResult then
-        Result := LDescriptor;
+      ACodecClass := Descriptor.CodecClass;
+      Exit(True);
     end;
 end;
 
-class function TBitmapCodecManager.GuessCodecClass(const Name: string; const Field: TBitmapCodecDescriptorField):
-  TCustomBitmapCodecClass;
-begin
-  Result := FindBitmapCodecDescriptor(name, field).BitmapCodecClass;
-  //If none found, fallback to the first one.
-  if (Result = nil) and (FBitmapCodecClassDescriptors.Count > 0) then
-    Result := FBitmapCodecClassDescriptors[0].BitmapCodecClass;
-end;
-
-class procedure TBitmapCodecManager.RegisterBitmapCodecClass(const Extension, Description: string; const CanSave: Boolean;
-  const BitmapCodecClass: TCustomBitmapCodecClass);
+class function TBitmapCodecManager.FindWritableCodecClass(const AFileExtension: string;
+  var ACodecClass: TCustomBitmapCodecClass): Boolean;
 var
-  LDescriptor: TBitmapCodecClassDescriptor;
+  Descriptor: TCodecDescriptor;
 begin
-  if FBitmapCodecClassDescriptors = nil then
-    FBitmapCodecClassDescriptors := TList<TBitmapCodecClassDescriptor>.Create;
-
-  LDescriptor.Extension := Extension;
-  LDescriptor.Description := Description;
-  LDescriptor.BitmapCodecClass := BitmapCodecClass;
-  LDescriptor.CanSave := CanSave;
-  FBitmapCodecClassDescriptors.Add(LDescriptor);
+  Result := False;
+  ACodecClass := nil;
+  for Descriptor in CodecsDescriptors do
+    if Descriptor.CanSave and SameExtension(AFileExtension, Descriptor.Extension) then
+    begin
+      ACodecClass := Descriptor.CodecClass;
+      Exit(True);
+    end;
 end;
 
-class procedure TBitmapCodecManager.UnregisterBitmapCodecClass(const Extension: string);
+class function TBitmapCodecManager.GuessCodecClass(const AFileExtension: string): TCustomBitmapCodecClass;
+begin
+  if not FindCodecClass(AFileExtension, Result) and (CodecsDescriptors.Count > 0) then
+    //If none found, fallback to the first one.
+    Result := CodecsDescriptors.First.CodecClass;
+end;
+
+class procedure TBitmapCodecManager.RegisterBitmapCodecClass(const AFileExtension, ADescription: string; const ACanSave: Boolean;
+  const ACodecClass: TCustomBitmapCodecClass);
+var
+  LDescriptor: TCodecDescriptor;
+begin
+  if AFileExtension.Trim.IsEmpty then
+    raise EBitmapCodecManagerException.CreateRes(@SCodecFileExtensionCannotEmpty);
+
+  if ACodecClass = nil then
+    raise EBitmapCodecManagerException.CreateRes(@SCodecClassCannotBeNil);
+
+  if CodecExists(AFileExtension) then
+    raise EBitmapCodecManagerException.CreateResFmt(@SCodecAlreadyExists, [AFileExtension]);
+
+  LDescriptor.Extension := AFileExtension;
+  LDescriptor.Description := ADescription;
+  LDescriptor.CodecClass := ACodecClass;
+  LDescriptor.CanSave := ACanSave;
+  CodecsDescriptors.Add(LDescriptor);
+end;
+
+class procedure TBitmapCodecManager.UnregisterBitmapCodecClass(const AFileExtension: string);
 var
   I: Integer;
 begin
-  if FBitmapCodecClassDescriptors <> nil then
-    for I := FBitmapCodecClassDescriptors.Count - 1 downto 0 do
-      if SameText(Extension, FBitmapCodecClassDescriptors[I].Extension) then
-        FBitmapCodecClassDescriptors.Delete(I);
+  for I := CodecsDescriptors.Count - 1 downto 0 do
+    if SameText(AFileExtension, CodecsDescriptors[I].Extension) then
+    begin
+      CodecsDescriptors.Delete(I);
+      Exit;
+    end;
 end;
 
 class function TBitmapCodecManager.CodecExists(const AFileName: string): Boolean;
+var
+  CodecClass: TCustomBitmapCodecClass;
 begin
-  Result := FindBitmapCodecDescriptor(ExtractFileExt(AFileName),
-    TBitmapCodecDescriptorField.Extension).BitmapCodecClass <> nil;
+  Result := FindCodecClass(ExtractFileExt(AFileName), CodecClass);
+end;
+
+class function TBitmapCodecManager.GetCodecsDescriptors: TList<TCodecDescriptor>;
+begin
+  if FCodecsDescriptors = nil then
+    FCodecsDescriptors := TList<TCodecDescriptor>.Create;
+
+  Result := FCodecsDescriptors;
 end;
 
 class function TBitmapCodecManager.GetFileTypes: string;
 var
-  Descriptor: TBitmapCodecClassDescriptor;
+  Descriptor: TCodecDescriptor;
 begin
-  Result := '';
-  if FBitmapCodecClassDescriptors <> nil then
-    for Descriptor in FBitmapCodecClassDescriptors do
-      if Result = '' then
-        Result := '*' + Descriptor.Extension
-      else
-        Result := Result + ';' + '*' + Descriptor.Extension;
+  Result := string.Empty;
+  for Descriptor in CodecsDescriptors do
+    if Result.IsEmpty then
+      Result := '*' + Descriptor.Extension
+    else
+      Result := Result + ';' + '*' + Descriptor.Extension;
 end;
 
 class function TBitmapCodecManager.GetFilterString: string;
 var
-  Descriptor: TBitmapCodecClassDescriptor;
+  Descriptor: TCodecDescriptor;
+  CodecFilter: string;
+  FileTypes: string;
 begin
-  Result := '';
-  if FBitmapCodecClassDescriptors <> nil then
+  Result := string.Empty;
+  for Descriptor in CodecsDescriptors do
   begin
-    for Descriptor in FBitmapCodecClassDescriptors do
-      if Result = '' then
-        Result := Descriptor.Description + ' (' + '*' + Descriptor.Extension + ')|' + '*' + Descriptor.Extension
-      else
-        Result := Result + '|' + Descriptor.Description + ' (' + '*' + Descriptor.Extension + ')|' + '*' +
-          Descriptor.Extension;
-    // all files
-    Result := SVAllFiles + ' (' + GetFileTypes + ')|' + GetFileTypes + '|' + Result;
+    CodecFilter := Descriptor.ToFilterString;
+    if Result.IsEmpty then
+      Result := CodecFilter
+    else
+      Result := Result + '|' + CodecFilter;
   end;
+  // all files
+  FileTypes := GetFileTypes;
+  Result := SVAllFiles + ' (' + FileTypes + ')|' + FileTypes + '|' + Result;
 end;
 
 class function TBitmapCodecManager.GetImageSize(const AFileName: string): TPointF;
 var
   CodecClass: TCustomBitmapCodecClass;
-  DataType: String;
+  DataType: string;
 begin
   DataType := TImageTypeChecker.GetType(AFileName);
-  CodecClass := GuessCodecClass(DataType, TBitmapCodecDescriptorField.Extension);
+  CodecClass := GuessCodecClass(DataType);
   if CodecClass <> nil then
     Result := CodecClass.GetImageSize(AFileName)
   else
     Result := TPointF.Zero;
 end;
 
-class function TBitmapCodecManager.LoadFromFile(const AFileName: string; const Bitmap: TBitmapSurface;
-  const MaxSizeLimit: Cardinal = 0): Boolean;
+class function TBitmapCodecManager.LoadFromFile(const AFileName: string; const ABitmap: TBitmapSurface;
+  const AMaxSizeLimit: Cardinal = 0): Boolean;
 var
   CodecClass: TCustomBitmapCodecClass;
   Codec: TCustomBitmapCodec;
-  DataType: String;
+  DataType: string;
 begin
+  if ABitmap = nil then
+    raise EBitmapCodecManagerException.CreateResFmt(@SWrongParameter, ['ABitmap']);
+
   DataType := TImageTypeChecker.GetType(AFileName);
-  CodecClass := GuessCodecClass(DataType, TBitmapCodecDescriptorField.Extension);
+  CodecClass := GuessCodecClass(DataType);
   if CodecClass <> nil then
   begin
     Codec := CodecClass.Create;
     try
-      Result := Codec.LoadFromFile(AFileName, Bitmap, MaxSizeLimit);
+      Result := Codec.LoadFromFile(AFileName, ABitmap, AMaxSizeLimit);
     finally
       Codec.Free;
     end;
@@ -3070,19 +3174,22 @@ begin
 end;
 
 class function TBitmapCodecManager.LoadThumbnailFromFile(const AFileName: string; const AFitWidth, AFitHeight: Single;
-  const UseEmbedded: Boolean; const Bitmap: TBitmapSurface): Boolean;
+  const AUseEmbedded: Boolean; const ABitmap: TBitmapSurface): Boolean;
 var
   CodecClass: TCustomBitmapCodecClass;
   Codec: TCustomBitmapCodec;
-  DataType: String;
+  DataType: string;
 begin
+  if ABitmap = nil then
+    raise EBitmapCodecManagerException.CreateResFmt(@SWrongParameter, ['ABitmap']);
+
   DataType := TImageTypeChecker.GetType(AFileName);
-  CodecClass := GuessCodecClass(DataType, TBitmapCodecDescriptorField.Extension);
+  CodecClass := GuessCodecClass(DataType);
   if CodecClass <> nil then
   begin
     Codec := CodecClass.Create;
     try
-      Result := Codec.LoadThumbnailFromFile(AFileName, AFitWidth, AFitHeight, UseEmbedded, Bitmap);
+      Result := Codec.LoadThumbnailFromFile(AFileName, AFitWidth, AFitHeight, AUseEmbedded, ABitmap);
     finally
       Codec.Free;
     end;
@@ -3091,72 +3198,84 @@ begin
     Result := False;
 end;
 
-class function TBitmapCodecManager.LoadFromStream(const AStream: TStream; const Bitmap: TBitmapSurface;
-  const MaxSizeLimit: Cardinal = 0): Boolean;
+class function TBitmapCodecManager.LoadFromStream(const AStream: TStream; const ABitmap: TBitmapSurface;
+  const AMaxSizeLimit: Cardinal = 0): Boolean;
 var
   CodecClass: TCustomBitmapCodecClass;
   Codec: TCustomBitmapCodec;
-  DataType: String;
+  DataType: string;
 begin
+  if AStream = nil then
+    raise EBitmapCodecManagerException.CreateResFmt(@SWrongParameter, ['AStream']);
+  if ABitmap = nil then
+    raise EBitmapCodecManagerException.CreateResFmt(@SWrongParameter, ['ABitmap']);
+
   Result := False;
   DataType := TImageTypeChecker.GetType(AStream);
-  CodecClass := GuessCodecClass(DataType, TBitmapCodecDescriptorField.Extension);
+  CodecClass := GuessCodecClass(DataType);
   if CodecClass <> nil then
   begin
     Codec := CodecClass.Create;
     try
-      Result := Codec.LoadFromStream(AStream, Bitmap, MaxSizeLimit);
+      Result := Codec.LoadFromStream(AStream, ABitmap, AMaxSizeLimit);
     finally
       Codec.Free;
     end;
   end
 end;
 
-class function TBitmapCodecManager.SaveToFile(const AFileName: string; const Bitmap: TBitmapSurface;
-  const SaveParams: PBitmapCodecSaveParams = nil): Boolean;
-var
-  Codec: TCustomBitmapCodec;
-  Descriptor: TBitmapCodecClassDescriptor;
+class function TBitmapCodecManager.SameExtension(const ALeft, ARight: string): Boolean;
 begin
-  Result := False;
-  if FBitmapCodecClassDescriptors <> nil then
-    for Descriptor in FBitmapCodecClassDescriptors do
-      if SameText(ExtractFileExt(AFileName), Descriptor.Extension, loUserLocale) and Descriptor.CanSave then
-      begin
-        Codec := Descriptor.BitmapCodecClass.Create;
-        try
-          Result := Codec.SaveToFile(AFileName, Bitmap, SaveParams);
-        finally
-          Codec.Free;
-        end;
-      end;
+  Result := SameText(ALeft, ARight, loUserLocale) or SameText('.' + ALeft, ARight, loUserLocale);
 end;
 
-class function TBitmapCodecManager.SaveToStream(const AStream: TStream; const Bitmap: TBitmapSurface; const Extension: string;
-  SaveParams: PBitmapCodecSaveParams = nil): Boolean;
+class function TBitmapCodecManager.SaveToFile(const AFileName: string; const ABitmap: TBitmapSurface;
+  const ASaveParams: PBitmapCodecSaveParams = nil): Boolean;
 var
   Codec: TCustomBitmapCodec;
-  Descriptor: TBitmapCodecClassDescriptor;
+  CodecClass: TCustomBitmapCodecClass;
 begin
+  if ABitmap = nil then
+    raise EBitmapCodecManagerException.CreateResFmt(@SWrongParameter, ['ABitmap']);
+
   Result := False;
-  if FBitmapCodecClassDescriptors <> nil then
-    for Descriptor in FBitmapCodecClassDescriptors do
-      if (SameText(Extension, Descriptor.Extension, loUserLocale) or SameText('.' + Extension, Descriptor.Extension,
-        loUserLocale)) and Descriptor.CanSave then
-      begin
-        Codec := Descriptor.BitmapCodecClass.Create;
-        try
-          Result := Codec.SaveToStream(AStream, Bitmap, Descriptor.Extension, SaveParams);
-        finally
-          Codec.Free;
-        end;
-      end;
+  if FindWritableCodecClass(ExtractFileExt(AFileName), CodecClass) then
+  begin
+    Codec := CodecClass.Create;
+    try
+      Result := Codec.SaveToFile(AFileName, ABitmap, ASaveParams);
+    finally
+      Codec.Free;
+    end;
+  end;
+end;
+
+class function TBitmapCodecManager.SaveToStream(const AStream: TStream; const ABitmap: TBitmapSurface; const AExtension: string;
+  const ASaveParams: PBitmapCodecSaveParams = nil): Boolean;
+var
+  Codec: TCustomBitmapCodec;
+  CodecClass: TCustomBitmapCodecClass;
+begin
+  if AStream = nil then
+    raise EBitmapCodecManagerException.CreateResFmt(@SWrongParameter, ['AStream']);
+  if ABitmap = nil then
+    raise EBitmapCodecManagerException.CreateResFmt(@SWrongParameter, ['ABitmap']);
+
+  Result := False;
+  if FindWritableCodecClass(AExtension, CodecClass) then
+  begin
+    Codec := CodecClass.Create;
+    try
+      Result := Codec.SaveToStream(AStream, ABitmap, AExtension, ASaveParams);
+    finally
+      Codec.Free;
+    end;
+  end;
 end;
 
 { TBitmapData }
 
-constructor TBitmapData.Create(const AWidth, AHeight: Integer;
-  const APixelFormat: TPixelFormat);
+constructor TBitmapData.Create(const AWidth, AHeight: Integer; const APixelFormat: TPixelFormat);
 begin
   Self.FWidth := AWidth;
   Self.FHeight := AHeight;
@@ -3416,6 +3535,7 @@ end;
 procedure TBitmap.SetSize(const AWidth, AHeight: Integer);
 var
   SaveBitmapScale: Single;
+  SavePixelFormat: TPixelFormat;
 begin
   if (FImage.FWidth <> AWidth) or (FImage.FHeight <> AHeight) then
   begin
@@ -3427,10 +3547,15 @@ begin
     TMonitor.Enter(Self);
     try
       SaveBitmapScale := BitmapScale;
-      CreateNewReference;
-      FImage.FWidth := Max(0, AWidth);
-      FImage.FHeight := Max(0, AHeight);
-      FImage.FBitmapScale := SaveBitmapScale;
+      SavePixelFormat := FImage.PixelFormat;
+      try
+        CreateNewReference;
+        FImage.FWidth := Max(0, AWidth);
+        FImage.FHeight := Max(0, AHeight);
+      finally
+        FImage.FBitmapScale := SaveBitmapScale;
+        FImage.FPixelFormat := SavePixelFormat;
+      end;
       BitmapChanged;
     finally
       TMonitor.Exit(Self);
@@ -3715,6 +3840,8 @@ begin
     end
     else
     begin
+      if Source.PixelFormat <> TPixelFormat.None then
+        FImage.FPixelFormat := Source.PixelFormat;
       SetSize(Source.Width, Source.Height);
       if Map(TMapAccess.Write, BitmapData) then
       try
@@ -4003,33 +4130,36 @@ end;
 
 function TBitmap.Map(const Access: TMapAccess; var Data: TBitmapData): Boolean;
 begin
+  Result := False;
   TMonitor.Enter(Self);
+  try
+    if Access in [TMapAccess.Write, TMapAccess.ReadWrite] then
+      CopyToNewReference;
 
-  if Access in [TMapAccess.Write, TMapAccess.ReadWrite] then
-    CopyToNewReference;
-
-  if CanvasClass.MapBitmap(Handle, Access, Data) then
-  begin
-    Data.Create(Width, Height, PixelFormat);
-    FMapped := True;
-    FMapAccess := Access;
-    Result := True;
-  end
-  else
-    Result := False;
+    if CanvasClass.MapBitmap(Handle, Access, Data) then
+    begin
+      Data.Create(Width, Height, PixelFormat);
+      FMapped := True;
+      FMapAccess := Access;
+      Result := True;
+    end;
+  finally
+    if not Result then
+      TMonitor.Exit(Self);
+  end;
 end;
 
 procedure TBitmap.Unmap(var Data: TBitmapData);
 begin
   if FMapped then
-  begin
-    CanvasClass.UnmapBitmap(Handle, Data);
-    FMapped := False;
-    if FMapAccess in [TMapAccess.Write, TMapAccess.ReadWrite] then
-      BitmapChanged;
-
-    TMonitor.Exit(Self);
-  end;
+    try
+      CanvasClass.UnmapBitmap(Handle, Data);
+      FMapped := False;
+      if FMapAccess in [TMapAccess.Write, TMapAccess.ReadWrite] then
+        BitmapChanged;
+    finally
+      TMonitor.Exit(Self);
+    end;
 end;
 
 procedure TBitmap.LoadFromFile(const AFileName: string);
@@ -6465,6 +6595,16 @@ begin
   end;
 end;
 
+procedure TCanvas.FillRect(const ARect: TRectF; const AOpacity: Single; const ABrush: TBrush);
+begin
+  FillRect(ARect, 0, 0, [], AOpacity, ABrush);
+end;
+
+procedure TCanvas.FillRect(const ARect: TRectF; const AOpacity: Single);
+begin
+  FillRect(ARect, 0, 0, [], AOpacity);
+end;
+
 procedure TCanvas.DoFillRoundRect(const ARect: TRectF; const XRadius,
   YRadius: Single; const ACorners: TCorners; const AOpacity: Single;
   const ABrush: TBrush; const ACornerType: TCornerType = TCornerType.Round);
@@ -7251,9 +7391,17 @@ begin
   RemoveEnumElementAliases(TypeInfo(TCanvas.TMatrixMeaning));
 end;
 
+{ TBitmapCodecManager.TBitmapCodecClassDescriptor }
+
+function TBitmapCodecManager.TCodecDescriptor.ToFilterString: string;
+begin
+  Result := Format('%s (*%s)|*%s', [Description, Extension, Extension]);
+end;
+
 initialization
   RegisterAliases;
   RegisterFmxClasses([TBrushObject, TFontObject, TPathObject, TBitmapObject, TColorObject]);
 finalization
+  TFont.FontService := nil;
   UnregisterAliases;
 end.

@@ -2,14 +2,12 @@
 {                                                       }
 {              Delphi FireMonkey Platform               }
 {                                                       }
-{ Copyright(c) 2011-2018 Embarcadero Technologies, Inc. }
+{ Copyright(c) 2011-2020 Embarcadero Technologies, Inc. }
 {              All rights reserved                      }
 {                                                       }
 {*******************************************************}
 
 unit FMX.Platform.Win;
-
-{$IFDEF MSWINDOWS}
 
 (*$HPPEMIT '#if defined(WIN32) && defined(CreateWindow)'*)
 (*$HPPEMIT '  #define __SAVE_CREATEWINDOW CreateWindow'*)
@@ -23,6 +21,7 @@ unit FMX.Platform.Win;
 
 {$HPPEMIT NOUSINGNAMESPACE}
 {$R-}
+
 interface
 
 {$SCOPEDENUMS ON}
@@ -236,7 +235,10 @@ type
     procedure Clean;
   end;
 
-  TPlatformWin = class(TInterfacedObject, IFMXApplicationService, IFMXSystemFontService, IFMXTimerService,
+  TWinTimerService = class;
+  TImmManager = class;
+
+  TPlatformWin = class(TInterfacedObject, IFMXApplicationService, IFMXSystemFontService,
     IFMXWindowService, IFMXDragDropService, IFMXCursorService, IFMXMouseService,
     IFMXScreenService, IFMXLocaleService, IFMXTextService, IFMXContextService, IFMXCanvasService, IFMXDeviceService,
     IFMXWindowBorderService, IFMXSystemInformationService, IFMXLoggingService, IFMXFullScreenWindowService,
@@ -251,8 +253,6 @@ type
     FApplicationHWND: HWND;
     FIsOutApplicationHWND: Boolean;
     FFullScreenSupport: TDictionary<TCommonCustomForm, TFullScreenParams>;
-    FHandleCounter: TFmxHandle;
-    FTimerData: TList<TWin32TimerInfo>;
     FDiableUpdateState: Boolean;
     FThreadSyncHandle: HWND;
     FInPaintUpdateRects: TDictionary<TWindowHandle, TUpdateRects>;
@@ -263,11 +263,13 @@ type
     FMultiTouchManager: TMultiTouchManagerWin;
     FEnabledInteractiveGestures: TInteractiveGestures;
     FSaveStateStoragePath: string;
-    FPerformanceFrequency: Int64;
     FDragAndDropActive: Boolean;
     FKeyMapping: TKeyMapping;
     FAcceleratorKeyRegistry: IFMXAcceleratorKeyRegistryService;
     FIsPostQuitMessage: Boolean;
+    FTimerService: TWinTimerService;
+    { IMM }
+    FImmManagers: TDictionary<TCommonCustomForm, TImmManager>;
     procedure ThreadSync(var Msg: TMessage);
     procedure WakeMainThread(Sender: TObject);
     function CreateAppHandle: HWND;
@@ -311,6 +313,7 @@ type
     function PlatformKeyToVirtualKey(const PlatformKey: Word; var KeyKind: TKeyKind): Word;
     /// <summary>Obtains the platform key from a given virtual key.</summary>
     function VirtualKeyToPlatformKey(const VirtualKey: Word): Word;
+    function GetImmManager(const Index: TCommonCustomForm): TImmManager;
   public
     constructor Create;
     destructor Destroy; override;
@@ -330,10 +333,6 @@ type
     { IFMXSystemFontService }
     function GetDefaultFontFamilyName: string;
     function GetDefaultFontSize: Single;
-    { IFMXTimerService }
-    function CreateTimer(Interval: Integer; TimerFunc: TTimerProc): TFmxHandle;
-    function DestroyTimer(Timer: TFmxHandle): Boolean;
-    function GetTick: Double;
     { IFMXWindowService }
     function FindForm(const AHandle: TWindowHandle): TCommonCustomForm;
     function CreateWindow(const AForm: TCommonCustomForm): TWindowHandle;
@@ -376,7 +375,7 @@ type
     function GetScreenSize: TPointF;
     function GetScreenScale: Single;
     function GetScreenOrientation: TScreenOrientation;
-    procedure SetScreenOrientation(AOrientations: TScreenOrientations);
+    procedure SetSupportedScreenOrientations(const AOrientations: TScreenOrientations);
     { IFMXLocaleService }
     function GetCurrentLangID: string;
     function GetLocaleFirstDayOfWeek: string;
@@ -409,6 +408,29 @@ type
     { IFMXDefaultMetricsService }
     function SupportsDefaultSize(const AComponent: TComponentKind): Boolean;
     function GetDefaultSize(const AComponent: TComponentKind): TSize;
+
+    property ImmManager[const Index: TCommonCustomForm]: TImmManager read GetImmManager;
+    property TimerService: TWinTimerService read FTimerService;
+  end;
+
+  TWinTimerService = class(TInterfacedObject, IFMXTimerService)
+  private
+    FHandleCounter: TFmxHandle;
+    FTimers: TList<TWin32TimerInfo>;
+    FPerformanceFrequency: Int64;
+    FTerminating: Boolean;
+    procedure DestroyTimers;
+    { Handlers }
+    class procedure TimerCallback(window_hwnd: HWND; Msg: Longint; idEvent: UINT; dwTime: Longint); static; stdcall;
+    procedure ApplicationTerminatingHandler(const Sender: TObject; const Msg: System.Messaging.TMessage);
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    { IFMXTimerService }
+    function CreateTimer(AInterval: Integer; ATimerFunc: TTimerProc): TFmxHandle;
+    function DestroyTimer(Timer: TFmxHandle): Boolean;
+    function GetTick: Double;
   end;
 
   TMenuLooperWin = class
@@ -550,6 +572,77 @@ type
   end;
 
   TOpenForm = class(TCommonCustomForm);
+  TTextServiceWin = class;
+
+  TImmManager = class
+  private
+    [Weak] FForm: TCommonCustomForm;
+    function GetFormHandle: HWND;
+    procedure UpdateCompositionAttributes(const AContext: HIMC; const ATextService: TTextServiceWin);
+    procedure UpdateCompositionCursorPos(const AContext: HIMC; const ATextService: TTextServiceWin);
+    procedure ProcessImeParameters(const AContext: HIMC; const AParameters: LPARAM; const ATextService: TTextServiceWin);
+  protected
+    procedure WMStartComposition(var Message: TMessage); message WM_IME_STARTCOMPOSITION;
+    procedure WMComposition(var Message: TMessage); message WM_IME_COMPOSITION;
+    procedure WMEndComposition(var Message: TMessage); message WM_IME_ENDCOMPOSITION;
+    procedure WMSetContext(var Message: TMessage); message WM_IME_SETCONTEXT;
+    procedure WMNotify(var Message: TMessage); message WM_IME_NOTIFY;
+
+    function GetComposition(const AContext: HIMC): string;
+    function GetResultComposition(const AContext: HIMC): string;
+  public
+    constructor Create(const AForm: TCommonCustomForm);
+
+    function UpdateIMEWindowPosition: LRESULT;
+
+    property Form: TCommonCustomForm read FForm;
+    property FormHandle: HWND read GetFormHandle;
+  end;
+
+{ Text Service }
+
+  TTextServiceWin = class(TTextService)
+  private const
+    LCID_Korean_Default = (SUBLANG_KOREAN shl 10) + LANG_KOREAN;
+  private
+    FMarkedText: string;
+    FIsInputting: Boolean;
+    FMarkedTextCursorPosition: Integer;
+    procedure SetMarkedTextCursorPosition(const Value: Integer);
+    procedure RecreateImmContext(const AFormHandle: TWindowHandle);
+    procedure Reset;
+  protected
+    procedure MarkedTextPositionChanged; override;
+    procedure CaretPositionChanged; override;
+    function GetMarketTextAttributes: TArray<TMarkedTextAttribute>; override;
+  public
+    CompAttrBuf: array of Byte;
+
+    procedure InternalSetMarkedText(const AMarkedText: string); override;
+    function InternalGetMarkedText: string; override;
+    procedure InternalStartIMEInput;
+    procedure InternalEndIMEInput;
+
+    procedure RefreshImePosition; override;
+
+    function TargetClausePosition: TPoint; override;
+
+    procedure EnterControl(const AFormHandle: TWindowHandle); override;
+    procedure ExitControl(const AFormHandle: TWindowHandle); override;
+
+    { Deprecated }
+    procedure DrawSingleLine(const ACanvas: TCanvas; const ARect: TRectF; const AFirstVisibleChar: Integer;
+      const AFont: TFont; const AOpacity: Single; const AFlags: TFillTextFlags; const ATextAlign: TTextAlign;
+      const AVTextAlign: TTextAlign = TTextAlign.Center; const AWordWrap: Boolean = False); overload; override;
+    procedure DrawSingleLine(const ACanvas: TCanvas; const S: string; const ARect: TRectF; const Font: TFont;
+      const AOpacity: Single; const Flags: TFillTextFlags; const ATextAlign: TTextAlign;
+      const AVTextAlign: TTextAlign = TTextAlign.Center; const AWordWrap: Boolean = False); overload; override;
+
+    function HasMarkedText: Boolean; override;
+
+    /// <summary>Returns caret position in <c>MarkedText</c> bounds.</summary>
+    property MarkedTextCursorPosition: Integer read FMarkedTextCursorPosition write SetMarkedTextCursorPosition;
+  end;
 
 var
   VirtualKeyboardWin: TVirtualKeyboardWin;
@@ -570,7 +663,7 @@ begin
   PlatformWin := TPlatformWin.Create;
   TPlatformServices.Current.AddPlatformService(IFMXApplicationService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXSystemFontService, PlatformWin);
-  TPlatformServices.Current.AddPlatformService(IFMXTimerService, PlatformWin);
+  TPlatformServices.Current.AddPlatformService(IFMXTimerService, PlatformWin.TimerService);
   TPlatformServices.Current.AddPlatformService(IFMXWindowService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXDragDropService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXCursorService, PlatformWin);
@@ -625,6 +718,19 @@ begin
   TPlatformServices.Current.RemovePlatformService(IFMXFullScreenWindowService);
   TPlatformServices.Current.RemovePlatformService(IFMXVirtualKeyboardService);
   TPlatformServices.Current.RemovePlatformService(IFMXDefaultMetricsService);
+  TPlatformServices.Current.RemovePlatformService(IFMXLoggingService);
+  TPlatformServices.Current.RemovePlatformService(IFMXListingService);
+  TPlatformServices.Current.RemovePlatformService(IFMXSaveStateService);
+  TPlatformServices.Current.RemovePlatformService(IFMXGestureRecognizersService);
+  TPlatformServices.Current.RemovePlatformService(IFMXWindowsTouchService);
+  TPlatformServices.Current.RemovePlatformService(IFMXDefaultMetricsService);
+  TPlatformServices.Current.RemovePlatformService(IFMXKeyMappingService);
+end;
+
+procedure RaiseIfNil(const AObject: TObject; const AArgumentName: string);
+begin
+  if AObject = nil then
+    raise EArgumentException.CreateFmt(SParamIsNil, [AArgumentName]);
 end;
 
 { TPlatformWin }
@@ -636,10 +742,8 @@ begin
   WindowAtomString := Format('FIREMONKEY%.8X', [GetCurrentProcessID]);
   WindowAtom := GlobalAddAtomW(PChar(WindowAtomString));
 
-  FTimerData := TList<TWin32TimerInfo>.Create;
   FFullScreenSupport := TDictionary<TCommonCustomForm, TFullScreenParams>.Create;
   FInPaintUpdateRects := TDictionary<TWindowHandle, TUpdateRects>.Create;
-  FHandleCounter := 128; // Start counting handles at 128. All valid handles have lower nibble = 0;
   FThreadSyncHandle := AllocateHWnd(ThreadSync);
   FKeyMapping := TKeyMapping.Create;
   FAcceleratorKeyRegistry := TWinAcceleratorKeyRegistry.Create;
@@ -648,18 +752,20 @@ begin
   FCaptionChangedId := TMessageManager.DefaultManager.SubscribeToMessage(TMainCaptionChangedMessage,
     CaptionChangedHandler);
   FRunning := False;
-  if not QueryPerformanceFrequency(FPerformanceFrequency) then
-    FPerformanceFrequency := 0;
+
+  FImmManagers := TObjectDictionary<TCommonCustomForm, TImmManager>.Create([doOwnsValues]);
+  FTimerService := TWinTimerService.Create;
 end;
 
 destructor TPlatformWin.Destroy;
 begin
   TMessageManager.DefaultManager.Unsubscribe(TMainCaptionChangedMessage, FCaptionChangedId);
+  FreeAndNil(FImmManagers);
   FreeAndNil(Application);
   FInPaintUpdateRects.Free;
   FFullScreenSupport.Free;
-  FTimerData.Free;
   FAcceleratorKeyRegistry := nil;
+  FTimerService := nil;
   FKeyMapping.Free;
   GlobalDeleteAtom(WindowAtom);
 
@@ -697,27 +803,9 @@ begin
 end;
 
 procedure TPlatformWin.Terminate;
-var
-  D: TWin32TimerInfo;
-  L: TList<TFmxHandle>;
-  I: Integer;
 begin
   FRunning := False;
   FTerminating := True;
-  L := TList<TFmxHandle>.Create;
-  try
-    for D in FTimerData do
-      if D.TimerHandle <> 0 then
-        L.Add(D.TimerHandle);
-    for I := L.Count - 1 downto 0 do
-      try
-        DestroyTimer(L[I]);
-      except
-        Continue;
-      end;
-  finally
-    FreeAndNil(L);
-  end;
   FIsPostQuitMessage := True;
 
   FMultiTouchManager.Free; // release multitouch early so that it does not hold reference to services
@@ -839,179 +927,47 @@ begin
   PostMessage(FThreadSyncHandle, WM_NULL, 0, 0);
 end;
 
-{ Timer }
-
-procedure TimerCallBackProc(window_hwnd: HWND; Msg: Longint; idEvent: UINT; dwTime: Longint); stdcall;
-var
-  Index: Integer;
-begin
-  try
-    Index := PlatformWin.FTimerData.Count;
-    while (Index > 0) do
-    begin
-      Dec(Index);
-      if PlatformWin.FTimerData[Index].TimerID = idEvent then
-      begin
-        PlatformWin.FTimerData[Index].TimerFunc;
-        Break;
-      end;
-    end;
-  except
-    on E: Exception do
-    begin
-      if Application <> nil then
-        Application.HandleException(nil)
-      else
-        Raise;
-    end;
-  end;
-end;
-
-function TPlatformWin.CreateTimer(Interval: Integer; TimerFunc: TTimerProc): TFmxHandle;
-var
-  TimerInfo: TWin32TimerInfo;
-begin
-  Result := 0;
-  if not FTerminating and (Interval > 0) and Assigned(TimerFunc) then
-  begin
-    TimerInfo.TimerFunc := TimerFunc;
-    TimerInfo.TimerID := Winapi.Windows.SetTimer(0, 0, Interval, @TimerCallBackProc);
-    if TimerInfo.TimerID <> 0 then
-    begin
-{$IFDEF CPUX64}
-      TimerInfo.TimerHandle := TInterlocked.Add(Int64(FHandleCounter), 16);
-{$ENDIF}
-{$IFDEF CPUX86}
-      TimerInfo.TimerHandle := TInterlocked.Add(Integer(FHandleCounter), 16);
-{$ENDIF}
-      FTimerData.Add(TimerInfo);
-      Result := TimerInfo.TimerHandle;
-    end;
-  end;
-end;
-
-function TPlatformWin.DestroyTimer(Timer: TFmxHandle): Boolean;
-var
-  Index: Integer;
-begin
-  Result := False;
-  Index := FTimerData.Count;
-  while (Index > 0) do
-  begin
-    Dec(Index);
-    if FTimerData[Index].TimerHandle = Timer then
-    begin
-      Result := Winapi.Windows.KillTimer(0, FTimerData[Index].TimerID);
-      FTimerData.Delete(Index);
-    end;
-  end;
-end;
-
-function TPlatformWin.GetTick: Double;
-var
-  PerformanceCounter: Int64;
-begin
-  if FPerformanceFrequency <> 0 then
-  begin
-    QueryPerformanceCounter(PerformanceCounter);
-    Result := PerformanceCounter / FPerformanceFrequency;
-  end
-  else
-    Result := timeGetTime / 1000;
-end;
-
 { Text Service }
 
-type
-  TTextServiceWin = class(TTextService)
-  private const
-    LCID_Korean_Default = (SUBLANG_KOREAN shl 10) + LANG_KOREAN;
-  private
-    FCaretPosition: TPoint;
-    FText: string;
-    FMarkedText: string;
-    FImeMode: TImeMode;
-    FWorking: Boolean;
-  protected
-    function GetText: string; override;
-    procedure SetText(const Value: string); override;
-    function GetCaretPosition: TPoint; override;
-    procedure SetCaretPosition(const Value: TPoint); override;
-  public
-    CompAttrBuf: Array of Byte;
-    ImmCompCursorPos: Integer;
-    CompClauseBuf: Array of DWORD;
-
-    procedure InternalSetMarkedText(const AMarkedText: string); override;
-    function InternalGetMarkedText: string; override;
-    procedure InternalStartIMEInput;
-    procedure InternalBreakIMEInput;
-    procedure InternalEndIMEInput;
-
-    function CombinedText: string; override;
-    function TargetClausePosition: TPoint; override;
-
-    procedure EnterControl(const FormHandle: TWindowHandle); override;
-    procedure ExitControl(const FormHandle: TWindowHandle); override;
-
-    procedure DrawSingleLine(const Canvas: TCanvas; const ARect: TRectF; const FirstVisibleChar: Integer;
-      const Font: TFont; const AOpacity: Single; const Flags: TFillTextFlags; const ATextAlign: TTextAlign;
-      const AVTextAlign: TTextAlign = TTextAlign.Center; const AWordWrap: Boolean = False); overload; override;
-
-    procedure DrawSingleLine(const Canvas: TCanvas; const S: string; const ARect: TRectF; const Font: TFont;
-      const AOpacity: Single; const Flags: TFillTextFlags; const ATextAlign: TTextAlign;
-      const AVTextAlign: TTextAlign = TTextAlign.Center; const AWordWrap: Boolean = False); overload; override;
-
-    function HasMarkedText: Boolean; override;
-
-    function GetImeMode: TImeMode; override;
-    procedure SetImeMode(const Value: TImeMode); override;
-
-    { Windows }
-    constructor Create(const Owner: IControl; SupportMultiLine: Boolean); override;
-    destructor Destroy; override;
+function TTextServiceWin.GetMarketTextAttributes: TArray<TMarkedTextAttribute>;
+var
+  I: Integer;
+begin
+  if FMarkedText.IsEmpty or (Length(CompAttrBuf) = 0) then
+  begin
+    Result := [];
+    Exit;
   end;
 
-  { Text Service }
-
-constructor TTextServiceWin.Create(const Owner: IControl; SupportMultiLine: Boolean);
-begin
-  inherited;
+  SetLength(Result, FMarkedText.Length);
+  for I := 0 to FMarkedText.Length - 1 do
+    case CompAttrBuf[I] of
+      ATTR_INPUT:
+        Result[I] := TMarkedTextAttribute.Input;
+      ATTR_TARGET_CONVERTED:
+        Result[I] := TMarkedTextAttribute.TargetConverted;
+      ATTR_CONVERTED:
+        Result[I] := TMarkedTextAttribute.Converted;
+      ATTR_TARGET_NOTCONVERTED:
+        Result[I] := TMarkedTextAttribute.TargetNotConverted;
+      ATTR_INPUT_ERROR:
+        Result[I] := TMarkedTextAttribute.InputError;
+    end;
 end;
 
-destructor TTextServiceWin.Destroy;
+procedure TTextServiceWin.SetMarkedTextCursorPosition(const Value: Integer);
 begin
-  inherited;
-end;
-
-function TTextServiceWin.GetText: string;
-begin
-  Result := FText;
-end;
-
-procedure TTextServiceWin.SetText(const Value: string);
-begin
-  FText := Value;
-end;
-
-function TTextServiceWin.GetCaretPosition: TPoint;
-begin
-  Result := FCaretPosition;
-end;
-
-procedure TTextServiceWin.SetCaretPosition(const Value: TPoint);
-begin
-  FCaretPosition := Value;
+  FMarkedTextCursorPosition := Value;
 end;
 
 procedure TTextServiceWin.InternalSetMarkedText(const AMarkedText: string);
 var
   TextInput: ITextInput;
 begin
-  if FWorking and Supports(Owner, ITextInput, TextInput) then
+  if FIsInputting and Supports(Owner, ITextInput, TextInput) then
   begin
     FMarkedText := AMarkedText;
-    // Need update.
+    FMarkedTextCursorPosition := EnsureRange(FMarkedTextCursorPosition, 0, FMarkedText.Length);
     TextInput.IMEStateUpdated;
   end;
 end;
@@ -1020,11 +976,71 @@ procedure TTextServiceWin.InternalStartIMEInput;
 var
   TextInput: ITextInput;
 begin
-  if not FWorking and Supports(Owner, ITextInput, TextInput) then
+  if not FIsInputting and Supports(Owner, ITextInput, TextInput) then
   begin
-    FWorking := True;
+    FIsInputting := True;
+    Reset;
     TextInput.StartIMEInput;
   end;
+end;
+
+procedure TTextServiceWin.MarkedTextPositionChanged;
+begin
+  inherited;
+  if FIsInputting then
+    RefreshImePosition;
+end;
+
+procedure TTextServiceWin.RecreateImmContext(const AFormHandle: TWindowHandle);
+var
+  IMC: HIMC;
+  OldIMC: HIMC;
+  WindowHandle: HWND;
+begin
+  // Our styled controls doesn't have window handle, so form shares IMM context between all text styled controls.
+  // It leads to issues in IMM with keeping in memory previous IMM composition string, when user switches focus
+  // between out styled text input controls. Even if we rest composition string by ImmSetCompositionString,
+  // OS sends WM_IME_COMPOSITION notification message with the previous composition string and this behavior
+  // is different, when user uses different IMM provides. So the recreating context  guarantees blank IME context
+  // without previous states.
+
+  WindowHandle := WindowHandleToPlatform(AFormHandle).Wnd;
+  IMC := ImmCreateContext;
+  OldIMC := ImmAssociateContext(WindowHandle, IMC);
+  ImmDestroyContext(OldIMC);
+  ImmReleaseContext(WindowHandle, IMC);
+end;
+
+procedure TTextServiceWin.RefreshImePosition;
+
+  function FindForm: TCommonCustomForm;
+  var
+    TmpObject: TFmxObject;
+  begin
+    TmpObject := Owner.GetObject;
+    while (TmpObject <> nil) and not (TmpObject is TCommonCustomForm) do
+      TmpObject := TmpObject.Parent;
+
+    if TmpObject is TCommonCustomForm then
+      Result := TCommonCustomForm(TmpObject)
+    else
+      Result := nil;
+  end;
+
+var
+  Form: TCommonCustomForm;
+begin
+  inherited;
+  Form := FindForm;
+  if Form <> nil then
+    PlatformWin.ImmManager[Form].UpdateIMEWindowPosition;
+end;
+
+procedure TTextServiceWin.Reset;
+begin
+  CompAttrBuf := nil;
+  FMarkedText := string.Empty;
+  FMarkedTextCursorPosition := 0;
 end;
 
 function TTextServiceWin.InternalGetMarkedText: string;
@@ -1032,280 +1048,177 @@ begin
   Result := FMarkedText;
 end;
 
-procedure TTextServiceWin.InternalBreakIMEInput;
-var
-  TextInput: ITextInput;
+procedure TTextServiceWin.CaretPositionChanged;
 begin
-  if FWorking and Supports(Owner, ITextInput, TextInput) then
-  begin
-    FMarkedText := string.Empty;
-    ImmCompCursorPos := 0;
-    TextInput.IMEStateUpdated;
-    FWorking := False;
-  end;
-end;
-
-function TTextServiceWin.CombinedText: string;
-begin
-  if not FMarkedText.IsEmpty then
-    Result := FText.Substring(0, FCaretPosition.X) + FMarkedText + FText.Substring(FCaretPosition.X, MaxInt)
-  else
-    Result := FText;
+  inherited;
+  if FIsInputting then
+    RefreshImePosition;
 end;
 
 function TTextServiceWin.TargetClausePosition: TPoint;
 begin
-  Result := FCaretPosition;
-  Result.X := Result.X + ImmCompCursorPos;
+  Result := CaretPosition;
+  Result.X := Result.X + MarkedTextCursorPosition;
 end;
 
 procedure TTextServiceWin.InternalEndIMEInput;
 var
   TextInput: ITextInput;
 begin
-  if FWorking and Supports(Owner, ITextInput, TextInput) then
+  if FIsInputting and Supports(Owner, ITextInput, TextInput) then
   begin
+    FIsInputting := False;
+    FMarkedTextCursorPosition := 0;
     TextInput.EndIMEInput;
     FMarkedText := string.Empty;
-    ImmCompCursorPos := 0;
-    FWorking := False;
   end;
 end;
 
-procedure ProcessImeParameters(const Context: HIMC; const Parameters: LPARAM; const TextService: TTextServiceWin);
+procedure TTextServiceWin.EnterControl(const AFormHandle: TWindowHandle);
 var
-  Result: Integer;
-  CompositionString: string;
-begin
-  if (Parameters and GCS_CURSORPOS) <> 0 then
-  begin
-    Result := ImmGetCompositionString(Context, GCS_CURSORPOS, nil, 0);
-    if (GetLastError = 0) then
-      TextService.ImmCompCursorPos := Result;
-  end;
-
-  Result := ImmGetCompositionString(Context, GCS_COMPSTR, nil, 0);
-  SetLength(CompositionString, Result div SizeOf(Char));
-  ImmGetCompositionString(Context, GCS_COMPSTR, PChar(CompositionString), Result);
-
-  if not CompositionString.IsEmpty or TextService.HasMarkedText then
-  begin
-    if ((Parameters and GCS_CURSORPOS) = 0) and ((GetKeyboardLayout(0) and $FFF) = TTextServiceWin.LCID_Korean_Default)
-    then // True for Special support for Korean IME
-      TextService.ImmCompCursorPos := Max(1, TextService.FMarkedText.Length);
-
-    TextService.InternalStartIMEInput;
-    TextService.InternalSetMarkedText(CompositionString);
-
-    if (Parameters and GCS_COMPATTR) <> 0 then
-    begin
-      Result := ImmGetCompositionString(Context, GCS_COMPATTR, nil, 0);
-      if GetLastError = 0 then
-      begin
-        SetLength(TextService.CompAttrBuf, Result);
-        ImmGetCompositionString(Context, GCS_COMPATTR, @(TextService.CompAttrBuf[0]), Result);
-      end;
-    end;
-
-    if (Parameters and GCS_COMPCLAUSE) <> 0 then
-    begin
-      Result := ImmGetCompositionString(Context, GCS_COMPCLAUSE, nil, 0);
-      if GetLastError = 0 then
-      begin
-        SetLength(TextService.CompClauseBuf, Result div SizeOf(DWORD));
-        ImmGetCompositionString(Context, GCS_COMPCLAUSE, @(TextService.CompClauseBuf[0]), Result);
-      end;
-    end;
-  end;
-end;
-
-procedure TTextServiceWin.EnterControl(const FormHandle: TWindowHandle);
-var
-  Form: TCommonCustomForm;
-  IMC: HIMC;
   WindowHandle: HWND;
-  TextInput: ITextInput;
 begin
-  WindowHandle := WindowHandleToPlatform(FormHandle).Wnd;
+  RaiseIfNil(AFormHandle, 'AFormHandle');
+
+  WindowHandle := WindowHandleToPlatform(AFormHandle).Wnd;
   if TPlatformServices.Current.SupportsPlatformService(IFMXWBService) then
     SetFocus(WindowHandle);
-  IMC := 0;
-  if FImeMode <> TImeMode.imDisable then
-  begin
-    IMC := ImmGetContext(WindowHandle);
-    if IMC = 0 then
-    begin
-      ImmAssociateContextEx(WindowHandle, 0, IACE_DEFAULT);
-      ImmReleaseContext(WindowHandle, IMC);
-    end;
-  end;
-  TImeModeHelper.SetIme(WindowHandle, FImeMode);
 
-  Form := WindowHandleToPlatform(FormHandle).Form;
-  if (IMC <> 0) and (Form <> nil) and (Form.Focused <> nil) and Supports(Form.Focused, ITextInput, TextInput) then
-  begin
-    if ImmGetCompositionString(IMC, GCS_COMPSTR, nil, 0) > 0 then
-      ProcessImeParameters(IMC, $FFFF, TTextServiceWin(TextInput.GetTextService));
-  end;
+  if ImeMode <> TImeMode.imDisable then
+    RecreateImmContext(AFormHandle);
+  TImeModeHelper.SetIme(WindowHandle, ImeMode);
 end;
 
-procedure TTextServiceWin.ExitControl(const FormHandle: TWindowHandle);
+procedure TTextServiceWin.ExitControl(const AFormHandle: TWindowHandle);
 begin
-  InternalBreakIMEInput;
-  TImeModeHelper.ResetIme(WindowHandleToPlatform(FormHandle).Wnd, FImeMode);
+  RaiseIfNil(AFormHandle, 'AFormHandle');
+
+  if ImeMode <> TImeMode.imDisable then
+    RecreateImmContext(AFormHandle);
+
+  Reset;
+  TImeModeHelper.ResetIme(WindowHandleToPlatform(AFormHandle).Wnd, ImeMode);
 end;
 
-procedure TTextServiceWin.DrawSingleLine(const Canvas: TCanvas; const ARect: TRectF; const FirstVisibleChar: Integer;
-  const Font: TFont; const AOpacity: Single; const Flags: TFillTextFlags; const ATextAlign: TTextAlign;
+procedure TTextServiceWin.DrawSingleLine(const ACanvas: TCanvas; const ARect: TRectF; const AFirstVisibleChar: Integer;
+  const AFont: TFont; const AOpacity: Single; const AFlags: TFillTextFlags; const ATextAlign: TTextAlign;
   const AVTextAlign: TTextAlign = TTextAlign.Center; const AWordWrap: Boolean = False);
 var
-  I, J: Integer;
   S: string;
-  Layout: TTextLayout;
-  Region: TRegion;
 begin
-  Layout := TTextLayoutManager.TextLayoutByCanvas(Canvas.ClassType).Create;
-  try
-    Layout.BeginUpdate;
-    Layout.TopLeft := ARect.TopLeft;
-    Layout.MaxSize := PointF(ARect.Width, ARect.Height);
-    Layout.WordWrap := AWordWrap;
-    Layout.HorizontalAlign := ATextAlign;
-    Layout.VerticalAlign := AVTextAlign;
-    Layout.Font := Font;
-    Layout.Color := Canvas.Fill.Color;
-    Layout.Opacity := AOpacity;
-    Layout.RightToLeft := TFillTextFlag.RightToLeft in Flags;
-    S := CombinedText;
-    Layout.Text := S.Substring(FirstVisibleChar - 1, S.Length - FirstVisibleChar + 1);
-    Layout.EndUpdate;
-    Layout.RenderLayout(Canvas);
-
-    if (FMarkedText.Length > 0) and (Length(CompAttrBuf) > 0) then
-    begin
-      Canvas.Stroke.Assign(Canvas.Fill);
-      Canvas.Stroke.Thickness := 2;
-      Canvas.Stroke.Dash := TStrokeDash.Solid;
-      try
-        for I := 1 to FMarkedText.Length do
-        begin
-          case CompAttrBuf[I - 1] of
-            ATTR_INPUT:
-              begin
-                Canvas.Stroke.Thickness := 1;
-                Canvas.Stroke.Dash := TStrokeDash.Dash
-              end;
-            ATTR_TARGET_CONVERTED:
-              begin
-                Canvas.Stroke.Thickness := 2;
-                Canvas.Stroke.Dash := TStrokeDash.Solid;
-              end;
-            ATTR_CONVERTED:
-              begin
-                Canvas.Stroke.Thickness := 1;
-                Canvas.Stroke.Dash := TStrokeDash.Solid;
-              end;
-            ATTR_TARGET_NOTCONVERTED:
-              begin
-                Canvas.Stroke.Thickness := 4;
-                Canvas.Stroke.Dash := TStrokeDash.Solid;
-              end;
-            ATTR_INPUT_ERROR:
-              begin
-                Canvas.Stroke.Thickness := 1;
-                Canvas.Stroke.Dash := TStrokeDash.Dot
-              end;
-          end;
-
-          Region := Layout.RegionForRange(TTextRange.Create(Max(0, CaretPosition.X + I - FirstVisibleChar), 1));
-          for J := Low(Region) to High(Region) do
-            Canvas.DrawLine(
-              PointF(Region[J].Left, Region[J].Bottom),
-              PointF(Region[J].Right, Region[J].Bottom),
-              AOpacity, Canvas.Stroke);
-        end;
-      finally
-        Canvas.Stroke.Thickness := 1;
-        Canvas.Stroke.Dash := TStrokeDash.Solid;
-      end;
-    end;
-  finally
-    FreeAndNil(Layout);
-  end;
+  S := CombinedText;
+  S := S.Substring(AFirstVisibleChar - 1, S.Length - AFirstVisibleChar + 1);
+  DrawSingleLine(ACanvas, S, ARect, AFont, AOpacity, AFlags, ATextAlign, AVTextAlign, AWordWrap);
 end;
 
-procedure TTextServiceWin.DrawSingleLine(const Canvas: TCanvas; const S: string; const ARect: TRectF; const Font: TFont;
+procedure TTextServiceWin.DrawSingleLine(const ACanvas: TCanvas; const S: string; const ARect: TRectF; const Font: TFont;
   const AOpacity: Single; const Flags: TFillTextFlags; const ATextAlign: TTextAlign;
   const AVTextAlign: TTextAlign = TTextAlign.Center; const AWordWrap: Boolean = False);
+
+  procedure UnderlineRegion(const ARegions: TRegion);
+  var
+    I: Integer;
+    Region: TRectF;
+    HalfThickness: Single;
+    StartPoint, EndPoint: TPointF;
+  begin
+    HalfThickness := ACanvas.Stroke.Thickness / 2;
+    for I := Low(ARegions) to High(ARegions) do
+    begin
+      Region := ACanvas.AlignToPixel(ARegions[I]);
+
+      StartPoint := TPointF.Create(Region.Left, Region.Bottom);
+      StartPoint.Offset(-HalfThickness, -HalfThickness);
+      EndPoint := Region.BottomRight;
+      EndPoint.Offset(-HalfThickness, -HalfThickness);
+      ACanvas.DrawLine(StartPoint, EndPoint, AOpacity);
+    end;
+  end;
+
+  procedure UnderlineMarkedText(const ALayout: TTextLayout; const AAttributes: TArray<TMarkedTextAttribute>);
+  var
+    SavedState: TCanvasSaveState;
+    Region: TRegion;
+    TextRange: TTextRange;
+    PositionInLine: Integer;
+    I: Integer;
+  begin
+    SavedState := ACanvas.SaveState;
+    try
+      ACanvas.Stroke.Assign(ACanvas.Fill);
+      ACanvas.Stroke.Thickness := 2;
+      ACanvas.Stroke.Dash := TStrokeDash.Solid;
+      for I := 0 to FMarkedText.Length - 1 do
+      begin
+        case AAttributes[I] of
+          TMarkedTextAttribute.Input:
+            begin
+              ACanvas.Stroke.Thickness := 1;
+              ACanvas.Stroke.Dash := TStrokeDash.Dash
+            end;
+          TMarkedTextAttribute.TargetConverted:
+            begin
+              ACanvas.Stroke.Thickness := 2;
+              ACanvas.Stroke.Dash := TStrokeDash.Solid;
+            end;
+          TMarkedTextAttribute.Converted:
+            begin
+              ACanvas.Stroke.Thickness := 1;
+              ACanvas.Stroke.Dash := TStrokeDash.Solid;
+            end;
+          TMarkedTextAttribute.TargetNotConverted:
+            begin
+              ACanvas.Stroke.Thickness := 4;
+              ACanvas.Stroke.Dash := TStrokeDash.Solid;
+            end;
+          TMarkedTextAttribute.InputError:
+            begin
+              ACanvas.Stroke.Thickness := 1;
+              ACanvas.Stroke.Dash := TStrokeDash.Dot
+            end;
+        end;
+
+        // CaretPosition -> MarkedTextPosition
+        if CaretPosition.X > S.Length - FMarkedText.Length then
+          PositionInLine := S.Length - FMarkedText.Length
+        else
+          PositionInLine := CaretPosition.X;
+        TextRange := TTextRange.Create(PositionInLine + I, 1);
+
+        Region := ALayout.RegionForRange(TextRange);
+        UnderlineRegion(Region);
+      end;
+    finally
+      ACanvas.RestoreState(SavedState);
+    end;
+  end;
+
 var
-  I, J: Integer;
   Layout: TTextLayout;
-  Region: TRegion;
+  Attributes: TArray<TMarkedTextAttribute>;
 begin
-  Layout := TTextLayoutManager.TextLayoutByCanvas(Canvas.ClassType).Create;
+  Layout := TTextLayoutManager.TextLayoutByCanvas(ACanvas.ClassType).Create;
   try
     Layout.BeginUpdate;
-    Layout.TopLeft := ARect.TopLeft;
-    Layout.MaxSize := PointF(ARect.Width, ARect.Height);
-    Layout.WordWrap := AWordWrap;
-    Layout.HorizontalAlign := ATextAlign;
-    Layout.VerticalAlign := AVTextAlign;
-    Layout.Font := Font;
-    Layout.Color := Canvas.Fill.Color;
-    Layout.Opacity := AOpacity;
-    Layout.RightToLeft := TFillTextFlag.RightToLeft in Flags;
-    Layout.Text := S;
-    Layout.EndUpdate;
-    Layout.RenderLayout(Canvas);
-
-    if (FMarkedText.Length > 0) and (Length(CompAttrBuf) > 0) then
-    begin
-      Canvas.Stroke.Assign(Canvas.Fill);
-      Canvas.Stroke.Thickness := 2;
-      Canvas.Stroke.Dash := TStrokeDash.Solid;
-      try
-        for I := 1 to FMarkedText.Length do
-        begin
-          case CompAttrBuf[I - 1] of
-            ATTR_INPUT:
-              begin
-                Canvas.Stroke.Thickness := 1;
-                Canvas.Stroke.Dash := TStrokeDash.Dash
-              end;
-            ATTR_TARGET_CONVERTED:
-              begin
-                Canvas.Stroke.Thickness := 2;
-                Canvas.Stroke.Dash := TStrokeDash.Solid;
-              end;
-            ATTR_CONVERTED:
-              begin
-                Canvas.Stroke.Thickness := 1;
-                Canvas.Stroke.Dash := TStrokeDash.Solid;
-              end;
-            ATTR_TARGET_NOTCONVERTED:
-              begin
-                Canvas.Stroke.Thickness := 4;
-                Canvas.Stroke.Dash := TStrokeDash.Solid;
-              end;
-            ATTR_INPUT_ERROR:
-              begin
-                Canvas.Stroke.Thickness := 1;
-                Canvas.Stroke.Dash := TStrokeDash.Dot
-              end;
-          end;
-
-          Region := Layout.RegionForRange(TTextRange.Create(Max(0, CaretPosition.X + I), 1));
-          for J := Low(Region) to High(Region) do
-            Canvas.DrawLine(
-              PointF(Region[J].Left, Region[J].Bottom),
-              PointF(Region[J].Right, Region[J].Bottom),
-              AOpacity, Canvas.Stroke);
-        end;
-      finally
-        Canvas.Stroke.Thickness := 1;
-        Canvas.Stroke.Dash := TStrokeDash.Solid;
-      end;
+    try
+      Layout.TopLeft := ARect.TopLeft;
+      Layout.MaxSize := TPointF.Create(ARect.Width, ARect.Height);
+      Layout.WordWrap := AWordWrap;
+      Layout.HorizontalAlign := ATextAlign;
+      Layout.VerticalAlign := AVTextAlign;
+      Layout.Font := Font;
+      Layout.Color := ACanvas.Fill.Color;
+      Layout.Opacity := AOpacity;
+      Layout.RightToLeft := TFillTextFlag.RightToLeft in Flags;
+      Layout.Text := S;
+    finally
+      Layout.EndUpdate;
     end;
+    Layout.RenderLayout(ACanvas);
+
+    Attributes := GetMarketTextAttributes;
+    if not FMarkedText.IsEmpty and (Length(Attributes) > 0) then
+      UnderlineMarkedText(Layout, Attributes);
   finally
     FreeAndNil(Layout);
   end;
@@ -1314,16 +1227,6 @@ end;
 function TTextServiceWin.HasMarkedText: Boolean;
 begin
   Result := not FMarkedText.IsEmpty;
-end;
-
-function TTextServiceWin.GetImeMode: TImeMode;
-begin
-  Result := FImeMode;
-end;
-
-procedure TTextServiceWin.SetImeMode(const Value: TImeMode);
-begin
-  FImeMode := Value;
 end;
 
 function TPlatformWin.GetTextServiceClass: TTextServiceClass;
@@ -1622,9 +1525,15 @@ end;
 procedure TWinWindowHandle.FreeBuffer;
 begin
   if FBufferHandle <> 0 then
+  begin
     DeleteDC(FBufferHandle);
+    FBufferHandle := 0;
+  end;
   if FBufferBitmap <> 0 then
+  begin
     DeleteObject(FBufferBitmap);
+    FBufferBitmap := 0;
+  end;
 end;
 
 function TWinWindowHandle.GetScale: Single;
@@ -1780,97 +1689,6 @@ begin
   end
   else
     Result := DefWindowProc(HWND, uMsg, wParam, LPARAM);
-end;
-
-function WMImeStartComposition(const AForm: TCommonCustomForm; HWND: HWND; uMsg: UINT; wParam: wParam;
-  LPARAM: LPARAM): LRESULT;
-var
-  TSObj: ITextInput;
-begin
-  if (AForm.Focused <> nil) and Supports(AForm.Focused, ITextInput, TSObj) then
-    TTextServiceWin(TSObj.GetTextService).InternalStartIMEInput;
-  if System.SysUtils.Win32MajorVersion >= 6 then
-    Result := DefWindowProc(HWND, uMsg, wParam, LPARAM)
-  else
-    Result := 0;
-end;
-
-function WMImeComposition(const AForm: TCommonCustomForm; uMsg: UINT; wParam: wParam; LPARAM: LPARAM): LRESULT;
-var
-  IMC: HIMC;
-  S: string;
-  Size: Integer;
-  Wnd: HWND;
-  TextInput: ITextInput;
-  TextService: TTextServiceWin;
-  I: Integer;
-  Key: Word;
-  Ch: Char;
-  Processed: Boolean;
-begin
-  Processed := False;
-  Result := 0;
-
-  Wnd := FormToHWND(AForm);
-  if (LPARAM and GCS_RESULTSTR) <> 0 then
-  begin
-    Processed := True;
-    IMC := ImmGetContext(Wnd);
-    if IMC <> 0 then
-    begin
-      try
-        if (AForm.Focused <> nil) and Supports(AForm.Focused, ITextInput, TextInput) then
-        begin
-          if not TTextServiceWin(TextInput.GetTextService).FWorking then
-            Exit;
-          TTextServiceWin(TextInput.GetTextService).InternalBreakIMEInput;
-        end;
-        Size := ImmGetCompositionString(IMC, GCS_RESULTSTR, nil, 0);
-        SetLength(S, Size div SizeOf(Char));
-        ImmGetCompositionString(IMC, GCS_RESULTSTR, PChar(S), Size);
-      finally
-        ImmReleaseContext(Wnd, IMC);
-      end;
-      for I := 0 to S.Length - 1 do
-      begin
-        Key := 0;
-        Ch := S.Chars[I];
-        AForm.KeyDown(Key, Ch, []);
-        AForm.KeyUp(Key, Ch, []);
-      end;
-    end;
-    if (GetKeyboardLayout(0) and $FFF) = TTextServiceWin.LCID_Korean_Default then // Special support for Korean IME
-      SendMessage(Wnd, WM_IME_STARTCOMPOSITION, 0, 0);
-  end;
-
-  if (LPARAM and GCS_COMPSTR) <> 0 then
-  begin
-    Processed := True;
-    IMC := ImmGetContext(Wnd);
-    if IMC <> 0 then
-    begin
-      try
-        if (AForm.Focused <> nil) and Supports(AForm.Focused, ITextInput, TextInput) then
-          ProcessImeParameters(IMC, LPARAM, TTextServiceWin(TextInput.GetTextService));
-      finally
-        ImmReleaseContext(Wnd, IMC);
-      end;
-    end;
-  end;
-
-  if not Processed then
-  begin
-    // Pressed ESC
-    if (AForm.Focused <> nil) and Supports(AForm.Focused, ITextInput, TextInput) then
-    begin
-      TextService := TTextServiceWin(TextInput.GetTextService);
-      // For Chinese Microsoft engkoo - do not call break
-      if (GetKeyboardLayout(0) and $FFFF) <> $0804 then
-        if TextService.FWorking then
-          TextService.InternalBreakIMEInput;
-    end;
-    Result := DefWindowProc(Wnd, uMsg, wParam, LPARAM);
-  end;
 end;
 
 // When the WM_GESTURENOTIFY message is received, use SetGestureConfig to specify the gestures to receive.
@@ -2115,68 +1933,6 @@ begin
     end;
 end;
 
-function SetIMEWndPosition(const AForm: TCommonCustomForm; uMsg: UINT; wParam: wParam; LPARAM: LPARAM): LRESULT;
-
-  function DpToPx(const APoint: TPointF): TPoint; overload;
-  var
-    FormScale: Single;
-  begin
-    FormScale := AForm.Handle.Scale;
-    Result := TPointF.Create(FormScale * APoint.X, FormScale * APoint.Y).Round;
-  end;
-
-  function DpToPx(const ARect: TRectF): TRect; overload;
-  begin
-    Result.TopLeft := DpToPx(ARect.TopLeft);
-    Result.BottomRight := DpToPx(ARect.BottomRight);
-  end;
-
-  function DefineControlRect(const AFocusedControl: IControl; const ATextInput: ITextInput): TRectF;
-  var
-    SelectionRect: TRectF;
-  begin
-    SelectionRect := ATextInput.GetSelectionRect;
-    Result.TopLeft :=  AForm.ScreenToClient(AFocusedControl.LocalToScreen(SelectionRect.TopLeft));
-    Result.BottomRight :=  AForm.ScreenToClient(AFocusedControl.LocalToScreen(SelectionRect.BottomRight));
-  end;
-
-var
-  IMC: HIMC;
-  Wnd: HWND;
-  Candidate: TCandidateForm;
-  TextInput: ITextInput;
-begin
-  Result := 0;
-  Wnd := FormToHWND(AForm);
-  IMC := ImmGetContext(Wnd);
-  if IMC = 0 then
-    Exit;
-
-  try
-    if (AForm.Focused <> nil) and Supports(AForm.Focused, ITextInput, TextInput) then
-    begin
-      Candidate.dwIndex := 0;
-      Candidate.dwStyle := CFS_POINT;
-      Candidate.ptCurrentPos := DpToPx(TextInput.GetTargetClausePointF);
-      Result := LRESULT(ImmSetCandidateWindow(IMC, @Candidate));
-
-      Candidate.dwStyle := CFS_EXCLUDE;
-      Candidate.rcArea := DpToPx(DefineControlRect(AForm.Focused, TextInput));
-      ImmSetCandidateWindow(IMC, @Candidate);
-    end;
-  finally
-    ImmReleaseContext(Wnd, IMC);
-  end;
-end;
-
-function WMImeNotify(const AForm: TCommonCustomForm; HWND: HWND; uMsg: UINT; wParam: wParam; LPARAM: LPARAM): LRESULT;
-begin
-  if wParam = IMN_OPENCANDIDATE then
-    Result := SetIMEWndPosition(AForm, uMsg, wParam, LPARAM)
-  else
-    Result := DefWindowProc(HWND, uMsg, wParam, LPARAM);
-end;
-
 //
 
 type
@@ -2194,10 +1950,9 @@ var
 const
   ImpossibleMousePosition: TPoint = (X: Low(FixedInt); Y: Low(FixedInt));
 
-
-
 function WndProc(hwnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
-var  UpdateRects: array of TRectF;
+var
+  UpdateRects: array of TRectF;
   LForm: TCommonCustomForm;
   Wnd: Winapi.Windows.HWND;
   WindowBorder: TWindowBorderWin;
@@ -2316,7 +2071,6 @@ var
   Message: TMessage;
   Shift: TShiftState;
   Placement: TWindowPlacement;
-  TSObj: ITextInput;
   Msg: tagMsg;
   PaintControl: IPaintControl;
   Obj: IControl;
@@ -2336,11 +2090,8 @@ begin
   Message.LParam := lParam;
   Message.Result := 0;
   // Check to see if this is a design message
-  if (LForm <> nil) and (LForm.Designer <> nil) then
-  begin
-    if LForm.Designer.IsDesignMsg(LForm, Message) then
-      Exit;
-  end;
+  if (LForm <> nil) and (LForm.Designer <> nil) and LForm.Designer.IsDesignMsg(LForm, Message) then
+    Exit;
 
   if LForm <> nil then
   begin
@@ -2761,52 +2512,15 @@ begin
               // Result := SetIMECompositionWndPosition(LForm, uMsg, wParam, lParam);
               // OnInputLangChange();
             end;
-          WM_IME_SETCONTEXT:
-            begin
-              // Request the candidate windows only
-              Result := DefWindowProc(hwnd, uMsg, wParam, lParam and ISC_SHOWUIALLCANDIDATEWINDOW);
-            end;
-          WM_IME_STARTCOMPOSITION:
-            begin
-              // InitCompStringData();
-              // *trapped = true;
-              SetIMEWndPosition(LForm, uMsg, wParam, lParam);
-              Result := WMImeStartComposition(LForm, hwnd, uMsg, wParam, lParam);
-            end;
-          WM_IME_COMPOSITION:
-            begin
-              SetIMEWndPosition(LForm, uMsg, wParam, lParam);
-              Result := WMImeComposition(LForm, uMsg, wParam, lParam);
-            end;
+          WM_IME_SETCONTEXT,
+          WM_IME_STARTCOMPOSITION,
+          WM_IME_COMPOSITION,
+          WM_IME_NOTIFY,
           WM_IME_ENDCOMPOSITION:
             begin
-              SetIMEWndPosition(LForm, uMsg, wParam, lParam);
-              if (LForm.Focused <> nil) and Supports(LForm.Focused, ITextInput, TSObj) then
-              begin
-                if ((GetKeyboardLayout(0) and $FFFF) = TTextServiceWin.LCID_Korean_Default) and not TTextServiceWin(TSObj.GetTextService).FWorking
-                then // Special support for Korean IME
-                begin
-                  if not TTextServiceWin(TSObj.GetTextService).FWorking then
-                    SendMessage(Wnd, WM_IME_STARTCOMPOSITION, 0, 0);
-                end
-                else
-                begin
-                  // For Chinese Microsoft engkoo - pressed ESC, need to interrupt input
-                  if ((GetKeyboardLayout(0) and $FFFF) = $0804) and TTextServiceWin(TSObj.GetTextService).FWorking then
-                    TTextServiceWin(TSObj.GetTextService).InternalBreakIMEInput;
-                  TTextServiceWin(TSObj.GetTextService).InternalEndIMEInput;
-                end;
-              end;
-            end;
-          WM_IME_NOTIFY:
-            begin
-              Result := WMImeNotify(LForm, hwnd, uMsg, wParam, lParam);
-            end;
-          // WM_IME_SETCONTEXT:
-          // begin
-                                              
-          // end;
-          { }
+              PlatformWin.ImmManager[LForm].Dispatch(Message);
+              Result := Message.Result;
+            end;              
           WM_COMMAND:
             begin
               MenuServiceWin.Dispatch(Message);
@@ -2974,8 +2688,8 @@ var
   end;
 
 begin
-  if AForm = nil then
-    raise EArgumentException.Create(SArgumentNil);
+  RaiseIfNil(AForm, 'AForm');
+
   LDropTarget := nil;
   LForm := AForm;
   Style := WS_CLIPSIBLINGS or WS_CLIPCHILDREN;
@@ -3097,6 +2811,8 @@ begin
     raise;
   end;
   TWinWindowHandle(Result).FWinDropTarget := LDropTarget;
+
+  FImmManagers.Add(AForm, TImmManager.Create(AForm));
 end;
 
 function TPlatformWin.CreateWindowBorder(const AForm: TCommonCustomForm): TWindowBorder;
@@ -3109,6 +2825,8 @@ var
   Wnd: HWND;
   DesignerForm: IDesignerForm;
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   HideWindow(AForm);
   Wnd := FormToHWND(AForm);
   if not ((csDesigning in AForm.ComponentState) or Supports(AForm, IDesignerForm, DesignerForm)) then
@@ -3116,6 +2834,8 @@ begin
   WindowHandleToPlatform(AForm.Handle).FWinDropTarget.Free;
   RemoveProp(Wnd, MakeIntAtom(WindowAtom));
   Winapi.Windows.DestroyWindow(Wnd);
+
+  FImmManagers.Remove(AForm);
 end;
 
 procedure TPlatformWin.ReleaseWindow(const AForm: TCommonCustomForm);
@@ -3124,6 +2844,8 @@ end;
 
 procedure TPlatformWin.InvalidateImmediately(const AForm: TCommonCustomForm);
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   InvalidateWindowRect(AForm, AForm.ClientRect);
 end;
 
@@ -3135,6 +2857,8 @@ var
   UpdateRects: TUpdateRects;
   I: Integer;
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   if IntersectRect(R, TRectF.Create(0, 0, AForm.ClientWidth, AForm.ClientHeight)) then
   begin
     Wnd := FormToHWND(AForm);
@@ -3229,23 +2953,37 @@ end;
 
 function TPlatformWin.GetWindowRect(const AForm: TCommonCustomForm): TRectF;
 begin
-  Result := TRectF.Create(WindowHandleToPlatform(AForm.Handle).Bounds);
+  RaiseIfNil(AForm, 'AForm');
+
+  if AForm.IsHandleAllocated then
+    Result := TRectF.Create(WindowHandleToPlatform(AForm.Handle).Bounds)
+  else
+    Result := TRectF.Create(0, 0, AForm.Width, AForm.Height);
 end;
 
 function TPlatformWin.GetWindowScale(const AForm: TCommonCustomForm): Single;
 begin
-  Result := AForm.Handle.Scale;
+  RaiseIfNil(AForm, 'AForm');
+
+  if AForm.IsHandleAllocated then
+    Result := AForm.Handle.Scale
+  else
+    Result := GetScreenScale;
 end;
 
 procedure TPlatformWin.SetWindowRect(const AForm: TCommonCustomForm; ARect: TRectF);
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   { for using Metro-style interface in designer we set Maximized but we can change window size }
-  if AForm.WindowState in [TWindowState.wsNormal, TWindowState.wsMaximized] then
+  if AForm.IsHandleAllocated and (AForm.WindowState in [TWindowState.wsNormal, TWindowState.wsMaximized]) then
     WindowHandleToPlatform(AForm.Handle).Bounds := ARect.Round;
 end;
 
 procedure TPlatformWin.SetWindowCaption(const AForm: TCommonCustomForm; const ACaption: string);
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   SetWindowText(FormToHWND(AForm), ACaption);
 end;
 
@@ -3299,6 +3037,8 @@ end;
 
 procedure TPlatformWin.SetCapture(const AForm: TCommonCustomForm);
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   Winapi.Windows.SetCapture(FormToHWND(AForm));
 end;
 
@@ -3309,16 +3049,26 @@ end;
 
 function TPlatformWin.GetClientSize(const AForm: TCommonCustomForm): TPointF;
 begin
-  Result := TSizeF.Create(WindowHandleToPlatform(AForm.Handle).ClientSize);
+  RaiseIfNil(AForm, 'AForm');
+
+  if AForm.IsHandleAllocated then
+    Result := TSizeF.Create(WindowHandleToPlatform(AForm.Handle).ClientSize)
+  else
+    Result := TSizeF.Create(AForm.Width, AForm.Height);
 end;
 
 procedure TPlatformWin.SetClientSize(const AForm: TCommonCustomForm; const ASize: TPointF);
 begin
-  WindowHandleToPlatform(AForm.Handle).ClientSize := TSizeF.Create(ASize).Round;
+  RaiseIfNil(AForm, 'AForm');
+
+  if AForm.IsHandleAllocated then
+    WindowHandleToPlatform(AForm.Handle).ClientSize := TSizeF.Create(ASize).Round;
 end;
 
 procedure TPlatformWin.HideWindow(const AForm: TCommonCustomForm);
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   SetWindowPos(FormToHWND(AForm), 0, 0, 0, 0, 0, SWP_HIDEWINDOW or SWP_NOSIZE or SWP_NOMOVE or SWP_NOZORDER or
     SWP_NOACTIVATE);
 end;
@@ -3336,6 +3086,8 @@ var
   OldDisableDeactivate: Boolean;
   OldActiveHandle: TWinWindowHandle;
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   Wnd := FormToHWND(AForm);
   nCmdShow := ShowCommands[AForm.WindowState];
   if (AForm.FormStyle = TFormStyle.Popup) then
@@ -3384,6 +3136,8 @@ procedure TPlatformWin.BringToFront(const AForm: TCommonCustomForm);
 var
   Wnd: HWND;
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   Wnd := FormToHWND(AForm);
   SetWindowPos(Wnd, HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE or SWP_NOMOVE or SWP_NOSIZE);
 end;
@@ -3392,6 +3146,8 @@ procedure TPlatformWin.SendToBack(const AForm: TCommonCustomForm);
 var
   Wnd: HWND;
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   Wnd := FormToHWND(AForm);
   SetWindowPos(Wnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOACTIVATE or SWP_NOMOVE or SWP_NOSIZE);
 end;
@@ -3400,8 +3156,10 @@ procedure TPlatformWin.Activate(const AForm: TCommonCustomForm);
 var
   Wnd: HWND;
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   Wnd := FormToHWND(AForm);
-  if (not IsWindowVisible(Wnd)) or (IsIconic(Wnd)) then
+  if not IsWindowVisible(Wnd) or IsIconic(Wnd) then
   begin
     if AForm.FormStyle = TFormStyle.Popup then
       Winapi.Windows.ShowWindow(Wnd, SW_RESTORE or SW_SHOWNOACTIVATE)
@@ -3430,6 +3188,8 @@ var
   end;
 
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   if AForm.Visible and not FDiableUpdateState then
   begin
     Wnd := FormToHWND(AForm);
@@ -3453,6 +3213,8 @@ var
   AppService: IFMXApplicationService;
   CloseRes: TCloseAction;
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   Result := mrNone;
   if GetCapture <> 0 then
     SendMessage(GetCapture, WM_CANCELMODE, 0, 0);
@@ -3496,6 +3258,8 @@ function TPlatformWin.ClientToScreen(const AForm: TCommonCustomForm; const Point
 var
   P: TPoint;
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   P := (Point * WindowHandleToPlatform(AForm.Handle).Scale).Round;
   Winapi.Windows.ClientToScreen(FormToHWND(AForm), P);
   Result := TPointF.Create(P);
@@ -3505,6 +3269,8 @@ function TPlatformWin.ScreenToClient(const AForm: TCommonCustomForm; const Point
 var
   P: TPoint;
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   P := Point.Round;
   Winapi.Windows.ScreenToClient(FormToHWND(AForm), P);
   Result := TPointF.Create(P) / WindowHandleToPlatform(AForm.Handle).Scale;
@@ -4221,12 +3987,19 @@ begin
     Result := LFSParam.IsFullScreen;
 end;
 
+function TPlatformWin.GetImmManager(const Index: TCommonCustomForm): TImmManager;
+begin
+  Result := FImmManagers[Index];
+end;
+
 procedure TPlatformWin.SetFullScreen(const AForm: TCommonCustomForm;
   const AValue: Boolean);
 var
   LFSParam: TFullScreenParams;
   LClean: TFullScreenParams;
 begin
+  RaiseIfNil(AForm, 'AForm');
+
   if AValue and not (TFmxFormState.Showing in AForm.FormState) then
     AForm.Visible := True;
   FillChar(LFSParam, SizeOf(LFSParam), 0);
@@ -4261,8 +4034,7 @@ begin
   end;
 end;
 
-procedure TPlatformWin.SetShowFullScreenIcon(const AForm: TCommonCustomForm;
-  const AValue: Boolean);
+procedure TPlatformWin.SetShowFullScreenIcon(const AForm: TCommonCustomForm; const AValue: Boolean);
 begin
 end;
 
@@ -4301,7 +4073,7 @@ begin
   Result := TScreenOrientation.Landscape;
 end;
 
-procedure TPlatformWin.SetScreenOrientation(AOrientations: TScreenOrientations);
+procedure TPlatformWin.SetSupportedScreenOrientations(const AOrientations: TScreenOrientations);
 begin
   // Not needed for Windows
 end;
@@ -4420,7 +4192,12 @@ end;
 
 function TPlatformWin.FindForm(const AHandle: TWindowHandle): TCommonCustomForm;
 begin
-  Result := nil;
+  RaiseIfNil(AHandle, 'AHandle');
+
+  if AHandle is TWinWindowHandle then
+    Result := TWinWindowHandle(AHandle).Form
+  else
+    Result := nil;
 end;
 
 procedure TPlatformWin.Log(const AFormat: string; const AParams: array of const);
@@ -6049,6 +5826,7 @@ var
   CurrentView, NewView: IMenuView;
   Obj: IControl;
   TimerID: THandle;
+  MenuItem: TMenuItem;
 begin
   FView := AView;
   AView.Loop := True;
@@ -6147,9 +5925,10 @@ begin
                       { Menus }
                       if (Obj <> nil) and (Obj.GetObject is TMenuItem) then
                       begin
-                        if not (TMenuItem(Obj.GetObject).IsSelected) and TMenuItem(Obj.GetObject).HavePopup then
-                          TOpenMenuItem(Obj.GetObject).NeedPopup
-                        else
+                        MenuItem := TMenuItem(Obj.GetObject);
+                        if not MenuItem.IsSelected and MenuItem.HavePopup then
+                          TOpenMenuItem(MenuItem).NeedPopup
+                        else if MenuItem.CanBeClicked then
                         begin
                           EndLoop(AView);
                           TOpenMenuItem(Obj.GetObject).Click;
@@ -6217,12 +5996,13 @@ begin
                       { Menus }
                       if (Obj <> nil) and (Obj.GetObject is TMenuItem) then
                       begin
-                        if not (TMenuItem(Obj.GetObject).IsSelected) and TMenuItem(Obj.GetObject).HavePopup then
-                          TOpenMenuItem(Obj.GetObject).NeedPopup
-                        else
+                        MenuItem := TMenuItem(Obj.GetObject);
+                        if not MenuItem.IsSelected and MenuItem.HavePopup then
+                          TOpenMenuItem(MenuItem).NeedPopup
+                        else if MenuItem.CanBeClicked then
                         begin
                           EndLoop(AView);
-                          TOpenMenuItem(Obj.GetObject).Click;
+                          TOpenMenuItem(MenuItem).Click;
                         end;
                       end
                       else
@@ -6273,7 +6053,7 @@ begin
                           begin
                             if AView.Selected.HavePopup then
                               AView.Selected.NeedPopup
-                            else
+                            else if AView.Selected.CanBeClicked then
                             begin
                               TOpenMenuItem(AView.Selected).Click;
                               EndLoop(AView);
@@ -6330,20 +6110,356 @@ begin
   end;
 end;
 
-initialization
+{ TWinTimerService }
 
+procedure TWinTimerService.ApplicationTerminatingHandler(const Sender: TObject; const Msg: System.Messaging.TMessage);
+begin
+  FTerminating := True;
+  DestroyTimers;
+end;
+
+constructor TWinTimerService.Create;
+begin
+  inherited;
+  FTimers := TList<TWin32TimerInfo>.Create;
+  FHandleCounter := 128; // Start counting handles at 128. All valid handles have lower nibble = 0;
+  FTerminating := False;
+  if not QueryPerformanceFrequency(FPerformanceFrequency) then
+    FPerformanceFrequency := 0;
+
+  TMessageManager.DefaultManager.SubscribeToMessage(TApplicationTerminatingMessage, ApplicationTerminatingHandler);
+end;
+
+destructor TWinTimerService.Destroy;
+begin
+  TMessageManager.DefaultManager.Unsubscribe(TApplicationTerminatingMessage, ApplicationTerminatingHandler);
+
+  FreeAndNil(FTimers);
+  inherited;
+end;
+
+function TWinTimerService.CreateTimer(AInterval: Integer; ATimerFunc: TTimerProc): TFmxHandle;
+var
+  TimerInfo: TWin32TimerInfo;
+begin
+  Result := 0;
+  if not FTerminating and (AInterval > 0) and Assigned(ATimerFunc) then
+  begin
+    TimerInfo.TimerFunc := ATimerFunc;
+    TimerInfo.TimerID := Winapi.Windows.SetTimer(0, 0, AInterval, @TimerCallback);
+    if TimerInfo.TimerID <> 0 then
+    begin
+{$IFDEF CPUX64}
+      TimerInfo.TimerHandle := TInterlocked.Add(Int64(FHandleCounter), 16);
+{$ENDIF}
+{$IFDEF CPUX86}
+      TimerInfo.TimerHandle := TInterlocked.Add(Integer(FHandleCounter), 16);
+{$ENDIF}
+      FTimers.Add(TimerInfo);
+      Result := TimerInfo.TimerHandle;
+    end
+    else
+      raise Exception.CreateFmt(SCannotCreateTimer, [GetLastError]);
+  end;
+end;
+
+function TWinTimerService.DestroyTimer(Timer: TFmxHandle): Boolean;
+var
+  Index: Integer;
+  TimerInfo: TWin32TimerInfo;
+begin
+  Result := False;
+  Index := FTimers.Count;
+  while (Index > 0) do
+  begin
+    Dec(Index);
+    TimerInfo := FTimers[Index];
+    if TimerInfo.TimerHandle = Timer then
+    begin
+      Result := Winapi.Windows.KillTimer(0, TimerInfo.TimerID);
+      FTimers.Delete(Index);
+    end;
+  end;
+end;
+
+procedure TWinTimerService.DestroyTimers;
+var
+  I: Integer;
+begin
+  for I := FTimers.Count - 1 downto 0 do
+    try
+      DestroyTimer(FTimers[I].TimerHandle);
+    except
+    end;
+end;
+
+function TWinTimerService.GetTick: Double;
+var
+  PerformanceCounter: Int64;
+begin
+  if FPerformanceFrequency <> 0 then
+  begin
+    QueryPerformanceCounter(PerformanceCounter);
+    Result := PerformanceCounter / FPerformanceFrequency;
+  end
+  else
+    Result := timeGetTime / 1000;
+end;
+
+class procedure TWinTimerService.TimerCallback(window_hwnd: HWND; Msg: Longint; idEvent: UINT; dwTime: Longint);
+var
+  Index: Integer;
+begin
+  try
+    Index := PlatformWin.TimerService.FTimers.Count;
+    while (Index > 0) do
+    begin
+      Dec(Index);
+      if PlatformWin.TimerService.FTimers[Index].TimerID = idEvent then
+      begin
+        PlatformWin.TimerService.FTimers[Index].TimerFunc;
+        Break;
+      end;
+    end;
+  except
+    on E: Exception do
+    begin
+      if Application <> nil then
+        Application.HandleException(nil)
+      else
+        raise;
+    end;
+  end;
+end;
+
+{ TImmManager }
+
+constructor TImmManager.Create(const AForm: TCommonCustomForm);
+begin
+  FForm := AForm;
+end;
+
+function TImmManager.GetComposition(const AContext: HIMC): string;
+var
+  BufferLength: Integer;
+begin
+  BufferLength := ImmGetCompositionString(AContext, GCS_COMPSTR, nil, 0);
+  SetLength(Result, BufferLength div SizeOf(Char));
+  ImmGetCompositionString(AContext, GCS_COMPSTR, PChar(Result), BufferLength);
+end;
+
+function TImmManager.GetFormHandle: HWND;
+begin
+  Result := FormToHWND(Form);
+end;
+
+function TImmManager.GetResultComposition(const AContext: HIMC): string;
+var
+  BufferLength: Integer;
+begin
+  BufferLength := ImmGetCompositionString(AContext, GCS_RESULTSTR, nil, 0);
+  SetLength(Result, BufferLength div SizeOf(Char));
+  ImmGetCompositionString(AContext, GCS_RESULTSTR, PChar(Result), BufferLength);
+end;
+
+procedure TImmManager.ProcessImeParameters(const AContext: HIMC; const AParameters: LPARAM; const ATextService: TTextServiceWin);
+var
+  CompositionString: string;
+begin
+  CompositionString := GetComposition(AContext);
+  ATextService.InternalSetMarkedText(CompositionString);
+
+  if AParameters and GCS_COMPATTR <> 0 then
+    UpdateCompositionAttributes(AContext, ATextService);
+
+  if AParameters and GCS_CURSORPOS <> 0 then
+    UpdateCompositionCursorPos(AContext, ATextService)
+  else if GetKeyboardLayout(0) and $FFFF = TTextServiceWin.LCID_Korean_Default then
+    // Native Korean IME Input system doesn't use cursor position. Instead of it it hightlights the last character in
+    // marked text. Since FMX doesn't support displaying character selection, we just move caret in the end of marked
+    // text and use underline attribute for highlighting last character.
+    ATextService.MarkedTextCursorPosition := Max(1, ATextService.MarkedText.Length);
+end;
+
+procedure TImmManager.UpdateCompositionAttributes(const AContext: HIMC; const ATextService: TTextServiceWin);
+var
+  BufferLength: Integer;
+begin
+  BufferLength := ImmGetCompositionString(AContext, GCS_COMPATTR, nil, 0);
+  if BufferLength > 0 then
+  begin
+    SetLength(ATextService.CompAttrBuf, BufferLength);
+    ImmGetCompositionString(AContext, GCS_COMPATTR, @(ATextService.CompAttrBuf[0]), BufferLength);
+  end;
+end;
+
+procedure TImmManager.UpdateCompositionCursorPos(const AContext: HIMC; const ATextService: TTextServiceWin);
+var
+ CursorPos: Integer;
+begin
+  CursorPos := ImmGetCompositionString(AContext, GCS_CURSORPOS, nil, 0);
+  if CursorPos >= 0 then
+    ATextService.MarkedTextCursorPosition := CursorPos;
+end;
+
+function TImmManager.UpdateIMEWindowPosition: LRESULT;
+
+  function DpToPx(const APoint: TPointF): TPoint; overload;
+  var
+    FormScale: Single;
+  begin
+    FormScale := Form.Handle.Scale;
+    Result := TPointF.Create(APoint.X * FormScale, APoint.Y * FormScale).Round;
+  end;
+
+  function DpToPx(const ARect: TRectF): TRect; overload;
+  begin
+    Result.TopLeft := DpToPx(ARect.TopLeft);
+    Result.BottomRight := DpToPx(ARect.BottomRight);
+  end;
+
+  function DefineControlRect(const AFocusedControl: IControl; const ATextInput: ITextInput): TRectF;
+  var
+    SelectionRect: TRectF;
+  begin
+    SelectionRect := ATextInput.GetSelectionRect;
+    Result.TopLeft := Form.ScreenToClient(AFocusedControl.LocalToScreen(SelectionRect.TopLeft));
+    Result.BottomRight := Form.ScreenToClient(AFocusedControl.LocalToScreen(SelectionRect.BottomRight));
+  end;
+
+var
+  IMC: HIMC;
+  Candidate: TCandidateForm;
+  TextInput: ITextInput;
+begin
+  Result := 0;
+
+  if not Supports(Form.Focused, ITextInput, TextInput) then
+    Exit;
+
+  IMC := ImmGetContext(FormHandle);
+  if IMC = 0 then
+    Exit;         
+    
+  try
+    Candidate.dwIndex := 0;
+    Candidate.dwStyle := CFS_POINT;
+    Candidate.ptCurrentPos := DpToPx(TextInput.GetTargetClausePointF);
+    Result := LRESULT(ImmSetCandidateWindow(IMC, @Candidate));
+
+    Candidate.dwStyle := CFS_EXCLUDE;
+    Candidate.rcArea := DpToPx(DefineControlRect(Form.Focused, TextInput));
+    ImmSetCandidateWindow(IMC, @Candidate);
+  finally
+    ImmReleaseContext(FormHandle, IMC);
+  end;
+end;
+
+procedure TImmManager.WMComposition(var Message: TMessage);
+var
+  IMC: HIMC;
+  S: string;
+  TextInput: ITextInput;
+  I: Integer;
+  Key: Word;
+  Ch: Char;
+  IsProcessed: Boolean;
+begin
+  UpdateIMEWindowPosition;
+
+  IsProcessed := False;
+
+  // User selected result string
+  if Message.LParam and GCS_RESULTSTR <> 0 then
+  begin
+    IsProcessed := True;
+    IMC := ImmGetContext(FormHandle);
+    if IMC <> 0 then
+    begin
+      try
+        if Supports(Form.Focused, ITextInput, TextInput) then
+        begin
+          TTextServiceWin(TextInput.GetTextService).Reset;
+          TextInput.IMEStateUpdated;
+        end;
+        S := GetResultComposition(IMC);
+      finally
+        ImmReleaseContext(FormHandle, IMC);
+      end;
+
+      for I := 0 to S.Length - 1 do
+      begin
+        Key := 0;
+        Ch := S.Chars[I];
+        Form.KeyDown(Key, Ch, []);
+        Form.KeyUp(Key, Ch, []);
+      end;
+    end;
+  end;
+
+  // User is inputting current composition string
+  if Message.LParam and GCS_COMPSTR <> 0 then
+  begin
+    IsProcessed := True;
+    IMC := ImmGetContext(FormHandle);
+    if IMC <> 0 then
+      try
+        if Supports(Form.Focused, ITextInput, TextInput) then
+        begin
+          ProcessImeParameters(IMC, Message.LParam, TTextServiceWin(TextInput.GetTextService));
+          TextInput.IMEStateUpdated;
+        end;
+      finally
+        ImmReleaseContext(FormHandle, IMC);
+      end;
+  end;
+
+  if IsProcessed then
+    Message.Result := 0
+  else
+    Message.Result := DefWindowProc(FormHandle, Message.Msg, Message.WParam, Message.LParam);
+end;
+
+procedure TImmManager.WMEndComposition(var Message: TMessage);
+var
+  TextInput: ITextInput;
+begin
+  UpdateIMEWindowPosition;
+  
+  if Supports(Form.Focused, ITextInput, TextInput) then
+    TTextServiceWin(TextInput.GetTextService).InternalEndIMEInput;
+end;
+
+procedure TImmManager.WMNotify(var Message: TMessage);
+begin
+  if Message.WParam = IMN_OPENCANDIDATE then
+    Message.Result := UpdateIMEWindowPosition
+  else
+    Message.Result := DefWindowProc(FormHandle, Message.Msg, Message.WParam, Message.LParam);
+end;
+
+procedure TImmManager.WMSetContext(var Message: TMessage);
+begin
+  Message.Result := DefWindowProc(FormHandle, Message.Msg, Message.WParam, Message.LParam and ISC_SHOWUIALLCANDIDATEWINDOW);
+end;
+
+procedure TImmManager.WMStartComposition(var Message: TMessage);
+var
+  TextInput: ITextInput;
+begin
+  UpdateIMEWindowPosition;
+
+  if Supports(Form.Focused, ITextInput, TextInput) then
+    TTextServiceWin(TextInput.GetTextService).InternalStartIMEInput;
+
+  if System.SysUtils.Win32MajorVersion >= 6 then
+    Message.Result := DefWindowProc(FormHandle, Message.Msg, Message.WParam, Message.LParam)
+  else
+    Message.Result := 0;
+end;
+
+initialization
   OleInitialize(nil);
   CapturedGestureControl := nil;
   LastMousePos := ImpossibleMousePosition;
-
-finalization
-
-// UnregisterCorePlatformServices;
-{$ENDIF MSWINDOWS}
-{$IFDEF MACOS}
-interface
-implementation
-initialization
-finalization
-{$ENDIF MACOS}
 end.

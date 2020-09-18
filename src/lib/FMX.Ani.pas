@@ -2,7 +2,7 @@
 {                                                       }
 {              Delphi FireMonkey Platform               }
 {                                                       }
-{ Copyright(c) 2011-2019 Embarcadero Technologies, Inc. }
+{ Copyright(c) 2011-2020 Embarcadero Technologies, Inc. }
 {              All rights reserved                      }
 {                                                       }
 {*******************************************************}
@@ -18,6 +18,8 @@ uses
 
 type
 
+  TAnimation = class;
+
   ITriggerAnimation = interface
   ['{8A291102-742F-45CB-9159-4E1D283AAF20}']
     procedure StartTriggerAnimation(const AInstance: TFmxObject; const ATrigger: string);
@@ -28,12 +30,23 @@ type
   /// Android uses asynchronous animation model.</summary>
   TAnimator = class
   private type
-    TAnimationDestroyer = class
+    IAnimationDestroyer = interface
+    ['{3597F657-95E3-4E21-992D-C834EE541F1D}']
+      procedure RegisterAnimation(const AAnimation: TAnimation);
+    end;
+    TAnimationDestroyer = class(TInterfacedObject, IFreeNotification, IAnimationDestroyer)
     private
+      FAnimations: TList<Pointer>;
       procedure DoAniFinished(Sender: TObject);
+      { IFreeNotification }
+      procedure FreeNotification(AObject: TObject);
+    public
+      constructor Create;
+      destructor Destroy; override;
+      procedure RegisterAnimation(const AAnimation: TAnimation);
     end;
   private class var
-    FDestroyer: TAnimationDestroyer;
+    FDestroyer: IAnimationDestroyer;
   private
     class procedure CreateDestroyer;
     class procedure Uninitialize;
@@ -538,64 +551,6 @@ uses
   System.Types, System.Math, System.SysUtils, System.StrUtils, System.SyncObjs, {$IFDEF MACOS}Macapi.CoreFoundation, {$ENDIF}
   FMX.Platform, FMX.Forms, FMX.Utils, FMX.MultiResBitmap;
 
-
-type
-  IAnimationDestroyer = interface
-  ['{3597F657-95E3-4E21-992D-C834EE541F1D}']
-    procedure RegisterAnimation(const AAnimation: TAnimation);
-  end;
-
-  TFixedAnimationDestroyer = class(TInterfacedObject, IFreeNotification, IAnimationDestroyer)
-  private
-    FAnimations: TList<Pointer>;
-    procedure DoAniFinished(Sender: TObject);
-    { IFreeNotification }
-    procedure FreeNotification(AObject: TObject);
-  public
-    constructor Create;
-    destructor Destroy; override;
-    procedure RegisterAnimation(const AAnimation: TAnimation);
-  end;
-
-{ TFixedAnimationDestroyer }
-
-constructor TFixedAnimationDestroyer.Create;
-begin
-  FAnimations := TList<Pointer>.Create
-end;
-
-destructor TFixedAnimationDestroyer.Destroy;
-begin
-  FreeAndNil(FAnimations);
-  inherited;
-end;
-
-procedure TFixedAnimationDestroyer.DoAniFinished(Sender: TObject);
-begin
-  TThread.ForceQueue(nil, procedure begin
-    if FAnimations.Contains(Sender) then
-    begin
-      TAnimation(Sender).DisposeOf;
-      FAnimations.Remove(Sender);
-    end;
-  end);
-end;
-
-procedure TFixedAnimationDestroyer.FreeNotification(AObject: TObject);
-begin
-  FAnimations.Remove(AObject);
-end;
-
-procedure TFixedAnimationDestroyer.RegisterAnimation(const AAnimation: TAnimation);
-begin
-  FAnimations.Add(AAnimation);
-  AAnimation.OnFinish := DoAniFinished;
-  AAnimation.AddFreeNotify(Self);
-end;
-
-var
-  Destroyer: IAnimationDestroyer;
-
 function InterpolateBack(t, B, C, D, S: Single; AType: TAnimationType): Single;
 begin
   case AType of
@@ -1001,11 +956,38 @@ end;
 
 { TAnimator.TAnimationDestroyer }
 
+constructor TAnimator.TAnimationDestroyer.Create;
+begin
+  FAnimations := TList<Pointer>.Create
+end;
+
+destructor TAnimator.TAnimationDestroyer.Destroy;
+begin
+  FreeAndNil(FAnimations);
+  inherited;
+end;
+
 procedure TAnimator.TAnimationDestroyer.DoAniFinished(Sender: TObject);
 begin
   TThread.ForceQueue(nil, procedure begin
-    TAnimation(Sender).DisposeOf;
+    if FAnimations.Contains(Sender) then
+    begin
+      TAnimation(Sender).DisposeOf;
+      FAnimations.Remove(Sender);
+    end;
   end);
+end;
+
+procedure TAnimator.TAnimationDestroyer.FreeNotification(AObject: TObject);
+begin
+  FAnimations.Remove(AObject);
+end;
+
+procedure TAnimator.TAnimationDestroyer.RegisterAnimation(const AAnimation: TAnimation);
+begin
+  FAnimations.Add(AAnimation);
+  AAnimation.OnFinish := DoAniFinished;
+  AAnimation.AddFreeNotify(Self);
 end;
 
 { TAnimator }
@@ -1127,6 +1109,8 @@ var
 begin
   StopPropertyAnimation(Target, APropertyName);
 
+  CreateDestroyer;
+
   Animation := TColorAnimation.Create(Target);
   Animation.Parent := Target;
   Animation.AnimationType := AType;
@@ -1135,7 +1119,7 @@ begin
   Animation.PropertyName := APropertyName;
   Animation.StartFromCurrent := True;
   Animation.StopValue := NewValue;
-  Destroyer.RegisterAnimation(Animation);
+  FDestroyer.RegisterAnimation(Animation);
   Animation.Start;
 end;
 
@@ -1147,6 +1131,8 @@ var
 begin
   StopPropertyAnimation(Target, APropertyName);
 
+  CreateDestroyer;
+
   Animation := TFloatAnimation.Create(nil);
   Animation.Parent := Target;
   Animation.AnimationType := AType;
@@ -1155,16 +1141,18 @@ begin
   Animation.PropertyName := APropertyName;
   Animation.StartFromCurrent := True;
   Animation.StopValue := NewValue;
-  Destroyer.RegisterAnimation(Animation);
+  FDestroyer.RegisterAnimation(Animation);
   Animation.Start;
 end;
 
 class procedure TAnimator.AnimateFloatDelay(const Target: TFmxObject; const APropertyName: string; const NewValue: Single;
   Duration: Single = 0.2; Delay: Single = 0.0; AType: TAnimationType = TAnimationType.In;
-  AInterpolation: TInterpolationType = TInterpolationType.Linear);
+   AInterpolation: TInterpolationType = TInterpolationType.Linear);
 var
   Animation: TFloatAnimation;
 begin
+  CreateDestroyer;
+
   Animation := TFloatAnimation.Create(nil);
   Animation.Parent := Target;
   Animation.AnimationType := AType;
@@ -1174,7 +1162,7 @@ begin
   Animation.PropertyName := APropertyName;
   Animation.StartFromCurrent := True;
   Animation.StopValue := NewValue;
-  Destroyer.RegisterAnimation(Animation);
+  FDestroyer.RegisterAnimation(Animation);
   Animation.Start;
 end;
 
@@ -1212,6 +1200,8 @@ class procedure TAnimator.AnimateInt(const Target: TFmxObject; const APropertyNa
 var
   Animation: TIntAnimation;
 begin
+  CreateDestroyer;
+
   StopPropertyAnimation(Target, APropertyName);
 
   Animation := TIntAnimation.Create(nil);
@@ -1222,7 +1212,7 @@ begin
   Animation.PropertyName := APropertyName;
   Animation.StartFromCurrent := True;
   Animation.StopValue := NewValue;
-  Destroyer.RegisterAnimation(Animation);
+  FDestroyer.RegisterAnimation(Animation);
   Animation.Start;
 end;
 
@@ -1278,12 +1268,13 @@ end;
 
 class procedure TAnimator.Uninitialize;
 begin
-  FreeAndNil(FDestroyer);
+  FDestroyer := nil;
 end;
 
-{ TAniThread }
-
 type
+
+{$IFDEF ANDROID}
+{ TAniThread }
 
   TTimerThread = class(TThread)
   private
@@ -1317,6 +1308,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   end;
+{$ENDIF ANDROID}
 
   TAniThread = class({$IFDEF ANDROID}TThreadTimer{$ELSE}TTimer{$ENDIF})
   private
@@ -2820,6 +2812,7 @@ begin
     inherited;
 end;
 
+{$IFDEF ANDROID}
 { TTimerThread }
 
 constructor TTimerThread.Create;
@@ -2832,8 +2825,10 @@ end;
 
 destructor TTimerThread.Destroy;
 begin
-  FreeAndNil(FEnabledEvent);
+  Terminate;
+  FEnabledEvent.setEvent;
   inherited;
+  FreeAndNil(FEnabledEvent);
 end;
 
 procedure TTimerThread.DoInterval;
@@ -2909,16 +2904,14 @@ procedure TThreadTimer.UpdateTimer;
 begin
   // Don't invoke inherited method, because we take care under alternative timer implementation with Thread.
 end;
+{$ENDIF ANDROID}
 
 initialization
   RegisterFmxClasses([TColorAnimation, TGradientAnimation, TFloatAnimation, TIntAnimation,
     TRectAnimation, TBitmapAnimation, TBitmapListAnimation, TColorKeyAnimation,
     TFloatKeyAnimation]);
   TAnimation.AniFrameRate := TAnimation.DefaultAniFrameRate;
-
-  Destroyer :=  TFixedAnimationDestroyer.Create;
 finalization
-  Destroyer := nil;
   TAnimator.Uninitialize;
   TAnimation.Uninitialize;
 end.
