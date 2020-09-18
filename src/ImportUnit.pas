@@ -1,4 +1,4 @@
-unit ImportUnit;
+﻿unit ImportUnit;
 
 (*        AErender Launcher                                                                 *)
 (*        ImportUnit.pas                                                                    *)
@@ -49,6 +49,7 @@ uses
   FMX.ListView,
   FMX.Edit,
   FMX.DialogService.Sync,
+  FMX.BufferedLayout,
   Xml.xmldom,
   Xml.XMLIntf,
   Xml.XMLDoc,
@@ -89,14 +90,16 @@ type
     deselallButton: TButton;
     StatusBar1: TStatusBar;
     GridPanelLayout1: TGridPanelLayout;
+    BufferedLayout1: TBufferedLayout;
     procedure FormShow(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure compositionsChangeCheck(Sender: TObject);
     procedure importButtonClick(Sender: TObject);
     procedure selectallButtonClick(Sender: TObject);
-    procedure FormResize(Sender: TObject);
     procedure deselallButtonClick(Sender: TObject);
     procedure compositionsChange(Sender: TObject);
+    procedure SetLanguage(LanguageCode: Integer);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
     {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
@@ -106,7 +109,6 @@ type
 
 var
   ImportForm: TImportForm;
-  XML: IXMLDocument;
   RootNode: IXMLNode;
   CheckedComps, CompCount: Integer;
   PARAMSTART: Boolean = False;
@@ -133,12 +135,36 @@ begin
 end;
 {$ENDIF MSWINDOWS}
 
+procedure TImportForm.SetLanguage(LanguageCode: Integer);
+begin
+  ImportForm.Caption        := Language[LanguageCode].ImportForm.ImportAEProject;
+
+  importLabel.Text          := Language[LanguageCode].ImportForm.ImportAEProject;
+  aerProjectPathLabel.Text  := Language[LanguageCode].ImportForm.ProjectPath;
+  compLayout.Text           := Language[LanguageCode].ImportForm.Compositions;
+  selectallButton.Text      := Language[LanguageCode].ImportForm.SelectAll;
+  deselallButton.Text       := Language[LanguageCode].ImportForm.DeselectAll;
+
+  compProp.Text             := Language[LanguageCode].ImportForm.CompositonProperties;
+  compName.Text             := Language[LanguageCode].ImportForm.Name;
+  compResolution.Text       := Language[LanguageCode].ImportForm.Resolution;
+  compFramerate.Text        := Language[LanguageCode].ImportForm.Framerate;
+  compRangeIn.Text          := Language[LanguageCode].ImportForm.RangeStart;
+  compRangeOut.Text         := Language[LanguageCode].ImportForm.RangeEnd;
+
+  importProp.Text           := Language[LanguageCode].ImportForm.ImportProperties;
+  splitRenderCheckbox.Text  := Language[LanguageCode].ImportForm.PrepareForSplitRendering;
+
+  importButton.Text         := Language[LanguageCode].ImportForm.Import;
+end;
+
 procedure TImportForm.importButtonClick(Sender: TObject);
 var
   i, k: Integer;
 begin
-  MainForm.projectPath.Text := RootNode.Attributes['file'];
+  MainForm.projectPath.Text := RootNode.Attributes['project'];
   MainForm.outputPath.Text := '';
+  k := 0;
   if ((splitRenderCheckbox.Enabled) and (splitRenderCheckbox.IsChecked)) and (CheckedComps <= 1) then
     begin
       MainForm.compSwitch.Enabled := False;
@@ -210,7 +236,7 @@ begin
           MainForm.compCount.Value := CheckedComps;
           MainForm.inFrame.Text := '';
           MainForm.outFrame.Text := '';
-          for i := 0 to CompCount-1 do
+          for i := 0 to CompCount - 1 do
             if compositions.ListItems[i].IsChecked then
               begin
                 MainForm.compGrid.Cells[0, k] := RootNode.ChildNodes['compositions'].ChildNodes[i].ChildNodes['name'].Text;
@@ -218,26 +244,23 @@ begin
               end;
         end;
     end;
-  k := 0;
   XMLDocument.Active := False;
   ImportForm.Close;
 end;
 
 procedure TImportForm.compositionsChange(Sender: TObject);
 begin
-  compName.Text := 'Name: ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['name'].Text;
-  compResolution.Text := 'Resolution: ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['resolution'].Text;
-  compFramerate.Text := 'Framerate: ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['framerate'].Text;
-  compRangeIn.Text := 'Range start: ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['rangeStart'].Text;
-  compRangeOut.Text := 'Range end: ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['rangeEnd'].Text;
+  compName.Text := Language[LANG].ImportForm.Name + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['name'].Text;
+  compResolution.Text := Language[LANG].ImportForm.Resolution + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['resolution'].Text;
+  compFramerate.Text := Language[LANG].ImportForm.Framerate + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['framerate'].Text;
+  compRangeIn.Text := Language[LANG].ImportForm.RangeStart + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['rangeStart'].Text;
+  compRangeOut.Text := Language[LANG].ImportForm.RangeEnd + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['rangeEnd'].Text;
 end;
 
 procedure TImportForm.compositionsChangeCheck(Sender: TObject);
-var
-  i: Integer;
 begin
   CheckedComps := 0;
-  for i := 0 to CompCount-1 do
+  for var i := 0 to CompCount - 1 do
     if compositions.ListItems[i].IsChecked then
       inc (CheckedComps);
   if CheckedComps > 0 then
@@ -247,10 +270,8 @@ begin
 end;
 
 procedure TImportForm.deselallButtonClick(Sender: TObject);
-var
-  i: Integer;
 begin
-  for i := 0 to CompCount-1 do
+  for var i := 0 to CompCount-1 do
     compositions.ListItems[i].IsChecked := False;
 end;
 
@@ -262,15 +283,12 @@ begin
   compositions.Clear;
 end;
 
-procedure TImportForm.FormResize(Sender: TObject);
+procedure TImportForm.FormCreate(Sender: TObject);
 begin
-  selectallButton.Width := compositions.Width * 0.5 - 2.5;
-  deselallButton.Width := compositions.Width * 0.5 - 2.5;
+  compositions.AniCalculations.Animation := True;
 end;
 
 procedure TImportForm.FormShow(Sender: TObject);
-var
-  i: Integer;
 begin
   try
     if PARAMSTART then
@@ -290,24 +308,21 @@ begin
 
     RootNode := XMLDocument.DocumentElement;
 
-    aerProjectPath.Text := RootNode.Attributes['file'];
+    aerProjectPath.Text := RootNode.Attributes['project'];
     CompCount := StrToInt(RootNode.ChildNodes['compositions'].Attributes['count']);
-    for i := 0 to CompCount-1 do
+    for var i := 0 to CompCount - 1 do
       compositions.Items.Add(RootNode.ChildNodes['compositions'].ChildNodes[i].ChildNodes['name'].Text);
   except
-    on Exception do
-    begin
-      TDialogServiceSync.MessageDialog('Selected file is not compatible with AErender Launcher. Please, provide proper .aer / .xml file for import!', TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
-      //ImportForm.Close;
+    on Exception do begin
+      if TDialogServiceSync.MessageDialog(Language[LANG].Errors.IncompatibleFile, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0) = 0 then
+        ImportForm.Close;
     end;
   end;
 end;
 
 procedure TImportForm.selectallButtonClick(Sender: TObject);
-var
-  i: Integer;
 begin
-  for i := 0 to CompCount-1 do
+  for var i := 0 to CompCount - 1 do
     compositions.ListItems[i].IsChecked := True;
 end;
 

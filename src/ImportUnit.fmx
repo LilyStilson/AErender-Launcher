@@ -10,8 +10,8 @@ object ImportForm: TImportForm
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
   OnClose = FormClose
-  OnResize = FormResize
   OnShow = FormShow
   DesignerMasterStyle = 0
   object topLayout: TLayout
@@ -88,26 +88,6 @@ object ImportForm: TImportForm
     Size.PlatformDefault = False
     Text = 'Compositions'
     TabOrder = 5
-    object compositions: TListBox
-      Align = Client
-      Margins.Left = 10.000000000000000000
-      Margins.Top = 20.000000000000000000
-      Margins.Right = 10.000000000000000000
-      Margins.Bottom = 5.000000000000000000
-      Size.Width = 306.000000000000000000
-      Size.Height = 273.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 0
-      DisableFocusEffect = True
-      DefaultItemStyles.ItemStyle = ''
-      DefaultItemStyles.GroupHeaderStyle = ''
-      DefaultItemStyles.GroupFooterStyle = ''
-      ShowCheckboxes = True
-      OnChange = compositionsChange
-      OnChangeCheck = compositionsChangeCheck
-      Viewport.Width = 302.000000000000000000
-      Viewport.Height = 269.000000000000000000
-    end
     object GridPanelLayout1: TGridPanelLayout
       Align = Bottom
       Margins.Left = 10.000000000000000000
@@ -118,7 +98,7 @@ object ImportForm: TImportForm
       Size.Width = 306.000000000000000000
       Size.Height = 27.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 2
+      TabOrder = 1
       ColumnCollection = <
         item
           Value = 50.000000000000000000
@@ -165,6 +145,31 @@ object ImportForm: TImportForm
         OnClick = deselallButtonClick
       end
     end
+    object BufferedLayout1: TBufferedLayout
+      Align = Client
+      Size.Width = 326.000000000000000000
+      Size.Height = 298.000000000000000000
+      Size.PlatformDefault = False
+      object compositions: TListBox
+        Align = Client
+        Margins.Left = 10.000000000000000000
+        Margins.Top = 20.000000000000000000
+        Margins.Right = 10.000000000000000000
+        Margins.Bottom = 5.000000000000000000
+        Size.Width = 306.000000000000000000
+        Size.Height = 273.000000000000000000
+        Size.PlatformDefault = False
+        DisableFocusEffect = True
+        DefaultItemStyles.ItemStyle = ''
+        DefaultItemStyles.GroupHeaderStyle = ''
+        DefaultItemStyles.GroupFooterStyle = ''
+        ShowCheckboxes = True
+        OnChange = compositionsChange
+        OnChangeCheck = compositionsChangeCheck
+        Viewport.Width = 302.000000000000000000
+        Viewport.Height = 269.000000000000000000
+      end
+    end
   end
   object compImportLayout: TLayout
     Align = Right
@@ -196,7 +201,7 @@ object ImportForm: TImportForm
         Size.Height = 17.000000000000000000
         Size.PlatformDefault = False
         Text = 'Name: '
-        TabOrder = 4
+        TabOrder = 6
       end
       object compResolution: TLabel
         Align = Top
