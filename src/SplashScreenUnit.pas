@@ -41,9 +41,10 @@ type
   TSplashScreenForm = class(TForm)
     Image1: TImage;
     GridPanelLayout1: TGridPanelLayout;
-    Label1: TLabel;
     Rectangle1: TRectangle;
     Layout1: TLayout;
+    Path1: TPath;
+    Path2: TPath;
     procedure FormCreate(Sender: TObject);
   private
     {$IFDEF MSWINDOWS}procedure WMNCPaint(var AMessage: TMessage); message WM_NCPAINT;{$ENDIF MSWINDOWS}
