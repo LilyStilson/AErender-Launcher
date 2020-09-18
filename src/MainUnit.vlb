@@ -10,9 +10,6 @@ Coordinates=239,1036,95,51
 [cacheUsageInfo]
 Coordinates=1608,1036,93,51
 
-[renderingBlurEffect]
-Coordinates=935,56,111,33
-
 [UpdateLabel]
 Coordinates=646,1120,76,51
 
@@ -28,20 +25,8 @@ Coordinates=201,1120,54,51
 [properiesLayout2]
 Coordinates=659,1328,100,33
 
-[Lang1]
-Coordinates=334,832,44,33
-
-[winSettingsItem]
-Coordinates=527,1328,93,33
-
-[winImportConfigurationItem]
-Coordinates=329,1328,152,33
-
 [propertiesLayout1]
 Coordinates=185,1328,104,33
-
-[winMenuBarSeparator1]
-Coordinates=10,1328,129,33
 
 [infoButton]
 Coordinates=547,1120,66,51
@@ -73,9 +58,6 @@ Coordinates=2061,1266,78,33
 [outputModuleBox]
 Coordinates=741,10,101,123
 
-[MenuItem1]
-Coordinates=1956,1266,68,33
-
 [GridPanelLayout2]
 Coordinates=1812,1266,102,33
 
@@ -88,9 +70,6 @@ Coordinates=1047,1036,94,51
 [Image1]
 Coordinates=372,1036,49,51
 
-[winExitItem]
-Coordinates=1590,1266,71,33
-
 [customProp]
 Coordinates=881,10,74,69
 
@@ -102,12 +81,6 @@ Coordinates=1309,1266,123,33
 
 [ListBoxGroupHeader4]
 Coordinates=1141,1266,123,33
-
-[winDocItem]
-Coordinates=1033,1266,72,33
-
-[MenuBar1]
-Coordinates=934,1266,64,33
 
 [projectPath]
 Coordinates=1897,1036,70,51
@@ -161,9 +134,6 @@ Coordinates=10,1266,53,33
 [framesLayout]
 Coordinates=2493,1204,81,33
 
-[winHelpItem]
-Coordinates=2382,1204,74,33
-
 [StringColumn3]
 Coordinates=2256,1204,88,33
 
@@ -191,9 +161,6 @@ Coordinates=1623,1204,102,33
 [StringColumn1]
 Coordinates=1497,1204,88,33
 
-[winFileItem]
-Coordinates=1391,1204,70,33
-
 [missingFilesCheckbox]
 Coordinates=2228,1036,125,51
 
@@ -205,9 +172,6 @@ Coordinates=508,10,71,87
 
 [editItem]
 Coordinates=1304,1204,53,33
-
-[winAboutItem]
-Coordinates=1186,1204,82,33
 
 [compSwitch]
 Coordinates=344,131,75,177
@@ -232,12 +196,6 @@ Coordinates=1391,21,99,51
 
 [outputModuleLabel]
 Coordinates=397,1120,109,51
-
-[winEditItem]
-Coordinates=826,1204,72,33
-
-[winExportConfigItem]
-Coordinates=667,1204,117,33
 
 [outFrame]
 Coordinates=10,632,61,51
@@ -312,9 +270,6 @@ Coordinates=2124,1120,123,33
 [renderSettingsLayout]
 Coordinates=1961,1120,120,33
 
-[winOutModuleEditorItem]
-Coordinates=1780,1120,136,33
-
 [threadedRender]
 Coordinates=1258,1036,93,51
 
@@ -326,9 +281,6 @@ Coordinates=55,1002,75,33
 
 [threadsGrid]
 Coordinates=345,908,72,87
-
-[FloatAnimation1]
-Coordinates=1323,221,95,33
 
 [outputModuleLayout]
 Coordinates=1479,1120,116,33
@@ -354,12 +306,6 @@ Coordinates=1024,1120,94,33
 [helpItem]
 Coordinates=934,1120,56,33
 
-[winMenuBarSeparator2]
-Coordinates=759,1120,129,33
-
-[NotificationC]
-Coordinates=1323,661,78,33
-
 [openFile]
 Coordinates=1518,1036,56,51
 
@@ -381,11 +327,8 @@ Coordinates=1179,1036,94,51
 [endFrameLabel]
 Coordinates=968,1036,90,51
 
-[StyleBook1]
-Coordinates=0,0,70,33
-
 []
-Coordinates=336,496,101,190
+Coordinates=0,0,70,33
 
 [threadsCount]
 Coordinates=400,580,81,123
