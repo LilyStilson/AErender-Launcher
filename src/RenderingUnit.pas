@@ -91,7 +91,6 @@ type
     StopwatchTimer: TTimer;
     projectNameLabel: TLabel;
     totalFramesLabel: TLabel;
-    BufferedLayout1: TBufferedLayout;
     procedure ShowLogButtonClick (Sender: TObject);
     procedure renderingTimerTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -185,6 +184,9 @@ begin
       {$IFDEF MSWINDOWS}KillProcess('AfterFX.com');{$ENDIF MSWINDOWS}
       {$IFDEF MACOS}KillProcess('aerendercore');{$ENDIF MACOS}
 
+      // RU: Сброс состояния на панели задач
+      {$IFDEF MSWINDOWS}MainTaskBar.TaskBarState := 0;{$ENDIF MSWINDOWS}
+
       // RU: Очищаем массив с путями к логам
       Finalize(LogFiles);
 
@@ -209,9 +211,6 @@ begin
       totalProgressPercentage.Text := '0%';
       TotalProgressBar.Value := 0;
       TotalProgressBar.Max := 1;
-
-      // RU: Сброс состояния на панели задач
-      {$IFDEF MSWNDOWS}MainTaskBar.TaskBarState := 0;{$ENDIF MSWINDOWS}
     end
   except
     on Exception do
@@ -363,7 +362,7 @@ begin
       renderingTimer.Enabled := True;
       CurrentTime := Now;
       StopwatchTimer.Enabled := True;
-      //{$IFDEF MSWINDOWS}MainTaskBar.TaskBarState := 2;{$ENDIF MSWINDOWS}
+      {$IFDEF MSWINDOWS}MainTaskBar.TaskBarState := 2;{$ENDIF MSWINDOWS}
     end;
 end;
 
@@ -500,8 +499,8 @@ begin
             sum := sum + RenderGroups[j].RenderingProgress.Value;
 
         TotalProgressBar.Value := sum;
-        totalProgressPercentage.Text := Round((TotalProgressBar.Value / TotalProgressBar.Max) * 100).ToString + '%';
-        {$IFDEF MSWINDOWS}MainTaskBar.TaskBarProgress := Round((TotalProgressBar.Value / TotalProgressBar.Max) * 100);{$ENDIF MSWINDOWS}
+        totalProgressPercentage.Text := Trunc((TotalProgressBar.Value / TotalProgressBar.Max) * 100).ToString + '%';
+        {$IFDEF MSWINDOWS}MainTaskBar.TaskBarProgress := Trunc((TotalProgressBar.Value / TotalProgressBar.Max) * 100);{$ENDIF MSWINDOWS}
         if (TotalProgressBar.Max = 0) or (TotalProgressBar.Max = 1) then
           framesLabel.Text := Language[LANG].RenderingForm.WaitingForAerender
         else
@@ -576,7 +575,11 @@ end;
 
 procedure TRenderingForm.StopwatchTimerTimer(Sender: TObject);
 begin
-  //timeElapsedLabel.Text := Language[LANG].RenderingForm.TimeElapsed + FormatDateTime('hh:nn:ss', Now - CurrentTime);
+  // This causes on macOS
+  // [dccosx64 Fatal Error] RenderingUnit.pas(587): F2084 Internal Error: URW1237
+  // Workaround: Get string that is already in array and pass it through an inline variable
+  var TimeElapsed: String := Language[LANG].RenderingForm.TimeElapsed;
+  timeElapsedLabel.Text := TimeElapsed + FormatDateTime('hh:nn:ss', Now - CurrentTime);
 end;
 
 end.

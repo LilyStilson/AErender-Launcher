@@ -709,8 +709,8 @@ begin
   RootNode.AddChild('style').Text := STYLE.ToString;
   RootNode.AddChild('aerender').Text := AERPATH;
   RootNode.AddChild('onRenderStart').Text := ONRENDERSTART.ToString;
-  RootNode.AddChild('defprgpath').Text := MainForm.AEPOpenDialog.InitialDir;
-  RootNode.AddChild('defoutpath').Text := MainForm.SaveDialog1.InitialDir;
+  RootNode.AddChild('defprgpath').Text := DEFPRGPATH;
+  RootNode.AddChild('defoutpath').Text := DEFOUTPATH;
   RootNode.AddChild('handle').Text := AERH;
   RootNode.AddChild('delTempFiles').Text := DelTempFiles;
 
