@@ -27,6 +27,7 @@
 - Start AErender Launcher
 
 ### AErender Launcher Script
+**IMPORTANT:** Before installation, make sure that `Allow Scripts to Write Files and Access Network` is checked in After Effects Preferences
 #### Adobe After Effects CC 2019 and newer
 - In Adobe After Effects go to `File` -> `Scripts` -> `Install ScriptUI Panel...`
 - Select `AErender Launcher Script.jsx`
