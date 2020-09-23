@@ -27,7 +27,7 @@
 - Start AErender Launcher
 
 ### AErender Launcher Script
-<a href="https://github.com/LilyStilson/AErender-Launcher-Script#installation">AErender Launcher Script Installation</a>
+ - <a href="https://github.com/LilyStilson/AErender-Launcher-Script#installation">AErender Launcher Script Installation</a>
 
 ## Roadmap
 - Concatenation of rendered parts
