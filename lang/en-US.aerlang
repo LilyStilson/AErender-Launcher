@@ -28,6 +28,8 @@
             "DarwinDialogSave": "Save here",
             "OutputModulePreset": "Output Module",
             "ConfigureOutputModules": "Configure Output Modules...",
+            "RenderSettings": "Render Settings",
+            "ConfigureRenderSettings": "Configure Render Settings...",
             "Properties": "Properties",
             "MissingFiles": "Render with missing files",
             "Sound": "Play sound on render finish",

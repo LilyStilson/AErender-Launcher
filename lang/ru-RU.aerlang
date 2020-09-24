@@ -28,6 +28,8 @@
             "DarwinDialogSave": "Сохранить сюда",
             "OutputModulePreset": "Модуль вывода",
             "ConfigureOutputModules": "Редактировать модули вывода...",
+            "RenderSettings": "Настройки рендеринга",
+            "ConfigureRenderSettings": "Редактировать настройки рендеринга...",
             "Properties": "Параметры",
             "MissingFiles": "Рендерить с потерянными файлами",
             "Sound": "Звук по окончанию",
