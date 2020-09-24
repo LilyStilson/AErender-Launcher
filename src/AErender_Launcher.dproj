@@ -168,8 +168,8 @@
         <PF_UWPPackageName>AErenderLauncher</PF_UWPPackageName>
         <PF_UWPPublisher>CN=Deneb</PF_UWPPublisher>
         <PF_UWPPublisherDisplayName>Night Sky Studio</PF_UWPPublisherDisplayName>
-        <UWP_DelphiLogo150>..\icons\png\uwp\icon_uwp_150.png</UWP_DelphiLogo150>
-        <UWP_DelphiLogo44>..\icons\png\uwp\icon_uwp_44.png</UWP_DelphiLogo44>
+        <UWP_DelphiLogo150>..\icons\png\resized_uwp\icon_uwp_150.png</UWP_DelphiLogo150>
+        <UWP_DelphiLogo44>..\icons\png\resized_uwp\icon_uwp_44.png</UWP_DelphiLogo44>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.5.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.5.0;Comments=</VerInfo_Keys>
@@ -183,8 +183,8 @@
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
         <Icon_MainIcon>..\icons\platform\Launcher2020.ico</Icon_MainIcon>
         <Manifest_File>(None)</Manifest_File>
-        <UWP_DelphiLogo150>..\icons\png\uwp\icon_uwp_150.png</UWP_DelphiLogo150>
-        <UWP_DelphiLogo44>..\icons\png\uwp\icon_uwp_44.png</UWP_DelphiLogo44>
+        <UWP_DelphiLogo150>..\icons\png\resized_uwp\icon_uwp_150.png</UWP_DelphiLogo150>
+        <UWP_DelphiLogo44>..\icons\png\resized_uwp\icon_uwp_44.png</UWP_DelphiLogo44>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Keys>FileVersion=0.8.5.0;ProductVersion=0.8.5.0</VerInfo_Keys>
@@ -261,7 +261,6 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <Debugger_DebugSourcePath>C:\Program Files (x86)\Embarcadero\Studio\20.0\source\Chromium\;$(Debugger_DebugSourcePath)</Debugger_DebugSourcePath>
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
         <Icon_MainIcon>..\icons\platform\Launcher2020.ico</Icon_MainIcon>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
@@ -309,10 +308,10 @@
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
         <Icon_MainIcon>..\icons\platform\Launcher2020.ico</Icon_MainIcon>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>17</VerInfo_Build>
+        <VerInfo_Build>19</VerInfo_Build>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.5.17;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.0;Comments=;PrivateBuild=v0.8.0-beta</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.5.19;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.0;Comments=;PrivateBuild=v0.8.0-beta</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
@@ -324,14 +323,13 @@
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <BT_BuildType>Debug</BT_BuildType>
-        <Debugger_RunParams>-aerq &quot;C:\ProgramData\AErender\tempQueue.aerq&quot;</Debugger_RunParams>
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
         <Icon_MainIcon>..\icons\platform\Launcher2020.ico</Icon_MainIcon>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>2</VerInfo_Build>
+        <VerInfo_Build>4</VerInfo_Build>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.5.2;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.5;Comments=;PrivateBuild=v0.8.5-beta</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.5.4;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.5;Comments=;PrivateBuild=v0.8.5-beta</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
@@ -451,6 +449,13 @@
             </Delphi.Personality>
             <Deployment Version="3">
                 <DeployFile Configuration="Beta" Class="UWP_DelphiLogo44">
+                    <Platform Name="Win32">
+                        <RemoteDir>Assets\</RemoteDir>
+                        <RemoteName>Logo44x44.png</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile Configuration="Beta" Class="UWP_DelphiLogo44">
                     <Platform Name="Win64">
                         <RemoteDir>Assets\</RemoteDir>
                         <RemoteName>Logo44x44.png</RemoteName>
@@ -462,15 +467,29 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\icons\png\uwp\icon_uwp_150.png" Configuration="Beta" Class="UWP_DelphiLogo150">
+                <DeployFile LocalName="..\icons\png\resized_uwp\icon_uwp_150.png" Configuration="Beta" Class="UWP_DelphiLogo150">
                     <Platform Name="Win32">
                         <RemoteDir>Assets\</RemoteDir>
                         <RemoteName>Logo150x150.png</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\icons\png\uwp\icon_uwp_44.png" Configuration="Beta" Class="UWP_DelphiLogo44">
+                <DeployFile LocalName="..\icons\png\resized_uwp\icon_uwp_150.png" Configuration="Beta" Class="UWP_DelphiLogo150">
+                    <Platform Name="Win64">
+                        <RemoteDir>Assets\</RemoteDir>
+                        <RemoteName>Logo150x150.png</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\icons\png\resized_uwp\icon_uwp_44.png" Configuration="Beta" Class="UWP_DelphiLogo44">
                     <Platform Name="Win32">
+                        <RemoteDir>Assets\</RemoteDir>
+                        <RemoteName>Logo44x44.png</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\icons\png\resized_uwp\icon_uwp_44.png" Configuration="Beta" Class="UWP_DelphiLogo44">
+                    <Platform Name="Win64">
                         <RemoteDir>Assets\</RemoteDir>
                         <RemoteName>Logo44x44.png</RemoteName>
                         <Overwrite>true</Overwrite>

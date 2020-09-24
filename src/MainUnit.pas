@@ -2004,7 +2004,10 @@ begin
     UpdateAvailable := True;
 
   if UpdateAvailable then begin
-    MainForm.Height := {$IFDEF MSWINDOWS}490{$ENDIF MSWINDOWS}  {$IFDEF MACOS}470{$ENDIF MACOS};
+    if threadsSwitch.IsChecked or compSwitch.IsChecked then
+      MainForm.Height := 630
+    else
+      MainForm.Height := {$IFDEF MSWINDOWS}490{$ENDIF MSWINDOWS}  {$IFDEF MACOS}470{$ENDIF MACOS};
     MainForm.UpdateInfo.Visible := True;
     MainForm.UpdateInfo.Enabled := True;
     MainForm.downloadButton.Text := Language[LANG].MainForm.Download + ' (' + gitVersion + ')';
