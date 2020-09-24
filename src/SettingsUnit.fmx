@@ -30,6 +30,7 @@ object SettingsForm: TSettingsForm
       Top = 408
     end
     object SettingsToolbar: TToolBar
+      PopupMenu = hiddenS
       Size.Width = 552.000000000000000000
       Size.Height = 33.000000000000000000
       Size.PlatformDefault = False
@@ -62,7 +63,6 @@ object SettingsForm: TSettingsForm
         TabOrder = 2
         Text = 'Reset Launcher Configuration'
         Visible = False
-        OnClick = ResetButtonClick
       end
     end
     object aerenderPathLayout: TLayout
@@ -611,6 +611,26 @@ object SettingsForm: TSettingsForm
         Text = 'Ok'
         OnClick = Button1Click
       end
+    end
+  end
+  object hiddenS: TPopupMenu
+    Left = 80
+    Top = 408
+    object opSettingsLabel: TMenuItem
+      Enabled = False
+      Text = 'Optional Settings'
+    end
+    object separatorItem5: TMenuItem
+      Locked = True
+      Text = '-'
+    end
+    object openConfig: TMenuItem
+      Text = 'Open config'
+      OnClick = openConfigClick
+    end
+    object resetLanucher: TMenuItem
+      Text = 'Reset AErender Launcher'
+      OnClick = resetLanucherClick
     end
   end
 end

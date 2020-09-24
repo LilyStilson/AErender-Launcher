@@ -34,9 +34,6 @@ Coordinates=547,1120,66,51
 [XMLOpenDialog]
 Coordinates=935,221,93,33
 
-[ListBoxItem6]
-Coordinates=2462,1266,79,33
-
 [docsItem]
 Coordinates=2369,1266,59,33
 
@@ -61,9 +58,6 @@ Coordinates=741,10,101,123
 [GridPanelLayout2]
 Coordinates=1812,1266,102,33
 
-[ListBoxItem9]
-Coordinates=1697,1266,79,33
-
 [soundCheckbox]
 Coordinates=1047,1036,94,51
 
@@ -73,14 +67,8 @@ Coordinates=372,1036,49,51
 [customProp]
 Coordinates=881,10,74,69
 
-[ListBoxItem8]
-Coordinates=1475,1266,79,33
-
 [outModuleEditorItem0]
 Coordinates=1309,1266,123,33
-
-[ListBoxGroupHeader4]
-Coordinates=1141,1266,123,33
 
 [projectPath]
 Coordinates=1897,1036,70,51
@@ -143,9 +131,6 @@ Coordinates=797,1036,49,51
 [mainLayout]
 Coordinates=2149,1204,72,33
 
-[ListBoxItem5]
-Coordinates=2034,1204,79,33
-
 [fileChooseLayout]
 Coordinates=1894,1204,100,33
 
@@ -201,9 +186,6 @@ Coordinates=397,1120,109,51
 Coordinates=10,632,61,51
 Visible=True
 
-[renderSettings]
-Coordinates=614,10,87,123
-
 [settingsItem0]
 Coordinates=550,1204,80,33
 
@@ -218,9 +200,6 @@ Coordinates=1145,991,93,33
 
 [outModuleEditorItem]
 Coordinates=391,1204,117,33
-
-[ListBoxItem7]
-Coordinates=276,1204,79,33
 
 [importConfigItem]
 Coordinates=137,1204,100,33
@@ -263,9 +242,6 @@ Coordinates=2234,10,119,51
 
 [ffmpegConfigButton]
 Coordinates=1183,10,114,69
-
-[ListBoxGroupHeader3]
-Coordinates=2124,1120,123,33
 
 [renderSettingsLayout]
 Coordinates=1961,1120,120,33
@@ -328,10 +304,13 @@ Coordinates=1179,1036,94,51
 Coordinates=968,1036,90,51
 
 []
-Coordinates=0,0,70,33
+Coordinates=2124,1120,123,33
 
 [threadsCount]
 Coordinates=400,580,81,123
 Visible=True
 ExplicitSubNodes=Enabled;Visible
+
+[renderSettingsBox]
+Coordinates=614,10,87,123
 

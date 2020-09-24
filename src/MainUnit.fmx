@@ -17862,7 +17862,7 @@ object MainForm: TMainForm
         Margins.Right = 5.000000000000000000
         Margins.Bottom = 5.000000000000000000
         Position.X = 5.000000000000000000
-        Position.Y = 89.000000000000000000
+        Position.Y = 118.000000000000000000
         Size.Width = 691.000000000000000000
         Size.Height = 149.000000000000000000
         Size.PlatformDefault = False
@@ -18112,19 +18112,19 @@ object MainForm: TMainForm
         Size.PlatformDefault = False
         object outputModuleBox: TComboBox
           Align = Client
+          DropDownKind = Custom
           Margins.Left = 10.000000000000000000
           Margins.Top = 3.000000000000000000
           Margins.Right = 5.000000000000000000
           Margins.Bottom = 3.000000000000000000
-          Size.Width = 555.000000000000000000
+          Size.Width = 548.000000000000000000
           Size.Height = 23.000000000000000000
           Size.PlatformDefault = False
           OnChange = outputModuleBoxChange
         end
         object outputModuleLabel: TLabel
           Align = Left
-          AutoSize = True
-          Size.Width = 121.000000000000000000
+          Size.Width = 128.000000000000000000
           Size.Height = 29.000000000000000000
           Size.PlatformDefault = False
           TextSettings.WordWrap = False
@@ -18134,77 +18134,38 @@ object MainForm: TMainForm
       object renderSettingsLayout: TLayout
         Align = Top
         EnableDragHighlight = False
-        Enabled = False
         Margins.Left = 5.000000000000000000
-        Margins.Top = 5.000000000000000000
         Margins.Right = 5.000000000000000000
         Position.X = 5.000000000000000000
-        Size.Width = 590.000000000000000000
+        Position.Y = 89.000000000000000000
+        Size.Width = 691.000000000000000000
         Size.Height = 29.000000000000000000
         Size.PlatformDefault = False
-        Visible = False
-        object renderSettings: TComboBox
+        object renderSettingsBox: TComboBox
           Align = Client
-          ItemIndex = 1
-          Margins.Left = 5.000000000000000000
-          Margins.Top = 2.500000000000000000
+          DropDownKind = Custom
+          Margins.Left = 10.000000000000000000
+          Margins.Top = 3.000000000000000000
           Margins.Right = 5.000000000000000000
-          Margins.Bottom = 2.500000000000000000
-          Size.Width = 416.000000000000000000
-          Size.Height = 24.000000000000000000
+          Margins.Bottom = 3.000000000000000000
+          Size.Width = 548.000000000000000000
+          Size.Height = 23.000000000000000000
           Size.PlatformDefault = False
-          object ListBoxGroupHeader3: TListBoxGroupHeader
-            Selectable = False
-            TextSettings.Font.Size = 16.000000000000000000
-            TextSettings.Font.StyleExt = {00070000000000000004000000}
-            StyledSettings = [Family, FontColor, Other]
-            HitTest = True
-            Text = 'Default render settings'
-          end
-          object ListBoxItem5: TListBoxItem
-            IsSelected = True
-            Size.Width = 19.000000000000000000
-            Size.Height = 19.000000000000000000
-            Size.PlatformDefault = False
-            Text = 'Best Settings'
-          end
-          object ListBoxItem6: TListBoxItem
-            Size.Width = 19.000000000000000000
-            Size.Height = 19.000000000000000000
-            Size.PlatformDefault = False
-            Text = 'Current Settings'
-          end
-          object ListBoxItem7: TListBoxItem
-            Text = 'DV Settings'
-          end
-          object ListBoxItem9: TListBoxItem
-            Text = 'Multi-Machine Settings'
-          end
-          object ListBoxGroupHeader4: TListBoxGroupHeader
-            Selectable = False
-            TextSettings.Font.Size = 16.000000000000000000
-            TextSettings.Font.StyleExt = {00070000000000000004000000}
-            StyledSettings = [Family, FontColor, Other]
-            HitTest = True
-            Text = 'Custom'
-          end
-          object ListBoxItem8: TListBoxItem
-            Selectable = False
-            Text = 'Add Item...'
-          end
+          OnChange = renderSettingsBoxChange
         end
         object renderSettingsLabel: TLabel
           Align = Left
-          Size.Width = 164.000000000000000000
+          Size.Width = 128.000000000000000000
           Size.Height = 29.000000000000000000
           Size.PlatformDefault = False
+          TextSettings.WordWrap = False
           Text = 'Render Settings:'
         end
       end
       object GridPanelLayout1: TGridPanelLayout
         Align = Client
         Size.Width = 701.000000000000000000
-        Size.Height = 272.000000000000000000
+        Size.Height = 243.000000000000000000
         Size.PlatformDefault = False
         ColumnCollection = <
           item
@@ -18234,7 +18195,7 @@ object MainForm: TMainForm
         object compLayout: TLayout
           Align = Client
           Size.Width = 350.500000000000000000
-          Size.Height = 272.000000000000000000
+          Size.Height = 243.000000000000000000
           Size.PlatformDefault = False
           object compGrid: TStringGrid
             Align = Client
@@ -18253,8 +18214,8 @@ object MainForm: TMainForm
             RowCount = 1
             Options = [Editing, RowLines, RowSelect, Header]
             OnEditingDone = compGridEditingDone
-            Viewport.Width = 299.000000000000000000
-            Viewport.Height = 206.000000000000000000
+            Viewport.Width = 303.000000000000000000
+            Viewport.Height = 231.000000000000000000
             object StringColumn1: TStringColumn
               Header = 'Compositions list'
             end
@@ -18328,7 +18289,7 @@ object MainForm: TMainForm
           Align = Client
           Anchors = []
           Size.Width = 350.500000000000000000
-          Size.Height = 272.000000000000000000
+          Size.Height = 243.000000000000000000
           Size.PlatformDefault = False
           object threadsTopLayout: TLayout
             Align = Top
@@ -18406,8 +18367,8 @@ object MainForm: TMainForm
             Visible = False
             RowCount = 2
             Options = [ColLines, RowLines, AutoDisplacement]
-            Viewport.Width = 289.000000000000000000
-            Viewport.Height = 187.000000000000000000
+            Viewport.Width = 293.000000000000000000
+            Viewport.Height = 191.000000000000000000
             object StringColumn2: TStringColumn
               Header = 'In'
               Size.Width = 145.000000000000000000

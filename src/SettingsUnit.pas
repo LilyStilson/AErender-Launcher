@@ -52,6 +52,7 @@ uses
   FMX.Edit,
   FMX.Platform,
   FMX.Objects,
+  FMX.Menus,
   {$ENDREGION}
 
   {$REGION '  Windows Only Libraries  '}{$IFDEF MSWINDOWS}
@@ -110,6 +111,11 @@ type
     UIExpander: TExpander;
     BehaviourExpander: TExpander;
     langChangeLabel: TLabel;
+    hiddenS: TPopupMenu;
+    openConfig: TMenuItem;
+    resetLanucher: TMenuItem;
+    opSettingsLabel: TMenuItem;
+    separatorItem5: TMenuItem;
     procedure langBoxChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure aerenderPathSelectClick(Sender: TObject);
@@ -124,13 +130,14 @@ type
     procedure delFilesCheckBoxChange(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       var KeyChar: Char; Shift: TShiftState);
-    procedure ResetButtonClick(Sender: TObject);
     procedure dpi125Change(Sender: TObject);
     procedure dpi100Change(Sender: TObject);
     procedure dpi150Change(Sender: TObject);
     procedure dpi200Change(Sender: TObject);
     procedure refreshAerenderClick(Sender: TObject);
     procedure SetLanguage(LanguageCode: Integer);
+    procedure openConfigClick(Sender: TObject);
+    procedure resetLanucherClick(Sender: TObject);
   private
     { Private declarations }
     {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
@@ -507,16 +514,26 @@ begin
   end;
 end;
 
-procedure TSettingsForm.ResetButtonClick(Sender: TObject);
+procedure TSettingsForm.openConfigClick(Sender: TObject);
+begin
+  {$IFDEF MSWINDOWS}
+    ShellExecute(0, 'open', PWideChar(APPFOLDER + 'AErenderConfiguration.xml'), nil, nil, SW_SHOW);
+  {$ENDIF MSWINDOWS}
+  {$IFDEF MACOS}
+    _system(PAnsiChar('open ' + AnsiString('"' + APPFOLDER + 'AErenderConfiguration.xml' + '"')));
+  {$ENDIF MACOS}
+end;
+
+procedure TSettingsForm.resetLanucherClick(Sender: TObject);
 begin
   if (TDialogServiceSync.MessageDialog(('Launcher configuration will be renewed. This will delete all your setting and output modules. Application will be restarted'
-                                        + #13#10 + 'Proceed?'), TMsgDlgType.mtWarning, mbOKCancel, TMsgDlgBtn.mbOK, 0) = 1) then
+                                        + #13#10 + 'This action is irreversible! Proceed?'), TMsgDlgType.mtWarning, mbOKCancel, TMsgDlgBtn.mbOK, 0) = 1) then
     begin
       InitConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
       {$IFDEF MSWINDOWS}ShellExecute(0, 'OPEN', PChar(ParamStr(0)), '', '', SW_SHOWNORMAL);{$ENDIF MSWINDOWS}
       {$IFDEF MACOS}_system(PAnsiChar('open "' + AnsiString(ParamStr(0)) + '" &'));{$ENDIF MACOS}
+      Halt;
     end;
-  Application.Terminate;
 end;
 
 procedure TSettingsForm.styleBoxChange(Sender: TObject);

@@ -176,15 +176,8 @@ type
     outputModuleLabel: TLabel;
     outputModuleLayout: TLayout;
     renderSettingsLayout: TLayout;
-    renderSettings: TComboBox;
-    ListBoxGroupHeader3: TListBoxGroupHeader;
-    ListBoxItem5: TListBoxItem;
-    ListBoxItem6: TListBoxItem;
-    ListBoxItem7: TListBoxItem;
-    ListBoxGroupHeader4: TListBoxGroupHeader;
-    ListBoxItem8: TListBoxItem;
+    renderSettingsBox: TComboBox;
     renderSettingsLabel: TLabel;
-    ListBoxItem9: TListBoxItem;
     MainMenu1: TMainMenu;
     launcherItem: TMenuItem;
     fileItem: TMenuItem;
@@ -286,6 +279,7 @@ type
     procedure ReadAERQ(Path: String);
     procedure SetLanguage(LanguageCode: Integer);
     procedure UpdateOutputModules;
+    procedure UpdateRenderSettings;
     procedure threadsCountTyping(Sender: TObject);
     procedure threadsCountExit(Sender: TObject);
     procedure AddToRecents(Item: String);
@@ -294,6 +288,7 @@ type
     procedure ReInflateRecents;
     procedure compGridEditingDone(Sender: TObject; const ACol,
       ARow: Integer);
+    procedure renderSettingsBoxChange(Sender: TObject);
   private
     { Private declarations }
     //{$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
@@ -303,10 +298,15 @@ type
     procedure DragEnter(const Data: TDragObject; const Point: TPointF); override;
     procedure DragOver(const Data: TDragObject; const Point: TPointF; var Operation: TDragOperation); override;
     procedure DragDrop(const Data: TDragObject; const Point: TPointF); override;
+    procedure DoConstraints(NewWidth, NewHeight: Integer);
   end;
   OutputModule = record
     Module,
     Mask: String;
+    Imported: Boolean;
+  end;
+  RenderSetting = record
+    Setting: String;
     Imported: Boolean;
   end;
   function GetPlatformMemorySize: Int64;
@@ -314,8 +314,10 @@ type
   function GetDirectoryFiles(Directory: String): TArray<System.String>;
   function KillProcess(ProcessName: String): Integer;
   procedure InitOutputModules;
+  procedure InitRenderSettings;
   procedure InitConfiguration(Path: String);
   procedure LoadConfiguration(Path: String);
+  procedure LoadLegacyConfiguration(Path: String);
   procedure SaveConfiguration(Path: String);
   function Open(Path: String): Integer;
   function Execute(Path: String): Integer;
@@ -343,6 +345,7 @@ var
   LANG, STYLE, ONRENDERSTART: Integer;                      (*  Language, Theme and OnRenderStart values    *)
   LogFiles: TArray<String>;                                 (*  All the aerender log files here             *)
   OutputModules: TArray<OutputModule>;                      (*  All the After Effects output modules here   *)
+  RenderSettings: TArray<RenderSetting>;
   OMCount: Cardinal;
   //TempOutputModule: OutputModule;                         (*  Temporary Output Module used from import    *)
   TMathParser: MathExpParser.TExpressionParser;             (*  Mathematical parser for frames calculation  *)
@@ -489,6 +492,19 @@ begin
 {$ENDIF MACOS}
 end;
 
+procedure InitLanguage(PATH: String);
+begin
+  //LANG := 1;
+  var ResourceEN: TResourceStream := TResourceStream.Create(HInstance, 'Language_EN', RT_RCDATA);
+  var ResourceRU: TResourceStream := TResourceStream.Create(HInstance, 'Language_RU', RT_RCDATA);
+  Language := [
+                LauncherText.InitFromResourceStream(ResourceEN),
+                LauncherText.InitFromResourceStream(ResourceRU)
+              ];
+
+  ChangeLanguage(LANG);
+end;
+
 procedure InitOutputModules;
 begin
   SetLength (OutputModules, 10);
@@ -534,13 +550,39 @@ begin
   OutputModules[9].Imported := False;
 end;
 
+procedure InitRenderSettings;
+begin
+  SetLength (RenderSettings, 5);
+
+  RenderSettings[0].Setting   := 'Current Settings';
+  RenderSettings[0].Imported  := False;
+
+  RenderSettings[1].Setting   := 'Best Settings';
+  RenderSettings[1].Imported  := False;
+
+  RenderSettings[2].Setting   := 'DV Settings';
+  RenderSettings[2].Imported  := False;
+
+  RenderSettings[3].Setting   := 'Draft Settings';
+  RenderSettings[3].Imported  := False;
+
+  RenderSettings[4].Setting   := 'Multi-Machine Settings';
+  RenderSettings[4].Imported  := False;
+
+  //RenderSettings[4].Setting   := 'Custom';
+  //RenderSettings[4].Imported  := False;
+end;
+
 procedure InitConfiguration(Path: String);
 var
   Config: IXMLDocument;
   RootNode: IXMLNode;
   ChildNode: IXMLNode;
 begin
+  //InitLanguage;
   InitOutputModules;
+  InitRenderSettings;
+
   Config := TXMLDocument.Create(nil);
   Config.Active := True;
   Config.Encoding := 'utf-8';
@@ -584,7 +626,18 @@ begin
     ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
   end;
 
-  MainForm.outputModuleBox.Items.Add('Configure Output Modules...');
+  //MainForm.outputModuleBox.Items.Add('Configure Output Module...');
+
+  ChildNode := RootNode.AddChild('renderSettings');
+  ChildNode.Attributes['selected'] := '0';
+
+  for var i := 0 to High(RenderSettings) do begin
+    var SettingNode: IXMLNode := RootNode.ChildNodes['renderSettings'].AddChild('setting');
+    SettingNode.Text := RenderSettings[i].Setting;
+    SettingNode.Attributes['imported'] := 'False';
+  end;
+
+  //MainForm.renderSettingsBox.Items.Add('Configure Render Settings...');
 
   ChildNode := RootNode.AddChild('recentProjects');
   for var i := 0 to 9 do
@@ -637,9 +690,13 @@ begin
       OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
       OutputModules[i].Imported := False;
     end;
+
+  InitRenderSettings;
+
   //MainForm.UpdateOutputModules;
   //MainForm.outputModuleBox.Items.Add(Language[LANG].MainForm.ConfigureOutputModules);
   MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
+  MainForm.renderSettingsBox.ItemIndex := 0;
 end;
 
 procedure LoadConfiguration(Path: String);
@@ -678,18 +735,30 @@ begin
   MainForm.memUsageTrackBar.Value := RootNode.ChildNodes['memoryLimit'].Text.ToSingle();
   MainForm.cacheUsageTrackBar.Value := RootNode.ChildNodes['cacheLimit'].Text.ToSingle();
 
-  SetLength (OutputModules, RootNode.ChildNodes['outputModule'].ChildNodes.Count);
-  for var i := 0 to High(OutputModules) do begin
-    OutputModules[i].Module := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['moduleName'].Text;
-    OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
-    OutputModules[i].Imported := StrToBool(RootNode.ChildNodes['outputModule'].ChildNodes[i].Attributes['imported']);
-  end;
+  if RootNode.ChildNodes['outputModule'].ChildNodes.Count <> 0 then begin
+    SetLength (OutputModules, RootNode.ChildNodes['outputModule'].ChildNodes.Count);
+    for var i := 0 to High(OutputModules) do begin
+      OutputModules[i].Module := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['moduleName'].Text;
+      OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
+      OutputModules[i].Imported := StrToBool(RootNode.ChildNodes['outputModule'].ChildNodes[i].Attributes['imported']);
+    end;
+    MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
+  end else
+    InitOutputModules;
+
+  if RootNode.ChildNodes['renderSettings'].ChildNodes.Count <> 0 then begin
+    SetLength (RenderSettings, RootNode.ChildNodes['renderSettings'].ChildNodes.Count);
+    for var i := 0 to High(RenderSettings) do begin
+      RenderSettings[i].Setting := RootNode.ChildNodes['renderSettings'].ChildNodes[i].Text;
+      RenderSettings[i].Imported := StrToBool(RootNode.ChildNodes['renderSettings'].ChildNodes[i].Attributes['imported']);
+    end;
+    MainForm.renderSettingsBox.ItemIndex := StrToInt(RootNode.ChildNodes['renderSettings'].Attributes['selected']);
+  end else
+    InitRenderSettings;
 
   for var i := 0 to 9 do begin
     Recents[i] := RootNode.ChildNodes['recentProjects'].ChildNodes[i].Text;
   end;
-
-  MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
 end;
 
 procedure SaveConfiguration(Path: String);
@@ -732,9 +801,7 @@ begin
   RootNode.AddChild('cacheLimit').Text := MainForm.cacheUsageTrackBar.Value.ToString;
 
   ChildNode := RootNode.AddChild('outputModule');
-
   ChildNode.Attributes['selected'] := MainForm.outputModuleBox.ItemIndex.ToString;
-
   for var i := 0 to High(OutputModules) do begin
     var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
     ModuleNode.Attributes['imported'] := BoolToStr(OutputModules[i].Imported, True);
@@ -742,8 +809,15 @@ begin
     ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
   end;
 
-  ChildNode := RootNode.AddChild('recentProjects');
+  ChildNode := RootNode.AddChild('renderSettings');
+  ChildNode.Attributes['selected'] := MainForm.renderSettingsBox.ItemIndex.ToString;
+  for var i := 0 to High(RenderSettings) do begin
+    var SettingNode: IXMLNode := RootNode.ChildNodes['renderSettings'].AddChild('setting');
+    SettingNode.Text := RenderSettings[i].Setting;
+    SettingNode.Attributes['imported'] := RenderSettings[i].Imported;
+  end;
 
+  ChildNode := RootNode.AddChild('recentProjects');
   for var i := 0 to 9 do begin
     if Recents[i] = '' then
       ChildNode.AddChild('project').Text := '(empty)'
@@ -796,6 +870,16 @@ begin
     end;
 end;
 
+function GetRSIndex(ARenderSetting: RenderSetting): Integer;
+begin
+  Result := -1;
+  for var i := 0 to High(RenderSettings) do
+    if ARenderSetting.Setting = RenderSettings[i].Setting then begin
+      Result := i;
+      break;
+    end;
+end;
+
 procedure ChangeLanguage(LanguageCode: Integer);
 begin
   MainForm.SetLanguage(LanguageCode);
@@ -804,19 +888,6 @@ begin
   AboutForm.SetLanguage(LanguageCode);
   RenderingForm.SetLanguage(LanguageCode);
   OutputModuleEditorForm.SetLanguage(LanguageCode);
-end;
-
-procedure InitLanguage(PATH: String);
-begin
-  //LANG := 1;
-  var ResourceEN: TResourceStream := TResourceStream.Create(HInstance, 'Language_EN', RT_RCDATA);
-  var ResourceRU: TResourceStream := TResourceStream.Create(HInstance, 'Language_RU', RT_RCDATA);
-  Language := [
-                LauncherText.InitFromResourceStream(ResourceEN),
-                LauncherText.InitFromResourceStream(ResourceRU)
-              ];
-
-  ChangeLanguage(LANG);
 end;
 
 function GetRecentIndex(Item: String): Integer;
@@ -894,6 +965,14 @@ begin
   InflateRecents;
 end;
 
+procedure TMainForm.renderSettingsBoxChange(Sender: TObject);
+begin
+  if (renderSettingsBox.ItemIndex = renderSettingsBox.Count - 1) and (renderSettingsBox.Count <> 0) then begin
+    //OutputModuleEditorForm.Show;
+    //renderSettingsBox.ItemIndex := 0;
+  end
+end;
+
 /// This will add instance to Recents[] and call
 /// ReInflateRecents() to update recentItem
 procedure TMainForm.AddToRecents(Item: String);
@@ -945,11 +1024,9 @@ begin
   MainForm.exportConfigItem.Text      := Language[LanguageCode].MainForm.MainMenu.ExportConfiguration;
   MainForm.exitItem.Text              := Language[LanguageCode].MainForm.MainMenu.{$IFDEF MSWINDOWS}Close;{$ENDIF MSWINDOWS}{$IFDEF MACOS}CloseDarwin;{$ENDIF MACOS}
 
-
   MainForm.editItem.Text              := Language[LanguageCode].MainForm.MainMenu.EditMenu;
   MainForm.outModuleEditorItem.Text   := Language[LanguageCode].MainForm.MainMenu.OutputModuleEditor;
   MainForm.settingsItem.Text          := Language[LanguageCode].MainForm.MainMenu.Settings;
-
 
   MainForm.helpItem.Text              := Language[LanguageCode].MainForm.MainMenu.HelpMenu;
   MainForm.aboutItem.Text             := Language[LanguageCode].MainForm.MainMenu.About;
@@ -961,6 +1038,7 @@ begin
   MainForm.openFile.Text              := Language[LanguageCode].MainForm.OpenSaveProjectButton;
   MainForm.saveFile.Text              := Language[LanguageCode].MainForm.OpenSaveProjectButton;
   MainForm.outputModuleLabel.Text     := Language[LanguageCode].MainForm.OutputModulePreset;
+  MainForm.renderSettingsLabel.Text   := Language[LanguageCode].MainForm.RenderSettings;
 
   MainForm.properties.Text            := Language[LanguageCode].MainForm.Properties;
   MainForm.missingFilesCheckbox.Text  := Language[LanguageCode].MainForm.MissingFiles;
@@ -1000,6 +1078,7 @@ end;
 
 procedure TMainForm.UpdateOutputModules;
 begin
+  var Index: Integer := outputModuleBox.ItemIndex;
   if (outputModuleBox.Count <> 0) then
     outputModuleBox.Clear;
 
@@ -1009,7 +1088,22 @@ begin
     else
       outputModuleBox.Items.Add(OutputModules[i].Module);
   outputModuleBox.Items.Add(Language[LANG].MainForm.ConfigureOutputModules);
-  outputModuleBox.ItemIndex := 0;
+  outputModuleBox.ItemIndex := Index;
+end;
+
+procedure TMainForm.UpdateRenderSettings;
+begin
+  var Index: Integer := renderSettingsBox.ItemIndex;
+  if (renderSettingsBox.Count <> 0) then
+    renderSettingsBox.Clear;
+
+  for var i := 0 to High(RenderSettings) do
+    if RenderSettings[i].Imported then
+      renderSettingsBox.Items.Add(RenderSettings[i].Setting + ' ' + Language[LANG].OutputModuleConfiguratorForm.Imported)
+    else
+      renderSettingsBox.Items.Add(RenderSettings[i].Setting);
+  //renderSettingsBox.Items.Add(Language[LANG].MainForm.ConfigureRenderSettings);
+  renderSettingsBox.ItemIndex := Index;
 end;
 
 procedure TMainForm.ReadAERQ(Path: String);
@@ -1024,7 +1118,7 @@ begin
 
   projectPath.Text := RootNode.Attributes['project'];
   outputPath.Text := RootNode.ChildNodes['queueItem'].Attributes['outputFolder'];
-  tempSavePath := RootNode.ChildNodes['queueItem'].Attributes['outputFolder'];
+  tempSavePath := RootNode.ChildNodes['queueItem'].Attributes['outputFolder'] + PLATFORMPATHSEPARATOR;
 
   /// Add new Output Module to library if it don't exist
   if StrToBool(RootNode.ChildNodes['queueItem'].ChildNodes['outputModule'].Attributes['use']) then begin
@@ -1032,19 +1126,36 @@ begin
     TempOutputModule.Module := RootNode.ChildNodes['queueItem'].ChildNodes['outputModule'].ChildNodes['module'].Text;
     TempOutputModule.Mask   := RootNode.ChildNodes['queueItem'].ChildNodes['outputModule'].ChildNodes['mask'].Text;
 
-    if not (GetOMIndex(TempOutputModule) = -1) then begin
-      outputModuleBox.ItemIndex := GetOMIndex(TempOutputModule);
-    end else begin
+    if GetOMIndex(TempOutputModule) <> -1 then
+      outputModuleBox.ItemIndex := GetOMIndex(TempOutputModule)
+    else begin
       SetLength(OutputModules, Length(OutputModules) + 1);
       OutputModules[High(OutputModules)].Module   := RootNode.ChildNodes['queueItem'].ChildNodes['outputModule'].ChildNodes['module'].Text;
       OutputModules[High(OutputModules)].Mask     := RootNode.ChildNodes['queueItem'].ChildNodes['outputModule'].ChildNodes['mask'].Text;
       OutputModules[High(OutputModules)].Imported := True;
 
-      outputModuleBox.Items.Insert(outputModuleBox.Items.Count - 1, OutputModules[High(OutputModules)].Module + ' (imported)');
+      outputModuleBox.Items.Insert(outputModuleBox.Items.Count - 1, OutputModules[High(OutputModules)].Module + ' ' + Language[LANG].OutputModuleConfiguratorForm.Imported);
       outputModuleBox.ItemIndex := outputModuleBox.Items.Count - 2;
     end;
   end;
-  outputModuleBoxChange(nil);
+  outputModuleBoxChange(Self);
+
+  if RootNode.ChildNodes['queueItem'].ChildNodes['renderSettings'].Text.IsEmpty <> True then begin
+    var TempRenderSetting: RenderSetting;
+    TempRenderSetting.Setting := RootNode.ChildNodes['queueItem'].ChildNodes['renderSettings'].Text;
+
+    if GetRSIndex(TempRenderSetting) <> -1 then
+      renderSettingsBox.ItemIndex := GetRSIndex(TempRenderSetting)
+    else begin
+      SetLength(RenderSettings, Length(RenderSettings) + 1);
+      RenderSettings[High(RenderSettings)].Setting := RootNode.ChildNodes['queueItem'].ChildNodes['renderSettings'].Text;
+      RenderSettings[High(RenderSettings)].Imported := True;
+
+      renderSettingsBox.Items.Insert(renderSettingsBox.Items.Count - 1, RenderSettings[High(RenderSettings)].Setting + ' ' + Language[LANG].OutputModuleConfiguratorForm.Imported);
+      renderSettingsBox.ItemIndex := renderSettingsBox.Items.Count - 2;
+    end;
+  end;
+  renderSettingsBoxChange(Self);
 
   compName.Text := RootNode.ChildNodes['queueItem'].ChildNodes['composition'].ChildNodes['name'].Text;
   inFrame.Text  := RootNode.ChildNodes['queueItem'].ChildNodes['composition'].ChildNodes['rangeStart'].Text;
@@ -1097,12 +1208,12 @@ begin
   if compSwitch.IsChecked then begin
     if UpdateAvailable = True then
       begin
-        if MainForm.Height <= 470 then
-          MainForm.Height := MainForm.Height + 130;
+        if MainForm.Height <= 490 then
+          MainForm.Height := 630;//MainForm.Height + 130;
       end
     else
-      if MainForm.Height <= 420 then
-        MainForm.Height := MainForm.Height + 130;
+      if MainForm.Height <= 450 then
+        MainForm.Height := 580;//MainForm.Height + 130;
 
     compSwitchLabel.Text := Language[LANG].MainForm.MultiComp;
 
@@ -1111,11 +1222,11 @@ begin
     compGrid.Model.ScrollDirections := TScrollDirections.Vertical;
   end else begin
     if UpdateAvailable = True then begin
-        if MainForm.Height >= 580 then
-          MainForm.Height := MainForm.Height - 130
+      if MainForm.WindowState <> TWindowState.wsMaximized then
+        MainForm.Height := 490//MainForm.Height - 130
     end else
-      if MainForm.Height <= 550 then
-        MainForm.Height := MainForm.Height - 130;
+      if MainForm.WindowState <> TWindowState.wsMaximized then
+        MainForm.Height := 450;//MainForm.Height - 130;
 
     compSwitchLabel.Text := Language[LANG].MainForm.SingleComp;
     compName.Text := compGrid.Cells[0, 0];
@@ -1177,8 +1288,7 @@ begin
   {$IFDEF MSWINDOWS}DwmCompositionEnabled();{$ENDIF MSWINDOWS}
   FormatSettings := TFormatSettings.Invariant;
   MainForm.Width := 600;
-  MainForm.Height := {$IFDEF MSWINDOWS}420{$ENDIF MSWINDOWS}
-                      {$IFDEF MACOS}400{$ENDIF MACOS};
+  MainForm.Height := {$IFDEF MSWINDOWS}450{$ENDIF MSWINDOWS}  {$IFDEF MACOS}430{$ENDIF MACOS};
   //MainForm.Caption := 'AErender Launcher (' + APPVERSION_DEMO + ')';
   MainForm.Caption := 'AErender Launcher (' + APPVERSION + ')';
   APPFOLDER :=  {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\'{$ENDIF MSWINDOWS}
@@ -1245,12 +1355,34 @@ begin
   threadsGrid.AniCalculations.Animation := True;
 end;
 
+procedure TMainForm.DoConstraints(NewWidth, NewHeight: Integer);
+begin
+  SetBounds(Left, Top, NewWidth, NewHeight);
+end ;
+
 procedure TMainForm.FormResize(Sender: TObject);
 begin
-  //compName.Text := 'H: ' + MainForm.Height.ToString + '; W: ' + MainForm.Width.ToString;
+  // RU: Установка размеров для колонн в таблицах
   StringColumn1.Width := compGrid.Width;
   StringColumn2.Width := threadsGrid.Width * 0.5;
   StringColumn3.Width := threadsGrid.Width * 0.5;
+
+  // RU: Ограничение ширины формы
+  if MainForm.Width < 600 then
+    MainForm.Width := 600;
+
+  // RU: Ограничение высоты формы в зависимости от платформы и видимости панели с обновлением
+  if UpdateAvailable then begin
+    if MainForm.Height < {$IFDEF MSWINDOWS}490{$ENDIF MSWINDOWS}  {$IFDEF MACOS}470{$ENDIF MACOS} then begin
+      MainForm.Height := {$IFDEF MSWINDOWS}490{$ENDIF MSWINDOWS}  {$IFDEF MACOS}470{$ENDIF MACOS};
+      {$IFDEF MSWINDOWS}Mouse_Event(MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);{$ENDIF MSWINDOWS}
+    end;
+  end else begin
+    if MainForm.Height < {$IFDEF MSWINDOWS}450{$ENDIF MSWINDOWS}  {$IFDEF MACOS}430{$ENDIF MACOS} then begin
+      MainForm.Height := {$IFDEF MSWINDOWS}450{$ENDIF MSWINDOWS}  {$IFDEF MACOS}430{$ENDIF MACOS};
+    {$IFDEF MSWINDOWS}Mouse_Event(MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);{$ENDIF MSWINDOWS}
+    end;
+  end;
 end;
 
 procedure TMainForm.FormShow(Sender: TObject);
@@ -1267,6 +1399,8 @@ begin
   end;
 
   UpdateOutputModules;
+  UpdateRenderSettings;
+
   SettingsForm.styleBox.ItemIndex := STYLE;
   SettingsForm.onRenderStartBox.ItemIndex := ONRENDERSTART;
   SettingsForm.HandleCheckBox.IsChecked := StrToBool(AERH);
@@ -1513,6 +1647,9 @@ begin
               if outputModuleBox.ItemIndex <> -1 then
                 execFile[i].script := execFile[i].script + '-OMtemplate "' + OutputModules[outputModuleBox.ItemIndex].Module + '" ';
 
+              if renderSettingsBox.ItemIndex <> -1 then
+                execFile[i].script := execFile[i].script + '-RStemplate  "' + RenderSettings[outputModuleBox.ItemIndex].Setting + '" ';
+
               // Add memory usage flags to script
               execFile[i].script := execFile[i].script + '-mem_usage "' + Trunc(memUsageTrackBar.Value).ToString + '" "' + Trunc(cacheUsageTrackBar.Value).ToString + '" ';
 
@@ -1587,7 +1724,7 @@ begin
               {$ENDIF MACOS}
             end;
         // Wait untill aerender launches
-        Sleep (1000);
+        Sleep (200);
         if SettingsForm.HandleCheckBox.IsChecked then
           begin
             if RenderingUnit.VISIBLE then
@@ -1827,12 +1964,12 @@ begin
     begin
       if UpdateAvailable = True then
         begin
-          if MainForm.Height <= 470 then
-            MainForm.Height := MainForm.Height + 130;
+          if MainForm.Height <= 490 then
+            MainForm.Height := 630;
         end
       else
-        if MainForm.Height <= 420 then
-          MainForm.Height := MainForm.Height + 130;
+        if MainForm.Height <= 450 then
+          MainForm.Height := 580;
 
       threadsSwitchLabel.Text := Language[LANG].MainForm.SplitRender;
       outFrame.TextPrompt     := Language[LANG].MainForm.EndFrameHint;
@@ -1843,12 +1980,12 @@ begin
     begin
       if UpdateAvailable = True then
         begin
-          if MainForm.Height >= 580 then
-            MainForm.Height := MainForm.Height - 130
+          if MainForm.WindowState <> TWindowState.wsMaximized then
+            MainForm.Height := 490
         end
       else
-        if MainForm.Height <= 550 then
-          MainForm.Height := MainForm.Height - 130;
+        if MainForm.WindowState <> TWindowState.wsMaximized then
+          MainForm.Height := 450;
 
       threadsSwitchLabel.Text := Language[LANG].MainForm.SingleRener;
       outFrame.TextPrompt     := '';
@@ -1867,14 +2004,14 @@ begin
     UpdateAvailable := True;
 
   if UpdateAvailable then begin
-    MainForm.Height := {$IFDEF MSWINDOWS}460{$ENDIF MSWINDOWS}  {$IFDEF MACOS}420{$ENDIF MACOS};
+    MainForm.Height := {$IFDEF MSWINDOWS}490{$ENDIF MSWINDOWS}  {$IFDEF MACOS}470{$ENDIF MACOS};
     MainForm.UpdateInfo.Visible := True;
     MainForm.UpdateInfo.Enabled := True;
     MainForm.downloadButton.Text := Language[LANG].MainForm.Download + ' (' + gitVersion + ')';
     {$IFDEF MSWINDOWS}gitDownload := gitRelease.A[0].P['assets'].A[1].P['browser_download_url'].Value;{$ENDIF MSWINDOWS}
     {$IFDEF MACOS}gitDownload := gitRelease.A[0].P['assets'].A[0].P['browser_download_url'].Value;{$ENDIF MACOS}
   end else begin
-    MainForm.Height := {$IFDEF MSWINDOWS}420{$ENDIF MSWINDOWS}  {$IFDEF MACOS}400{$ENDIF MACOS};
+    MainForm.Height := {$IFDEF MSWINDOWS}450{$ENDIF MSWINDOWS}  {$IFDEF MACOS}430{$ENDIF MACOS};
     MainForm.UpdateInfo.Visible := False;
     MainForm.UpdateInfo.Enabled := False;
   end;
