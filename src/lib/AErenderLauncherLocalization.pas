@@ -6,7 +6,7 @@ uses
   System.Types, System.Character, System.Variants, System.IOUtils, System.SysUtils, System.Classes, System.JSON;
 
 type
-  /// I didn't used it anywhere, but I'll leave it here
+  /// I didn't use it anywhere, but I'll leave it here
   /// Maybe this will come useful someday
   TLanguageCode = record
     const
@@ -32,6 +32,8 @@ type
     DarwinDialogTip, DarwinDialogOpen, DarwinDialogSaveNameField, DarwinDialogSave,
     OutputModulePreset,
     ConfigureOutputModules,
+    RenderSettings,
+    ConfigureRenderSettings,
     Properties,
     MissingFiles,
     Sound,
@@ -192,6 +194,8 @@ begin
   Result.MainForm.DarwinDialogSave              := LanguageData.P['LauncherText'].P['MainFormText'].P['DarwinDialogSave'].Value;
   Result.MainForm.OutputModulePreset            := LanguageData.P['LauncherText'].P['MainFormText'].P['OutputModulePreset'].Value;
   Result.MainForm.ConfigureOutputModules        := LanguageData.P['LauncherText'].P['MainFormText'].P['ConfigureOutputModules'].Value;
+  Result.MainForm.RenderSettings                := LanguageData.P['LauncherText'].P['MainFormText'].P['RenderSettings'].Value;
+  Result.MainForm.ConfigureRenderSettings       := LanguageData.P['LauncherText'].P['MainFormText'].P['ConfigureRenderSettings'].Value;
   Result.MainForm.Properties                    := LanguageData.P['LauncherText'].P['MainFormText'].P['Properties'].Value;
   Result.MainForm.MissingFiles                  := LanguageData.P['LauncherText'].P['MainFormText'].P['MissingFiles'].Value;
   Result.MainForm.Sound                         := LanguageData.P['LauncherText'].P['MainFormText'].P['Sound'].Value;
@@ -258,6 +262,7 @@ begin
   Result.OutputModuleConfiguratorForm.OutputModulePrompt              := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['OutputModulePrompt'].Value;
   Result.OutputModuleConfiguratorForm.OutputFileNameStructure         := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['OutputFileNameStructure'].Value;
   Result.OutputModuleConfiguratorForm.OutputFileNamePrompt            := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['OutputFileNamePrompt'].Value;
+  Result.OutputModuleConfiguratorForm.Imported                        := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['Imported'].Value;
   Result.OutputModuleConfiguratorForm.ProjectTab                      := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['ProjectTab'].Value;
   Result.OutputModuleConfiguratorForm.CompositionTab                  := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['CompositionTab'].Value;
   Result.OutputModuleConfiguratorForm.CompositionTimeTab              := LanguageData.P['LauncherText'].P['OutputModuleFormText'].P['CompositionTimeTab'].Value;
