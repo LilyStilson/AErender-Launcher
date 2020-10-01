@@ -44,7 +44,7 @@ object RenderingForm: TRenderingForm
         Margins.Right = 10.000000000000000000
         Position.X = 5.000000000000000000
         Position.Y = 86.000000000000000000
-        Size.Width = 97.000000000000000000
+        Size.Width = 98.000000000000000000
         Size.Height = 24.000000000000000000
         Size.PlatformDefault = False
         TextSettings.WordWrap = False
@@ -55,7 +55,7 @@ object RenderingForm: TRenderingForm
       object statusBarSeparator1: TLine
         Align = Right
         LineType = Left
-        Position.X = 350.000000000000000000
+        Position.X = 318.000000000000000000
         Position.Y = 97.000000000000000000
         Size.Width = 10.000000000000000000
         Size.Height = 31.000000000000000000
@@ -67,9 +67,9 @@ object RenderingForm: TRenderingForm
         Margins.Top = 4.000000000000000000
         Margins.Right = 24.000000000000000000
         Margins.Bottom = 4.000000000000000000
-        Position.X = 360.000000000000000000
+        Position.X = 328.000000000000000000
         Position.Y = 101.000000000000000000
-        Size.Width = 128.000000000000000000
+        Size.Width = 160.000000000000000000
         Size.Height = 23.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 2
@@ -164,12 +164,14 @@ object RenderingForm: TRenderingForm
       end
       object timeElapsedLabel: TLabel
         Align = Left
+        AutoSize = True
         Margins.Left = 8.000000000000000000
         Position.X = 8.000000000000000000
         Position.Y = 97.000000000000000000
-        Size.Width = 175.000000000000000000
+        Size.Width = 120.000000000000000000
         Size.Height = 31.000000000000000000
         Size.PlatformDefault = False
+        TextSettings.WordWrap = False
         Text = 'Time Elapsed: 00:00:00'
         TabOrder = 5
       end
@@ -177,7 +179,7 @@ object RenderingForm: TRenderingForm
         Align = Left
         AutoSize = True
         Margins.Left = 10.000000000000000000
-        Position.X = 193.000000000000000000
+        Position.X = 138.000000000000000000
         Position.Y = 97.000000000000000000
         Size.Width = 0.000000000000000000
         Size.Height = 31.000000000000000000
@@ -196,7 +198,7 @@ object RenderingForm: TRenderingForm
         StyledSettings = [Family, FontColor]
         Margins.Left = 20.000000000000000000
         Position.X = 20.000000000000000000
-        Size.Width = 147.000000000000000000
+        Size.Width = 148.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Size = 16.000000000000000000

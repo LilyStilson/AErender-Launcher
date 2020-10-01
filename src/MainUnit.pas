@@ -79,6 +79,7 @@ uses
   FMX.ComboTrackBar,
   FMX.ImgList,
   FMX.ComboEdit,
+  FMX.Text,
   FMX.BufferedLayout,
   {$ENDREGION}
 
@@ -103,11 +104,97 @@ uses
 
   {$REGION '    macOS Only Libraries    '}{$IFDEF MACOS}
     Posix.Stdlib, Posix.Unistd, Posix.SysSysctl, Posix.SysTypes, FMX.Platform.Mac,
-    Mac.CodeBlocks, MacApi.Dialogs,
-    Macapi.Appkit, Macapi.ObjectiveC, Macapi.Foundation, Macapi.Helpers, Macapi.ObjCRuntime, Macapi.CocoaTypes;
+    Mac.CodeBlocks, Macapi.Appkit, Macapi.ObjectiveC, Macapi.Foundation,
+    Macapi.Dialogs, Macapi.Helpers, Macapi.ObjCRuntime, Macapi.CocoaTypes;
   {$ENDIF MACOS}{$ENDREGION}
 
 type
+  // This won't be required in the next RAD Studio version
+  TComboEdit = class(TCustomComboEdit)
+  procedure OnValidateEvent(Sender: TObject; var Text: string);
+  procedure OnValidatingEvent(Sender: TObject; var Text: string);
+  published
+    property CanFocus default True;
+    property CanParentFocus;
+    property Cursor default crIBeam;
+    property DisableFocusEffect;
+    property DropDownCount default TComboEditModel.DefaultDropDownCount;
+    property DropDownKind default TComboEditModel.DefaultDropDownKind;
+    property KeyboardType;
+    property ReadOnly;
+    property ItemHeight;
+    property ItemWidth;
+    property Items;
+    property ItemIndex;
+    property ListBoxResource;
+    property Text;
+    property TextSettings;
+    property Position;
+    property Width;
+    property Height;
+    property HelpContext;
+    property HelpKeyword;
+    property HelpType;
+    property Hint;
+    property StyledSettings;
+    property StyleLookup;
+    property ClipChildren default False;
+    property ClipParent default False;
+    property DragMode default TDragMode.dmManual;
+    property EnableDragHighlight default True;
+    property Enabled default True;
+    property Locked default False;
+    property HitTest default True;
+    property Padding;
+    property Opacity;
+    property Margins;
+    property PopupMenu;
+    property RotationAngle;
+    property RotationCenter;
+    property Scale;
+    property Size;
+    property TouchTargetExpansion;
+    property Visible default True;
+    property Caret;
+    property KillFocusByReturn;
+    property ParentShowHint;
+    property ShowHint;
+    { events }
+    property OnChange;
+    property OnChangeTracking;
+    property OnTyping;
+    property OnApplyStyleLookup;
+    property OnClosePopup;
+    property OnPopup;
+    { Drag and Drop events }
+    property OnDragEnter;
+    property OnDragLeave;
+    property OnDragOver;
+    property OnDragDrop;
+    property OnDragEnd;
+    { Keyboard events }
+    property OnKeyDown;
+    property OnKeyUp;
+    { Mouse events }
+    property OnCanFocus;
+    property OnClick;
+    property OnDblClick;
+    property OnEnter;
+    property OnExit;
+    property OnMouseDown;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnMouseWheel;
+    property OnMouseEnter;
+    property OnMouseLeave;
+    property OnPainting;
+    property OnPaint;
+    property OnResize;
+    property OnResized;
+    property OnPresentationNameChoosing;
+    property OnValidate;
+    property OnValidating;
+  end;
   TMainForm = class(TForm)
     projectPathLabel: TLabel;
     inputFileLayout: TLayout;
@@ -298,7 +385,6 @@ type
     procedure DragEnter(const Data: TDragObject; const Point: TPointF); override;
     procedure DragOver(const Data: TDragObject; const Point: TPointF; var Operation: TDragOperation); override;
     procedure DragDrop(const Data: TDragObject; const Point: TPointF); override;
-    procedure DoConstraints(NewWidth, NewHeight: Integer);
   end;
   OutputModule = record
     Module,
@@ -355,7 +441,8 @@ var
   Language: TArray<LauncherText>;
   Recents: array [0..9] of String;
   RecentsMenuItems: TArray<TMenuItem>;
-  //TempThreadsStr: String = '';
+  TempThreadsStr: String = '';
+  ImportedPath: String = '';
 
 implementation
 
@@ -372,6 +459,19 @@ uses
   {$ENDREGION}
 
 {$R *.fmx}
+
+procedure TComboEdit.OnValidateEvent(Sender: TObject; var Text: string);
+begin
+  TempThreadsStr := Text;
+end;
+
+procedure TComboEdit.OnValidatingEvent(Sender: TObject; var Text: string);
+begin
+  if (TempThreadsStr <> '') then begin
+    Text := TempThreadsStr;
+    TempThreadsStr := '';
+  end;
+end;
 
 {$REGION '    Routines    '}
 
@@ -626,7 +726,7 @@ begin
     ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
   end;
 
-  //MainForm.outputModuleBox.Items.Add('Configure Output Module...');
+  MainForm.outputModuleBox.ItemIndex := 0;
 
   ChildNode := RootNode.AddChild('renderSettings');
   ChildNode.Attributes['selected'] := '0';
@@ -637,7 +737,7 @@ begin
     SettingNode.Attributes['imported'] := 'False';
   end;
 
-  //MainForm.renderSettingsBox.Items.Add('Configure Render Settings...');
+  MainForm.renderSettingsBox.ItemIndex := 0;
 
   ChildNode := RootNode.AddChild('recentProjects');
   for var i := 0 to 9 do
@@ -656,7 +756,7 @@ begin
   Config.Active := True;
   RootNode := Config.DocumentElement;
 
-  LANG := RootNode.ChildNodes['lang'].Text.ToInteger();
+  LANG := 0;
   STYLE := RootNode.ChildNodes['style'].Text.ToInteger();
   AERPATH := RootNode.ChildNodes['aerender'].Text;
   ONRENDERSTART := RootNode.ChildNodes['onRenderStart'].Text.ToInteger();
@@ -693,8 +793,6 @@ begin
 
   InitRenderSettings;
 
-  //MainForm.UpdateOutputModules;
-  //MainForm.outputModuleBox.Items.Add(Language[LANG].MainForm.ConfigureOutputModules);
   MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
   MainForm.renderSettingsBox.ItemIndex := 0;
 end;
@@ -1109,17 +1207,14 @@ end;
 procedure TMainForm.ReadAERQ(Path: String);
 begin
   var AERQXMLDocument: IXMLDocument := TXMLDocument.Create(nil);
-  AERQXMLDocument.ParseOptions := [poAsyncLoad];
   AERQXMLDocument.LoadFromFile(Path);
   AERQXMLDocument.Encoding := 'utf-8';
 
   AERQXMLDocument.Active := True;
   var RootNode: IXMLNode := AERQXMLDocument.DocumentElement;
-
   projectPath.Text := RootNode.Attributes['project'];
   outputPath.Text := RootNode.ChildNodes['queueItem'].Attributes['outputFolder'];
   tempSavePath := RootNode.ChildNodes['queueItem'].Attributes['outputFolder'] + PLATFORMPATHSEPARATOR;
-
   /// Add new Output Module to library if it don't exist
   if StrToBool(RootNode.ChildNodes['queueItem'].ChildNodes['outputModule'].Attributes['use']) then begin
     var TempOutputModule: OutputModule;
@@ -1353,12 +1448,10 @@ begin
   compGrid.AniCalculations.Animation := True;
 
   threadsGrid.AniCalculations.Animation := True;
-end;
 
-procedure TMainForm.DoConstraints(NewWidth, NewHeight: Integer);
-begin
-  SetBounds(Left, Top, NewWidth, NewHeight);
-end ;
+  threadsCount.OnValidate := threadsCount.OnValidateEvent;
+  threadsCount.OnValidating := threadsCount.OnValidatingEvent;
+end;
 
 procedure TMainForm.FormResize(Sender: TObject);
 begin
@@ -1405,6 +1498,13 @@ begin
   SettingsForm.onRenderStartBox.ItemIndex := ONRENDERSTART;
   SettingsForm.HandleCheckBox.IsChecked := StrToBool(AERH);
   SettingsForm.delFilesCheckBox.IsChecked := StrToBool(DelTempFiles);
+
+  {$IFDEF MACOS}
+  if LANG = 1 then begin
+    outputModuleLabel.Width := 148;
+    renderSettingsLabel.Width := 148;
+  end;
+  {$ENDIF MACOS}
 
   if memUsageTrackBar.Value = 100 then
     memUsageInfo.Text := Language[LANG].MainForm.Unlimited
@@ -1461,9 +1561,33 @@ begin
   threadsSwitch.Enabled := True;
   threadsSwitch.IsChecked := False;
 
+{$IFDEF MACOS}
+  var NSWin: NSWindow := WindowHandleToPlatform(Screen.ActiveForm.Handle).Wnd;
+
+  var FOpenFile: NSSavePanel := TNSOpenPanel.Wrap(TNSOpenPanel.OCClass.openPanel);
+  FOpenFile.setDirectory(StrToNSStr(DEFPRGPATH));
+  FOpenFile.setAllowedFileTypes(ArrayToNSArray(['aer']));
+  FOpenFile.setPrompt(StrToNSStr('Import configuration'));
+
+  objc_msgSendP2((FOpenFile as ILocalObject).GetObjectID,
+                 sel_getUid(PAnsiChar('beginSheetModalForWindow:completionHandler:')),
+                 (NSWin as ILocalObject).GetObjectID,
+                 TObjCBlock.CreateBlockWithProcedure(
+                 procedure (p1: NSInteger)
+                 begin
+                    if p1 = 0 then
+                      // Handle
+                    else begin
+                      ImportedPath := NSStrToStr(FOpenFile.URL.relativePath);
+                      ImportForm.ShowModal;
+                    end;
+                 end));
+{$ENDIF MACOS}
+{$IFDEF MSWINDOWS}
   with XMLOpenDialog do
     if Execute then
       ImportForm.ShowModal;
+{$ENDIF MSWINDOWS}
 end;
 
 procedure TMainForm.infoButtonClick(Sender: TObject);
@@ -1493,10 +1617,10 @@ type
   end;
 var
   threads, comps, emptyComps: Integer;
-  PATH, logPath, prgPath: String;
+  PATH, logPath{, prgPath}: String;
   execFile: array [1..128] of exec;
 
-  Notification: TNotification;
+  // Notification: TNotification;
 begin
   //Error Codes
   if not (SettingsForm.HandleCheckBox.IsChecked and isRendering) then begin
@@ -1517,6 +1641,8 @@ begin
         if emptyComps > 0 then
           ERR := ERR + #13#10 + '[Error 5]: ' + Language[LANG].Errors.multiCompIsEmpty;
       end;
+    if StrToInt(threadsCount.Text) > 128 then
+      ERR := ERR + #13#10 + '[Error 6]: ' + Language[LANG].Errors.tooManyThreads;
 
     //Proceed if no errors occured
     if not ERR.IsEmpty then
@@ -1934,7 +2060,7 @@ begin
       threadsCount.StyleLookup := 'comboeditstyle';
     calculateButtonClick(Sender);
   end;
- // threadsCount.Text := TempThreadsStr;
+  //threadsCount.Text := TempThreadsStr;
 end;
 
 procedure TMainForm.threadsCountExit(Sender: TObject);

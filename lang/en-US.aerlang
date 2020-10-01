@@ -138,6 +138,7 @@
             "outputIsEmpty": "Output path is not specified",
             "compositionIsEmpty": "Composition name is not specified",
             "multiCompIsEmpty": "Not all compositions names are specified in composition list",
+            "tooManyThreads": "Too many rendering threads selected (limit is 128)",
             "isCurrentlyRendering": "Rendering is already in progress! Wait untill current rendering finshes. Rendering progress window will open.",
             "IncompatibleFile": "Selected file is not compatible with AErender Launcher. Please, provide proper .aer / .xml file for import!"
         }

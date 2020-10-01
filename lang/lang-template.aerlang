@@ -138,6 +138,7 @@
             "outputIsEmpty": "",
             "compositionIsEmpty": "",
             "multiCompIsEmpty": "",
+            "tooManyThreads": "",
             "isCurrentlyRendering": "",
             "IncompatibleFile": ""
         }

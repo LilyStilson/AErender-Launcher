@@ -428,8 +428,8 @@ begin
 end;
 
 procedure TSettingsForm.FormCreate(Sender: TObject);
-var
-   LangFiles: TArray<String>;
+{var
+   LangFiles: TArray<String>;}
 begin
   try
     if AERPATH.IsEmpty then

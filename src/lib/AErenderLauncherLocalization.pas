@@ -129,6 +129,7 @@ type
     outputIsEmpty,
     compositionIsEmpty,
     multiCompIsEmpty,
+    tooManyThreads,
     isCurrentlyRendering,
     IncompatibleFile: String;
   end;
@@ -310,6 +311,7 @@ begin
   Result.Errors.outputIsEmpty                   := LanguageData.P['LauncherText'].P['ErrorText'].P['outputIsEmpty'].Value;
   Result.Errors.compositionIsEmpty              := LanguageData.P['LauncherText'].P['ErrorText'].P['compositionIsEmpty'].Value;
   Result.Errors.multiCompIsEmpty                := LanguageData.P['LauncherText'].P['ErrorText'].P['multiCompIsEmpty'].Value;
+  Result.Errors.tooManyThreads                  := LanguageData.P['LauncherText'].P['ErrorText'].P['tooManyThreads'].Value;
   Result.Errors.isCurrentlyRendering            := LanguageData.P['LauncherText'].P['ErrorText'].P['isCurrentlyRendering'].Value;
   Result.Errors.IncompatibleFile                := LanguageData.P['LauncherText'].P['ErrorText'].P['IncompatibleFile'].Value;
   {$ENDREGION}

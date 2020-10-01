@@ -298,7 +298,11 @@ begin
       end
     else
       begin
+        {$IFDEF MSWINDOWS}
         XMLFile.Text := ExtractFileName(MainForm.XMLOpenDialog.FileName);
+        {$ELSE}
+        XMLFile.Text := ExtractFileName(ImportedPath);
+        {$ENDIF}
         XMLDocument.LoadFromFile(MainForm.XMLOpenDialog.FileName);
       end;
 
@@ -314,8 +318,8 @@ begin
       compositions.Items.Add(RootNode.ChildNodes['compositions'].ChildNodes[i].ChildNodes['name'].Text);
   except
     on Exception do begin
-      if TDialogServiceSync.MessageDialog(Language[LANG].Errors.IncompatibleFile, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0) = 0 then
-        ImportForm.Close;
+      TDialogServiceSync.MessageDialog(Language[LANG].Errors.IncompatibleFile, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
+      ImportForm.Close;
     end;
   end;
 end;

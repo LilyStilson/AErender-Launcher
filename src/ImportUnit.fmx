@@ -166,8 +166,8 @@ object ImportForm: TImportForm
         ShowCheckboxes = True
         OnChange = compositionsChange
         OnChangeCheck = compositionsChangeCheck
-        Viewport.Width = 302.000000000000000000
-        Viewport.Height = 269.000000000000000000
+        Viewport.Width = 306.000000000000000000
+        Viewport.Height = 273.000000000000000000
       end
     end
   end
@@ -201,7 +201,7 @@ object ImportForm: TImportForm
         Size.Height = 17.000000000000000000
         Size.PlatformDefault = False
         Text = 'Name: '
-        TabOrder = 6
+        TabOrder = 5
       end
       object compResolution: TLabel
         Align = Top

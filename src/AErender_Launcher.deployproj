@@ -25,10 +25,19 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="..\icons\png\uwp\icon_uwp_44.png" Condition="'$(Config)'=='Beta'">
+        <DeployFile Include="..\icons\png\resized_uwp\icon_uwp_44.png" Condition="'$(Config)'=='Beta'">
             <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
             <RemoteName>Logo44x44.png</RemoteName>
             <DeployClass>UWP_DelphiLogo44</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="..\icons\png\resized_uwp\icon_uwp_150.png" Condition="'$(Config)'=='Beta'">
+            <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
+            <RemoteName>Logo150x150.png</RemoteName>
+            <DeployClass>UWP_DelphiLogo150</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
@@ -53,30 +62,12 @@
             <Overwrite>True</Overwrite>
             <Required>True</Required>
         </DeployFile>
-        <DeployFile Include="..\icons\png\uwp\icon_uwp_150.png" Condition="'$(Config)'=='Beta'">
-            <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
-            <RemoteName>Logo150x150.png</RemoteName>
-            <DeployClass>UWP_DelphiLogo150</DeployClass>
-            <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
     </ItemGroup>
     <ItemGroup Condition="'$(Platform)'=='Win32'">
-        <DeployFile Include="..\icons\png\uwp\icon_uwp_150.png" Condition="'$(Config)'=='Beta'">
+        <DeployFile Include="..\icons\png\resized_uwp\icon_uwp_150.png" Condition="'$(Config)'=='Beta'">
             <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
             <RemoteName>Logo150x150.png</RemoteName>
             <DeployClass>UWP_DelphiLogo150</DeployClass>
-            <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
-        <DeployFile Include="E:\AErender CC\icon_UWP_44.png" Condition="'$(Config)'=='Release'">
-            <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
-            <RemoteName>Logo44x44.png</RemoteName>
-            <DeployClass>UWP_DelphiLogo44</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
@@ -91,7 +82,7 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
-        <DeployFile Include="..\icons\png\uwp\icon_uwp_44.png" Condition="'$(Config)'=='Beta'">
+        <DeployFile Include="..\icons\png\resized_uwp\icon_uwp_44.png" Condition="'$(Config)'=='Beta'">
             <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
             <RemoteName>Logo44x44.png</RemoteName>
             <DeployClass>UWP_DelphiLogo44</DeployClass>
@@ -105,15 +96,6 @@
             <RemoteName>ru-RU.aerlang</RemoteName>
             <DeployClass>ProjectFile</DeployClass>
             <Operation>0</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
-        <DeployFile Include="E:\AErender CC\icon_UWP_150.png" Condition="'$(Config)'=='Release'">
-            <RemoteDir>AErender_Launcher\Assets\</RemoteDir>
-            <RemoteName>Logo150x150.png</RemoteName>
-            <DeployClass>UWP_DelphiLogo150</DeployClass>
-            <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
@@ -226,15 +208,6 @@
             <RemoteDir>AErender_Launcher.app\Contents\</RemoteDir>
             <RemoteName>Info.plist</RemoteName>
             <DeployClass>ProjectOSXInfoPList</DeployClass>
-            <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
-        <DeployFile Include="E:\AErender CC\AErender.icns" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>AErender_Launcher.app\Contents\Resources\</RemoteDir>
-            <RemoteName>AErenderLauncher.icns</RemoteName>
-            <DeployClass>ProjectOSXResource</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>

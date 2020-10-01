@@ -160,13 +160,14 @@ end;
 function CompareOutputModules(a, b: TArray<MainUnit.OutputModule>): Boolean;
 begin
   Result := False;
-  for var i := 0 to High(a) do
-    if (a[i].Module = b[i].Module) and (a[i].Mask = b[i].Mask) then
-      Result := True
-    else begin
-      Result := False;
-      break;
-    end;
+  if Length(a) = Length(b) then
+    for var i := 0 to High(a) do
+      if (a[i].Module = b[i].Module) and (a[i].Mask = b[i].Mask) then
+        Result := True
+      else begin
+        Result := False;
+        break;
+      end;
 end;
 
 procedure TOutputModuleEditorForm.SetLanguage(LanguageCode: Integer);
@@ -327,10 +328,12 @@ begin
     for var i := tempIndex + 1 to High(MainUnit.OutputModules) - 1 do
       MainUnit.OutputModules[i - 1] := MainUnit.OutputModules[i];
 
-  SetLength (MainUnit.OutputModules, Length (MainUnit.OutputModules) - 1);
+  SetLength (MainUnit.OutputModules, Length(MainUnit.OutputModules) - 1);
 
   outputModulesBox.Items.Delete(tempIndex);
   outputModulesBox.ItemIndex := tempIndex - 1;
+  //MainForm.UpdateOutputModules;
+  {$IFDEF MACOS}NSWindowEditStateChange(True);{$ENDIF MACOS}
 end;
 
 procedure TOutputModuleEditorForm.saveModulesButtonClick(Sender: TObject);
