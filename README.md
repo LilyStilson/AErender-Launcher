@@ -1,4 +1,4 @@
-<h1 align="center"><img src="https://i.imgur.com/vFnMPYF.png" alt="AErender Launcher"></img></h1>
+<h1 align="center"><img src="https://raw.githubusercontent.com/LilyStilson/AErender-Launcher/master/wiki/Wallpaper_alpha.png" alt="AErender Launcher"></img></h1>
 <p align="center">GUI for Adobe After Effects aerender console interface with various features. Comes bundled with <a href="https://github.com/LilyStilson/AErender-Launcher-Script">AErender Launcher Script</a>.</p>
 
 <div align="center">
