@@ -44,6 +44,9 @@ uses
   FMX.Layouts,
   FMX.Ani,
   FMX.Effects,
+
+  AErenderLauncher.IO,
+
   {$IFDEF MSWINDOWS}
     FMX.Platform.Win, Winapi.ShellAPI, Winapi.Windows;
   {$ENDIF MSWINDOWS}
@@ -131,12 +134,7 @@ end;
 
 procedure TAboutForm.WebsiteLabelClick(Sender: TObject);
 begin
-  {$IFDEF MSWINDOWS}
-    ShellExecute(0, 'open', PWideChar('http://aerenderlauncher.com'), nil, nil, SW_SHOW);
-  {$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}
-    _system(PAnsiChar('open ' + AnsiString('"' + 'http://aerenderlauncher.com' + '"')));
-  {$ENDIF MACOS}
+  Open('http://aerenderlauncher.com');
 end;
 
 procedure TAboutForm.LogoRotationAnimFinish(Sender: TObject);
