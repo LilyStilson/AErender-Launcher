@@ -51,7 +51,7 @@ uses
   FMX.BufferedLayout,
   FMX.BehaviorManager,
 
-  AErenderDataParser,
+  AErenderLauncher.AerenderParser,
 
   {$IFDEF MSWINDOWS}
     System.Notification, FMX.TaskBar, FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
@@ -376,7 +376,7 @@ type
   TRenderData = record      // Непосредственно тип
     LogFile: TStringList;   // Сюда считываем лог
     //Data: TStringList;    // Не ебу, нахуй это нужно, но почему-то я его тут обозначил. Далее в коде оно нигде не использовалось.
-    Stream: TStream;        // Поток, даннве из котрого будут передаваться в переменную LogFile
+    Stream: TStream;        // Поток, данные из котрого будут передаваться в переменную LogFile
     State: Integer;         // Обозначим для состояния рендеринга три цифры: -1 (ошибка), 0 (завершён), 1 (рендерится)
   end;
 var
@@ -479,7 +479,7 @@ begin
         RenderGroups[i].RenderingProgress.Value := RenderGroups[i].RenderingProgress.Max;
       end;
       // RU: Проверяем, была ошибка или нет
-      if RenderGroups[i].LogMemo.Text.Contains('aerender ERROR') or RenderGroups[i].LogMemo.Text.Contains('aerender Error') then begin
+      if RenderGroups[i].LogMemo.Text.Contains('ERROR:') or RenderGroups[i].LogMemo.Text.Contains('USAGE:') then begin
         Render[i].State := -1;
         RenderGroups[i].WaitProgress.Visible := False;
         RenderGroups[i].WaitProgress.Enabled := False;

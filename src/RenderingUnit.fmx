@@ -44,7 +44,7 @@ object RenderingForm: TRenderingForm
         Margins.Right = 10.000000000000000000
         Position.X = 5.000000000000000000
         Position.Y = 86.000000000000000000
-        Size.Width = 98.000000000000000000
+        Size.Width = 97.000000000000000000
         Size.Height = 24.000000000000000000
         Size.PlatformDefault = False
         TextSettings.WordWrap = False
@@ -198,7 +198,7 @@ object RenderingForm: TRenderingForm
         StyledSettings = [Family, FontColor]
         Margins.Left = 20.000000000000000000
         Position.X = 20.000000000000000000
-        Size.Width = 148.000000000000000000
+        Size.Width = 147.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Size = 16.000000000000000000
