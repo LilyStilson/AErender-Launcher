@@ -27,6 +27,8 @@
 
 interface
 
+{$DEFINE DEBUG_MODE}
+
 uses
   {$REGION '    System Namespaces    '}
   System.SysUtils,
@@ -41,6 +43,7 @@ uses
   System.Threading,
   System.Rtti,
   System.Bindings.Outputs,
+  System.Math,
   System.Notification,
   System.ImageList,
   System.Net.URLClient,
@@ -94,8 +97,11 @@ uses
   {$ENDREGION}
 
   {$REGION '    Additional Liraries    '}
-  MathExpParser,
-  AErenderLauncherLocalization,
+  AErenderLauncher.MathExpParser,
+  AErenderLauncher.Localization,
+  AErenderLauncher.IO,
+  AErenderLauncher.Rendering,
+  AErenderLauncher.Math,
   {$ENDREGION}
 
   {$REGION '    Windows Only Libraries    '}{$IFDEF MSWINDOWS}
@@ -405,15 +411,11 @@ type
   procedure LoadConfiguration(Path: String);
   procedure LoadLegacyConfiguration(Path: String);
   procedure SaveConfiguration(Path: String);
-  function Open(Path: String): Integer;
-  function Execute(Path: String): Integer;
-  function BackgroundExecute(Path: String): Integer;
   procedure ChangeLanguage(LanguageCode: Integer);
   procedure InitLanguage(PATH: String);
 
 const
-  APPVERSION = 'v0.8.5-beta';
-  //APPVERSION_DEMO = 'v0.8.5-beta';
+  APPVERSION = 'v0.8.6-beta';
   AERL_REPO_RELEASES = 'https://api.github.com/repos/lilystilson/aerender-launcher/releases';
   PLATFORMPATHSEPARATOR = {$IFDEF MSWINDOWS}'\'{$ENDIF MSWINDOWS}
                           {$IFDEF MACOS}'/'{$ENDIF MACOS};
@@ -434,7 +436,7 @@ var
   RenderSettings: TArray<RenderSetting>;
   OMCount: Cardinal;
   //TempOutputModule: OutputModule;                         (*  Temporary Output Module used from import    *)
-  TMathParser: MathExpParser.TExpressionParser;             (*  Mathematical parser for frames calculation  *)
+  TMathParser: TExpressionParser;             (*  Mathematical parser for frames calculation  *)
   FHandleDragDirectly: Boolean = False;                     (*  For implementation of DragDrop functional   *)
   PARAMSTART: Boolean = False;
   isRendering: Boolean = False;
@@ -758,7 +760,7 @@ begin
 
   LANG := 0;
   STYLE := RootNode.ChildNodes['style'].Text.ToInteger();
-  AERPATH := RootNode.ChildNodes['aerender'].Text;
+  AErenderPath := RootNode.ChildNodes['aerender'].Text;
   ONRENDERSTART := RootNode.ChildNodes['onRenderStart'].Text.ToInteger();
   DEFPRGPATH := RootNode.ChildNodes['defprgpath'].Text;
   DEFOUTPATH := RootNode.ChildNodes['defoutpath'].Text;
@@ -777,6 +779,7 @@ begin
   MainForm.soundCheckbox.IsChecked := RootNode.ChildNodes['sound'].Text.ToBoolean();
   MainForm.threadedRender.IsChecked := RootNode.ChildNodes['thread'].Text.ToBoolean();
   MainForm.customCheckbox.IsChecked := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
+  MainForm.customProp.Enabled := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
   MainForm.customProp.Text := RootNode.ChildNodes['prop'].Text;
 
   MainForm.memUsageTrackBar.Value := RootNode.ChildNodes['memoryLimit'].Text.ToSingle();
@@ -809,7 +812,7 @@ begin
 
   LANG := RootNode.ChildNodes['lang'].Text.ToInteger();
   STYLE := RootNode.ChildNodes['style'].Text.ToInteger();
-  AERPATH := RootNode.ChildNodes['aerender'].Text;
+  AErenderPath := RootNode.ChildNodes['aerender'].Text;
   ONRENDERSTART := RootNode.ChildNodes['onRenderStart'].Text.ToInteger();
   DEFPRGPATH := RootNode.ChildNodes['defprgpath'].Text;
   DEFOUTPATH := RootNode.ChildNodes['defoutpath'].Text;
@@ -828,6 +831,7 @@ begin
   MainForm.soundCheckbox.IsChecked := RootNode.ChildNodes['sound'].Text.ToBoolean();
   MainForm.threadedRender.IsChecked := RootNode.ChildNodes['thread'].Text.ToBoolean();
   MainForm.customCheckbox.IsChecked := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
+  MainForm.customProp.Enabled := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
   MainForm.customProp.Text := RootNode.ChildNodes['prop'].Text;
 
   MainForm.memUsageTrackBar.Value := RootNode.ChildNodes['memoryLimit'].Text.ToSingle();
@@ -874,7 +878,7 @@ begin
 
   RootNode.AddChild('lang').Text := LANG.ToString;
   RootNode.AddChild('style').Text := STYLE.ToString;
-  RootNode.AddChild('aerender').Text := AERPATH;
+  RootNode.AddChild('aerender').Text := AErenderPath;
   RootNode.AddChild('onRenderStart').Text := ONRENDERSTART.ToString;
   RootNode.AddChild('defprgpath').Text := DEFPRGPATH;
   RootNode.AddChild('defoutpath').Text := DEFOUTPATH;
@@ -924,38 +928,6 @@ begin
   end;
 
   Config.SaveToFile(Path);
-end;
-
-function Open(Path: String): Integer;
-begin
-  {$IFDEF MSWINDOWS}
-    Result := ShellExecute(0, 'open', PWideChar(Path), nil, nil, SW_SHOW);
-  {$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}
-    Result := _system(PAnsiChar('open ' + AnsiString('"' + Path + '"')));
-  {$ENDIF MACOS}
-end;
-
-function Execute(Path: String): Integer;
-begin
-  {$IFDEF MSWINDOWS}
-    Result := ShellExecute(0, 'OPEN', PWideChar(Path), '', '', SW_SHOWNORMAL)
-  {$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}
-    _system(PAnsiChar('chmox +x ' + AnsiString('"' + Path + '"')));
-    Result := _system(PAnsiChar('command ' + AnsiString('"' + Path + '"')));
-  {$ENDIF MACOS}
-end;
-
-function BackgroundExecute(Path: String): Integer;
-begin
-  {$IFDEF MSWINDOWS}
-    Result := ShellExecute(0, 'OPEN', PWideChar(Path), '', '', SW_HIDE)
-  {$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}
-    _system(PAnsiChar('chmox +x ' + AnsiString('"' + Path + '"')));
-    Result := _system(PAnsiChar('command ' + AnsiString('"' + Path + '" & disown')));
-  {$ENDIF MACOS}
 end;
 
 function GetOMIndex(AOutputModule: OutputModule): Integer;
@@ -1380,24 +1352,22 @@ procedure TMainForm.FormCreate(Sender: TObject);
 var
   CFG: TextFile;
 begin
-  {$IFDEF MSWINDOWS}DwmCompositionEnabled();{$ENDIF MSWINDOWS}
+  {$IFDEF MSWINDOWS}DwmCompositionEnabled();{$ENDIF}
   FormatSettings := TFormatSettings.Invariant;
   MainForm.Width := 600;
-  MainForm.Height := {$IFDEF MSWINDOWS}450{$ENDIF MSWINDOWS}  {$IFDEF MACOS}430{$ENDIF MACOS};
-  //MainForm.Caption := 'AErender Launcher (' + APPVERSION_DEMO + ')';
+  MainForm.Height := {$IFDEF MSWINDOWS}450{$ELSE MACOS}430{$ENDIF};
   MainForm.Caption := 'AErender Launcher (' + APPVERSION + ')';
-  APPFOLDER :=  {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\'{$ENDIF MSWINDOWS}
-                {$IFDEF MACOS}GetEnvironmentVariable('HOME') + '/Documents/AErender/'{$ENDIF MACOS};
+  APPFOLDER :=  {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\'
+                {$ELSE MACOS}GetEnvironmentVariable('HOME') + '/Documents/AErender/'{$ENDIF};
   {$IFDEF MSWINDOWS}
   FreeAndNil(launcherItem);
   exitItem.ShortCut := TextToShortCut('Alt+F4');
   exportConfigItem.ShortCut := TextToShortCut('Ctrl+E');
   importConfigItem.ShortCut := TextToShortCut('Ctrl+I');
-  {$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}
+  {$ELSE MACOS}
   FreeAndNil(editItem);
   FreeAndNil(exitItem);
-  {$ENDIF MACOS}
+  {$ENDIF}
 
   if DirectoryExists(APPFOLDER) then
     AssignFile(CFG, APPFOLDER + 'AErenderConfiguration.xml')
@@ -1416,14 +1386,15 @@ begin
             LoadLegacyConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
           except
             on Exception do begin
-              if (TDialogServiceSync.MessageDialog(('Configuration file is corrupted! Press OK to renew configuration file. Application will be restarted.' + #13#10 +
-                                {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\AErenderConfiguration.xml'{$ENDIF MSWINDOWS}
-                                    {$IFDEF MACOS}'~/Documents/AErender/AErenderConfiguration.xml'{$ENDIF MACOS}),
+              if (TDialogServiceSync.MessageDialog(
+                ('Configuration file is corrupted! Press OK to renew configuration file. Application will be restarted.' + #13#10 +
+                {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\AErenderConfiguration.xml'
+                {$ELSE MACOS}'~/Documents/AErender/AErenderConfiguration.xml'{$ENDIF}),
                 TMsgDlgType.mtError, mbOKCancel, TMsgDlgBtn.mbOK, 0) = 1) then
               begin
                 System.SysUtils.DeleteFile(APPFOLDER + 'AErenderConfiguration.xml');
-                {$IFDEF MSWINDOWS}ShellExecute(0, 'OPEN', PChar(ParamStr(0)), '', '', SW_SHOWNORMAL);{$ENDIF MSWINDOWS}
-                {$IFDEF MACOS}_system(PAnsiChar('open -a "' + AnsiString(ParamStr(0)) + '" & disown'));{$ENDIF MACOS}
+                {$IFDEF MSWINDOWS}ShellExecute(0, 'OPEN', PChar(ParamStr(0)), '', '', SW_SHOWNORMAL);
+                {$ELSE MACOS}_system(PAnsiChar('open -a "' + AnsiString(ParamStr(0)) + '" & disown'));{$ENDIF}
               end;
               Halt;
             end;
@@ -1451,6 +1422,8 @@ begin
 
   threadsCount.OnValidate := threadsCount.OnValidateEvent;
   threadsCount.OnValidating := threadsCount.OnValidatingEvent;
+
+  //ShowMessage(AErenderPath);
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
@@ -1617,7 +1590,7 @@ type
   end;
 var
   threads, comps, emptyComps: Integer;
-  PATH, logPath{, prgPath}: String;
+  PATH, logPath: String;
   execFile: array [1..128] of exec;
 
   // Notification: TNotification;
@@ -1652,203 +1625,236 @@ begin
       end
     else
       begin
-        if threadsSwitch.IsChecked then
-          begin
-            threads := threadsCount.Text.ToInteger;
-            SetLength (LogFiles, threads);
-          end
-        else
-          begin
-            threads := 1;
-            if Length(LogFiles) = 0 then
-              SetLength (LogFiles, threads);
-          end;
+        var Compositions: TArray<TComposition>;
         if compSwitch.IsChecked then
-          begin
-            comps := StrToInt(compCount.Value.ToString);
-            SetLength (LogFiles, comps);
-          end
+          SetLength(Compositions, StrToInt(compCount.Value.ToString))
         else
-          begin
-            comps := 1;
-            if Length(LogFiles) = 0 then
-              SetLength (LogFiles, comps);
-          end;
+          SetLength(Compositions, 1);
+        for var i := 0 to High(Compositions) do begin
+          if compSwitch.IsChecked then
+            Compositions[i].CompName := compGrid.Cells[0, i]
+          else
+            Compositions[i].CompName := compName.Text;
+          Compositions[i].Frames := TFrameSpan.Create(IfThenElse(inFrame.Text = '', -1, StrToInt(inFrame.Text)), IfThenElse(outFrame.Text = '', -1, StrToInt(outFrame.Text))); // yeet
+          Compositions[i].Split := IfThenElse(threadsSwitch.IsChecked = True, StrToInt(threadsCount.Text), 0); // double yeet
+        end;
 
-        for var j := 0 to comps-1 do
-          for var i := 1 to threads do
-            begin
-              /// Script compiling section
+        var Task: TRenderTask := TRenderTask.Create(
+          projectPath.Text,
+          outputPath.Text,
+          outputModuleBox.Items[outputModuleBox.ItemIndex],
+          renderSettingsBox.Items[renderSettingsBox.ItemIndex],
+          missingFilesCheckbox.IsChecked,
+          soundCheckbox.IsChecked,
+          threadedRender.IsChecked,
+          IfThenElse(customCheckbox.IsChecked = True, customProp.Text, ''),  // triple yeet
+          cacheUsageTrackBar.Value,
+          memUsageTrackBar.Value,
+          Compositions
+        );
 
-              // Clear the string
-              execFile[i].script := '';
-
-              // Add encoding header to ensure that our CMD on Windows will use UTF-8
-              {$IFDEF MSWINDOWS}
-              execFile[i].script := 'chcp 65001' + #13#10;
-              {$ENDIF MSWINDOWS}
-
-              // Make console output data from it if progress display is enabled
-              // Made by using default in Shell and Bash  ( command ) > data/output/path.log
-              // Open bracket here
-              if SettingsForm.HandleCheckBox.IsChecked then
-                execFile[i].script := execFile[i].script + '(';
-
-              // Ensure that logs paths won't comflict with each other
-              if comps = 1 then
-                logPath := APPFOLDER + compName.Text + '_' + i.ToString
-              else
-                logPath := APPFOLDER + compGrid.Cells[0, j] + '_' + i.ToString;
-
-              // Add Pass output path to temporary wariable
-              PATH := outputPath.Text;
-
-              // Create folder if '[projectName]/' or '[projectName]\' is used
-              // Because aerender won't do it for you
-              if outputPath.Text.Contains('[projectName]' + PLATFORMPATHSEPARATOR) then
-                begin
-                  PATH := StringReplace(PATH, '[projectName]', ExtractFileName(projectPath.Text), [rfReplaceAll, rfIgnoreCase]);
-                  if not DirectoryExists(ExtractFilePath(PATH)) then
-                    CreateDir(ExtractFilePath(PATH));
-                end;
-
-              // Adjust file output path if split render is enabled
-              // because they can conflict
-              if threadsSwitch.IsChecked then
-                begin
-                  var FilePath: String := ExtractFilePath(PATH);
-                  var FileName: String := StringReplace(ExtractFileName(PATH), ExtractFileExt(PATH), '', [rfReplaceAll, rfIgnoreCase]);
-                  var FileExt:  String := ExtractFileExt(PATH);
-                  PATH := FilePath + FileName + '_' + i.ToString + FileExt;
-                end;
-
-              // Adjust file output path if multi comp render is enabled
-              // because they can conflict
-              if compSwitch.IsChecked then
-                if not outputPath.Text.Contains('[compName]') then
-                  begin
-                    var FilePath: String := ExtractFilePath(PATH);
-                    var FileName: String := StringReplace(ExtractFileName(PATH), ExtractFileExt(PATH), '', [rfReplaceAll, rfIgnoreCase]);
-                    var FileExt:  String := ExtractFileExt(PATH);
-                    PATH := FilePath + FileName + '_' + compGrid.Cells[0, j] + FileExt;
-                  end;
-
-              /// Begin executable compiling section
-              // Add aerender path to script
-              execFile[i].script := execFile[i].script + '"' + AERPATH + '" ' + '-project "' + projectPath.Text + '" -output "' + PATH + '" ';
-
-              // Add comp name to script
-              if compSwitch.IsChecked then
-                execFile[i].script := execFile[i].script + '-comp "' + compGrid.Cells[0, j] + '" '
-              else
-                execFile[i].script := execFile[i].script + '-comp "' + compName.Text + '" ';
-
-              // Add start and end ranges to script
-              if threadsSwitch.IsChecked then
-                begin
-                  execFile[i].script := execFile[i].script + '-s "' + threadsGrid.Cells[0, i-1] + '" ';
-                  execFile[i].script := execFile[i].script + '-e "' + threadsGrid.Cells[1, i-1] + '" ';
-                end
-              else
-                begin
-                  if not inFrame.Text.IsEmpty then
-                    execFile[i].script := execFile[i].script + '-s "' + inFrame.Text + '" ';
-                  if not outFrame.Text.IsEmpty then
-                    execFile[i].script := execFile[i].script + '-e "' + outFrame.Text + '" ';
-                end;
-
-              // Add sound flag to script
-              if soundCheckbox.IsChecked then
-                execFile[i].script := execFile[i].script + '-sound ON ';
-
-              // Add multiprocessing flag to script
-              if threadedRender.IsChecked then
-                execFile[i].script := execFile[i].script + '-mp ';
-
-              // Add missing footage flag to script
-              if missingFilesCheckbox.IsChecked then
-                execFile[i].script := execFile[i].script + '-continueOnMissingFootage ';
-
-              // Add output module flag to script
-              if outputModuleBox.ItemIndex <> -1 then
-                execFile[i].script := execFile[i].script + '-OMtemplate "' + OutputModules[outputModuleBox.ItemIndex].Module + '" ';
-
-              if renderSettingsBox.ItemIndex <> -1 then
-                execFile[i].script := execFile[i].script + '-RStemplate  "' + RenderSettings[outputModuleBox.ItemIndex].Setting + '" ';
-
-              // Add memory usage flags to script
-              execFile[i].script := execFile[i].script + '-mem_usage "' + Trunc(memUsageTrackBar.Value).ToString + '" "' + Trunc(cacheUsageTrackBar.Value).ToString + '" ';
-
-              // Add whatever user typed parameters to script
-              if customCheckbox.IsChecked then
-                execFile[i].script := execFile[i].script + customProp.Text;
-
-              if SettingsForm.HandleCheckBox.IsChecked then
-                begin
-                  execFile[i].script := execFile[i].script + ') > "' + logPath + '.log"';
-
-                  if threadsSwitch.IsChecked then
-                    LogFiles[i-1] := logPath + '.log'
-                  else
-                    LogFiles[j] := logPath + '.log';
-                end;
-
-              //File section
-              {$IFDEF MSWINDOWS}
-                if compSwitch.IsChecked then
-                  AssignFile (execFile[i].F, 'C:\ProgramData\AErender\aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.bat', CP_UTF8)
-                else
-                  AssignFile (execFile[i].F, 'C:\ProgramData\AErender\aerender' + i.ToString + '.bat', CP_UTF8);
-                Rewrite (execFile[i].F);
-                Writeln (execFile[i].F, execFile[i].script);
-                //Writeln (execFile[i].F, '@PAUSE');
-                CloseFile (execFile[i].F);
-                if SettingsForm.HandleCheckBox.IsChecked then
-                  if compSwitch.IsChecked then
-                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_HIDE)
-                  else
-                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_HIDE)
-                else
-                  if compSwitch.IsChecked then
-                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_SHOWNORMAL)
-                  else
-                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_SHOWNORMAL)
-                    //Execute('C:\ProgramData\AErender\aerender' + i.ToString + '.bat');
-              {$ENDIF MSWINOWS}
-              {$IFDEF MACOS}
-                if compSwitch.IsChecked then
-                  AssignFile (execFile[i].F, GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command', CP_UTF8)
-                else
-                  AssignFile (execFile[i].F, GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command', CP_UTF8);
-                Rewrite (execFile[i].F);
-                Writeln (execFile[i].F, execFile[i].script);
-                //Writeln (execFile[i].F, 'read -p "Press any key to continue..."');
-                CloseFile (execFile[i].F);
-                if SettingsForm.HandleCheckBox.IsChecked then
-                  if compSwitch.IsChecked then
-                    begin
-                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
-                      _system(PAnsiChar('command "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command" & disown')));
-                    end
-                  else
-                    begin
-                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
-                      _system(PAnsiChar('command "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command" & disown')));
-                    end
-                else
-                  if compSwitch.IsChecked then
-                    begin
-                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
-                      _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
-                    end
-                  else
-                    begin
-                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
-                      _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
-                      //Execute(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"');
-                    end
-              {$ENDIF MACOS}
-            end;
+        RenderTasks.Add(Task);
+        {$IFDEF DEBUG_MODE}
+        ShowMessage(Format('Length: %d%sTask[0]: %s', [Length(RenderTasks.ToArray), #13#10, RenderTasks.Items[0].ToString]));
+        {$ENDIF}
+        RenderTasks.Remove(Task);
+//        if threadsSwitch.IsChecked then
+//          begin
+//            threads := threadsCount.Text.ToInteger;
+//            SetLength (LogFiles, threads);
+//          end
+//        else
+//          begin
+//            threads := 1;
+//            if Length(LogFiles) = 0 then
+//              SetLength (LogFiles, threads);
+//          end;
+//        if compSwitch.IsChecked then
+//          begin
+//            comps := StrToInt(compCount.Value.ToString);
+//            SetLength (LogFiles, comps);
+//          end
+//        else
+//          begin
+//            comps := 1;
+//            if Length(LogFiles) = 0 then
+//              SetLength (LogFiles, comps);
+//          end;
+//
+//        for var j := 0 to comps-1 do
+//          for var i := 1 to threads do
+//            begin
+//              /// Script compiling section
+//
+//              // Clear the string
+//              execFile[i].script := '';
+//
+//              // Add encoding header to ensure that our CMD on Windows will use UTF-8
+//              {$IFDEF MSWINDOWS}
+//              execFile[i].script := 'chcp 65001' + #13#10;
+//              {$ENDIF MSWINDOWS}
+//
+//              // Make console output data from it if progress display is enabled
+//              // Made by using default in Shell and Bash  ( command ) > data/output/path.log
+//              // Open bracket here
+//              if SettingsForm.HandleCheckBox.IsChecked then
+//                execFile[i].script := execFile[i].script + '(';
+//
+//              // Ensure that logs paths won't comflict with each other
+//              if comps = 1 then
+//                logPath := APPFOLDER + compName.Text + '_' + i.ToString
+//              else
+//                logPath := APPFOLDER + compGrid.Cells[0, j] + '_' + i.ToString;
+//
+//              // Add Pass output path to temporary wariable
+//              PATH := outputPath.Text;
+//
+//              // Create folder if '[projectName]/' or '[projectName]\' is used
+//              // Because aerender won't do it for you
+//              if outputPath.Text.Contains('[projectName]' + PLATFORMPATHSEPARATOR) then
+//                begin
+//                  PATH := StringReplace(PATH, '[projectName]', ExtractFileName(projectPath.Text), [rfReplaceAll, rfIgnoreCase]);
+//                  if not DirectoryExists(ExtractFilePath(PATH)) then
+//                    CreateDir(ExtractFilePath(PATH));
+//                end;
+//
+//              // Adjust file output path if split render is enabled
+//              // because they can conflict
+//              if threadsSwitch.IsChecked then
+//                begin
+//                  var FilePath: String := ExtractFilePath(PATH);
+//                  var FileName: String := StringReplace(ExtractFileName(PATH), ExtractFileExt(PATH), '', [rfReplaceAll, rfIgnoreCase]);
+//                  var FileExt:  String := ExtractFileExt(PATH);
+//                  PATH := FilePath + FileName + '_' + i.ToString + FileExt;
+//                end;
+//
+//              // Adjust file output path if multi comp render is enabled
+//              // because they can conflict
+//              if compSwitch.IsChecked then
+//                if not outputPath.Text.Contains('[compName]') then
+//                  begin
+//                    var FilePath: String := ExtractFilePath(PATH);
+//                    var FileName: String := StringReplace(ExtractFileName(PATH), ExtractFileExt(PATH), '', [rfReplaceAll, rfIgnoreCase]);
+//                    var FileExt:  String := ExtractFileExt(PATH);
+//                    PATH := FilePath + FileName + '_' + compGrid.Cells[0, j] + FileExt;
+//                  end;
+//
+//              /// Begin executable compiling section
+//              // Add aerender path to script
+//              execFile[i].script := execFile[i].script + '"' + AERPATH + '" ' + '-project "' + projectPath.Text + '" -output "' + PATH + '" ';
+//
+//              // Add comp name to script
+//              if compSwitch.IsChecked then
+//                execFile[i].script := execFile[i].script + '-comp "' + compGrid.Cells[0, j] + '" '
+//              else
+//                execFile[i].script := execFile[i].script + '-comp "' + compName.Text + '" ';
+//
+//              // Add start and end ranges to script
+//              if threadsSwitch.IsChecked then
+//                begin
+//                  execFile[i].script := execFile[i].script + '-s "' + threadsGrid.Cells[0, i-1] + '" ';
+//                  execFile[i].script := execFile[i].script + '-e "' + threadsGrid.Cells[1, i-1] + '" ';
+//                end
+//              else
+//                begin
+//                  if not inFrame.Text.IsEmpty then
+//                    execFile[i].script := execFile[i].script + '-s "' + inFrame.Text + '" ';
+//                  if not outFrame.Text.IsEmpty then
+//                    execFile[i].script := execFile[i].script + '-e "' + outFrame.Text + '" ';
+//                end;
+//
+//              // Add sound flag to script
+//              if soundCheckbox.IsChecked then
+//                execFile[i].script := execFile[i].script + '-sound ON ';
+//
+//              // Add multiprocessing flag to script
+//              if threadedRender.IsChecked then
+//                execFile[i].script := execFile[i].script + '-mp ';
+//
+//              // Add missing footage flag to script
+//              if missingFilesCheckbox.IsChecked then
+//                execFile[i].script := execFile[i].script + '-continueOnMissingFootage ';
+//
+//              // Add output module flag to script
+//              if outputModuleBox.ItemIndex <> -1 then
+//                execFile[i].script := execFile[i].script + '-OMtemplate "' + OutputModules[outputModuleBox.ItemIndex].Module + '" ';
+//
+//              if renderSettingsBox.ItemIndex <> -1 then
+//                execFile[i].script := execFile[i].script + '-RStemplate "' + RenderSettings[renderSettingsBox.ItemIndex].Setting + '" ';
+//
+//              // Add memory usage flags to script
+//              execFile[i].script := execFile[i].script + '-mem_usage "' + Trunc(memUsageTrackBar.Value).ToString + '" "' + Trunc(cacheUsageTrackBar.Value).ToString + '" ';
+//
+//              // Add whatever user typed parameters to script
+//              if customCheckbox.IsChecked then
+//                execFile[i].script := execFile[i].script + customProp.Text;
+//
+//              if SettingsForm.HandleCheckBox.IsChecked then
+//                begin
+//                  execFile[i].script := execFile[i].script + ') > "' + logPath + '.log"';
+//
+//                  if threadsSwitch.IsChecked then
+//                    LogFiles[i-1] := logPath + '.log'
+//                  else
+//                    LogFiles[j] := logPath + '.log';
+//                end;
+//
+//              //File section
+//              {$IFDEF MSWINDOWS}
+//                if compSwitch.IsChecked then
+//                  AssignFile (execFile[i].F, 'C:\ProgramData\AErender\aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.bat', CP_UTF8)
+//                else
+//                  AssignFile (execFile[i].F, 'C:\ProgramData\AErender\aerender' + i.ToString + '.bat', CP_UTF8);
+//                Rewrite (execFile[i].F);
+//                Writeln (execFile[i].F, execFile[i].script);
+//                //Writeln (execFile[i].F, '@PAUSE');
+//                CloseFile (execFile[i].F);
+//                if SettingsForm.HandleCheckBox.IsChecked then
+//                  if compSwitch.IsChecked then
+//                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_HIDE)
+//                  else
+//                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_HIDE)
+//                else
+//                  if compSwitch.IsChecked then
+//                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_SHOWNORMAL)
+//                  else
+//                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_SHOWNORMAL)
+//                    //Execute('C:\ProgramData\AErender\aerender' + i.ToString + '.bat');
+//              {$ENDIF MSWINOWS}
+//              {$IFDEF MACOS}
+//                if compSwitch.IsChecked then
+//                  AssignFile (execFile[i].F, GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command', CP_UTF8)
+//                else
+//                  AssignFile (execFile[i].F, GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command', CP_UTF8);
+//                Rewrite (execFile[i].F);
+//                Writeln (execFile[i].F, execFile[i].script);
+//                //Writeln (execFile[i].F, 'read -p "Press any key to continue..."');
+//                CloseFile (execFile[i].F);
+//                if SettingsForm.HandleCheckBox.IsChecked then
+//                  if compSwitch.IsChecked then
+//                    begin
+//                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
+//                      _system(PAnsiChar('command "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command" & disown')));
+//                    end
+//                  else
+//                    begin
+//                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
+//                      _system(PAnsiChar('command "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command" & disown')));
+//                    end
+//                else
+//                  if compSwitch.IsChecked then
+//                    begin
+//                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
+//                      _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
+//                    end
+//                  else
+//                    begin
+//                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
+//                      _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
+//                      //Execute(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"');
+//                    end
+//              {$ENDIF MACOS}
+//            end;
         // Wait untill aerender launches
         Sleep (200);
         if SettingsForm.HandleCheckBox.IsChecked then

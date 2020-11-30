@@ -18513,6 +18513,7 @@ object MainForm: TMainForm
             object compCount: TSpinBox
               Touch.InteractiveGestures = [LongTap, DoubleTap]
               Align = Right
+              StyleLookup = 'spinboxstyle'
               Cursor = crIBeam
               Min = 2.000000000000000000
               Value = 2.000000000000000000
