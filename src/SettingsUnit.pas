@@ -116,6 +116,17 @@ type
     resetLanucher: TMenuItem;
     opSettingsLabel: TMenuItem;
     separatorItem5: TMenuItem;
+    RenderingExpander: TExpander;
+    renderingModeLabel: TLabel;
+    GridPanelLayout2: TGridPanelLayout;
+    Layout1: TLayout;
+    GridPanelLayout3: TGridPanelLayout;
+    allAtOnce: TSpeedButton;
+    SpeedButton2: TSpeedButton;
+    Layout4: TLayout;
+    Label1: TLabel;
+    Edit1: TEdit;
+    Label2: TLabel;
     procedure langBoxChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure aerenderPathSelectClick(Sender: TObject);
