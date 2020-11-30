@@ -5,7 +5,7 @@
         <Config Condition="'$(Config)'==''">Beta</Config>
         <FrameworkType>FMX</FrameworkType>
         <MainSource>AErender_Launcher.dpr</MainSource>
-        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <ProjectGuid>{C2DB1030-533B-41FD-8468-632CB85028C7}</ProjectGuid>
         <ProjectVersion>19.0</ProjectVersion>
         <TargetedPlatforms>4099</TargetedPlatforms>
@@ -16,13 +16,13 @@
         <EL_ChildProcessInheritance>true</EL_ChildProcessInheritance>
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Build>5</VerInfo_Build>
+        <VerInfo_Build>6</VerInfo_Build>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <Manifest_File>(None)</Manifest_File>
         <Base_OSX32>true</Base_OSX32>
         <BT_BuildType>Debug</BT_BuildType>
-        <VerInfo_Keys>CFBundleVersion=0.8.5;NSHighResolutionCapable=true;NSLocationUsageDescription=;CFBundleShortVersionString=0.8.5;NSCalendarsUsageDescription=Not used;NSRemindersUsageDescription=Not used;NSCameraUsageDescription=Not used;NSMicrophoneUsageDescription=Not used;NSMotionUsageDescription=Not used;NSDesktopFolderUsageDescription=Not used;NSDocumentsFolderUsageDescription=Not used;NSDownloadsFolderUsageDescription=Not used;NSNetworkVolumesUsageDescription=Not used;NSRemovableVolumesUsageDescription=Not used;NSSpeechRecognitionUsageDescription=Not used</VerInfo_Keys>
+        <VerInfo_Keys>CFBundleVersion=0.8.6;NSHighResolutionCapable=true;NSLocationUsageDescription=;CFBundleShortVersionString=0.8.6;NSCalendarsUsageDescription=Not used;NSRemindersUsageDescription=Not used;NSCameraUsageDescription=Not used;NSMicrophoneUsageDescription=Not used;NSMotionUsageDescription=Not used;NSDesktopFolderUsageDescription=Not used;NSDocumentsFolderUsageDescription=Not used;NSDownloadsFolderUsageDescription=Not used;NSNetworkVolumesUsageDescription=Not used;NSRemovableVolumesUsageDescription=Not used;NSSpeechRecognitionUsageDescription=Not used</VerInfo_Keys>
         <Icon_MainIcon>..\icons\platform\Launcher2020.ico</Icon_MainIcon>
         <Debugger_Launcher>/usr/X11/bin/xterm -e &quot;%debuggee%&quot;</Debugger_Launcher>
     </PropertyGroup>
@@ -172,12 +172,12 @@
         <UWP_DelphiLogo44>..\icons\png\resized_uwp\icon_uwp_44.png</UWP_DelphiLogo44>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.5.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.5.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.6.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.6.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <VerInfo_PreRelease>true</VerInfo_PreRelease>
-        <VerInfo_Release>5</VerInfo_Release>
+        <VerInfo_Release>6</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
@@ -187,12 +187,12 @@
         <UWP_DelphiLogo44>..\icons\png\resized_uwp\icon_uwp_44.png</UWP_DelphiLogo44>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>FileVersion=0.8.5.0;ProductVersion=0.8.5.0</VerInfo_Keys>
+        <VerInfo_Keys>FileVersion=0.8.6.0;ProductVersion=0.8.6.0</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <VerInfo_PreRelease>true</VerInfo_PreRelease>
-        <VerInfo_Release>5</VerInfo_Release>
+        <VerInfo_Release>6</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <DCC_DebugDCUs>true</DCC_DebugDCUs>
@@ -209,7 +209,7 @@
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
         <Icon_MainIcon>..\icons\platform\Launcher2020.ico</Icon_MainIcon>
         <Manifest_File>..\(None)</Manifest_File>
-        <VerInfo_Build>5</VerInfo_Build>
+        <VerInfo_Build>6</VerInfo_Build>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
@@ -223,12 +223,12 @@
         <VerInfo_Build>1</VerInfo_Build>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.5.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.5.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.6.1;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.5.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <VerInfo_PreRelease>true</VerInfo_PreRelease>
-        <VerInfo_Release>5</VerInfo_Release>
+        <VerInfo_Release>6</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <BT_BuildType>Debug</BT_BuildType>
@@ -297,9 +297,9 @@
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
         <Icon_MainIcon>..\icons\platform\Launcher2020.ico</Icon_MainIcon>
         <Manifest_File>..\(None)</Manifest_File>
-        <VerInfo_Build>5</VerInfo_Build>
+        <VerInfo_Build>6</VerInfo_Build>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CFBundleVersion=0.8.5;NSHighResolutionCapable=true;NSCalendarsUsageDescription=Not used;NSRemindersUsageDescription=Not used;NSCameraUsageDescription=Not used;NSMicrophoneUsageDescription=Not used;NSMotionUsageDescription=Not used;NSDesktopFolderUsageDescription=Not used;NSDocumentsFolderUsageDescription=Data saving;NSDownloadsFolderUsageDescription=Not used;NSNetworkVolumesUsageDescription=Not used;NSRemovableVolumesUsageDescription=Not used;NSSpeechRecognitionUsageDescription=Not used;CFBundleShortVersionString=0.8.5</VerInfo_Keys>
+        <VerInfo_Keys>CFBundleVersion=0.8.6;NSHighResolutionCapable=true;NSCalendarsUsageDescription=Not used;NSRemindersUsageDescription=Not used;NSCameraUsageDescription=Not used;NSMicrophoneUsageDescription=Not used;NSMotionUsageDescription=Not used;NSDesktopFolderUsageDescription=Not used;NSDocumentsFolderUsageDescription=Data saving;NSDownloadsFolderUsageDescription=Not used;NSNetworkVolumesUsageDescription=Not used;NSRemovableVolumesUsageDescription=Not used;NSSpeechRecognitionUsageDescription=Not used;CFBundleShortVersionString=0.8.6</VerInfo_Keys>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
     </PropertyGroup>
@@ -308,16 +308,16 @@
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
         <Icon_MainIcon>..\icons\platform\Launcher2020.ico</Icon_MainIcon>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>23</VerInfo_Build>
+        <VerInfo_Build>25</VerInfo_Build>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.5.23;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.0;Comments=;PrivateBuild=v0.8.0-beta</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.6.25;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.0;Comments=;PrivateBuild=v0.8.0-beta</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <VerInfo_PreRelease>true</VerInfo_PreRelease>
         <VerInfo_Private>true</VerInfo_Private>
-        <VerInfo_Release>5</VerInfo_Release>
+        <VerInfo_Release>6</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_3_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
@@ -327,14 +327,14 @@
         <Icon_MainIcon>..\icons\platform\Launcher2020.ico</Icon_MainIcon>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>7</VerInfo_Build>
+        <VerInfo_Build>10</VerInfo_Build>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.5.7;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.5;Comments=;PrivateBuild=v0.8.5-beta</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.6.10;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.6;Comments=;PrivateBuild=v0.8.6-beta</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <VerInfo_PreRelease>true</VerInfo_PreRelease>
-        <VerInfo_Release>5</VerInfo_Release>
+        <VerInfo_Release>6</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_4_OSX64)'!=''">
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
@@ -401,10 +401,13 @@
         </DCCReference>
         <DCCReference Include="lib\Mac.CodeBlocks.pas"/>
         <DCCReference Include="lib\FMX.Taskbar.pas"/>
-        <DCCReference Include="MathExpParser.pas"/>
-        <DCCReference Include="..\..\AErender Parser\AErenderDataParser.pas"/>
-        <DCCReference Include="lib\AErenderLauncherLocalization.pas"/>
-        <DCCReference Include="lib\MacApi.Dialogs.pas"/>
+        <DCCReference Include="lib\AErenderLauncher.Localization.pas"/>
+        <DCCReference Include="lib\AErenderLauncher.AerenderParser.pas"/>
+        <DCCReference Include="lib\AErenderLauncher.MathExpParser.pas"/>
+        <DCCReference Include="lib\AErenderLauncher.Rendering.pas"/>
+        <DCCReference Include="lib\AErenderLauncher.IO.pas"/>
+        <DCCReference Include="lib\AErenderLauncher.Math.pas"/>
+        <DCCReference Include="lib\System.Types.Nullable.pas"/>
         <RcItem Include="..\lang\en-US.aerlang">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>

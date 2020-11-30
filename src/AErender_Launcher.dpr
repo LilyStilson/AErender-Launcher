@@ -48,10 +48,13 @@ uses
   {$IFDEF MSWINDOWS}
   FMX.Taskbar in 'lib\FMX.Taskbar.pas',
   {$ENDIF MSWINDOWS}
-  MathExpParser in 'MathExpParser.pas',
-  AErenderDataParser in '..\..\AErender Parser\AErenderDataParser.pas',
-  AErenderLauncherLocalization in 'lib\AErenderLauncherLocalization.pas',
-  MacApi.Dialogs in 'lib\MacApi.Dialogs.pas';
+  AErenderLauncher.Localization in 'lib\AErenderLauncher.Localization.pas',
+  AErenderLauncher.AerenderParser in 'lib\AErenderLauncher.AerenderParser.pas',
+  AErenderLauncher.MathExpParser in 'lib\AErenderLauncher.MathExpParser.pas',
+  AErenderLauncher.Rendering in 'lib\AErenderLauncher.Rendering.pas',
+  AErenderLauncher.IO in 'lib\AErenderLauncher.IO.pas',
+  AErenderLauncher.Math in 'lib\AErenderLauncher.Math.pas',
+  System.Types.Nullable in 'lib\System.Types.Nullable.pas';
 
 {$R *.res}
 
