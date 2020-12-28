@@ -372,6 +372,7 @@
         </DelphiCompile>
         <DCCReference Include="lib\FMX.Graphics.pas"/>
         <DCCReference Include="lib\FMX.Ani.pas"/>
+        <DCCReference Include="lib\Components\TCompLabel\Package\FMX.CompLabel.pas"/>
         <DCCReference Include="SplashScreenUnit.pas">
             <Form>SplashScreenForm</Form>
         </DCCReference>

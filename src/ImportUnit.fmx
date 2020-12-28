@@ -17,7 +17,7 @@ object ImportForm: TImportForm
   object topLayout: TLayout
     Align = Top
     Size.Width = 640.000000000000000000
-    Size.Height = 33.000000000000000000
+    Size.Height = 32.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 3
     object importLabel: TLabel
@@ -25,7 +25,7 @@ object ImportForm: TImportForm
       StyledSettings = [Family, FontColor]
       Margins.Left = 20.000000000000000000
       Size.Width = 322.000000000000000000
-      Size.Height = 33.000000000000000000
+      Size.Height = 32.000000000000000000
       Size.PlatformDefault = False
       TextSettings.Font.Size = 14.000000000000000000
       TextSettings.Font.StyleExt = {00070000000000000004000000}
@@ -43,13 +43,13 @@ object ImportForm: TImportForm
       Margins.Right = 10.000000000000000000
       Margins.Bottom = 5.000000000000000000
       Size.Width = 288.000000000000000000
-      Size.Height = 23.000000000000000000
+      Size.Height = 22.000000000000000000
       Size.PlatformDefault = False
     end
   end
   object projectPathLayout: TLayout
     Align = Top
-    Position.Y = 33.000000000000000000
+    Position.Y = 32.000000000000000000
     Size.Width = 640.000000000000000000
     Size.Height = 32.000000000000000000
     Size.PlatformDefault = False
@@ -84,7 +84,7 @@ object ImportForm: TImportForm
     Margins.Right = 5.000000000000000000
     Margins.Bottom = 5.000000000000000000
     Size.Width = 326.000000000000000000
-    Size.Height = 335.000000000000000000
+    Size.Height = 336.000000000000000000
     Size.PlatformDefault = False
     Text = 'Compositions'
     TabOrder = 5
@@ -94,7 +94,7 @@ object ImportForm: TImportForm
       Margins.Right = 10.000000000000000000
       Margins.Bottom = 10.000000000000000000
       Position.X = 10.000000000000000000
-      Position.Y = 298.000000000000000000
+      Position.Y = 299.000000000000000000
       Size.Width = 306.000000000000000000
       Size.Height = 27.000000000000000000
       Size.PlatformDefault = False
@@ -148,7 +148,7 @@ object ImportForm: TImportForm
     object BufferedLayout1: TBufferedLayout
       Align = Client
       Size.Width = 326.000000000000000000
-      Size.Height = 298.000000000000000000
+      Size.Height = 299.000000000000000000
       Size.PlatformDefault = False
       object compositions: TListBox
         Align = Client
@@ -157,7 +157,7 @@ object ImportForm: TImportForm
         Margins.Right = 10.000000000000000000
         Margins.Bottom = 5.000000000000000000
         Size.Width = 306.000000000000000000
-        Size.Height = 273.000000000000000000
+        Size.Height = 274.000000000000000000
         Size.PlatformDefault = False
         DisableFocusEffect = True
         DefaultItemStyles.ItemStyle = ''
@@ -166,17 +166,17 @@ object ImportForm: TImportForm
         ShowCheckboxes = True
         OnChange = compositionsChange
         OnChangeCheck = compositionsChangeCheck
-        Viewport.Width = 306.000000000000000000
-        Viewport.Height = 273.000000000000000000
+        Viewport.Width = 302.000000000000000000
+        Viewport.Height = 270.000000000000000000
       end
     end
   end
   object compImportLayout: TLayout
     Align = Right
     Position.X = 336.000000000000000000
-    Position.Y = 65.000000000000000000
+    Position.Y = 64.000000000000000000
     Size.Width = 304.000000000000000000
-    Size.Height = 345.000000000000000000
+    Size.Height = 346.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 7
     object compProp: TGroupBox
@@ -185,7 +185,7 @@ object ImportForm: TImportForm
       Margins.Top = 5.000000000000000000
       Margins.Right = 10.000000000000000000
       Size.Width = 289.000000000000000000
-      Size.Height = 213.000000000000000000
+      Size.Height = 214.000000000000000000
       Size.PlatformDefault = False
       Text = 'Composition Properties'
       TabOrder = 0
@@ -262,7 +262,7 @@ object ImportForm: TImportForm
       Margins.Right = 10.000000000000000000
       Margins.Bottom = 5.000000000000000000
       Position.X = 5.000000000000000000
-      Position.Y = 218.000000000000000000
+      Position.Y = 219.000000000000000000
       Size.Width = 289.000000000000000000
       Size.Height = 122.000000000000000000
       Size.PlatformDefault = False

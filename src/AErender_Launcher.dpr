@@ -33,6 +33,7 @@ uses
   FMX.Forms,
   FMX.Graphics in 'lib\FMX.Graphics.pas',
   FMX.Ani in 'lib\FMX.Ani.pas',
+  FMX.CompLabel in 'lib\Components\TCompLabel\Package\FMX.CompLabel.pas',
   SplashScreenUnit in 'SplashScreenUnit.pas' {SplashScreenForm},
   MainUnit in 'MainUnit.pas' {MainForm},
   SettingsUnit in 'SettingsUnit.pas' {SettingsForm},

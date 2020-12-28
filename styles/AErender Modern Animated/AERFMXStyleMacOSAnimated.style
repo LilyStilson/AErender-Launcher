@@ -2164,123 +2164,13 @@ object TStyleContainer
     end
   end
   object TLayout
-    StyleName = 'comboeditstyle'
-    Align = Center
-    Size.Width = 100.000000000000000000
-    Size.Height = 25.000000000000000000
-    Size.PlatformDefault = False
-    Visible = False
-    TabOrder = 34
-    object TLayout
-      StyleName = 'background'
-      Align = Contents
-      Size.Width = 100.000000000000000000
-      Size.Height = 25.000000000000000000
-      Size.PlatformDefault = False
-      object TRectangle
-        StyleName = 'Rectangle1'
-        Align = Client
-        Fill.Color = xFF202020
-        HitTest = False
-        Size.Width = 100.000000000000000000
-        Size.Height = 25.000000000000000000
-        Size.PlatformDefault = False
-        Stroke.Kind = None
-        XRadius = 3.000000000000000000
-        YRadius = 3.000000000000000000
-        object TLayout
-          StyleName = 'ButtonStyleObject'
-          Align = FitRight
-          Margins.Top = 1.000000000000000000
-          Margins.Right = 1.000000000000000000
-          Margins.Bottom = 1.000000000000000000
-          Position.X = 75.924545288085940000
-          Position.Y = 1.000000000000000000
-          Size.Width = 23.075454711914060000
-          Size.Height = 23.000000000000000000
-          Size.PlatformDefault = False
-          object TLayout
-            StyleName = 'Layout1'
-            Align = Center
-            Margins.Left = 1.000000000000000000
-            Size.Width = 10.000000000000000000
-            Size.Height = 6.000000000000000000
-            Size.PlatformDefault = False
-            object TPath
-              StyleName = 'Path1'
-              Align = Client
-              Data.Path = {
-                04000000000000000000C8420000C84201000000000096430000C84201000000
-                0000484300009643030000000000C8420000C842}
-              Fill.Color = claWhite
-              HitTest = False
-              Size.Width = 10.000000000000000000
-              Size.Height = 6.000000000000000000
-              Size.PlatformDefault = False
-              Stroke.Kind = None
-            end
-          end
-        end
-        object TColorAnimation
-          StyleName = 'buttonColorAnimation1'
-          Duration = 0.100000001490116100
-          PropertyName = 'Fill.Color'
-          StartValue = xFF202020
-          StopValue = xFF404040
-          Trigger = 'IsMouseOver=true;IsPressed=false;IsFocused=false'
-          TriggerInverse = 'IsMouseOver=false;IsPressed=false;IsFocused=false'
-        end
-        object TColorAnimation
-          StyleName = 'buttonColorAnimation2'
-          Duration = 0.100000001490116100
-          PropertyName = 'Fill.Color'
-          StartValue = xFF404040
-          StopValue = xFF17579C
-          Trigger = 'IsPressed=true;IsMouseOver=true;IsFocused=false'
-        end
-        object TColorAnimation
-          StyleName = 'buttonColorAnimation3'
-          Duration = 0.100000001490116100
-          PropertyName = 'Fill.Color'
-          StartValue = xFF2A82E2
-          StopValue = xFF17579C
-          Trigger = 'IsPressed=true;IsMouseOver=true;IsFocused=true'
-          TriggerInverse = 'IsPressed=false;IsMouseOver=true;IsFocused=true'
-        end
-      end
-    end
-    object TBrushObject
-      StyleName = 'foreground'
-    end
-    object TFontObject
-      StyleName = 'font'
-      Font.Size = 13.000000000000000000
-    end
-    object TLayout
-      StyleName = 'content'
-      Align = Client
-      Locked = True
-      Margins.Left = 2.000000000000000000
-      Margins.Top = 2.000000000000000000
-      Margins.Right = 27.000000000000000000
-      Margins.Bottom = 2.000000000000000000
-      Size.Width = 71.000000000000000000
-      Size.Height = 21.000000000000000000
-      Size.PlatformDefault = False
-    end
-    object TBrushObject
-      StyleName = 'selection'
-      Brush.Color = x962A82E2
-    end
-  end
-  object TLayout
     StyleName = 'splitterstyle'
     Align = Center
     Size.Width = 42.250000000000000000
     Size.Height = 96.750000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 35
+    TabOrder = 34
     object TRectangle
       StyleName = 'Rectangle1'
       Align = Client
@@ -2336,7 +2226,7 @@ object TStyleContainer
     Size.Height = 21.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 36
+    TabOrder = 35
     object TLayout
       Align = Left
       Size.Width = 21.000000000000000000
@@ -2570,7 +2460,7 @@ object TStyleContainer
     Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 43
+    TabOrder = 42
     object TLayout
       Align = Bottom
       Position.Y = 34.000000000000000000
@@ -2642,60 +2532,6 @@ object TStyleContainer
     end
   end
   object TLayout
-    StyleName = 'progressbarministyle'
-    Align = Center
-    Size.Width = 66.599998474121090000
-    Size.Height = 56.399997711181640000
-    Size.PlatformDefault = False
-    Visible = False
-    TabOrder = 46
-    object TRectangle
-      StyleName = 'htrack'
-      Align = Contents
-      Fill.Color = xFF202020
-      Locked = True
-      HitTest = False
-      Size.Width = 66.599998474121090000
-      Size.Height = 56.399997711181640000
-      Size.PlatformDefault = False
-      Stroke.Kind = None
-      object TRectangle
-        StyleName = 'hindicator'
-        Align = Left
-        Fill.Color = xFF2A82E2
-        Locked = True
-        HitTest = False
-        Size.Width = 50.000000000000000000
-        Size.Height = 56.399997711181640000
-        Size.PlatformDefault = False
-        Stroke.Kind = None
-      end
-    end
-    object TRectangle
-      StyleName = 'vtrack'
-      Align = Contents
-      Fill.Color = xFF202020
-      Locked = True
-      HitTest = False
-      Size.Width = 66.599998474121090000
-      Size.Height = 56.399997711181640000
-      Size.PlatformDefault = False
-      Stroke.Kind = None
-      object TRectangle
-        StyleName = 'vindicator'
-        Align = Bottom
-        Fill.Color = xFF2A82E2
-        Locked = True
-        HitTest = False
-        Position.Y = 35.399997711181640000
-        Size.Width = 66.599998474121090000
-        Size.Height = 21.000000000000000000
-        Size.PlatformDefault = False
-        Stroke.Kind = None
-      end
-    end
-  end
-  object TLayout
     StyleName = 'aniindicatorhorzstyle'
     Align = Center
     Size.Width = 192.250000000000000000
@@ -2750,6 +2586,7 @@ object TStyleContainer
       Align = Client
       ClipChildren = True
       ClipParent = True
+      Corners = [TopRight, BottomRight]
       Fill.Color = xFF202020
       HitTest = False
       Size.Width = 96.000000000000000000
@@ -2829,7 +2666,7 @@ object TStyleContainer
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 49
+    TabOrder = 46
     object TPath
       StyleName = 'Path1'
       Align = Center
@@ -2862,7 +2699,7 @@ object TStyleContainer
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 52
+    TabOrder = 50
     object TLayout
       Align = Left
       Size.Width = 24.000000000000000000
@@ -2935,7 +2772,7 @@ object TStyleContainer
     Size.Height = 103.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 57
+    TabOrder = 55
     object TRectangle
       StyleName = 'bgrectangle'
       Align = Contents
@@ -3032,6 +2869,716 @@ object TStyleContainer
           Size.PlatformDefault = False
         end
       end
+    end
+  end
+  object TLayout
+    StyleName = 'panelstyle'
+    Align = Center
+    Size.Width = 192.000000000000000000
+    Size.Height = 164.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    object TRectangle
+      StyleName = 'background'
+      Align = Contents
+      Fill.Color = xFF202020
+      Size.Width = 192.000000000000000000
+      Size.Height = 164.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      XRadius = 3.000000000000000000
+      YRadius = 3.000000000000000000
+    end
+  end
+  object TLayout
+    StyleName = 'progressbarminierrorstyle'
+    Align = Center
+    Size.Width = 66.599998474121090000
+    Size.Height = 56.399997711181640000
+    Size.PlatformDefault = False
+    Visible = False
+    object TRectangle
+      StyleName = 'htrack'
+      Align = Contents
+      Fill.Color = xFF404040
+      Locked = True
+      HitTest = False
+      Size.Width = 66.599998474121090000
+      Size.Height = 56.399997711181640000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      XRadius = 2.000000000000000000
+      YRadius = 2.000000000000000000
+      object TRectangle
+        StyleName = 'hindicator'
+        Align = Left
+        Fill.Color = xFFE22A2A
+        Locked = True
+        HitTest = False
+        Size.Width = 50.000000000000000000
+        Size.Height = 56.399997711181640000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        XRadius = 2.000000000000000000
+        YRadius = 2.000000000000000000
+      end
+    end
+    object TRectangle
+      StyleName = 'vtrack'
+      Align = Contents
+      Fill.Color = xFF404040
+      Locked = True
+      HitTest = False
+      Size.Width = 66.599998474121090000
+      Size.Height = 56.399997711181640000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      XRadius = 2.000000000000000000
+      YRadius = 2.000000000000000000
+      object TRectangle
+        StyleName = 'vindicator'
+        Align = Bottom
+        Fill.Color = xFFE22A2A
+        Locked = True
+        HitTest = False
+        Position.Y = 35.399997711181640000
+        Size.Width = 66.599998474121090000
+        Size.Height = 21.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        XRadius = 2.000000000000000000
+        YRadius = 2.000000000000000000
+      end
+    end
+  end
+  object TLayout
+    StyleName = 'progressbarministyle'
+    Align = Center
+    Size.Width = 66.599998474121090000
+    Size.Height = 56.399997711181640000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 45
+    object TRectangle
+      StyleName = 'htrack'
+      Align = Contents
+      Fill.Color = xFF404040
+      Locked = True
+      HitTest = False
+      Size.Width = 66.599998474121090000
+      Size.Height = 56.399997711181640000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      XRadius = 2.000000000000000000
+      YRadius = 2.000000000000000000
+      object TRectangle
+        StyleName = 'hindicator'
+        Align = Left
+        Fill.Color = xFF2A82E2
+        Locked = True
+        HitTest = False
+        Size.Width = 50.000000000000000000
+        Size.Height = 56.399997711181640000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        XRadius = 2.000000000000000000
+        YRadius = 2.000000000000000000
+      end
+    end
+    object TRectangle
+      StyleName = 'vtrack'
+      Align = Contents
+      Fill.Color = xFF404040
+      Locked = True
+      HitTest = False
+      Size.Width = 66.599998474121090000
+      Size.Height = 56.399997711181640000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      XRadius = 2.000000000000000000
+      YRadius = 2.000000000000000000
+      object TRectangle
+        StyleName = 'vindicator'
+        Align = Bottom
+        Fill.Color = xFF2A82E2
+        Locked = True
+        HitTest = False
+        Position.Y = 35.399997711181640000
+        Size.Width = 66.599998474121090000
+        Size.Height = 21.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        XRadius = 2.000000000000000000
+        YRadius = 2.000000000000000000
+      end
+    end
+  end
+  object TLayout
+    StyleName = 'comboeditstyle'
+    Align = Center
+    Size.Width = 100.000000000000000000
+    Size.Height = 25.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 49
+    object TBrushObject
+      StyleName = 'foreground'
+    end
+    object TFontObject
+      StyleName = 'font'
+      Font.Size = 13.000000000000000000
+    end
+    object TLayout
+      StyleName = 'background'
+      Align = Contents
+      Size.Width = 100.000000000000000000
+      Size.Height = 25.000000000000000000
+      Size.PlatformDefault = False
+      object TRectangle
+        StyleName = 'Rectangle1'
+        Align = Client
+        Fill.Color = xFF202020
+        HitTest = False
+        Size.Width = 100.000000000000000000
+        Size.Height = 25.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Color = xFF202020
+        XRadius = 3.000000000000000000
+        YRadius = 3.000000000000000000
+        object TColorAnimation
+          StyleName = 'ColorAnimation1Style'
+          Duration = 0.100000001490116100
+          Inverse = True
+          PropertyName = 'Stroke.Color'
+          StartValue = xFF202020
+          StopValue = xFF404040
+          Trigger = 'IsMouseOver=true;IsFocused=false'
+          TriggerInverse = 'IsMouseOver=false;IsFocused=false'
+        end
+        object TColorAnimation
+          StyleName = 'ColorAnimation2Style'
+          Duration = 0.100000001490116100
+          Inverse = True
+          PropertyName = 'Stroke.Color'
+          StartValue = xFF404040
+          StopValue = xFF2A82E2
+          Trigger = 'IsMouseOver=true;IsFocused=true'
+          TriggerInverse = 'IsMouseOver=true;IsFocused=false'
+        end
+        object TLayout
+          StyleName = 'arrow'
+          Align = FitRight
+          Margins.Top = 1.000000000000000000
+          Margins.Right = 1.000000000000000000
+          Margins.Bottom = 1.000000000000000000
+          Position.X = 75.924545288085940000
+          Position.Y = 1.000000000000000000
+          Size.Width = 23.075454711914060000
+          Size.Height = 23.000000000000000000
+          Size.PlatformDefault = False
+          object TRectangle
+            StyleName = 'Rectangle1'
+            Align = Contents
+            Corners = [TopRight, BottomRight]
+            Fill.Color = xFF303030
+            HitTest = False
+            Size.Width = 23.075454711914060000
+            Size.Height = 23.000000000000000000
+            Size.PlatformDefault = False
+            Stroke.Kind = None
+            XRadius = 3.000000000000000000
+            YRadius = 3.000000000000000000
+            object TColorAnimation
+              StyleName = 'ColorAnimation1Style'
+              Duration = 0.100000001490116100
+              Inverse = True
+              PropertyName = 'Fill.Color'
+              StartValue = xFF303030
+              StopValue = xFF404040
+              Trigger = 'IsMouseOver=true;IsFocused=false'
+              TriggerInverse = 'IsMouseOver=false;IsFocused=false'
+            end
+            object TColorAnimation
+              StyleName = 'ColorAnimation2Style'
+              Duration = 0.100000001490116100
+              PropertyName = 'Fill.Color'
+              StartValue = xFF404040
+              StopValue = xFF17579C
+              Trigger = 'IsFocused=true;IsMouseOver=true'
+            end
+          end
+          object TLayout
+            StyleName = 'Layout1'
+            Align = Center
+            Margins.Left = 1.000000000000000000
+            Size.Width = 10.000000000000000000
+            Size.Height = 6.000000000000000000
+            Size.PlatformDefault = False
+            object TPath
+              StyleName = 'Path1'
+              Align = Client
+              Data.Path = {
+                04000000000000000000C8420000C84201000000000096430000C84201000000
+                0000484300009643030000000000C8420000C842}
+              Fill.Color = claWhite
+              HitTest = False
+              Size.Width = 10.000000000000000000
+              Size.Height = 6.000000000000000000
+              Size.PlatformDefault = False
+              Stroke.Kind = None
+            end
+          end
+        end
+      end
+    end
+    object TBrushObject
+      StyleName = 'selection'
+      Brush.Color = x962A82E2
+    end
+    object TLayout
+      StyleName = 'content'
+      Align = Client
+      Margins.Left = 2.000000000000000000
+      Margins.Top = 2.000000000000000000
+      Margins.Right = 30.000000000000000000
+      Margins.Bottom = 2.000000000000000000
+      Size.Width = 68.000000000000000000
+      Size.Height = 21.000000000000000000
+      Size.PlatformDefault = False
+    end
+  end
+  object TLayout
+    StyleName = 'menubaritemstyle'
+    Align = Center
+    Margins.Left = 1.000000000000000000
+    Margins.Top = 1.000000000000000000
+    Margins.Right = 1.000000000000000000
+    Margins.Bottom = 1.000000000000000000
+    Size.Width = 73.000000000000000000
+    Size.Height = 26.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 36
+    object TRectangle
+      Align = Contents
+      Fill.Color = xFF2A82E2
+      HitTest = False
+      Opacity = 0.000099999997473788
+      Size.Width = 73.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      object TFloatAnimation
+        Duration = 0.000200000009499490
+        PropertyName = 'Opacity'
+        StartValue = 0.000000000000000000
+        StopValue = 1.000000000000000000
+        Trigger = 'IsSelected=true'
+        TriggerInverse = 'IsSelected=false'
+      end
+    end
+    object TRectangle
+      StyleName = 'background'
+      Align = Contents
+      Fill.Color = xFF2A82E2
+      HitTest = False
+      Opacity = 0.000000000000000000
+      Size.Width = 73.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      object TFloatAnimation
+        Duration = 0.000200000009499490
+        Inverse = True
+        PropertyName = 'Opacity'
+        StartValue = 0.000000000000000000
+        StopValue = 1.000000000000000000
+        Trigger = 'IsMouseOver=true'
+        TriggerInverse = 'IsMouseOver=false'
+      end
+    end
+    object TLayout
+      StyleName = 'glyph'
+      Align = Left
+      Size.Width = 25.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      object TLayout
+        StyleName = 'checkmark'
+        Align = Contents
+        Opacity = 0.001000000047497451
+        Size.Width = 25.000000000000000000
+        Size.Height = 26.000000000000000000
+        Size.PlatformDefault = False
+        object TPath
+          Align = Center
+          Data.Path = {
+            070000000000000056D9524391AE2C4301000000927666436502164301000000
+            9F3983432B7C3C43010000009E9AA64382D2B442010000006F1CB04375A4D142
+            0100000026DF8243263F67430300000056D9524391AE2C43}
+          Fill.Color = claWhite
+          HitTest = False
+          Size.Width = 11.000000000000000000
+          Size.Height = 11.000000000000000000
+          Size.PlatformDefault = False
+          Stroke.Kind = None
+        end
+        object TFloatAnimation
+          Duration = 0.100000001490116100
+          PropertyName = 'Opacity'
+          StartValue = 0.000000000000000000
+          StopValue = 1.000000000000000000
+          Trigger = 'IsChecked=true'
+          TriggerInverse = 'IsChecked=false'
+        end
+      end
+      object TGlyph
+        StyleName = 'glyphstyle'
+        Margins.Left = 1.000000000000000000
+        Margins.Top = 2.000000000000000000
+        Margins.Right = 3.000000000000000000
+        Margins.Bottom = 1.000000000000000000
+        Align = Right
+        Position.X = 6.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 16.000000000000000000
+        Size.Height = 23.000000000000000000
+        Size.PlatformDefault = False
+      end
+      object TImage
+        StyleName = 'bitmap'
+        MultiResBitmap = <
+          item
+          end>
+        Align = Contents
+        Margins.Left = 2.000000000000000000
+        Margins.Top = 2.000000000000000000
+        Margins.Right = 2.000000000000000000
+        Margins.Bottom = 2.000000000000000000
+        Size.Width = 21.000000000000000000
+        Size.Height = 22.000000000000000000
+        Size.PlatformDefault = False
+      end
+    end
+    object TText
+      StyleName = 'text'
+      Align = Left
+      Locked = True
+      HitTest = False
+      Margins.Left = 8.000000000000000000
+      Margins.Right = 8.000000000000000000
+      Position.X = 33.000000000000000000
+      Size.Width = 50.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.FontColor = claWhite
+      TextSettings.HorzAlign = Leading
+    end
+    object TText
+      StyleName = 'shortcut'
+      Align = Right
+      Locked = True
+      HitTest = False
+      Margins.Left = 12.000000000000000000
+      Margins.Right = 6.000000000000000000
+      Position.X = -3.000000000000000000
+      Size.Width = 50.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.FontColor = claWhite
+      TextSettings.HorzAlign = Leading
+    end
+    object TLayout
+      StyleName = 'submark'
+      Align = Right
+      Position.X = 53.000000000000000000
+      Size.Width = 20.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      object TPath
+        Align = Center
+        Data.Path = {
+          0400000000000000000000000000000001000000000000000000803F01000000
+          0000803F0000003F030000000000000000000000}
+        Fill.Color = claWhite
+        Locked = True
+        HitTest = False
+        Size.Width = 7.000000000000000000
+        Size.Height = 8.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+      end
+    end
+  end
+  object TRectangle
+    StyleName = 'menubarstyle'
+    Align = Center
+    ClipChildren = True
+    Fill.Kind = None
+    HitTest = False
+    Size.Width = 50.000000000000000000
+    Size.Height = 50.000000000000000000
+    Size.PlatformDefault = False
+    Stroke.Kind = None
+    Visible = False
+    XRadius = 3.000000000000000000
+    YRadius = 3.000000000000000000
+    object TRectangle
+      Align = Client
+      Fill.Color = xFF202020
+      HitTest = False
+      Margins.Left = -1.000000000000000000
+      Margins.Top = -1.000000000000000000
+      Margins.Right = -1.000000000000000000
+      Size.Width = 52.000000000000000000
+      Size.Height = 51.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Color = xFF151515
+      XRadius = 3.000000000000000000
+      YRadius = 3.000000000000000000
+    end
+    object TLayout
+      StyleName = 'content'
+      Align = Client
+      Margins.Left = 1.000000000000000000
+      Margins.Top = 1.000000000000000000
+      Margins.Right = 1.000000000000000000
+      Margins.Bottom = 1.000000000000000000
+      Size.Width = 48.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+    end
+  end
+  object TLayout
+    StyleName = 'menuitemstyle'
+    Align = Center
+    Margins.Left = 1.000000000000000000
+    Margins.Top = 1.000000000000000000
+    Margins.Right = 1.000000000000000000
+    Margins.Bottom = 1.000000000000000000
+    Size.Width = 73.000000000000000000
+    Size.Height = 26.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 37
+    object TRectangle
+      Align = Contents
+      Fill.Color = xFF2A82E2
+      HitTest = False
+      Opacity = 0.000099999997473788
+      Size.Width = 73.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      object TFloatAnimation
+        Duration = 0.000200000009499490
+        PropertyName = 'Opacity'
+        StartValue = 0.000000000000000000
+        StopValue = 1.000000000000000000
+        Trigger = 'IsSelected=true'
+        TriggerInverse = 'IsSelected=false'
+      end
+    end
+    object TRectangle
+      StyleName = 'background'
+      Align = Contents
+      Fill.Color = xFF2A82E2
+      HitTest = False
+      Opacity = 0.000000000000000000
+      Size.Width = 73.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      object TFloatAnimation
+        Duration = 0.000200000009499490
+        Inverse = True
+        PropertyName = 'Opacity'
+        StartValue = 0.000000000000000000
+        StopValue = 1.000000000000000000
+        Trigger = 'IsMouseOver=true'
+        TriggerInverse = 'IsMouseOver=false'
+      end
+    end
+    object TLayout
+      StyleName = 'glyph'
+      Align = Left
+      Size.Width = 25.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      object TLayout
+        StyleName = 'checkmark'
+        Align = Contents
+        Opacity = 0.001000000047497451
+        Size.Width = 25.000000000000000000
+        Size.Height = 26.000000000000000000
+        Size.PlatformDefault = False
+        object TPath
+          Align = Center
+          Data.Path = {
+            070000000000000056D9524391AE2C4301000000927666436502164301000000
+            9F3983432B7C3C43010000009E9AA64382D2B442010000006F1CB04375A4D142
+            0100000026DF8243263F67430300000056D9524391AE2C43}
+          Fill.Color = claWhite
+          HitTest = False
+          Size.Width = 11.000000000000000000
+          Size.Height = 11.000000000000000000
+          Size.PlatformDefault = False
+          Stroke.Kind = None
+        end
+        object TFloatAnimation
+          Duration = 0.100000001490116100
+          PropertyName = 'Opacity'
+          StartValue = 0.000000000000000000
+          StopValue = 1.000000000000000000
+          Trigger = 'IsChecked=true'
+          TriggerInverse = 'IsChecked=false'
+        end
+      end
+      object TGlyph
+        StyleName = 'glyphstyle'
+        Margins.Left = 1.000000000000000000
+        Margins.Top = 2.000000000000000000
+        Margins.Right = 3.000000000000000000
+        Margins.Bottom = 1.000000000000000000
+        Align = Left
+        Position.X = 1.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 16.000000000000000000
+        Size.Height = 23.000000000000000000
+        Size.PlatformDefault = False
+      end
+      object TImage
+        StyleName = 'bitmap'
+        MultiResBitmap = <
+          item
+          end>
+        Align = Left
+        Margins.Left = 2.000000000000000000
+        Margins.Top = 2.000000000000000000
+        Margins.Right = 2.000000000000000000
+        Margins.Bottom = 2.000000000000000000
+        Position.X = 2.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 21.000000000000000000
+        Size.Height = 22.000000000000000000
+        Size.PlatformDefault = False
+      end
+    end
+    object TText
+      StyleName = 'text'
+      Align = Left
+      Locked = True
+      HitTest = False
+      Margins.Left = 8.000000000000000000
+      Margins.Right = 8.000000000000000000
+      Position.X = 33.000000000000000000
+      Size.Width = 50.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.FontColor = claWhite
+      TextSettings.HorzAlign = Leading
+    end
+    object TText
+      StyleName = 'shortcut'
+      Align = Right
+      Locked = True
+      HitTest = False
+      Margins.Left = 12.000000000000000000
+      Margins.Right = 6.000000000000000000
+      Position.X = -3.000000000000000000
+      Size.Width = 50.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.FontColor = claWhite
+      TextSettings.HorzAlign = Leading
+    end
+    object TLayout
+      StyleName = 'submark'
+      Align = Right
+      Position.X = 53.000000000000000000
+      Size.Width = 20.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      object TPath
+        Align = Center
+        Data.Path = {
+          0400000000000000000000000000000001000000000000000000803F01000000
+          0000803F0000003F030000000000000000000000}
+        Fill.Color = claWhite
+        Locked = True
+        HitTest = False
+        Size.Width = 7.000000000000000000
+        Size.Height = 8.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+      end
+    end
+  end
+  object TLayout
+    StyleName = 'menuseparatorstyle'
+    Align = Center
+    Margins.Left = 1.000000000000000000
+    Margins.Top = 1.000000000000000000
+    Margins.Right = 1.000000000000000000
+    Margins.Bottom = 1.000000000000000000
+    Size.Width = 50.000000000000000000
+    Size.Height = 50.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 39
+    object TLine
+      Align = Top
+      LineType = Top
+      Margins.Left = 3.000000000000000000
+      Margins.Top = 2.000000000000000000
+      Margins.Right = 3.000000000000000000
+      Position.X = 3.000000000000000000
+      Position.Y = 2.000000000000000000
+      Size.Width = 44.000000000000000000
+      Size.Height = 1.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Color = xFF151515
+    end
+  end
+  object TRectangle
+    StyleName = 'menuviewstyle'
+    Align = Center
+    Fill.Color = xFF202020
+    Size.Width = 50.000000000000000000
+    Size.Height = 50.000000000000000000
+    Size.PlatformDefault = False
+    Stroke.Color = xFF151515
+    Visible = False
+    XRadius = 3.000000000000000000
+    YRadius = 3.000000000000000000
+    object TRectangle
+      Align = Client
+      Fill.Color = xFF202020
+      HitTest = False
+      Size.Width = 50.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Color = xFF151515
+      XRadius = 3.000000000000000000
+      YRadius = 3.000000000000000000
+      object TShadowEffect
+        Distance = 3.000000000000000000
+        Direction = 90.000000000000000000
+        Softness = 0.500000000000000000
+        Opacity = 0.500000000000000000
+        ShadowColor = claBlack
+      end
+    end
+    object TLayout
+      StyleName = 'content'
+      Align = Client
+      Margins.Left = 1.000000000000000000
+      Margins.Top = 1.000000000000000000
+      Margins.Right = 1.000000000000000000
+      Margins.Bottom = 1.000000000000000000
+      Size.Width = 48.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
     end
   end
 end

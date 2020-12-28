@@ -3541,67 +3541,13 @@ object TStyleContainer
     end
   end
   object TLayout
-    StyleName = 'progressbarministyle'
-    Align = Center
-    Size.Width = 66.599998474121090000
-    Size.Height = 56.399997711181640000
-    Size.PlatformDefault = False
-    Visible = False
-    TabOrder = 55
-    object TRectangle
-      StyleName = 'htrack'
-      Align = Contents
-      Fill.Color = xFF202020
-      Locked = True
-      HitTest = False
-      Size.Width = 66.599998474121090000
-      Size.Height = 56.399997711181640000
-      Size.PlatformDefault = False
-      Stroke.Kind = None
-      object TRectangle
-        StyleName = 'hindicator'
-        Align = Left
-        Fill.Color = xFF2A82E2
-        Locked = True
-        HitTest = False
-        Size.Width = 50.000000000000000000
-        Size.Height = 56.399997711181640000
-        Size.PlatformDefault = False
-        Stroke.Kind = None
-      end
-    end
-    object TRectangle
-      StyleName = 'vtrack'
-      Align = Contents
-      Fill.Color = xFF202020
-      Locked = True
-      HitTest = False
-      Size.Width = 66.599998474121090000
-      Size.Height = 56.399997711181640000
-      Size.PlatformDefault = False
-      Stroke.Kind = None
-      object TRectangle
-        StyleName = 'vindicator'
-        Align = Bottom
-        Fill.Color = xFF2A82E2
-        Locked = True
-        HitTest = False
-        Position.Y = 35.399997711181640000
-        Size.Width = 66.599998474121090000
-        Size.Height = 21.000000000000000000
-        Size.PlatformDefault = False
-        Stroke.Kind = None
-      end
-    end
-  end
-  object TLayout
     StyleName = 'comboeditstyle'
     Align = Center
     Size.Width = 100.000000000000000000
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 58
+    TabOrder = 57
     object TBrushObject
       StyleName = 'foreground'
     end
@@ -3758,7 +3704,7 @@ object TStyleContainer
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 63
+    TabOrder = 62
     object TPath
       StyleName = 'Path1'
       Align = Center
@@ -3791,7 +3737,7 @@ object TStyleContainer
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 67
+    TabOrder = 66
     object TLayout
       Align = Left
       Size.Width = 24.000000000000000000
@@ -3989,7 +3935,7 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 62
+    TabOrder = 61
     object TRectangle
       StyleName = 'bgrectangle'
       Align = Contents
