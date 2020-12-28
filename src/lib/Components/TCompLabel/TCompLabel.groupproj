@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{EE1941E1-8B82-410B-8888-9A849E41EE5E}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Package\CompLabel.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Test Project\CompLabelTest.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="CompLabel">
+        <MSBuild Projects="Package\CompLabel.dproj"/>
+    </Target>
+    <Target Name="CompLabel:Clean">
+        <MSBuild Projects="Package\CompLabel.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="CompLabel:Make">
+        <MSBuild Projects="Package\CompLabel.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="CompLabelTest">
+        <MSBuild Projects="Test Project\CompLabelTest.dproj"/>
+    </Target>
+    <Target Name="CompLabelTest:Clean">
+        <MSBuild Projects="Test Project\CompLabelTest.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="CompLabelTest:Make">
+        <MSBuild Projects="Test Project\CompLabelTest.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="CompLabel;CompLabelTest"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="CompLabel:Clean;CompLabelTest:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="CompLabel:Make;CompLabelTest:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
