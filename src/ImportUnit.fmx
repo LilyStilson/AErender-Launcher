@@ -23,8 +23,8 @@ object ImportForm: TImportForm
     object importLabel: TLabel
       Align = Client
       StyledSettings = [Family, FontColor]
-      Margins.Left = 20.000000000000000000
-      Size.Width = 322.000000000000000000
+      Margins.Left = 16.000000000000000000
+      Size.Width = 328.000000000000000000
       Size.Height = 32.000000000000000000
       Size.PlatformDefault = False
       TextSettings.Font.Size = 14.000000000000000000
@@ -37,13 +37,13 @@ object ImportForm: TImportForm
       Align = Right
       TabOrder = 1
       ReadOnly = True
-      Position.X = 342.000000000000000000
-      Position.Y = 5.000000000000000000
-      Margins.Top = 5.000000000000000000
-      Margins.Right = 10.000000000000000000
-      Margins.Bottom = 5.000000000000000000
+      Position.X = 344.000000000000000000
+      Position.Y = 4.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Right = 8.000000000000000000
+      Margins.Bottom = 4.000000000000000000
       Size.Width = 288.000000000000000000
-      Size.Height = 22.000000000000000000
+      Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
     end
   end
@@ -56,8 +56,8 @@ object ImportForm: TImportForm
     TabOrder = 4
     object aerProjectPathLabel: TLabel
       Align = Left
-      Margins.Left = 10.000000000000000000
-      Position.X = 10.000000000000000000
+      Margins.Left = 8.000000000000000000
+      Position.X = 8.000000000000000000
       Size.Width = 120.000000000000000000
       Size.Height = 32.000000000000000000
       Size.PlatformDefault = False
@@ -69,11 +69,11 @@ object ImportForm: TImportForm
       Align = Client
       TabOrder = 1
       ReadOnly = True
-      Margins.Top = 5.000000000000000000
-      Margins.Right = 10.000000000000000000
-      Margins.Bottom = 5.000000000000000000
-      Size.Width = 500.000000000000000000
-      Size.Height = 22.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Right = 8.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Size.Width = 504.000000000000000000
+      Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
     end
   end
@@ -145,30 +145,24 @@ object ImportForm: TImportForm
         OnClick = deselallButtonClick
       end
     end
-    object BufferedLayout1: TBufferedLayout
+    object compositions: TListBox
       Align = Client
-      Size.Width = 326.000000000000000000
-      Size.Height = 299.000000000000000000
+      Margins.Left = 10.000000000000000000
+      Margins.Top = 20.000000000000000000
+      Margins.Right = 10.000000000000000000
+      Margins.Bottom = 5.000000000000000000
+      Size.Width = 306.000000000000000000
+      Size.Height = 274.000000000000000000
       Size.PlatformDefault = False
-      object compositions: TListBox
-        Align = Client
-        Margins.Left = 10.000000000000000000
-        Margins.Top = 20.000000000000000000
-        Margins.Right = 10.000000000000000000
-        Margins.Bottom = 5.000000000000000000
-        Size.Width = 306.000000000000000000
-        Size.Height = 274.000000000000000000
-        Size.PlatformDefault = False
-        DisableFocusEffect = True
-        DefaultItemStyles.ItemStyle = ''
-        DefaultItemStyles.GroupHeaderStyle = ''
-        DefaultItemStyles.GroupFooterStyle = ''
-        ShowCheckboxes = True
-        OnChange = compositionsChange
-        OnChangeCheck = compositionsChangeCheck
-        Viewport.Width = 302.000000000000000000
-        Viewport.Height = 270.000000000000000000
-      end
+      DisableFocusEffect = True
+      DefaultItemStyles.ItemStyle = ''
+      DefaultItemStyles.GroupHeaderStyle = ''
+      DefaultItemStyles.GroupFooterStyle = ''
+      ShowCheckboxes = True
+      OnChange = compositionsChange
+      OnChangeCheck = compositionsChangeCheck
+      Viewport.Width = 302.000000000000000000
+      Viewport.Height = 270.000000000000000000
     end
   end
   object compImportLayout: TLayout
@@ -292,8 +286,8 @@ object ImportForm: TImportForm
     TabOrder = 10
     object importButton: TButton
       Align = Center
-      Size.Width = 114.000000000000000000
-      Size.Height = 30.000000000000000000
+      Size.Width = 128.000000000000000000
+      Size.Height = 28.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
       Text = 'Import'

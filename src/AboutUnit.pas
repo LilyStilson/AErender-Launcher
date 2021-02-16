@@ -2,10 +2,10 @@ unit AboutUnit;
 
 (*        AErender Launcher                                                                 *)
 (*        AboutUnit.pas                                                                     *)
-(*        Lily Stilson // 2019 - 2020                                                       *)
+(*        Lily Stilson // 2019 - 2021                                                       *)
 (*        MIT License                                                                       *)
 (*                                                                                          *)
-(*        Copyright (c) 2019 - 2020 Alice Romanets                                          *)
+(*        Copyright (c) 2019 - 2021 Alice Romanets                                          *)
 (*                                                                                          *)
 (*        Permission is hereby granted, free of charge, to any person obtaining a copy      *)
 (*        of this software and associated documentation files (the "Software"), to deal     *)
@@ -134,7 +134,7 @@ end;
 
 procedure TAboutForm.WebsiteLabelClick(Sender: TObject);
 begin
-  Open('http://aerenderlauncher.com');
+  Open('http://aerenderlauncher.com', []);
 end;
 
 procedure TAboutForm.LogoRotationAnimFinish(Sender: TObject);

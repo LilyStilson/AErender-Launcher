@@ -2,10 +2,10 @@
 
 (*        AErender Launcher                                                                 *)
 (*        MainUnit.pas                                                                      *)
-(*        Lily Stilson // 2019 - 2020                                                       *)
+(*        Lily Stilson // 2019 - 2021                                                       *)
 (*        MIT License                                                                       *)
 (*                                                                                          *)
-(*        Copyright (c) 2019 - 2020 Alice Romanets                                          *)
+(*        Copyright (c) 2019 - 2021 Alice Romanets                                          *)
 (*                                                                                          *)
 (*        Permission is hereby granted, free of charge, to any person obtaining a copy      *)
 (*        of this software and associated documentation files (the "Software"), to deal     *)
@@ -86,6 +86,7 @@ uses
   FMX.BufferedLayout,
   FMX.CompLabel,
   FMX.TreeView,
+  FMX.TabControl,
   {$ENDREGION}
 
   {$REGION '    Data Lib Namespaces    '}
@@ -99,16 +100,15 @@ uses
   {$ENDREGION}
 
   {$REGION '    Additional Liraries    '}
-  AErenderLauncher.MathExpParser,
   AErenderLauncher.Localization,
   AErenderLauncher.IO,
   AErenderLauncher.Rendering,
   AErenderLauncher.Math,
+  AErenderLauncher.Math.ExpParser,
   {$ENDREGION}
 
   {$REGION '    Windows Only Libraries    '}{$IFDEF MSWINDOWS}
-    Winapi.ShellAPI, Winapi.Windows, FMX.Platform.Win, Winapi.TlHelp32, WinApi.DwmApi, WinApi.UxTheme, WinApi.Messages,
-  FMX.TabControl;
+    Winapi.ShellAPI, Winapi.Windows, FMX.Platform.Win, Winapi.TlHelp32, WinApi.DwmApi, WinApi.UxTheme, WinApi.Messages;
   {$ENDIF MSWINDOWS}{$ENDREGION}
 
   {$REGION '    macOS Only Libraries    '}{$IFDEF MACOS}
@@ -205,16 +205,16 @@ type
     property OnValidating;
   end;
   TMainForm = class(TForm)
-    projectPathLabel: TLabel;
+    _projectPathLabel: TLabel;
     inputFileLayout: TLayout;
-    outputPathLabel: TLabel;
+    _outputPathLabel: TLabel;
     InputLabels: TLayout;
     pathLayout: TLayout;
-    projectPath: TEdit;
+    _projectPath: TEdit;
     fileChooseLayout: TLayout;
-    outputPath: TEdit;
+    _outputPath: TEdit;
     openFile: TButton;
-    saveFile: TButton;
+    _saveFile: TButton;
     properties: TGroupBox;
     soundCheckbox: TCheckBox;
     missingFilesCheckbox: TCheckBox;
@@ -329,45 +329,62 @@ type
     recentItem: TMenuItem;
     separatorItem3: TMenuItem;
     TasksToolbar: TToolBar;
-    Label5: TLabel;
+    TasksLabel: TLabel;
     RemoveTaskButton: TButton;
     AddTaskButton: TButton;
     TasksTreeView: TTreeView;
-    TreeViewItem2: TTreeViewItem;
-    TreeViewItem10: TTreeViewItem;
-    CompLabel1: TCompLabel;
     TasksPopupMenu: TPopupMenu;
-    MenuItem1: TMenuItem;
-    MenuItem2: TMenuItem;
-    MenuItem3: TMenuItem;
-    Popup1: TPopup;
+    AddTaskPopupItem: TMenuItem;
+    EditTaskPopupItem: TMenuItem;
+    DeleteTaskPopupItem: TMenuItem;
+    TaskEditorPopup: TPopup;
     PopupAniOpen: TFloatAnimation;
     PopupAniClose: TFloatAnimation;
-    NewTaskCompButton: TButton;
+    TaskEditorCompButton: TButton;
     ToolbarPopupMenu: TPopupMenu;
     ToolbarIconsOnly: TMenuItem;
     ToolbarIconsAndText: TMenuItem;
     ToolbarTextOnly: TMenuItem;
-    NewTaskTabControl: TTabControl;
-    NewTaskStepOne: TTabItem;
-    NewTaskStepTwo: TTabItem;
-    NewTaskStepOneStatusBar: TStatusBar;
-    NewTaskCancelButton: TButton;
-    StatusBar1: TStatusBar;
-    NewTaskCreateButton: TButton;
+    TaskEditorTabControl: TTabControl;
+    TaskEditorStepOne: TTabItem;
+    TaskEditorStepTwo: TTabItem;
+    TaskEditorStepOneStatusBar: TStatusBar;
+    TaskEditorCancelButton: TButton;
+    TaskEditorStepTwoStatusBar: TStatusBar;
+    TaskEditorSaveButton: TButton;
     Button3: TButton;
-    NewTaskProjectButton: TButton;
-    NewTaskStepOneToolbar: TToolBar;
-    NewTaskStepOneLabel: TLabel;
-    NewTaskStepTwoToolbar: TToolBar;
+    TaskEditorProjectButton: TButton;
+    TaskEditorStepOneToolbar: TToolBar;
+    TaskEditorStepOneLabel: TLabel;
+    TaskEditorStepTwoToolbar: TToolBar;
     NewTaskStepTwoLabel: TLabel;
-    NewTaskCompGrid: TStringGrid;
-    StringColumn4: TStringColumn;
-    IntegerColumn1: TIntegerColumn;
-    IntegerColumn2: TIntegerColumn;
-    IntegerColumn3: TIntegerColumn;
-    NewTaskCompCount: TSpinBox;
-    NewTaskCompCountLabel: TLabel;
+    TaskEditorCompGrid: TStringGrid;
+    CompositionCol: TStringColumn;
+    StartFrameCol: TIntegerColumn;
+    EndFrameCol: TIntegerColumn;
+    SplitCol: TIntegerColumn;
+    TaskEditorCompCount: TSpinBox;
+    TaskEditorCompCountLabel: TLabel;
+    CompNumCol: TIntegerColumn;
+    projectPath: TEdit;
+    projectPathLabel: TLabel;
+    Layout3: TLayout;
+    outputPathLabel: TLabel;
+    outputPath: TEdit;
+    saveFile: TButton;
+    GridPanelLayout4: TGridPanelLayout;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    TasksIsEmptyLabel: TLabel;
+    TasksIsEmpty: TLayout;
+    TeskIsEmptyAddLabel: TLabel;
+    Label5: TLabel;
+    DebugLabel: TLabel;
+    TaskEditorCreateTaskButton: TButton;
+    TasksPopupSeparator1: TMenuItem;
+    TaskItemDisplay: TMenuItem;
     procedure FormResize(Sender: TObject);
     procedure compSwitchSwitch(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -379,7 +396,7 @@ type
     procedure threadsCount1Change(Sender: TObject);
     procedure openFileClick(Sender: TObject);
     procedure launchButtonClick(Sender: TObject);
-    procedure saveFileClick(Sender: TObject);
+    procedure _saveFileClick(Sender: TObject);
     procedure infoButtonClick(Sender: TObject);
     procedure exitItemClick(Sender: TObject);
     procedure docsItemClick(Sender: TObject);
@@ -390,17 +407,14 @@ type
     procedure cacheUsageTrackBarChange(Sender: TObject);
     procedure memUsageInfoClick(Sender: TObject);
     procedure memUsageInfoEditValidate(Sender: TObject; var Text: string);
-    procedure cacheUsageInfoEditValidate(Sender: TObject;
-      var Text: string);
+    procedure cacheUsageInfoEditValidate(Sender: TObject; var Text: string);
     procedure cacheUsageInfoClick(Sender: TObject);
     procedure cacheUsageInfoEditExit(Sender: TObject);
     procedure memUsageInfoEditExit(Sender: TObject);
     procedure downloadButtonClick(Sender: TObject);
     procedure ffmpegConfigButtonClick(Sender: TObject);
-    procedure projectPathDragDrop(Sender: TObject; const Data: TDragObject;
-      const Point: TPointF);
-    procedure projectPathDragOver(Sender: TObject; const Data: TDragObject;
-      const Point: TPointF; var Operation: TDragOperation);
+    procedure _projectPathDragDrop(Sender: TObject; const Data: TDragObject; const Point: TPointF);
+    procedure _projectPathDragOver(Sender: TObject; const Data: TDragObject; const Point: TPointF; var Operation: TDragOperation);
     procedure outFrameValidate(Sender: TObject; var Text: string);
     procedure outputModuleBoxChange(Sender: TObject);
     procedure compNameTyping(Sender: TObject);
@@ -408,10 +422,8 @@ type
     procedure winOutModuleEditorItemClick(Sender: TObject);
     procedure inFrameValidate(Sender: TObject; var Text: string);
     procedure threadsCountChange(Sender: TObject);
-    procedure UpdateNetHTTPClientRequestError(const Sender: TObject;
-      const AError: string);
-    procedure UpdateNetHTTPClientRequestCompleted(const Sender: TObject;
-      const AResponse: IHTTPResponse);
+    procedure UpdateNetHTTPClientRequestError(const Sender: TObject; const AError: string);
+    procedure UpdateNetHTTPClientRequestCompleted(const Sender: TObject; const AResponse: IHTTPResponse);
     procedure ReadAERQ(Path: String);
     procedure SetLanguage(LanguageCode: Integer);
     procedure UpdateOutputModules;
@@ -420,29 +432,38 @@ type
     procedure threadsCountExit(Sender: TObject);
     procedure AddToRecents(Item: String);
     procedure RecentProjectSelected(Sender: TObject);
+
     procedure InflateRecents;
     procedure ReInflateRecents;
-    procedure compGridEditingDone(Sender: TObject; const ACol,
-      ARow: Integer);
+
+    procedure compGridEditingDone(Sender: TObject; const ACol, ARow: Integer);
     procedure renderSettingsBoxChange(Sender: TObject);
-    procedure TasksTreeViewDragChange(SourceItem, DestItem: TTreeViewItem;
-      var Allow: Boolean);
-    procedure TasksTreeViewKeyDown(Sender: TObject; var Key: Word;
-      var KeyChar: Char; Shift: TShiftState);
-    procedure TasksTreeViewMouseMove(Sender: TObject; Shift: TShiftState;
-      X, Y: Single);
+    procedure TasksTreeViewDragChange(SourceItem, DestItem: TTreeViewItem; var Allow: Boolean);
+    procedure TasksTreeViewKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
+    procedure TasksTreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Single);
     procedure TasksPopupMenuPopup(Sender: TObject);
     procedure AddTaskButtonClick(Sender: TObject);
     procedure RemoveTaskButtonClick(Sender: TObject);
     procedure FloatAnimation1Finish(Sender: TObject);
     procedure PopupAniOpenFinish(Sender: TObject);
-    procedure NewTaskCancelButtonClick(Sender: TObject);
+    procedure TaskEditorCancelButtonClick(Sender: TObject);
     procedure PopupAniCloseFinish(Sender: TObject);
-    procedure Popup1Popup(Sender: TObject);
-    procedure NewTaskCompButtonClick(Sender: TObject);
-    procedure NewTaskProjectButtonClick(Sender: TObject);
-    procedure NewTaskCreateButtonClick(Sender: TObject);
-    procedure NewTaskCompCountChange(Sender: TObject);
+    procedure TaskEditorPopupPopup(Sender: TObject);
+    procedure TaskEditorCompButtonClick(Sender: TObject);
+    procedure TaskEditorProjectButtonClick(Sender: TObject);
+    procedure TaskEditorCreateTaskButtonClick(Sender: TObject);
+    procedure TaskEditorCompCountChange(Sender: TObject);
+    procedure TaskEditorTabControlChange(Sender: TObject);
+    procedure TaskEditorCompGridEditingDone(Sender: TObject; const ACol, ARow: Integer);
+
+    procedure UpdateTasksList;
+
+    procedure RenderTasksOnNotify(Sender: TObject; const Item: TRenderTask; Action: TCollectionNotification);
+
+    procedure TasksTreeViewDragDrop(Sender: TObject; const Data: TDragObject; const Point: TPointF);
+
+    procedure TasksTreeViewItemDblClick(Sender: TObject);
+    procedure TaskEditorSaveButtonClick(Sender: TObject);
   private
     { Private declarations }
     FCurrentItem: String;
@@ -550,7 +571,7 @@ procedure TMainForm.WMNCPaint(var AMessage: TMessage);
 begin
   var hWnd: HWND := FormToHWND(Self);
 
-  SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or CS_DROPSHADOW);
+  SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or  CS_DROPSHADOW);
 
   {var v: Integer := 2;
 
@@ -567,24 +588,17 @@ end;
 {$ENDIF MSWINDOWS}
 
 function GetPlatformMemorySize: Int64;            //BYTES, BLYAD
-var
-  {$IFDEF MSWINDOWS}
-    MS_Ex: MemoryStatusEx;
-  {$ENDIF MSWINDOWS}
-  {$IFDEF MACOS}
-    res: Int64;
-    len: size_t;
-  {$ENDIF MACOS}
 begin
   {$IFDEF MSWINDOWS}
-    FillChar (MS_Ex, SizeOf (MemoryStatusEx), #0);
-    MS_Ex.dwLength := SizeOf (MemoryStatusEx);
-    GlobalMemoryStatusEx (MS_Ex);
+    var MS_Ex: MemoryStatusEx;
+    FillChar(MS_Ex, SizeOf(MemoryStatusEx), #0);
+    MS_Ex.dwLength := SizeOf(MemoryStatusEx);
+    GlobalMemoryStatusEx(MS_Ex);
     Result := MS_Ex.ullTotalPhys;
   {$ENDIF MSWINDOWS}
   {$IFDEF MACOS}
-    len := SizeOf (Result);
-    res := SysCtlByName ('hw.memsize', @Result, @len, nil, 0);
+    var len: size_t := SizeOf (Result);
+    var res: Int64 := SysCtlByName ('hw.memsize', @Result, @len, nil, 0);
     if res <> 0 then
       RaiseLastOSError;
   {$ENDIF MACOS}
@@ -1099,18 +1113,121 @@ begin
   InflateRecents;
 end;
 
+procedure TMainForm.RenderTasksOnNotify(Sender: TObject; const Item: TRenderTask; Action: TCollectionNotification);
+begin
+
+  /// Because method [Clear()] calls [BeginUpdate()] and [EndUpdate()]
+  /// we call it first here
+  TasksTreeView.Clear;
+
+  TasksTreeView.BeginUpdate;
+  for var Task: TRenderTask in RenderTasks do begin
+    var ProjectItem: TTreeViewItem := TTreeViewItem.Create(nil);
+    ProjectItem.Text := ExtractFileName(Task.Project);
+    ProjectItem.Parent := TasksTreeView;
+    ProjectItem.StyledSettings := [TStyledSetting.FontColor, TStyledSetting.Family, TStyledSetting.Size];
+    ProjectItem.TextSettings.Font.Style := [TFontStyle.fsBold];
+    ProjectItem.IsExpanded := True;
+    ProjectItem.OnDblClick := TasksTreeViewItemDblClick;
+
+    for var Comp: TComposition in Task.Compositions do begin
+      var CompItem: TTreeViewItem := TTreeViewItem.Create(nil);
+      CompItem.Text := Comp.CompName;
+      CompItem.Parent := ProjectItem;
+      CompItem.OnDblClick := TasksTreeViewItemDblClick;
+
+      var СompLabel: TCompLabel := TCompLabel.Create(nil);
+      СompLabel.Parent := CompItem;
+      СompLabel.Align := TAlignLayout.Client;
+      СompLabel.InFrame := IntToStr(Comp.Frames.StartFrame);
+      СompLabel.OutFrame := IntToStr(Comp.Frames.EndFrame);
+      СompLabel.Split := IntToStr(Comp.Split);
+    end;
+  end;
+  TasksTreeView.EndUpdate;
+
+  TasksTreeView.AllowDrag := True;
+end;
+
+procedure TMainForm.UpdateTasksList;
+begin
+//  TasksTreeView.BeginUpdate;
+//  ///
+//  TasksTreeView.Clear;
+//
+//  for var Task: TRenderTask in RenderTasks do begin
+//    var ProjectItem: TTreeViewItem := TTreeViewItem.Create(nil);
+//    ProjectItem.Text := ExtractFileName(Task.Project);
+//    ProjectItem.Parent := TasksTreeView;
+//    ProjectItem.StyledSettings := [TStyledSetting.FontColor, TStyledSetting.Family, TStyledSetting.Size];
+//    ProjectItem.TextSettings.Font.Style := [TFontStyle.fsBold];
+//    ProjectItem.IsExpanded := True;
+//
+//    for var Comp: TComposition in Task.Compositions do begin
+//      var CompItem: TTreeViewItem := TTreeViewItem.Create(nil);
+//      CompItem.Text := Comp.CompName;
+//      CompItem.Parent := ProjectItem;
+//
+//      var СompLabel: TCompLabel := TCompLabel.Create(nil);
+//      СompLabel.Parent := CompItem;
+//      СompLabel.Align := TAlignLayout.Client;
+//      СompLabel.InFrame := IntToStr(Comp.Frames.StartFrame);
+//      СompLabel.OutFrame := IntToStr(Comp.Frames.EndFrame);
+//      СompLabel.Split := IntToStr(Comp.Split);
+//    end;
+//  end;
+//  TasksTreeView.EndUpdate;
+end;
+
 procedure TMainForm.RemoveTaskButtonClick(Sender: TObject);
 begin
   //Popup1.IsOpen := False;
+  RenderTasks.Clear;
 end;
 
 procedure TMainForm.AddTaskButtonClick(Sender: TObject);
 begin
-  //Popup1.Height := 1;
-  //Popup1.
-  Popup1.PopupModal;
+  var TempStr: String := '';
 
-  //PopupAniOpen.Enabled := True;
+{$IFDEF MACOS}
+  var NSWin: NSWindow := WindowHandleToPlatform(Screen.ActiveForm.Handle).Wnd;
+
+  var FOpenFile: NSSavePanel := TNSOpenPanel.Wrap(TNSOpenPanel.OCClass.openPanel);
+  FOpenFile.setDirectory(StrToNSStr(DEFPRGPATH));
+  FOpenFile.setAllowedFileTypes(ArrayToNSArray(['aep']));
+  FOpenFile.setPrompt(StrToNSStr('Open After Effects project'));
+
+  objc_msgSendP2(        // We are calling here method straight from MacApi
+    (FOpenFile as ILocalObject).GetObjectID,  // Provide object with callable method
+    sel_getUid(PAnsiChar('beginSheetModalForWindow:completionHandler:')),  // Provide method UID
+    (NSWin as ILocalObject).GetObjectID,                                   // Provide first method parameter
+    TObjCBlock.CreateBlockWithProcedure(procedure (p1: NSInteger) begin    // Provide callback procedure (thanks NightFlight!)
+      if p1 = 0 then
+        // Handle
+      else begin
+        TempStr := NSStrToStr(FOpenFile.URL.relativePath);
+        //AddToRecents(TempStr);
+      end;
+    end)
+  );
+{$ELSE MSWINDOWS}
+  with AEPOpenDialog do
+    if Execute then begin
+      TempStr := AEPOpenDialog.FileName;
+    end;
+{$ENDIF}
+
+  if TempStr <> '' then begin
+    TaskEditorTabControl.TabIndex := 0;
+    if (TasksTreeView.ItemByText(ExtractFileName(TempStr)) <> nil) or (GetTaskByProject(ExtractFileName(TempStr)) <> nil) then
+      TasksTreeViewItemDblClick(TasksTreeView.ItemByText(ExtractFileName(TempStr)))
+    else begin
+      TaskEditorSaveButton.Visible := False;
+      TaskEditorCreateTaskButton.Visible := True;
+      TaskEditorPopup.PopupModal;
+      AddToRecents(TempStr);
+    end;
+  end;
 end;
 
 procedure TMainForm.renderSettingsBoxChange(Sender: TObject);
@@ -1144,9 +1261,91 @@ begin
   ReInflateRecents;
 end;
 
-procedure TMainForm.NewTaskProjectButtonClick(Sender: TObject);
+procedure TMainForm.TaskEditorProjectButtonClick(Sender: TObject);
 begin
-  NewTaskTabControl.TabIndex := 0;
+  TaskEditorTabControl.TabIndex := 0;
+end;
+
+procedure TMainForm.TaskEditorSaveButtonClick(Sender: TObject);
+begin
+  var ErrorStr: String := '';
+  for var i := 0 to StrToInt(TaskEditorCompCount.Text) - 1 do begin
+    /// EC001 :: Composition name is empty
+    if TaskEditorCompGrid.Cells[1, i] = '' then
+      ErrorStr := ErrorStr + Format('Composition[%d]: (EC001) %s%s', [i + 1, 'Composition name is empty', #13#10]);
+
+    /// EC002 :: [Start Frame] and [End Frame] can''t be empty with [Split] more than 1
+    if (TaskEditorCompGrid.Cells[2, i] = '') and (TaskEditorCompGrid.Cells[3, i] = '') and (TaskEditorCompGrid.Cells[4, i] <> '1') then
+      ErrorStr := ErrorStr + Format('Composition[%d]: (EC002) %s%s', [i + 1, '[Start Frame] and [End Frame] can''t be empty with [Split] more than 1', #13#10]);
+
+    /// New line for each comp
+    if ErrorStr <> '' then
+      ErrorStr := ErrorStr + #13#10;
+  end;
+
+  if ErrorStr <> '' then begin
+    raise AERParamException.Create(Format('%s%s%s', [Language[LANG].Errors.errorsOccured, #13#10, ErrorStr]));
+  end else begin
+    var TaskIndex: Integer := RenderTasks.IndexOf(GetTaskByProject(ExtractFileName(projectPath.Text)));
+    var Compositions: TList<TComposition> := TList<TComposition>.Create;
+
+    for var i := 0 to Trunc(TaskEditorCompCount.Value) - 1 do begin
+      Compositions.Add(TComposition.Create(
+        TaskEditorCompGrid.Cells[1, i],
+        TFrameSpan.Create(TaskEditorCompGrid.Cells[2, i], TaskEditorCompGrid.Cells[3, i]),
+        StrToInt(TaskEditorCompGrid.Cells[4, i])
+      ));
+    end;
+
+    /// Instead of re-creating whole task,
+    /// it's faster to rewrite contents of existing one
+    RenderTasks.Items[TaskIndex].Project := projectPath.Text;
+    RenderTasks.Items[TaskIndex].Output := outputPath.Text;
+    RenderTasks.Items[TaskIndex].OutputModule := outputModuleBox.Items[outputModuleBox.ItemIndex];
+    RenderTasks.Items[TaskIndex].RenderSettings := renderSettingsBox.Items[renderSettingsBox.ItemIndex];
+    RenderTasks.Items[TaskIndex].MissingFiles := missingFilesCheckbox.IsChecked;
+    RenderTasks.Items[TaskIndex].Sound := soundCheckbox.IsChecked;
+    RenderTasks.Items[TaskIndex].Multiprocessing := threadedRender.IsChecked;
+    RenderTasks.Items[TaskIndex].CustomProperties := IfThenElse(customCheckbox.IsChecked = True, customProp.Text, '');  // yeet
+    RenderTasks.Items[TaskIndex].CacheLimit := cacheUsageTrackBar.Value;
+    RenderTasks.Items[TaskIndex].MemoryLimit := memUsageTrackBar.Value;
+
+    RenderTasks.Items[TaskIndex].Compositions.Free;
+    RenderTasks.Items[TaskIndex].Compositions := TList<TComposition>.Create(Compositions);
+
+    {$IFDEF DEBUG_MODE}
+    ShowMessage(RenderTasks.Items[TaskIndex].ToString);
+    //ShowMessage(IntToStr(RenderTasks.Items[0].Count));
+    {$ENDIF}
+
+    Compositions.Free;
+
+    RenderTasksOnNotify(Sender, RenderTasks.Items[TaskIndex], cnAdded);
+
+    PopupAniClose.Enabled := True;
+
+    TaskEditorCompCount.Value := 1;
+    TaskEditorCompGrid.Cells[0, 0] := '1';
+    TaskEditorCompGrid.Cells[1, 0] := '';
+    TaskEditorCompGrid.Cells[2, 0] := '';
+    TaskEditorCompGrid.Cells[3, 0] := '';
+    TaskEditorCompGrid.Cells[4, 0] := '1';
+
+    //UpdateTasksList;
+
+    TasksIsEmpty.Visible := RenderTasks.Count = 0;
+
+  end;
+end;
+
+procedure TMainForm.TaskEditorTabControlChange(Sender: TObject);
+begin
+
+  if (TaskEditorTabControl.TabIndex = 1) and (TaskEditorCompGrid.Cells[4, 0] = '')
+    and (TaskEditorCompGrid.Cells[0, 0] = '') then begin
+    TaskEditorCompGrid.Cells[0, 0] := '1';
+    TaskEditorCompGrid.Cells[4, 0] := '1';
+  end;
 end;
 
 procedure TMainForm.RecentProjectSelected(Sender: TObject);
@@ -1391,7 +1590,7 @@ end;
 
 procedure TMainForm.downloadButtonClick(Sender: TObject);
 begin
-  Open(gitDownload);
+  Open(gitDownload, []);
 end;
 
 procedure TMainForm.exitItemClick(Sender: TObject);
@@ -1419,19 +1618,19 @@ begin
   SaveConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
   if StrToBool(DelTempFiles) = True then
     begin
-      var AerenderDirectory: TArray<String> := GetDirectoryFiles(APPFOLDER);
-      for var i := 0 to High(AerenderDirectory) do
+      var LauncherDirectory: TArray<String> := GetDirectoryFiles(APPFOLDER);
+      for var i := 0 to High(LauncherDirectory) do
         begin
           {$IFDEF MSWINDOWS}
-          if (AerenderDirectory[i].Contains('.bat')) then
-            System.SysUtils.DeleteFile(PWideChar(AerenderDirectory[i]));
+          if (LauncherDirectory[i].Contains('.bat')) then
+            System.SysUtils.DeleteFile(PWideChar(LauncherDirectory[i]));
           {$ENDIF MSWINDOWS}
           {$IFDEF MACOS}
-          if (AerenderDirectory[i].Contains('.command')) then
-            System.SysUtils.DeleteFile(PWideChar(AerenderDirectory[i]));
+          if (LauncherDirectory[i].Contains('.command')) then
+            System.SysUtils.DeleteFile(PWideChar(LauncherDirectory[i]));
           {$ENDIF MACOS}
-          if (AerenderDirectory[i].Contains('.log')) then
-            System.SysUtils.DeleteFile(PWideChar(AerenderDirectory[i]));
+          if (LauncherDirectory[i].Contains('.log')) then
+            System.SysUtils.DeleteFile(PWideChar(LauncherDirectory[i]));
         end;
     end;
 end;
@@ -1501,15 +1700,22 @@ begin
 
   InflateRecents;
 
-  outputModuleBox.ListBox.AniCalculations.Animation := True;
+  var AnimSetupThread: TThread := TThread.CreateAnonymousThread(procedure begin
+    outputModuleBox.ListBox.AniCalculations.Animation := True;
 
-  compGrid.AniCalculations.AutoShowing := False;
-  compGrid.AniCalculations.Animation := True;
+    compGrid.AniCalculations.AutoShowing := False;
+    compGrid.AniCalculations.Animation := True;
 
-  threadsGrid.AniCalculations.Animation := True;
+    threadsGrid.AniCalculations.Animation := True;
+
+    TaskEditorCompGrid.AniCalculations.Animation := True;
+    TaskEditorCompGrid.Model.ScrollDirections := (TScrollDirections.Vertical);
+  end);
 
   threadsCount.OnValidate := threadsCount.OnValidateEvent;
   threadsCount.OnValidating := threadsCount.OnValidatingEvent;
+
+  RenderTasks.OnNotify := MainForm.RenderTasksOnNotify;
 
   //ShowMessage(AErenderPath);
 end;
@@ -1541,6 +1747,30 @@ end;
 
 procedure TMainForm.FormShow(Sender: TObject);
 begin
+
+  /// To speed up startup we will check for FFMPEG in a separate thread
+  var FFMPEGCheckThread: TThread := TThread.CreateAnonymousThread(procedure begin
+    try
+    if GetFFMPEGPath <> '' then
+      begin
+        FFMPEG := True;
+        ffmpegPath := GetFFMPEGPath;
+        //ffmpegCheckBox.Enabled := True;
+      end
+    else
+      raise Exception.Create('FFMPEG not found');
+    except
+      on Exception do
+        begin
+          FFMPEG := False;
+          //ffmpegCheckBox.Enabled := False;
+          //ffmpegCheckBox.Hint := 'FFMPEG is not found at' + {$IFDEF MSWINDOWS} 'C:\ProgramData\AErender\' {$ENDIF MSWINDOWS}
+          //                                                  {$IFDEF MACOS} '~/Documents/AErender/' {$ENDIF MACOS} + 'directory';
+        end;
+    end;
+  end);
+
+
   //// Check for available languages
   // It's better to do it in a Show thread, since OnCreate event of main form
   // don't have access to other forms that are not yet created
@@ -1560,28 +1790,34 @@ begin
   SettingsForm.HandleCheckBox.IsChecked := StrToBool(AERH);
   SettingsForm.delFilesCheckBox.IsChecked := StrToBool(DelTempFiles);
 
-  {$IFDEF MACOS}
-  if LANG = 1 then begin
-    outputModuleLabel.Width := 148;
-    renderSettingsLabel.Width := 148;
-  end;
-  {$ENDIF MACOS}
+  var FormVisualUpdateThread: TThread :=TThread.CreateAnonymousThread(procedure begin
 
-  if memUsageTrackBar.Value = 100 then
-    memUsageInfo.Text := Language[LANG].MainForm.Unlimited
-  else
-    memUsageInfo.Text := Trunc(memUsageTrackBar.Value).ToString + '% (' + Trunc((GetPlatformMemorySize/1024/1024) * (memUsageTrackBar.Value / 100)).ToString + ' MB)';
-  if cacheUsageTrackBar.Value = 100 then
-    cacheUsageInfo.Text := Language[LANG].MainForm.Unlimited
-  else
-    cacheUsageInfo.Text := Trunc(cacheUsageTrackBar.Value).ToString + '%';
+    {$IFDEF MACOS}
+    if LANG = 1 then begin
+      outputModuleLabel.Width := 148;
+      renderSettingsLabel.Width := 148;
+    end;
+    {$ENDIF MACOS}
 
-  StringColumn1.Width := compGrid.Width - 5;
-  StringColumn2.Width := threadsGrid.Width * 0.5;
-  StringColumn3.Width := threadsGrid.Width * 0.5;
+    if memUsageTrackBar.Value = 100 then
+      memUsageInfo.Text := Language[LANG].MainForm.Unlimited
+    else
+      memUsageInfo.Text := Trunc(memUsageTrackBar.Value).ToString + '% (' + Trunc((GetPlatformMemorySize/1024/1024) * (memUsageTrackBar.Value / 100)).ToString + ' MB)';
+    if cacheUsageTrackBar.Value = 100 then
+      cacheUsageInfo.Text := Language[LANG].MainForm.Unlimited
+    else
+      cacheUsageInfo.Text := Trunc(cacheUsageTrackBar.Value).ToString + '%';
+
+    StringColumn1.Width := compGrid.Width - 5;
+    StringColumn2.Width := threadsGrid.Width * 0.5;
+    StringColumn3.Width := threadsGrid.Width * 0.5;
+  end);
 
   SplashScreenForm.Close;
   SplashScreenForm.Free;
+
+  FFMPEGCheckThread.Start;
+  FormVisualUpdateThread.Start;
 
   if (ParamCount > 0) and (ParamStr(1) = '-aer') then begin
     ImportUnit.PARAMSTART := True;
@@ -1592,24 +1828,8 @@ begin
     ReadAERQ(ParamStr(2));
   end;
 
-  try
-    if GetFFMPEGPath <> '' then
-      begin
-        FFMPEG := True;
-        ffmpegPath := GetFFMPEGPath;
-        //ffmpegCheckBox.Enabled := True;
-      end
-    else
-      raise Exception.Create('FFMPEG not found');
-  except
-    on Exception do
-      begin
-        FFMPEG := False;
-        //ffmpegCheckBox.Enabled := False;
-        //ffmpegCheckBox.Hint := 'FFMPEG is not found at' + {$IFDEF MSWINDOWS} 'C:\ProgramData\AErender\' {$ENDIF MSWINDOWS}
-        //                                                  {$IFDEF MACOS} '~/Documents/AErender/' {$ENDIF MACOS} + 'directory';
-      end;
-  end;
+  //ShowMessage(RenderTasks.Count.ToString);
+  TasksIsEmpty.Visible := RenderTasks.Count = 0;
 
   //  Check updates in separate thread to fasten startup
   MainForm.UpdateNetHTTPClient.Get(AERL_REPO_RELEASES);
@@ -1686,7 +1906,7 @@ begin
   //Error Codes
   if not (SettingsForm.HandleCheckBox.IsChecked and isRendering) then begin
     emptyComps := 0;
-    if AERPATH.IsEmpty then
+    if AErenderPath.IsEmpty then
       ERR := ERR + #13#10 + '[Error 1]: ' + Language[LANG].Errors.aerenderIsEmpty;
     if projectPath.Text.IsEmpty then
       ERR := ERR + #13#10 + '[Error 2]: ' + Language[LANG].Errors.projectIsEmpty;
@@ -1713,12 +1933,14 @@ begin
       end
     else
       begin
-        var Compositions: TArray<TComposition>;
+        {var Compositions: TList<TComposition>;
         if compSwitch.IsChecked then
           SetLength(Compositions, StrToInt(compCount.Value.ToString))
         else
           SetLength(Compositions, 1);
-        for var i := 0 to High(Compositions) do begin
+        for var i := 0 to StrToInt(compCount.Value.ToString) High(Compositions) do begin
+          var TempCompName: String;
+
           if compSwitch.IsChecked then
             Compositions[i].CompName := compGrid.Cells[0, i]
           else
@@ -1729,11 +1951,11 @@ begin
           if inFrame.Text = '' then
             ShowMessage('Empty');
 
-          var tempInFrame: Integer; var tempOutFrame: Integer;
-          if inFrame.Text = '' then tempInFrame := -1 else tempInFrame := StrToInt(inFrame.Text);
-          if inFrame.Text = '' then tempOutFrame := -1 else tempOutFrame := StrToInt(outFrame.Text);
+          var TempInFrame: Integer; var tempOutFrame: Integer;
+          if inFrame.Text = '' then TempInFrame := -1 else TempInFrame := StrToInt(inFrame.Text);
+          if inFrame.Text = '' then TempInFrame := -1 else TempInFrame := StrToInt(outFrame.Text);
 
-          Compositions[i].Frames := TFrameSpan.Create(tempInFrame, tempOutFrame);
+          Compositions[i].Frames := TFrameSpan.Create(TempInFrame, tempOutFrame);
 
           Compositions[i].Split := IfThenElse(threadsSwitch.IsChecked = True, StrToInt(threadsCount.Text), 0); // yeet
         end;
@@ -1751,13 +1973,13 @@ begin
           memUsageTrackBar.Value,
           Compositions
         );
-
-        RenderTasks.Add(Task);
+        }
+        //RenderTasks.Add(Task);
         {$IFDEF DEBUG_MODE}
         ShowMessage(RenderTasks.Items[0].ToString);
         ShowMessage(IntToStr(RenderTasks.Items[0].Count));
         {$ENDIF}
-        RenderTasks.Remove(Task);
+        //RenderTasks.Remove(Task);
 //        if threadsSwitch.IsChecked then
 //          begin
 //            threads := threadsCount.Text.ToInteger;
@@ -2064,7 +2286,7 @@ begin
                             + '_' + OutputModules[outputModuleBox.ItemIndex].Mask;
 end;
 
-procedure TMainForm.Popup1Popup(Sender: TObject);
+procedure TMainForm.TaskEditorPopupPopup(Sender: TObject);
 begin
   PopupAniOpen.Enabled := True;
 end;
@@ -2072,9 +2294,9 @@ end;
 procedure TMainForm.PopupAniCloseFinish(Sender: TObject);
 begin
   PopupAniClose.Enabled := False;
-  Popup1.IsOpen := False;
-  Popup1.Height := 384;
-  NewTaskTabControl.TabIndex := 0;
+  TaskEditorPopup.IsOpen := False;
+  TaskEditorPopup.Height := 384;
+  TaskEditorTabControl.TabIndex := 0;
 end;
 
 procedure TMainForm.PopupAniOpenFinish(Sender: TObject);
@@ -2082,12 +2304,12 @@ begin
   PopupAniOpen.Enabled := False;
 end;
 
-procedure TMainForm.NewTaskCancelButtonClick(Sender: TObject);
+procedure TMainForm.TaskEditorCancelButtonClick(Sender: TObject);
 begin
   PopupAniClose.Enabled := True;
 end;
 
-procedure TMainForm.projectPathDragDrop(Sender: TObject;
+procedure TMainForm._projectPathDragDrop(Sender: TObject;
   const Data: TDragObject; const Point: TPointF);
 begin
   if Data.Source <> nil then
@@ -2096,13 +2318,13 @@ begin
     projectPath.Text := Data.Files[0];
 end;
 
-procedure TMainForm.projectPathDragOver(Sender: TObject; const Data: TDragObject;
+procedure TMainForm._projectPathDragOver(Sender: TObject; const Data: TDragObject;
   const Point: TPointF; var Operation: TDragOperation);
 begin
   Operation := TDragOperation.Link;
 end;
 
-procedure TMainForm.saveFileClick(Sender: TObject);
+procedure TMainForm._saveFileClick(Sender: TObject);
 {$IFDEF MACOS}
 var
   FSaveFile: NSSavePanel;
@@ -2163,15 +2385,98 @@ begin
   SettingsForm.ShowModal;
 end;
 
-procedure TMainForm.NewTaskCompCountChange(Sender: TObject);
+procedure TMainForm.TaskEditorCompCountChange(Sender: TObject);
 begin
-  NewTaskCompGrid.RowCount := StrToInt(NewTaskCompCount.Text);
+  TaskEditorCompGrid.RowCount := StrToInt(TaskEditorCompCount.Text);
+  for var i := 0 to TaskEditorCompGrid.RowCount - 1 do begin
+    TaskEditorCompGrid.Cells[0, i] := IntToStr(i + 1);
+    if TaskEditorCompGrid.Cells[4, i] = '' then
+      TaskEditorCompGrid.Cells[4, i] := '1';
+  end;
+end;
+
+procedure TMainForm.TaskEditorCompGridEditingDone(Sender: TObject; const ACol, ARow: Integer);
+begin
+  {case ACol of
+    3: begin
+      if StrToInt(TaskEditorCompGrid.Cells[ACol, ARow]) > 128 then
+        TaskEditorCompGrid.StylesData['selection.fill.color'] := $FFFF6157
+      else
+        TaskEditorCompGrid.StylesData['selection.fill.color'] := $FF2A82E2;
+    end;
+  end; }
 end;
 
 procedure TMainForm.TasksPopupMenuPopup(Sender: TObject);
 begin
-  if (TasksTreeView.ItemByText(FCurrentItem) <> nil) and (FCurrentItem <> 'nil') then
+  if (TasksTreeView.ItemByText(FCurrentItem) <> nil) and (FCurrentItem <> 'nil') {or (TasksTreeView.Selected <> nil)} then begin
     TasksTreeView.ItemByText(FCurrentItem).IsSelected := True;
+    EditTaskPopupItem.Enabled := True;
+    DeleteTaskPopupItem.Enabled := True;
+    if TasksTreeView.ItemByText(FCurrentItem).ParentItem <> nil then  // Composition
+      TaskItemDisplay.Text := Format('Composition: %s', [FCurrentItem])
+    else  // Project
+      TaskItemDisplay.Text := Format('Project: %s', [FCurrentItem]);
+  end else begin
+    TaskItemDisplay.Text := 'No task is selected!';
+    EditTaskPopupItem.Enabled := False;
+    DeleteTaskPopupItem.Enabled := False;
+  end;
+end;
+
+procedure TMainForm.TasksTreeViewItemDblClick(Sender: TObject);
+begin
+  //TasksTreeView.AllowDrag := False;
+
+  var ProjectItem: TTreeViewItem;
+  var Task: TRenderTask;
+  var SelectedComp: String := '';
+
+  if TTreeViewItem(Sender).ParentItem <> nil then begin // If composition item was dblclicked
+    ProjectItem := TTreeViewItem(Sender).ParentItem;
+    TaskEditorTabControl.TabIndex := 1;
+    SelectedComp := TTreeViewItem(Sender).Text;
+  end else begin // We know for sure that it's a project item
+    ProjectItem := TTreeViewItem(Sender);
+    TaskEditorTabControl.TabIndex := 0;
+  end;
+
+  Task := GetTaskByProject(ProjectItem.Text);
+
+  if ProjectItem <> nil then begin // Ensure, that we won't get an Access Violation
+    projectPath.Text := Task.Project;
+    outputPath.Text := Task.Output;
+
+    outputModuleBox.Index := outputModuleBox.Items.IndexOf(Task.OutputModule);
+    renderSettingsBox.Index := renderSettingsBox.Items.IndexOf(Task.RenderSettings);
+
+    missingFilesCheckbox.IsChecked := Task.MissingFiles;
+    soundCheckbox.IsChecked := Task.Sound;
+    threadedRender.IsChecked := Task.Multiprocessing;
+
+    customCheckbox.IsChecked := not Task.CustomProperties.IsEmpty;
+    customProp.Enabled := not Task.CustomProperties.IsEmpty;
+    customProp.Text := Task.CustomProperties;
+
+    cacheUsageTrackBar.Value := Task.CacheLimit;
+    memUsageTrackBar.Value := Task.MemoryLimit;
+
+    TaskEditorCompCount.Value := Task.Compositions.Count;
+    for var i := 0 to Task.Compositions.Count - 1 do begin
+      TaskEditorCompGrid.Cells[1, i] := Task.Compositions.Items[i].CompName;
+      TaskEditorCompGrid.Cells[2, i] := Task.Compositions.Items[i].Frames.StartFrame.ToString;
+      TaskEditorCompGrid.Cells[3, i] := Task.Compositions.Items[i].Frames.EndFrame.ToString;
+      TaskEditorCompGrid.Cells[4, i] := Task.Compositions.Items[i].Split.ToString;
+    end;
+  end;
+
+  if SelectedComp <> '' then
+    TaskEditorCompGrid.SelectRow(GetCompIndexInTask(Task, SelectedComp));
+
+  TaskEditorSaveButton.Visible := True;
+  TaskEditorCreateTaskButton.Visible := False;
+
+  TaskEditorPopup.PopupModal;
 end;
 
 procedure TMainForm.TasksTreeViewDragChange(SourceItem, DestItem: TTreeViewItem; var Allow: Boolean);
@@ -2194,18 +2499,39 @@ begin
 
     if (SourceItem.Level = 2) and (DestItem.Level = 2) then // Project[0].Comp -> Project[1].Comp
       Allow := False;
-
+    //ShowMessage(Format('%d --> %d', [SourceItem.Level, DestItem.Level]));
   except
-    if SourceItem.Level = 1 then
-      Allow := True
-    else
+    if (SourceItem.Level = 1) and (RenderTasks.Count > 1) then begin
+      Allow := True;
+      RenderTasks.Move(RenderTasks.IndexOf(GetTaskByProject(SourceItem.Text)), RenderTasks.Count - 1);
+      //ShowMessage(Format('%d --> %d', [SourceItem.Level, -1]));
+      ShowMessage(Format('LastTask.Project = %s', [RenderTasks.Items[RenderTasks.Count - 1].Project]));
+    end else
       Allow := False;
+  end;
+
+end;
+
+procedure TMainForm.TasksTreeViewDragDrop(Sender: TObject; const Data: TDragObject; const Point: TPointF);
+begin
+  if Data.Source = nil then begin     // Ensure that we're recieving drag from outside
+    if LowerCase(ExtractFileExt(Data.Files[0])) = LowerCase('.aep') then begin
+      projectPath.Text := Data.Files[0];
+      AddTaskButtonClick(Sender);
+    end;
+
+    if LowerCase(ExtractFileExt(Data.Files[0])) = LowerCase('.aerq') then
+      ShowMessage('Queue dropped');
+
+    if LowerCase(ExtractFileExt(Data.Files[0])) = LowerCase('.aer') then
+      ShowMessage('Project configuration dropped');
   end;
 end;
 
 /// Implements basic hot-keys for main treeview
 /// [Ctrl + D]  = Duplicate selected
 /// [Del]       = Delete selected
+/// [Ctrl + N]  = New task
 procedure TMainForm.TasksTreeViewKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
 begin
   if ssCtrl in Shift then
@@ -2231,12 +2557,32 @@ begin
     end
   else
     case Key of
-      46: begin // [Del]
-        //Temporary := (TasksTreeView.Selected.Clone(nil) as TTreeViewItem);
-        //Temporary.Parent := TasksTreeView.Selected.Parent;
-        FreeAndNil(TasksTreeView.Selected);
+      8, 46: begin // [Backspace], [Del]
+        if TasksTreeView.Selected <> nil then // We can only delete something selected, othewise - access violation
+          if TasksTreeView.Selected.ParentItem <> nil then begin // If composition item was deleted
+            var Task: TRenderTask := GetTaskByProject(TasksTreeView.Selected.ParentItem.Text);
+            RenderTasks.Items[RenderTasks.IndexOf(Task)].Compositions.Remove(GetCompByName(Task, TasksTreeView.Selected.Text));
+
+            RenderTasksOnNotify(Sender, Task, cnRemoved);
+
+            //raise ENotImplemented.Create('Not implemented yet')
+          end else begin // We know for sure that it's a project item
+            RenderTasks.Remove(GetTaskByProject(TasksTreeView.Selected.Text));
+            FreeAndNil(TasksTreeView.Selected);
+          end;
+
+        //TasksIsEmpty.Visible := RenderTasks.Count = 0;
+      end;
+      19: begin // [Pause/Break]
+        {$IFDEF DEBUG_MODE}
+        if DebugLabel.Visible then
+           DebugLabel.Visible := False
+        else
+           DebugLabel.Visible := True;
+        {$ENDIF}    
       end;
     end;
+  {$IFDEF DEBUG_MODE}DebugLabel.Text := Format('key = %d', [Key]);{$ENDIF}
 end;
 
 procedure TMainForm.TasksTreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Single);
@@ -2438,14 +2784,80 @@ begin
     memUsageInfo.Text := Trunc(memUsageTrackBar.Value).ToString + '% (' + Trunc((GetPlatformMemorySize/1024/1024) * (memUsageTrackBar.Value / 100)).ToString + ' MB)';
 end;
 
-procedure TMainForm.NewTaskCompButtonClick(Sender: TObject);
+procedure TMainForm.TaskEditorCompButtonClick(Sender: TObject);
 begin
-  NewTaskTabControl.TabIndex := 1;
+  TaskEditorTabControl.TabIndex := 1;
 end;
 
-procedure TMainForm.NewTaskCreateButtonClick(Sender: TObject);
+procedure TMainForm.TaskEditorCreateTaskButtonClick(Sender: TObject);
 begin
-  PopupAniClose.Enabled := True;
+  var ErrorStr: String := '';
+  for var i := 0 to StrToInt(TaskEditorCompCount.Text) - 1 do begin
+    /// EC001 :: Composition name is empty
+    if TaskEditorCompGrid.Cells[1, i] = '' then
+      ErrorStr := ErrorStr + Format('%s[%d]: (EC001) %s%s', ['Composition', i + 1, 'Composition name is empty', #13#10]);
+
+    /// EC002 :: [Start Frame] and [End Frame] can''t be empty with [Split] more than 1
+    if (TaskEditorCompGrid.Cells[2, i] = '') and (TaskEditorCompGrid.Cells[3, i] = '') and (TaskEditorCompGrid.Cells[4, i] <> '1') then
+      ErrorStr := ErrorStr + Format('%s[%d]: (EC002) %s%s', ['Composition', i + 1, '[Start Frame] and [End Frame] can''t be empty with [Split] more than 1', #13#10]);
+
+    /// New line for each comp
+    if ErrorStr <> '' then
+      ErrorStr := ErrorStr + #13#10;
+  end;
+
+  if ErrorStr <> '' then begin
+    raise AERParamException.Create(Format('%s%s%s', [Language[LANG].Errors.errorsOccured, #13#10, ErrorStr]));
+  end else begin
+    /// Create all the compositions beforehand
+    /// to append them to [Task]
+    /// Also, lists should be created on initialization
+    /// they are not TArray<> :c
+    var Compositions: TList<TComposition> := TList<TComposition>.Create;
+
+    for var i := 0 to Trunc(TaskEditorCompCount.Value) - 1 do begin
+      Compositions.Add(TComposition.Create(
+        TaskEditorCompGrid.Cells[1, i],
+        TFrameSpan.Create(TaskEditorCompGrid.Cells[2, i], TaskEditorCompGrid.Cells[3, i]),
+        StrToInt(TaskEditorCompGrid.Cells[4, i])
+      ));
+    end;
+
+    var Task: TRenderTask := TRenderTask.Create(
+      projectPath.Text,
+      outputPath.Text,
+      outputModuleBox.Items[outputModuleBox.ItemIndex],
+      renderSettingsBox.Items[renderSettingsBox.ItemIndex],
+      missingFilesCheckbox.IsChecked,
+      soundCheckbox.IsChecked,
+      threadedRender.IsChecked,
+      IfThenElse(customCheckbox.IsChecked = True, customProp.Text, ''),  // yeet
+      cacheUsageTrackBar.Value,
+      memUsageTrackBar.Value,
+      TList<TComposition>.Create(Compositions)
+    );
+
+    RenderTasks.Add(Task);
+    {$IFDEF DEBUG_MODE}
+    ShowMessage(RenderTasks.Items[0].ToString);
+    //ShowMessage(IntToStr(RenderTasks.Items[0].Count));
+    {$ENDIF}
+
+    Compositions.Free;
+
+    PopupAniClose.Enabled := True;
+
+    TaskEditorCompCount.Value := 1;
+    TaskEditorCompGrid.Cells[0, 0] := '1';
+    TaskEditorCompGrid.Cells[1, 0] := '';
+    TaskEditorCompGrid.Cells[2, 0] := '';
+    TaskEditorCompGrid.Cells[3, 0] := '';
+    TaskEditorCompGrid.Cells[4, 0] := '1';
+
+    //UpdateTasksList;
+
+    TasksIsEmpty.Visible := RenderTasks.Count = 0;
+  end;
 end;
 
 procedure TMainForm.cacheUsageInfoClick(Sender: TObject);

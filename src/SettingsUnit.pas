@@ -2,10 +2,10 @@
 
 (*        AErender Launcher                                                                 *)
 (*        SettingsUnit.pas                                                                  *)
-(*        Lily Stilson // 2019 - 2020                                                       *)
+(*        Lily Stilson // 2019 - 2021                                                       *)
 (*        MIT License                                                                       *)
 (*                                                                                          *)
-(*        Copyright (c) 2019 - 2020 Alice Romanets                                          *)
+(*        Copyright (c) 2019 - 2021 Alice Romanets                                          *)
 (*                                                                                          *)
 (*        Permission is hereby granted, free of charge, to any person obtaining a copy      *)
 (*        of this software and associated documentation files (the "Software"), to deal     *)
@@ -127,6 +127,7 @@ type
     Label1: TLabel;
     Edit1: TEdit;
     Label2: TLabel;
+    TempFilesLabel: TLabel;
     procedure langBoxChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure aerenderPathSelectClick(Sender: TObject);
@@ -249,6 +250,16 @@ begin
     raise Exception.Create('Adobe After Effects may not be installed on this computer.')
   else
     Result := maxVerStr;
+end;
+
+function GetTempFilesCount: Integer;
+begin
+  var LauncherDirectory: TArray<String> := GetDirectoryFiles(APPFOLDER);
+  var Res: Integer := 0;
+  for var i := 0 to High(LauncherDirectory) do
+    if (LauncherDirectory[i].Contains('.bat')) or (LauncherDirectory[i].Contains('.command')) or (LauncherDirectory[i].Contains('.log')) then
+      inc(Res);
+  Result := Res;
 end;
 
 procedure TSettingsForm.SetLanguage(LanguageCode: Integer);
@@ -442,15 +453,19 @@ procedure TSettingsForm.FormCreate(Sender: TObject);
 {var
    LangFiles: TArray<String>;}
 begin
-  try
-    if AERPATH.IsEmpty then
-      AERPATH := DetectAerender + {$IFDEF MSWINDOWS}'\Support Files\aerender.exe'{$ENDIF MSWINDOWS}
-                                  {$IFDEF MACOS}'/aerender'{$ENDIF MACOS};
-  except
-    on Exception do
-      AERPATH := '';
-  end;
-  {$IFDEF MSWINDOWS}OpenDialog1.InitialDir := 'C:\Program Files\Adobe';{$ENDIF MSWINDOWS}
+  var AErenderDetectionThread: TThread := TThread.CreateAnonymousThread(procedure begin
+    try
+      if AERPATH.IsEmpty then
+        AERPATH := DetectAerender + {$IFDEF MSWINDOWS}'\Support Files\aerender.exe'{$ENDIF MSWINDOWS}
+                                    {$IFDEF MACOS}'/aerender'{$ENDIF MACOS};
+    except
+      on Exception do
+        AERPATH := '';
+    end;
+    {$IFDEF MSWINDOWS}OpenDialog1.InitialDir := 'C:\Program Files\Adobe';{$ENDIF MSWINDOWS}
+  end);
+
+  AErenderDetectionThread.Start;
 end;
 
 procedure TSettingsForm.FormKeyDown(Sender: TObject; var Key: Word;
@@ -480,6 +495,7 @@ begin
     aerenderPath.TextPrompt := '/Applications/Adobe After Effects CC/aerender';
     OpenDialog1.Filter := 'After Effects Render Engine|aerender';
   {$ENDIF MACOS}
+  TempFilesLabel.Text := Format('%d %s', [GetTempFilesCount, 'temporary files']);
 end;
 
 procedure TSettingsForm.HandleCheckBoxChange(Sender: TObject);

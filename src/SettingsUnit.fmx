@@ -39,8 +39,8 @@ object SettingsForm: TSettingsForm
         Align = Left
         AutoSize = True
         StyledSettings = [Family, FontColor]
-        Margins.Left = 20.000000000000000000
-        Position.X = 20.000000000000000000
+        Margins.Left = 16.000000000000000000
+        Position.X = 16.000000000000000000
         Size.Width = 208.000000000000000000
         Size.Height = 33.000000000000000000
         Size.PlatformDefault = False
@@ -69,14 +69,14 @@ object SettingsForm: TSettingsForm
       Align = Top
       StyledSettings = [Family, Size, FontColor]
       TextSettings.Font.StyleExt = {00070000000000000004000000}
-      Margins.Left = 5.000000000000000000
-      Margins.Top = 10.000000000000000000
-      Margins.Right = 5.000000000000000000
-      Margins.Bottom = 10.000000000000000000
-      Position.X = 5.000000000000000000
-      Position.Y = 341.000000000000000000
+      Margins.Left = 8.000000000000000000
+      Margins.Top = 8.000000000000000000
+      Margins.Right = 8.000000000000000000
+      Margins.Bottom = 8.000000000000000000
+      Position.X = 8.000000000000000000
+      Position.Y = 345.000000000000000000
       ShowCheck = False
-      Size.Width = 564.000000000000000000
+      Size.Width = 558.000000000000000000
       Size.Height = 130.000000000000000000
       Size.PlatformDefault = False
       Text = 'Behaviour'
@@ -84,7 +84,7 @@ object SettingsForm: TSettingsForm
       ContentSize = '105'
       object Layout2: TLayout
         Align = Top
-        Size.Width = 564.000000000000000000
+        Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
@@ -92,9 +92,9 @@ object SettingsForm: TSettingsForm
           Align = Client
           Hint = 'Not available on macOS now!'
           IsChecked = True
-          Margins.Left = 10.000000000000000000
-          Margins.Right = 10.000000000000000000
-          Size.Width = 544.000000000000000000
+          Margins.Left = 8.000000000000000000
+          Margins.Right = 8.000000000000000000
+          Size.Width = 542.000000000000000000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 0
@@ -105,27 +105,39 @@ object SettingsForm: TSettingsForm
       object Layout3: TLayout
         Align = Top
         Position.Y = 32.000000000000000000
-        Size.Width = 564.000000000000000000
+        Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 1
         object delFilesCheckBox: TCheckBox
           Align = Client
           IsChecked = True
-          Margins.Left = 10.000000000000000000
-          Margins.Right = 10.000000000000000000
-          Size.Width = 544.000000000000000000
+          Margins.Left = 8.000000000000000000
+          Margins.Right = 8.000000000000000000
+          Size.Width = 414.000000000000000000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 0
           Text = 'Delete temporary files on close'
           OnChange = delFilesCheckBoxChange
         end
+        object TempFilesLabel: TLabel
+          Align = Right
+          AutoSize = True
+          Enabled = False
+          Margins.Right = 16.000000000000000000
+          Position.X = 430.000000000000000000
+          Size.Width = 112.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TextSettings.WordWrap = False
+          Text = 'XXXX Temporary files'
+        end
       end
       object onRenderStartLayout: TLayout
         Align = Top
         Position.Y = 64.000000000000000000
-        Size.Width = 564.000000000000000000
+        Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 2
@@ -136,19 +148,19 @@ object SettingsForm: TSettingsForm
             'Minimize Launcher'
             'Close Launcher')
           ItemIndex = 0
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 5.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Size.Width = 389.000000000000000000
-          Size.Height = 22.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Right = 8.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Size.Width = 382.000000000000000000
+          Size.Height = 24.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 0
           OnChange = onRenderStartBoxChange
         end
         object onRenderStartLabel: TLabel
           Align = Left
-          Margins.Left = 10.000000000000000000
-          Position.X = 10.000000000000000000
+          Margins.Left = 8.000000000000000000
+          Position.X = 8.000000000000000000
           Size.Width = 160.000000000000000000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
@@ -161,13 +173,13 @@ object SettingsForm: TSettingsForm
       Align = Top
       StyledSettings = [Family, Size, FontColor]
       TextSettings.Font.StyleExt = {00070000000000000004000000}
-      Margins.Left = 5.000000000000000000
-      Margins.Top = 10.000000000000000000
-      Margins.Right = 5.000000000000000000
-      Position.X = 5.000000000000000000
-      Position.Y = 235.000000000000000000
+      Margins.Left = 8.000000000000000000
+      Margins.Top = 8.000000000000000000
+      Margins.Right = 8.000000000000000000
+      Position.X = 8.000000000000000000
+      Position.Y = 241.000000000000000000
       ShowCheck = False
-      Size.Width = 564.000000000000000000
+      Size.Width = 558.000000000000000000
       Size.Height = 96.000000000000000000
       Size.PlatformDefault = False
       Text = 'User Interface'
@@ -175,7 +187,7 @@ object SettingsForm: TSettingsForm
       ContentSize = '71'
       object styleLayout: TLayout
         Align = Top
-        Size.Width = 564.000000000000000000
+        Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
@@ -186,19 +198,19 @@ object SettingsForm: TSettingsForm
             'AErender Modern Animated'
             'Onyx Blue (Old Style)')
           ItemIndex = 0
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 5.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Size.Width = 389.000000000000000000
-          Size.Height = 22.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Right = 8.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Size.Width = 382.000000000000000000
+          Size.Height = 24.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 0
           OnChange = styleBoxChange
         end
         object styleLabel: TLabel
           Align = Left
-          Margins.Left = 10.000000000000000000
-          Position.X = 10.000000000000000000
+          Margins.Left = 8.000000000000000000
+          Position.X = 8.000000000000000000
           Size.Width = 160.000000000000000000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
@@ -334,7 +346,7 @@ object SettingsForm: TSettingsForm
       object langLayout: TLayout
         Align = Top
         Position.Y = 32.000000000000000000
-        Size.Width = 564.000000000000000000
+        Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 2
@@ -344,19 +356,19 @@ object SettingsForm: TSettingsForm
             'English'
             #1056#1091#1089#1089#1082#1080#1081' (Russian)')
           ItemIndex = 0
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 5.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Size.Width = 389.000000000000000000
-          Size.Height = 22.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Right = 8.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Size.Width = 382.000000000000000000
+          Size.Height = 24.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 0
           OnChange = langBoxChange
         end
         object langLabel: TLabel
           Align = Left
-          Margins.Left = 10.000000000000000000
-          Position.X = 10.000000000000000000
+          Margins.Left = 8.000000000000000000
+          Position.X = 8.000000000000000000
           Size.Width = 160.000000000000000000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
@@ -398,33 +410,33 @@ object SettingsForm: TSettingsForm
       Align = Top
       StyledSettings = [Family, Size, FontColor]
       TextSettings.Font.StyleExt = {00070000000000000004000000}
-      Margins.Left = 5.000000000000000000
-      Margins.Top = 10.000000000000000000
-      Margins.Right = 5.000000000000000000
-      Position.X = 5.000000000000000000
-      Position.Y = 43.000000000000000000
+      Margins.Left = 8.000000000000000000
+      Margins.Top = 8.000000000000000000
+      Margins.Right = 8.000000000000000000
+      Position.X = 8.000000000000000000
+      Position.Y = 41.000000000000000000
       ShowCheck = False
-      Size.Width = 564.000000000000000000
-      Size.Height = 182.000000000000000000
+      Size.Width = 558.000000000000000000
+      Size.Height = 192.000000000000000000
       Size.PlatformDefault = False
       Text = 'Rendering'
       TabOrder = 2
-      ContentSize = '157'
+      ContentSize = '167'
       object aerenderPathLayout: TLayout
         Align = Top
-        Size.Width = 564.000000000000000000
-        Size.Height = 55.000000000000000000
+        Size.Width = 558.000000000000000000
+        Size.Height = 64.000000000000000000
         Size.PlatformDefault = False
         object aerenderPathLabel: TLabel
           Align = Top
           StyledSettings = [Family, Size, FontColor]
-          Margins.Left = 5.000000000000000000
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 5.000000000000000000
-          Position.X = 5.000000000000000000
-          Position.Y = 5.000000000000000000
-          Size.Width = 554.000000000000000000
-          Size.Height = 17.000000000000000000
+          Margins.Left = 8.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Position.X = 8.000000000000000000
+          Position.Y = 4.000000000000000000
+          Size.Width = 546.000000000000000000
+          Size.Height = 24.000000000000000000
           Size.PlatformDefault = False
           TextSettings.Font.StyleExt = {00070000000000000004000000}
           TextSettings.HorzAlign = Center
@@ -433,24 +445,22 @@ object SettingsForm: TSettingsForm
         object aerenderPath: TEdit
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           Align = Client
-          Margins.Left = 5.000000000000000000
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 5.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Size.Width = 498.000000000000000000
-          Size.Height = 23.000000000000000000
+          Margins.Left = 8.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Margins.Bottom = 8.000000000000000000
+          Size.Width = 478.000000000000000000
+          Size.Height = 28.000000000000000000
           Size.PlatformDefault = False
         end
         object aerenderPathSelect: TButton
           Align = Right
           Hint = 'Choose aerender path'
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 5.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Position.X = 508.000000000000000000
-          Position.Y = 27.000000000000000000
-          Size.Width = 23.000000000000000000
-          Size.Height = 23.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Margins.Bottom = 8.000000000000000000
+          Position.X = 490.000000000000000000
+          Position.Y = 28.000000000000000000
+          Size.Width = 28.000000000000000000
+          Size.Height = 28.000000000000000000
           Size.PlatformDefault = False
           Text = '...'
           OnClick = aerenderPathSelectClick
@@ -459,13 +469,12 @@ object SettingsForm: TSettingsForm
           Align = Right
           StyledSettings = [Size, FontColor]
           Hint = 'Detect aerender automatically'
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 5.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Position.X = 536.000000000000000000
-          Position.Y = 27.000000000000000000
-          Size.Width = 23.000000000000000000
-          Size.Height = 23.000000000000000000
+          Margins.Right = 8.000000000000000000
+          Margins.Bottom = 8.000000000000000000
+          Position.X = 522.000000000000000000
+          Position.Y = 28.000000000000000000
+          Size.Width = 28.000000000000000000
+          Size.Height = 28.000000000000000000
           Size.PlatformDefault = False
           TextSettings.Font.Family = 'Segoe MDL2 Assets'
           OnClick = refreshAerenderClick
@@ -527,8 +536,8 @@ object SettingsForm: TSettingsForm
             Margins.Top = 4.000000000000000000
             Margins.Right = 4.000000000000000000
             Margins.Bottom = 4.000000000000000000
-            Size.Width = 15.000000000000000000
-            Size.Height = 15.000000000000000000
+            Size.Width = 20.000000000000000000
+            Size.Height = 20.000000000000000000
             Size.PlatformDefault = False
             Stroke.Kind = None
             Stroke.Thickness = 0.500000000000000000
@@ -538,14 +547,14 @@ object SettingsForm: TSettingsForm
       end
       object defaultProjectsLayout: TLayout
         Align = Top
-        Position.Y = 55.000000000000000000
-        Size.Width = 564.000000000000000000
+        Position.Y = 64.000000000000000000
+        Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         object defProjPathLabel: TLabel
           Align = Left
-          Margins.Left = 10.000000000000000000
-          Position.X = 10.000000000000000000
+          Margins.Left = 8.000000000000000000
+          Position.X = 8.000000000000000000
           Size.Width = 160.000000000000000000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
@@ -554,22 +563,22 @@ object SettingsForm: TSettingsForm
         object defaultProjectsPath: TEdit
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           Align = Client
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 5.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Size.Width = 361.000000000000000000
-          Size.Height = 22.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Size.Width = 354.000000000000000000
+          Size.Height = 24.000000000000000000
           Size.PlatformDefault = False
         end
         object Button2: TButton
           Align = Right
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 5.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Position.X = 536.000000000000000000
-          Position.Y = 5.000000000000000000
-          Size.Width = 23.000000000000000000
-          Size.Height = 22.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Right = 8.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Position.X = 526.000000000000000000
+          Position.Y = 4.000000000000000000
+          Size.Width = 24.000000000000000000
+          Size.Height = 24.000000000000000000
           Size.PlatformDefault = False
           Text = '...'
           OnClick = Button2Click
@@ -577,14 +586,14 @@ object SettingsForm: TSettingsForm
       end
       object defaultOutputLayout: TLayout
         Align = Top
-        Position.Y = 87.000000000000000000
-        Size.Width = 564.000000000000000000
+        Position.Y = 96.000000000000000000
+        Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         object defOutPathLabel: TLabel
           Align = Left
-          Margins.Left = 10.000000000000000000
-          Position.X = 10.000000000000000000
+          Margins.Left = 8.000000000000000000
+          Position.X = 8.000000000000000000
           Size.Width = 160.000000000000000000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
@@ -593,22 +602,22 @@ object SettingsForm: TSettingsForm
         object defaultOutputPath: TEdit
           Touch.InteractiveGestures = [LongTap, DoubleTap]
           Align = Client
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 5.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Size.Width = 361.000000000000000000
-          Size.Height = 22.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Size.Width = 354.000000000000000000
+          Size.Height = 24.000000000000000000
           Size.PlatformDefault = False
         end
         object Button3: TButton
           Align = Right
-          Margins.Top = 5.000000000000000000
-          Margins.Right = 5.000000000000000000
-          Margins.Bottom = 5.000000000000000000
-          Position.X = 536.000000000000000000
-          Position.Y = 5.000000000000000000
-          Size.Width = 23.000000000000000000
-          Size.Height = 22.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Right = 8.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Position.X = 526.000000000000000000
+          Position.Y = 4.000000000000000000
+          Size.Width = 24.000000000000000000
+          Size.Height = 24.000000000000000000
           Size.PlatformDefault = False
           Text = '...'
           OnClick = Button3Click
@@ -616,8 +625,8 @@ object SettingsForm: TSettingsForm
       end
       object GridPanelLayout2: TGridPanelLayout
         Align = Top
-        Position.Y = 119.000000000000000000
-        Size.Width = 564.000000000000000000
+        Position.Y = 128.000000000000000000
+        Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         ColumnCollection = <
@@ -647,14 +656,14 @@ object SettingsForm: TSettingsForm
           end>
         object Layout1: TLayout
           Align = Client
-          Size.Width = 366.600006103515600000
+          Size.Width = 362.700012207031300000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
           object renderingModeLabel: TLabel
             Align = Left
             Anchors = []
-            Margins.Left = 10.000000000000000000
-            Position.X = 10.000000000000000000
+            Margins.Left = 8.000000000000000000
+            Position.X = 8.000000000000000000
             Size.Width = 160.000000000000000000
             Size.Height = 32.000000000000000000
             Size.PlatformDefault = False
@@ -662,7 +671,7 @@ object SettingsForm: TSettingsForm
           end
           object GridPanelLayout3: TGridPanelLayout
             Align = Client
-            Size.Width = 196.600006103515600000
+            Size.Width = 194.700012207031300000
             Size.Height = 32.000000000000000000
             Size.PlatformDefault = False
             ColumnCollection = <
@@ -694,7 +703,7 @@ object SettingsForm: TSettingsForm
               StaysPressed = True
               Align = Client
               GroupName = 'renderingMode'
-              Size.Width = 58.980003356933590000
+              Size.Width = 58.410003662109380000
               Size.Height = 32.000000000000000000
               Size.PlatformDefault = False
               Text = 'All at once'
@@ -704,7 +713,7 @@ object SettingsForm: TSettingsForm
               Align = Client
               GroupName = 'renderingMode'
               IsPressed = True
-              Size.Width = 137.619995117187500000
+              Size.Width = 136.290008544921900000
               Size.Height = 32.000000000000000000
               Size.PlatformDefault = False
               Text = 'Limit simultaneous threads'
@@ -713,7 +722,7 @@ object SettingsForm: TSettingsForm
         end
         object Layout4: TLayout
           Align = Client
-          Size.Width = 197.399993896484400000
+          Size.Width = 195.299987792968800000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
           object Label1: TLabel

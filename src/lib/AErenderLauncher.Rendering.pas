@@ -13,8 +13,10 @@ uses
 
 type
   AERParamException = class(Exception);
+  AERFrameSpanException = class(Exception);
+  AERCompositionException = class(Exception);
 
-  TRenderState = (RS_WAITING, RS_RENDERING, RS_FINISHED);
+  TRenderState = (RS_WAITING, RS_RENDERING, RS_FINISHED, RS_STOPPED, RS_ERROR);
   TRenderMode = (RM_NORMAL, RM_TILED, RM_ALL_AT_ONCE);
   //TRenderMode = Cardinal;
 
@@ -28,6 +30,7 @@ type
   TFrameSpan = record
     StartFrame, EndFrame: Integer;
     constructor Create(const StartFrame, EndFrame: Integer); overload;
+    constructor Create(const StartFrame, EndFrame: String); overload;
     function Split(const Division: Integer): TArray<TFrameSpan>;
   end;
   //
@@ -36,7 +39,7 @@ type
     Frames: TFrameSpan;
     Split: Cardinal;
     Executable: TExecutable;
-    constructor Create(const CompName: String; const Frames: TFrameSpan; const Split: Integer = 0);
+    constructor Create(const CompName: String; const Frames: TFrameSpan; const Split: Integer = 1);
   end;
 
   TRenderThread = class(TThread)
@@ -66,8 +69,8 @@ type
     FCacheLimit,
     FMemoryLimit: Single;
     //FFrames: TArray<TFrameSpan>;
-    FCompositions: TArray<TComposition>;
-    FLogFilePaths: TArray<String>;
+    FCompositions: TList<TComposition>;
+    FLogFilePaths: TList<String>;
     FState: TRenderState;
 
     //FRenderThread: TRenderThread;
@@ -76,7 +79,7 @@ type
     FRenderFinishEvent: TRenderFinishEvent;
 
     //procedure TaskTerminate(Sender: TObject);
-    function ToExec: TArray<TExecutable>;
+    function ToExec: TList<TExecutable>;
   published   // Make some properties for tasks to use
     // Standard
     property Project: String read FProject write FProject;
@@ -94,9 +97,9 @@ type
 
     // Compositions and Frames
     //property Frames: TArray<TFrameSpan> read FFrames write FFrames;
-    property Compositions: TArray<TComposition> read FCompositions write FCompositions;
+    property Compositions: TList<TComposition> read FCompositions write FCompositions;
 
-    property LogFilePaths: TArray<String> read FLogFilePaths write FLogFilePaths;
+    property LogFilePaths: TList<String> read FLogFilePaths write FLogFilePaths;
     property State: TRenderState read FState write FState default TRenderState.RS_WAITING;
 
     property OnRenderStart: TRenderStartEvent read FRenderStartEvent write FRenderStartEvent;
@@ -106,7 +109,7 @@ type
                         const MissingFiles, Sound, Multiprocessing: Boolean;
                         const CustomProperties: String;
                         const CacheLimit, MemoryLimit: Single;
-                        const Compositions: TArray<TComposition>);
+                        const Compositions: TList<TComposition>);
 
     procedure Render(Mode: Integer = 0);
     function ToString: String; override;
@@ -132,8 +135,13 @@ type
     constructor Create;
   end;
 
+  function GetTaskByProject(const AProject: String): TRenderTask;
+  function GetTaskByCompName(const ACompName: String): TRenderTask; deprecated 'Useless in this context, we CAN get Project without browsing through compositions';
+  function GetCompByName(const ATask: TRenderTask; const ACompName: String): TComposition;
+  function GetCompIndexInTask(const ATask: TRenderTask; const ACompName: String): Integer;
+
 var
-  AErenderPath: String;
+  AErenderPath, Errors: String;
   RenderTasks: TObjectList<TRenderTask>;
 
 implementation
@@ -182,17 +190,32 @@ begin
   Self.EndFrame := EndFrame;
 end;
 
+constructor TFrameSpan.Create(const StartFrame, EndFrame: String);
+begin
+  if StartFrame <> '' then
+    Self.StartFrame := StrToInt(StartFrame)
+  else
+    Self.StartFrame := 0;
+
+  if EndFrame <> '' then
+    Self.EndFrame := StrToInt(EndFrame)
+  else
+    Self.EndFrame := 0;
+end;
 
 (******************)
 (*  TComposition  *)
 (******************)
-constructor TComposition.Create(const CompName: String; const Frames: TFrameSpan; const Split: Integer = 0);
+constructor TComposition.Create(const CompName: String; const Frames: TFrameSpan; const Split: Integer = 1);
 begin
-  Self.CompName := CompName;
+  if CompName <> '' then
+    Self.CompName := CompName;
+  {else
+    raise AERCompositionException.Create('Composition name cannot be empty');}
+
   Self.Frames := Frames;
   Self.Split := Split;
 end;
-
 
 (*****************)
 (*  TRenderTask  *)
@@ -201,9 +224,9 @@ function TRenderTask.ToString: String;
 begin
   var Res: String := Format('(%s, %s, %s, %s, [%s, %s, %s], "%s", %f, %f, ',
   [Project, Output, OutputModule, RenderSettings, BoolToStr(MissingFiles, True), BoolToStr(Sound, True), BoolToStr(Multiprocessing, True), CustomProperties, CacheLimit, MemoryLimit]);
-  for var i := 0 to High(Compositions) do
-    with Compositions[i] do
-      if i = High(Compositions)  then
+  for var i := 0 to Compositions.Count - 1 do
+    with Compositions.Items[i] do
+      if i = Compositions.Count - 1  then
         Res := Res + Format('Comp[%d](%s, [%d, %d], %d)', [i + 1, CompName, Frames.StartFrame, Frames.EndFrame, Split])
       else
         Res := Res + Format('Comp[%d](%s, [%d, %d], %d), ', [i + 1, CompName, Frames.StartFrame, Frames.EndFrame, Split]);
@@ -224,7 +247,7 @@ begin
   Result := Res;
 end;
 
-function TRenderTask.ToExec: TArray<TExecutable>;
+function TRenderTask.ToExec: TList<TExecutable>;
 begin
   // Start with empty string
   var TempStr: WideString := '';
@@ -232,7 +255,7 @@ begin
 
   // Append all the nesesary information in the beginning
   TempStr := {$IFDEF MSWINDOWS}'chcp 65001' + #13#10 + {$ENDIF}
-    Format('("%s" -project "%s" -output "%s" %s %s %s -OMtemplate "%s" -RStemplate "%s" -mem_usage "%d" "%d" ', [
+    Format('("%s" -project "%s" -output "%s" %s %s %s -OMtemplate "%s" -RStemplate "%s" -mem_usage "%d" "%d" %s', [
       AErenderPath,
       Project,
       Output,
@@ -242,7 +265,8 @@ begin
       OutputModule,
       RenderSettings,
       Trunc(MemoryLimit),
-      Trunc(CacheLimit)
+      Trunc(CacheLimit),
+      IfThenElse(CustomProperties.IsEmpty, CustomProperties, '')
     ]);
 
   List.Add(TempStr);
@@ -271,10 +295,10 @@ constructor TRenderTask.Create(const Project, Output, OutputModule, RenderSettin
   const MissingFiles, Sound, Multiprocessing: Boolean;
   const CustomProperties: String;
   const CacheLimit, MemoryLimit: Single;
-  const Compositions: TArray<TComposition>);
+  const Compositions: TList<TComposition>);
 begin
-  if (Project.IsEmpty or Output.IsEmpty or (Length(Compositions) = 0)) then
-    raise AERParamException.Create('Project, Output or compositions are empty');
+  if (Project.IsEmpty or Output.IsEmpty or (Compositions.Count = 0)) then
+    raise AERParamException.Create('Internal Error (EI001) - Project, Output or Compositions may be empty.');
 
   Self.Project        := Project;
   Self.Output         := Output;
@@ -347,11 +371,56 @@ begin
 end;
 
 
+(*************)
+(*  Helpers  *)
+(*************)
+function GetTaskByProject(const AProject: String): TRenderTask;
+begin
+  for var Task: TRenderTask in RenderTasks do
+    if ExtractFileName(Task.Project) = AProject then begin
+      Result := Task;
+      exit
+    end;
+  Result := nil;
+end;
+
+function GetTaskByCompName(const ACompName: String): TRenderTask;
+begin
+  for var Task: TRenderTask in RenderTasks do
+    for var Comp in Task.Compositions do
+      if Comp.CompName = ACompName then begin
+        Result := Task;
+        exit;
+      end;
+  Result := nil;
+end;
+
+function GetCompByName(const ATask: TRenderTask; const ACompName: String): TComposition;
+begin
+  for var Comp in ATask.Compositions do
+    if Comp.CompName = ACompName then begin
+      Result := Comp;
+      exit
+    end;
+  //Result := nil;
+end;
+
+function GetCompIndexInTask(const ATask: TRenderTask; const ACompName: String): Integer;
+begin
+  for var i := 0 to ATask.Compositions.Count - 1 do
+    if ATask.Compositions[i].CompName = ACompName then begin
+      Result := i;
+      exit;
+    end;
+  Result := -1;
+end;
+
 (********************)
 (*  Initialization  *)
 (********************)
 initialization
   RenderTasks := TObjectList<TRenderTask>.Create;
+  Errors := '';
 
 
 (******************)

@@ -2705,12 +2705,12 @@ object TStyleContainer
     object TLine
       Align = Top
       LineType = Top
-      Margins.Left = 3.000000000000000000
+      Margins.Left = -1.000000000000000000
       Margins.Top = 2.000000000000000000
-      Margins.Right = 3.000000000000000000
-      Position.X = 3.000000000000000000
+      Margins.Right = -1.000000000000000000
+      Position.X = -1.000000000000000000
       Position.Y = 2.000000000000000000
-      Size.Width = 44.000000000000000000
+      Size.Width = 52.000000000000000000
       Size.Height = 1.000000000000000000
       Size.PlatformDefault = False
       Stroke.Color = xFF151515
@@ -2727,24 +2727,6 @@ object TStyleContainer
     Visible = False
     XRadius = 3.000000000000000000
     YRadius = 3.000000000000000000
-    object TRectangle
-      Align = Client
-      Fill.Color = xFF202020
-      HitTest = False
-      Size.Width = 50.000000000000000000
-      Size.Height = 50.000000000000000000
-      Size.PlatformDefault = False
-      Stroke.Color = xFF151515
-      XRadius = 3.000000000000000000
-      YRadius = 3.000000000000000000
-      object TShadowEffect
-        Distance = 3.000000000000000000
-        Direction = 90.000000000000000000
-        Softness = 0.500000000000000000
-        Opacity = 0.500000000000000000
-        ShadowColor = claBlack
-      end
-    end
     object TLayout
       StyleName = 'content'
       Align = Client
@@ -2755,6 +2737,22 @@ object TStyleContainer
       Size.Width = 48.000000000000000000
       Size.Height = 48.000000000000000000
       Size.PlatformDefault = False
+    end
+    object TRectangle
+      Align = Client
+      Fill.Color = xFF202020
+      HitTest = False
+      Size.Width = 50.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Color = xFF151515
+      object TShadowEffect
+        Distance = 4.000000000000000000
+        Direction = 45.000000000000000000
+        Softness = 0.500000000000000000
+        Opacity = 0.500000000000000000
+        ShadowColor = claBlack
+      end
     end
   end
   object TLayout
@@ -3904,7 +3902,7 @@ object TStyleContainer
         Align = Client
         Locked = True
         HitTest = False
-        Size.Width = 27.000000000000000000
+        Size.Width = 47.000000000000000000
         Size.Height = 40.000000000000000000
         Size.PlatformDefault = False
         Text = 'Text'

@@ -19,9 +19,6 @@ Coordinates=1960,10,113,51
 [memUsageLayout]
 Coordinates=799,1328,103,33
 
-[saveFile]
-Coordinates=201,1120,54,51
-
 [properiesLayout2]
 Coordinates=659,1328,100,33
 
@@ -69,9 +66,6 @@ Coordinates=881,10,74,69
 
 [outModuleEditorItem0]
 Coordinates=1309,1266,123,33
-
-[projectPath]
-Coordinates=1897,1036,70,51
 
 [memUsageInfoEdit]
 Coordinates=89,1036,107,51
@@ -210,9 +204,6 @@ Coordinates=1323,1,144,33
 [OnyxBlueStyle]
 Coordinates=818,1002,87,33
 
-[outputPath]
-Coordinates=553,1036,68,51
-
 [threadsSwitch]
 Coordinates=160,571,84,177
 
@@ -282,20 +273,11 @@ Coordinates=1024,1120,94,33
 [helpItem]
 Coordinates=934,1120,56,33
 
-[openFile]
-Coordinates=1518,1036,56,51
-
 [compGrid]
 Coordinates=513,172,62,87
 
 [cacheUsageLimitLabel]
 Coordinates=2397,1036,125,51
-
-[projectPathLabel]
-Coordinates=122,1120,97,51
-
-[outputPathLabel]
-Coordinates=10,1036,95,51
 
 [startFrameLabel]
 Coordinates=1179,1036,94,51
@@ -313,4 +295,22 @@ ExplicitSubNodes=Enabled;Visible
 
 [renderSettingsBox]
 Coordinates=614,10,87,123
+
+[_projectPathLabel]
+Coordinates=122,1120,97,51
+
+[_projectPath]
+Coordinates=1897,1036,70,51
+
+[_outputPathLabel]
+Coordinates=10,1036,95,51
+
+[_outputPath]
+Coordinates=553,1036,68,51
+
+[openFile]
+Coordinates=1518,1036,56,51
+
+[_saveFile]
+Coordinates=201,1120,54,51
 

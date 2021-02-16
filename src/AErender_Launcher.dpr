@@ -2,10 +2,10 @@ program AErender_Launcher;
 
 (*        AErender Launcher                                                                 *)
 (*        AErenderLauncher.dpr                                                              *)
-(*        Lily Stilson // 2019 - 2020                                                       *)
+(*        Lily Stilson // 2019 - 2021                                                       *)
 (*        MIT License                                                                       *)
 (*                                                                                          *)
-(*        Copyright (c) 2019 - 2020 Alice Romanets                                          *)
+(*        Copyright (c) 2019 - 2021 Alice Romanets                                          *)
 (*                                                                                          *)
 (*        Permission is hereby granted, free of charge, to any person obtaining a copy      *)
 (*        of this software and associated documentation files (the "Software"), to deal     *)
@@ -30,10 +30,13 @@ program AErender_Launcher;
 uses
   System.StartUpCopy,
   System.SysUtils,
+
   FMX.Forms,
   FMX.Graphics in 'lib\FMX.Graphics.pas',
   FMX.Ani in 'lib\FMX.Ani.pas',
+  FMX.TreeView in 'lib\FMX.TreeView.pas',
   FMX.CompLabel in 'lib\Components\TCompLabel\Package\FMX.CompLabel.pas',
+
   SplashScreenUnit in 'SplashScreenUnit.pas' {SplashScreenForm},
   MainUnit in 'MainUnit.pas' {MainForm},
   SettingsUnit in 'SettingsUnit.pas' {SettingsForm},
@@ -43,15 +46,18 @@ uses
   FFMPEGUnit in 'FFMPEGUnit.pas' {FFMPEGForm},
   RenderingUnit in 'RenderingUnit.pas' {RenderingForm},
   OutputModuleEditorUnit in 'OutputModuleEditorUnit.pas' {OutputModuleEditorForm},
+
   {$IFDEF MACOS}
   Mac.CodeBlocks in 'lib\Mac.CodeBlocks.pas',
   {$ENDIF MACOS}
+
   {$IFDEF MSWINDOWS}
   FMX.Taskbar in 'lib\FMX.Taskbar.pas',
   {$ENDIF MSWINDOWS}
+
   AErenderLauncher.Localization in 'lib\AErenderLauncher.Localization.pas',
   AErenderLauncher.AerenderParser in 'lib\AErenderLauncher.AerenderParser.pas',
-  AErenderLauncher.MathExpParser in 'lib\AErenderLauncher.MathExpParser.pas',
+  AErenderLauncher.Math.ExpParser in 'lib\AErenderLauncher.Math.ExpParser.pas',
   AErenderLauncher.Rendering in 'lib\AErenderLauncher.Rendering.pas',
   AErenderLauncher.IO in 'lib\AErenderLauncher.IO.pas',
   AErenderLauncher.Math in 'lib\AErenderLauncher.Math.pas',

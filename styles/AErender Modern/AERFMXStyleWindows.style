@@ -16,7 +16,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 2
     object TRectangle
       StyleName = 'background'
       Align = Client
@@ -73,7 +72,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 3
     object TBrushObject
       StyleName = 'foreground'
     end
@@ -154,7 +152,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 4
     object TText
       StyleName = 'text'
       Align = Contents
@@ -172,7 +169,6 @@ object TStyleContainer
     Size.Height = 50.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 5
     object TRectangle
       StyleName = 'background'
       Align = Contents
@@ -209,7 +205,6 @@ object TStyleContainer
     Size.Height = 100.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 6
     FixedHeight = 17
     object TRectangle
       StyleName = 'htrack'
@@ -324,7 +319,6 @@ object TStyleContainer
     Size.Height = 38.333343505859380000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 7
     object TLayout
       Align = Left
       Size.Width = 18.000000000000000000
@@ -434,7 +428,6 @@ object TStyleContainer
     StyleName = 'scrollbarbottombutton'
     Align = Center
     Visible = False
-    TabOrder = 8
     object TRectangle
       StyleName = 'background'
       Align = Client
@@ -490,7 +483,6 @@ object TStyleContainer
     StyleName = 'scrollbarleftbutton'
     Align = Center
     Visible = False
-    TabOrder = 9
     object TRectangle
       StyleName = 'background'
       Align = Client
@@ -547,7 +539,6 @@ object TStyleContainer
     StyleName = 'scrollbarrightbutton'
     Align = Center
     Visible = False
-    TabOrder = 10
     object TRectangle
       StyleName = 'background'
       Align = Client
@@ -604,7 +595,6 @@ object TStyleContainer
     StyleName = 'scrollbartopbutton'
     Align = Center
     Visible = False
-    TabOrder = 11
     object TRectangle
       StyleName = 'background'
       Align = Client
@@ -661,7 +651,6 @@ object TStyleContainer
     StyleName = 'scrollbarstyle'
     Align = Center
     Visible = False
-    TabOrder = 12
     object TButton
       StyleName = 'leftbutton'
       Align = Left
@@ -758,7 +747,6 @@ object TStyleContainer
     Size.Width = 100.000000000000000000
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 13
     TrackingThumbScale = 1.000000000000000000
     Visible = False
     Fill.Color = xFF202020
@@ -781,7 +769,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 14
     object TBrushObject
       StyleName = 'foreground'
     end
@@ -885,7 +872,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 16
     object TBrushObject
       StyleName = 'foreground'
     end
@@ -1014,7 +1000,6 @@ object TStyleContainer
     Size.Height = 100.999992370605500000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 17
     object TRectangle
       StyleName = 'background'
       Align = Contents
@@ -1036,8 +1021,8 @@ object TStyleContainer
     Align = Center
     Fill.Color = xFF151515
     HitTest = False
-    Size.Width = 50.000000000000000000
-    Size.Height = 50.000000000000000000
+    Size.Width = 64.000000000000000000
+    Size.Height = 4.000000000000000000
     Size.PlatformDefault = False
     Stroke.Kind = None
     Visible = False
@@ -1057,7 +1042,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 18
     object TRectangle
       StyleName = 'top'
       Align = Contents
@@ -1161,7 +1145,6 @@ object TStyleContainer
     Size.Height = 131.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 19
     object TBrushObject
       StyleName = 'AlternatingRowBackground'
       Brush.Color = xFF2C2C2C
@@ -1271,7 +1254,6 @@ object TStyleContainer
     Size.Height = 26.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 20
     object TText
       StyleName = 'text'
       Align = Client
@@ -1294,7 +1276,6 @@ object TStyleContainer
     Size.Height = 24.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 21
     object TGlyph
       StyleName = 'glyphstyle'
       Margins.Left = 2.000000000000000000
@@ -1339,7 +1320,6 @@ object TStyleContainer
     Size.Height = 26.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 22
     object TRectangle
       StyleName = 'background'
       Align = Contents
@@ -1373,7 +1353,6 @@ object TStyleContainer
     Size.Height = 131.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 23
     object TBrushObject
       StyleName = 'AlternatingRowBackground'
       Brush.Color = x32787878
@@ -1418,6 +1397,7 @@ object TStyleContainer
           StyleName = 'selection'
           Fill.Color = xFF2A82E2
           HitTest = False
+          Opacity = 0.250000000000000000
           Size.Width = 50.000000000000000000
           Size.Height = 50.000000000000000000
           Size.PlatformDefault = False
@@ -1495,7 +1475,6 @@ object TStyleContainer
     Size.Height = 26.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 24
     object TRectangle
       StyleName = 'background'
       Align = Contents
@@ -1547,7 +1526,6 @@ object TStyleContainer
     Size.Height = 56.399997711181640000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 26
     object TRectangle
       StyleName = 'htrack'
       Align = Contents
@@ -1601,7 +1579,6 @@ object TStyleContainer
     Size.Height = 126.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 27
     object TLayout
       StyleName = 'htrack'
       Align = Contents
@@ -1643,7 +1620,6 @@ object TStyleContainer
     Size.Height = 26.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 28
     object TRectangle
       Align = Contents
       Fill.Color = xFF2A82E2
@@ -1834,18 +1810,17 @@ object TStyleContainer
     Margins.Top = 1.000000000000000000
     Margins.Right = 1.000000000000000000
     Margins.Bottom = 1.000000000000000000
-    Size.Width = 73.000000000000000000
-    Size.Height = 26.000000000000000000
+    Size.Width = 123.444442749023400000
+    Size.Height = 30.111110687255860000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 29
     object TRectangle
       Align = Contents
       Fill.Color = xFF2A82E2
       HitTest = False
       Opacity = 0.000099999997473788
-      Size.Width = 73.000000000000000000
-      Size.Height = 26.000000000000000000
+      Size.Width = 123.444442749023400000
+      Size.Height = 30.111110687255860000
       Size.PlatformDefault = False
       Stroke.Kind = None
       object TFloatAnimation
@@ -1862,13 +1837,14 @@ object TStyleContainer
       Align = Contents
       Fill.Color = xFF2A82E2
       HitTest = False
-      Opacity = 0.000099999997473788
-      Size.Width = 73.000000000000000000
-      Size.Height = 26.000000000000000000
+      Opacity = 0.000000000000000000
+      Size.Width = 123.444442749023400000
+      Size.Height = 30.111110687255860000
       Size.PlatformDefault = False
       Stroke.Kind = None
       object TFloatAnimation
         Duration = 0.000200000009499490
+        Inverse = True
         PropertyName = 'Opacity'
         StartValue = 0.000000000000000000
         StopValue = 1.000000000000000000
@@ -1880,14 +1856,14 @@ object TStyleContainer
       StyleName = 'glyph'
       Align = Left
       Size.Width = 25.000000000000000000
-      Size.Height = 26.000000000000000000
+      Size.Height = 30.111110687255860000
       Size.PlatformDefault = False
       object TLayout
         StyleName = 'checkmark'
         Align = Contents
         Opacity = 0.001000000047497451
         Size.Width = 25.000000000000000000
-        Size.Height = 26.000000000000000000
+        Size.Height = 30.111110687255860000
         Size.PlatformDefault = False
         object TPath
           Align = Center
@@ -1935,7 +1911,7 @@ object TStyleContainer
         Position.X = 2.000000000000000000
         Position.Y = 2.000000000000000000
         Size.Width = 21.000000000000000000
-        Size.Height = 22.000000000000000000
+        Size.Height = 26.111110687255860000
         Size.PlatformDefault = False
       end
     end
@@ -1948,7 +1924,7 @@ object TStyleContainer
       Margins.Right = 8.000000000000000000
       Position.X = 33.000000000000000000
       Size.Width = 50.000000000000000000
-      Size.Height = 26.000000000000000000
+      Size.Height = 30.111110687255860000
       Size.PlatformDefault = False
       TextSettings.FontColor = claWhite
       TextSettings.HorzAlign = Leading
@@ -1960,9 +1936,9 @@ object TStyleContainer
       HitTest = False
       Margins.Left = 12.000000000000000000
       Margins.Right = 6.000000000000000000
-      Position.X = -3.000000000000000000
+      Position.X = 47.444442749023440000
       Size.Width = 50.000000000000000000
-      Size.Height = 26.000000000000000000
+      Size.Height = 30.111110687255860000
       Size.PlatformDefault = False
       TextSettings.FontColor = claWhite
       TextSettings.HorzAlign = Leading
@@ -1970,9 +1946,9 @@ object TStyleContainer
     object TLayout
       StyleName = 'submark'
       Align = Right
-      Position.X = 53.000000000000000000
+      Position.X = 103.444442749023400000
       Size.Width = 20.000000000000000000
-      Size.Height = 26.000000000000000000
+      Size.Height = 30.111110687255860000
       Size.PlatformDefault = False
       object TPath
         Align = Center
@@ -1982,8 +1958,8 @@ object TStyleContainer
         Fill.Color = claWhite
         Locked = True
         HitTest = False
-        Size.Width = 7.000000000000000000
-        Size.Height = 8.000000000000000000
+        Size.Width = 6.000000000000000000
+        Size.Height = 10.000000000000000000
         Size.PlatformDefault = False
         Stroke.Kind = None
       end
@@ -1992,24 +1968,19 @@ object TStyleContainer
   object TLayout
     StyleName = 'menuseparatorstyle'
     Align = Center
-    Margins.Left = 1.000000000000000000
-    Margins.Top = 1.000000000000000000
-    Margins.Right = 1.000000000000000000
-    Margins.Bottom = 1.000000000000000000
     Size.Width = 50.000000000000000000
     Size.Height = 50.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 30
     object TLine
       Align = Top
       LineType = Top
-      Margins.Left = 3.000000000000000000
+      Margins.Left = -1.000000000000000000
       Margins.Top = 2.000000000000000000
-      Margins.Right = 3.000000000000000000
-      Position.X = 3.000000000000000000
+      Margins.Right = -1.000000000000000000
+      Position.X = -1.000000000000000000
       Position.Y = 2.000000000000000000
-      Size.Width = 44.000000000000000000
+      Size.Width = 52.000000000000000000
       Size.Height = 1.000000000000000000
       Size.PlatformDefault = False
       Stroke.Color = xFF151515
@@ -2023,7 +1994,6 @@ object TStyleContainer
     Size.Height = 50.000000000000000000
     Size.PlatformDefault = False
     Stroke.Color = xFF151515
-    Visible = False
     object TRectangle
       Align = Client
       Fill.Color = xFF202020
@@ -2033,8 +2003,8 @@ object TStyleContainer
       Size.PlatformDefault = False
       Stroke.Color = xFF151515
       object TShadowEffect
-        Distance = 3.000000000000000000
-        Direction = 90.000000000000000000
+        Distance = 4.000000000000000000
+        Direction = 45.000000000000000000
         Softness = 0.500000000000000000
         Opacity = 0.500000000000000000
         ShadowColor = claBlack
@@ -2056,7 +2026,6 @@ object TStyleContainer
     StyleName = 'imagecellstyle'
     Align = Center
     Visible = False
-    TabOrder = 31
     object TImage
       StyleName = 'image'
       MultiResBitmap = <
@@ -2081,7 +2050,6 @@ object TStyleContainer
     Size.Height = 43.500000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 32
     object TLayout
       Align = Right
       Position.X = 172.000000000000000000
@@ -2134,7 +2102,6 @@ object TStyleContainer
     StyleName = 'textcellstyle'
     Align = Center
     Visible = False
-    TabOrder = 33
     object TLayout
       StyleName = 'content'
       Align = Contents
@@ -2165,7 +2132,6 @@ object TStyleContainer
     Size.Height = 122.199996948242200000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 34
     object TBrushObject
       StyleName = 'foreground'
     end
@@ -2276,7 +2242,6 @@ object TStyleContainer
     Size.Height = 32.400001525878910000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 35
     object TText
       StyleName = 'text'
       Align = Contents
@@ -2342,7 +2307,6 @@ object TStyleContainer
     Size.Height = 21.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 36
     object TRectangle
       StyleName = 'background'
       Align = Contents
@@ -2454,7 +2418,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 37
     object TRectangle
       StyleName = 'Rectangle1'
       Align = Center
@@ -2537,7 +2500,6 @@ object TStyleContainer
     Size.Height = 56.399997711181640000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 38
     object TRectangle
       StyleName = 'htrack'
       Align = Contents
@@ -2602,7 +2564,6 @@ object TStyleContainer
     Size.Height = 103.500000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 39
     object TRectangle
       Align = Contents
       Fill.Kind = None
@@ -2671,7 +2632,6 @@ object TStyleContainer
     Size.Height = 44.500000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 40
     object TRectangle
       StyleName = 'Rectangle1'
       Align = Client
@@ -2850,7 +2810,6 @@ object TStyleContainer
     StyleName = 'popoverstyle'
     Align = Center
     Visible = False
-    TabOrder = 41
     object TRectangle
       StyleName = 'bg'
       Align = Client
@@ -2887,7 +2846,6 @@ object TStyleContainer
     Size.Height = 53.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 42
     object TRectangle
       StyleName = 'background'
       Align = Contents
@@ -2979,7 +2937,6 @@ object TStyleContainer
     StyleName = 'smallscrollbarstyle'
     Align = Center
     Visible = False
-    TabOrder = 43
     object TTrack
       StyleName = 'htrack'
       Align = Client
@@ -3008,7 +2965,6 @@ object TStyleContainer
     Size.Height = 96.750000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 44
     object TRectangle
       StyleName = 'Rectangle1'
       Align = Client
@@ -3076,7 +3032,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 45
     object TRectangle
       StyleName = 'closebutton'
       Align = Client
@@ -3131,7 +3086,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 46
     object TRectangle
       StyleName = 'maxbutton'
       Align = Client
@@ -3182,7 +3136,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 47
     object TRectangle
       StyleName = 'resbutton'
       Align = Client
@@ -3234,7 +3187,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 48
     object TRectangle
       StyleName = 'minbutton'
       Align = Client
@@ -3286,7 +3238,6 @@ object TStyleContainer
     Size.Height = 179.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 49
     object TRectangle
       StyleName = 'mask'
       Align = Contents
@@ -3500,7 +3451,6 @@ object TStyleContainer
     Size.Height = 179.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 50
     object TRectangle
       StyleName = 'mask'
       Align = Contents
@@ -3754,7 +3704,6 @@ object TStyleContainer
     Size.Height = 21.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 52
     object TLayout
       Align = Left
       Size.Width = 21.000000000000000000
@@ -3834,7 +3783,6 @@ object TStyleContainer
     Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 54
     object TLayout
       Align = Bottom
       Position.Y = 34.000000000000000000
@@ -3908,7 +3856,6 @@ object TStyleContainer
     Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 56
     object TLayout
       Align = Bottom
       Position.Y = 34.000000000000000000
@@ -3982,7 +3929,6 @@ object TStyleContainer
     Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 58
     object TLayout
       Align = Bottom
       Position.Y = 34.000000000000000000
@@ -4056,7 +4002,6 @@ object TStyleContainer
     Size.Height = 56.399997711181640000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 61
     object TRectangle
       StyleName = 'htrack'
       Align = Contents
@@ -4121,7 +4066,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 63
     object TRectangle
       StyleName = 'bgrectangle'
       Align = Contents
@@ -4220,7 +4164,6 @@ object TStyleContainer
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 65
     object TPath
       StyleName = 'Path1'
       Align = Center
@@ -4253,7 +4196,6 @@ object TStyleContainer
     Size.Height = 33.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 67
     object TLayout
       Align = Left
       Size.Width = 24.000000000000000000
@@ -4326,7 +4268,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 70
     object TRectangle
       StyleName = 'Rectangle1'
       Align = Contents
@@ -4353,7 +4294,6 @@ object TStyleContainer
     Size.Height = 25.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 15
     object TBrushObject
       StyleName = 'foreground'
     end
@@ -4482,7 +4422,6 @@ object TStyleContainer
     Size.Height = 24.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 60
     object TRectangle
       StyleName = 'vtrack'
       Align = Contents
@@ -4632,7 +4571,6 @@ object TStyleContainer
     Size.Height = 96.000000000000000000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 1
     object TRectangle
       StyleName = 'background'
       Align = Client
@@ -4714,7 +4652,6 @@ object TStyleContainer
     Size.Height = 56.399997711181640000
     Size.PlatformDefault = False
     Visible = False
-    TabOrder = 25
     object TRectangle
       StyleName = 'htrack'
       Align = Contents
@@ -4846,9 +4783,10 @@ object TStyleContainer
         Align = Client
         Locked = True
         HitTest = False
-        Size.Width = 27.000000000000000000
+        Size.Width = 47.000000000000000000
         Size.Height = 40.000000000000000000
         Size.PlatformDefault = False
+        Text = 'Text'
         TextSettings.FontColor = claWhite
         TextSettings.WordWrap = False
         TextSettings.HorzAlign = Leading
@@ -4968,5 +4906,706 @@ object TStyleContainer
         Visible = False
       end
     end
+  end
+  object TLayout
+    StyleName = 'actiontoolbuttonmultiview'
+    Align = Center
+    Size.Width = 100.000000000000000000
+    Size.Height = 50.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 124
+    FixedHeight = 50
+    object TGlyph
+      StyleName = 'glyphstyle'
+      Margins.Left = 9.000000000000000000
+      Margins.Top = 9.000000000000000000
+      Margins.Bottom = 9.000000000000000000
+      Align = Left
+      Position.X = 9.000000000000000000
+      Position.Y = 9.000000000000000000
+      Size.Width = 32.000000000000000000
+      Size.Height = 32.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object TRectangle
+      StyleName = 'background'
+      Align = Client
+      ClipChildren = True
+      ClipParent = True
+      Fill.Color = xFF202020
+      HitTest = False
+      Margins.Left = -50.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      object TColorAnimation
+        StyleName = 'buttonColorAnimation1'
+        Duration = 0.000000000000000000
+        PropertyName = 'Fill.Color'
+        StartValue = xFF202020
+        StopValue = xFF404040
+        Trigger = 'IsMouseOver=true;IsPressed=false;IsFocused=false'
+        TriggerInverse = 'IsMouseOver=false;IsPressed=false;IsFocused=false'
+      end
+      object TColorAnimation
+        StyleName = 'buttonColorAnimation3'
+        Duration = 0.000000000000000000
+        PropertyName = 'Fill.Color'
+        StartValue = xFF2A82E2
+        StopValue = xFF17579C
+        Trigger = 'IsPressed=true;IsMouseOver=true;IsFocused=true'
+        TriggerInverse = 'IsPressed=false;IsMouseOver=true;IsFocused=true'
+      end
+    end
+    object TText
+      StyleName = 'text'
+      Align = Client
+      HitTest = False
+      Size.Width = 50.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.FontColor = claWhite
+    end
+    object TLayout
+      StyleName = 'Layout2'
+      Align = Left
+      Size.Width = 50.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      object TPath
+        StyleName = 'icon'
+        Align = Center
+        Data.Path = {
+          17000000000000000000C03F0000C03F01000000000000000000000001000000
+          0000404000000000010000000000C03F0000C03F030000000000C03F0000C03F
+          0000000000009040000000000100000000004041000000000100000000004041
+          CDCC4C3F0100000000009040CDCC4C3F01000000000090400000000003000000
+          0000904000000000000000000000904033337340010000000000904000004040
+          0100000000004041000040400100000000004041333373400100000000009040
+          3333734003000000000090403333734000000000000090409A99D94001000000
+          000090400000C04001000000000040410000C04001000000000040419A99D940
+          01000000000090409A99D94003000000000090409A99D940}
+        Fill.Color = claWhite
+        HitTest = False
+        Size.Width = 26.000000000000000000
+        Size.Height = 28.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        WrapMode = Fit
+      end
+    end
+  end
+  object TLayout
+    StyleName = 'addbuttonstyle'
+    Align = Center
+    Size.Width = 100.000000000000000000
+    Size.Height = 24.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 126
+    FixedHeight = 24
+    object TGlyph
+      StyleName = 'glyphstyle'
+      Margins.Left = 9.000000000000000000
+      Margins.Top = 9.000000000000000000
+      Margins.Bottom = 9.000000000000000000
+      Align = Left
+      Position.X = 9.000000000000000000
+      Position.Y = 9.000000000000000000
+      Size.Width = 32.000000000000000000
+      Size.Height = 32.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object TRectangle
+      StyleName = 'background'
+      Align = Client
+      ClipChildren = True
+      ClipParent = True
+      Fill.Color = xFF202020
+      HitTest = False
+      Margins.Left = -24.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      object TColorAnimation
+        StyleName = 'buttonColorAnimation1'
+        Duration = 0.000000000000000000
+        PropertyName = 'Fill.Color'
+        StartValue = xFF202020
+        StopValue = xFF404040
+        Trigger = 'IsMouseOver=true;IsPressed=false;IsFocused=false'
+        TriggerInverse = 'IsMouseOver=false;IsPressed=false;IsFocused=false'
+      end
+      object TColorAnimation
+        StyleName = 'buttonColorAnimation3'
+        Duration = 0.000000000000000000
+        PropertyName = 'Fill.Color'
+        StartValue = xFF2A82E2
+        StopValue = xFF17579C
+        Trigger = 'IsPressed=true;IsMouseOver=true;IsFocused=true'
+        TriggerInverse = 'IsPressed=false;IsMouseOver=true;IsFocused=true'
+      end
+    end
+    object TText
+      StyleName = 'text'
+      Align = Client
+      HitTest = False
+      Size.Width = 76.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Text'
+      TextSettings.FontColor = claWhite
+    end
+    object TLayout
+      StyleName = 'Layout2'
+      Align = Left
+      Size.Width = 24.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      object TPath
+        StyleName = 'icon'
+        Align = Contents
+        Data.Path = {
+          0E00000000000000CDCC34410000C040010000000000C0400000C04001000000
+          0000C040CDCC3441010000009A99A940CDCC3441010000009A99A9400000C040
+          01000000000000000000C04001000000000000009A99A940010000009A99A940
+          9A99A940010000009A99A94000000000010000000000C0400000000001000000
+          0000C0409A99A94001000000CDCC34419A99A94001000000CDCC34410000C040
+          03000000CDCC34410000C040}
+        Fill.Color = claWhite
+        HitTest = False
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Right = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Size.Width = 16.000000000000000000
+        Size.Height = 16.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        WrapMode = Fit
+      end
+    end
+  end
+  object TLayout
+    StyleName = 'infotoolbuttonmultiview'
+    Align = Center
+    Size.Width = 100.000000000000000000
+    Size.Height = 50.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 123
+    FixedHeight = 50
+    object TGlyph
+      StyleName = 'glyphstyle'
+      Margins.Left = 9.000000000000000000
+      Margins.Top = 9.000000000000000000
+      Margins.Bottom = 9.000000000000000000
+      Align = Left
+      Position.X = 9.000000000000000000
+      Position.Y = 9.000000000000000000
+      Size.Width = 32.000000000000000000
+      Size.Height = 32.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object TRectangle
+      StyleName = 'background'
+      Align = Client
+      ClipChildren = True
+      ClipParent = True
+      Fill.Color = xFF202020
+      HitTest = False
+      Margins.Left = -50.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      object TColorAnimation
+        StyleName = 'buttonColorAnimation1'
+        Duration = 0.000000000000000000
+        PropertyName = 'Fill.Color'
+        StartValue = xFF202020
+        StopValue = xFF404040
+        Trigger = 'IsMouseOver=true;IsPressed=false;IsFocused=false'
+        TriggerInverse = 'IsMouseOver=false;IsPressed=false;IsFocused=false'
+      end
+      object TColorAnimation
+        StyleName = 'buttonColorAnimation3'
+        Duration = 0.000000000000000000
+        PropertyName = 'Fill.Color'
+        StartValue = xFF2A82E2
+        StopValue = xFF17579C
+        Trigger = 'IsPressed=true;IsMouseOver=true;IsFocused=true'
+        TriggerInverse = 'IsPressed=false;IsMouseOver=true;IsFocused=true'
+      end
+    end
+    object TText
+      StyleName = 'text'
+      Align = Client
+      HitTest = False
+      Size.Width = 50.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Text'
+      TextSettings.FontColor = claWhite
+    end
+    object TLayout
+      StyleName = 'Layout2'
+      Align = Left
+      Size.Width = 50.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      object TPath
+        StyleName = 'icon'
+        Align = Center
+        Data.Path = {
+          A0000000000000009A9987429A99074302000000010076429A99074302000000
+          01005E42CDCC064302000000343347423433054302000000010030429A990343
+          0200000067661A42CE4C01430200000067660642CECCFC4202000000CECCE441
+          0100F742020000000100C041CECCEF420200000034339F419B99E74202000000
+          CECC7C416866DF4202000000353343413533D64202000000CECC14413533CC42
+          020000009A99C9400000C24202000000000080403333B742020000009A991940
+          CDCCAB4202000000CDCC4C3F3333A04202000000000000003333944202000000
+          000000009A99874202000000000000000100764202000000CDCC4C3F01005E42
+          020000009A991940CECC4642020000000000804000003042020000009A99C940
+          66661A42020000003333134166660642020000009A994141CCCCE44102000000
+          33337B41FFFFBF410200000066669E4132339F41020000003333BF41CACC7C41
+          020000000000E441313343410200000000000642CACC14410200000066661A42
+          9A99C94002000000000030420000804002000000333347429A99194002000000
+          00005E42CDCC4C3F020000006666764200000000020000009A99874200000000
+          020000003433944200000000020000003433A042CDCC4C3F02000000CDCCAB42
+          9A991940020000003333B74200008040020000000000C2429A99C94002000000
+          3333CC4233331341020000003333D6429A994141020000006666DF4233337B41
+          020000009999E74266669E4102000000CCCCEF423333BF4102000000FFFFF642
+          0000E44102000000CCCCFC420000064202000000CC4C014300001A4202000000
+          999903439A992F420200000033330543CDCC464202000000CDCC064300005E42
+          02000000999907430000764202000000999907439A9987420200000099990743
+          3433944202000000CCCC06433433A0420200000033330543CDCCAB4202000000
+          999903436766B74202000000CD4C01433333C24202000000CCCCFC423433CC42
+          02000000FFFFF6423433D64202000000CCCCEF426766DF42020000009999E742
+          9A99E742020000006666DF42CDCCEF42020000003333D6420000F74202000000
+          3333CC42CDCCFC42020000003333C242CD4C0143020000006666B7429A990343
+          02000000CCCCAB4233330543020000003333A042CDCC06430200000033339442
+          9A990743020000009A9987429A990743030000009A9987429A99074300000000
+          9A99874200001041020000009A9979420000104102000000CECC644233331B41
+          02000000CECC50429A99314102000000CECC3C42000048410200000001002A42
+          0000684102000000CECC184200008841020000003433074200009C4102000000
+          3633EF41CDCCB441020000006966D2419A99D141020000009C99B5416766EE41
+          020000009C999D41CDCC064202000000D0CC88416666184202000000A0996941
+          00002A4202000000A099494166663C42020000003A333341CCCC504202000000
+          33331B4133336542020000000000104100007A4202000000000010419A998742
+          0200000000001041343392420200000033331B41CDCC9C42020000009A993141
+          CDCCA6420200000000004841CDCCB04202000000000068413333BA4202000000
+          000088410000C3420200000000009C41CDCCCB4202000000CDCCB4419A99D342
+          020000009A99D141CDCCDA42020000006766EE410000E24202000000CDCC0642
+          0000E84202000000666618423333ED420200000000002A423333F24202000000
+          66663C423333F64202000000666650420000F9420200000066666442CDCCFB42
+          02000000333379423333FD4202000000666687423333FD420200000033339242
+          3333FD420200000099999C42CDCCFB42020000009999A6420000F94202000000
+          9999B0423333F64202000000FFFFB9423333F24202000000CCCCC2423333ED42
+          020000009999CB423333E842020000006666D3420000E242020000009999DA42
+          CDCCDA4202000000CCCCE1429A99D34202000000CCCCE742CDCCCB4202000000
+          FFFFEC420000C34202000000FFFFF1423333BA4202000000FFFFF5420000B142
+          02000000CCCCF8420000A742020000009999FB4200009D4202000000FFFFFC42
+          9A99924202000000FFFFFC42CDCC874202000000FFFFFC4200007A4202000000
+          9999FB423433654202000000CCCCF8423433514202000000FFFFF54234333D42
+          02000000FFFFF14267662A4202000000FFFFEC42CECC184202000000FFFFE742
+          3433074202000000CCCCE1423633EF41020000009999DA426966D24102000000
+          6666D3429C99B541020000009999CB429C999D4102000000CCCCC242D0CC8841
+          02000000FFFFB942A099694102000000CCCCB042A0994941020000009999A642
+          3A33334102000000CDCC9C4233331B4102000000666692420000104102000000
+          9A99874200001041030000009A998742000010410000000033337D42CDCC1042
+          010000009A999042CDCC1042010000009A999042CDCC34420100000034337D42
+          CDCC34420100000034337D42CDCC10420300000033337D42CDCC104200000000
+          33337D4233335942010000009A99904233335942010000009A9990420000C742
+          0100000034337D420000C7420100000034337D42333359420300000033337D42
+          33335942}
+        Fill.Color = claWhite
+        HitTest = False
+        Size.Width = 26.000000000000000000
+        Size.Height = 28.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        WrapMode = Fit
+      end
+    end
+  end
+  object TLayout
+    StyleName = 'organizetoolbuttonmultiview'
+    Align = Center
+    Size.Width = 100.000000000000000000
+    Size.Height = 50.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 121
+    FixedHeight = 50
+    object TGlyph
+      StyleName = 'glyphstyle'
+      Margins.Left = 9.000000000000000000
+      Margins.Top = 9.000000000000000000
+      Margins.Bottom = 9.000000000000000000
+      Align = Left
+      Position.X = 9.000000000000000000
+      Position.Y = 9.000000000000000000
+      Size.Width = 32.000000000000000000
+      Size.Height = 32.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object TRectangle
+      StyleName = 'background'
+      Align = Client
+      ClipChildren = True
+      ClipParent = True
+      Fill.Color = xFF202020
+      HitTest = False
+      Margins.Left = -50.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      object TColorAnimation
+        StyleName = 'buttonColorAnimation1'
+        Duration = 0.000000000000000000
+        PropertyName = 'Fill.Color'
+        StartValue = xFF202020
+        StopValue = xFF404040
+        Trigger = 'IsMouseOver=true;IsPressed=false;IsFocused=false'
+        TriggerInverse = 'IsMouseOver=false;IsPressed=false;IsFocused=false'
+      end
+      object TColorAnimation
+        StyleName = 'buttonColorAnimation3'
+        Duration = 0.000000000000000000
+        PropertyName = 'Fill.Color'
+        StartValue = xFF2A82E2
+        StopValue = xFF17579C
+        Trigger = 'IsPressed=true;IsMouseOver=true;IsFocused=true'
+        TriggerInverse = 'IsPressed=false;IsMouseOver=true;IsFocused=true'
+      end
+    end
+    object TText
+      StyleName = 'text'
+      Align = Client
+      HitTest = False
+      Size.Width = 50.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.FontColor = claWhite
+    end
+    object TLayout
+      StyleName = 'Layout2'
+      Align = Left
+      Size.Width = 50.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      object TPath
+        StyleName = 'icon'
+        Align = Center
+        Data.Path = {
+          11000000000000009A99E9409A99C940010000006666664066661E4101000000
+          000000009A99C940010000000000003F9A99B94001000000CDCC4C409A990941
+          01000000CDCC4C40000000000100000000008040000000000100000000008040
+          00000841010000006666D6406666B640010000009A99E9409A99C94003000000
+          9A99E9409A99C940000000009A99993E00004041010000009A99993E33333341
+          010000000000E04033333341010000000000E04000004041010000009A99993E
+          00004041030000009A99993E00004041}
+        Fill.Color = claWhite
+        HitTest = False
+        Size.Width = 26.000000000000000000
+        Size.Height = 28.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        WrapMode = Fit
+      end
+    end
+  end
+  object TLayout
+    StyleName = 'settingstoolbuttonmultiview'
+    Align = Center
+    Size.Width = 100.000000000000000000
+    Size.Height = 50.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 122
+    FixedHeight = 50
+    object TGlyph
+      StyleName = 'glyphstyle'
+      Margins.Left = 9.000000000000000000
+      Margins.Top = 9.000000000000000000
+      Margins.Bottom = 9.000000000000000000
+      Align = Left
+      Position.X = 9.000000000000000000
+      Position.Y = 9.000000000000000000
+      Size.Width = 32.000000000000000000
+      Size.Height = 32.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object TRectangle
+      StyleName = 'background'
+      Align = Client
+      ClipChildren = True
+      ClipParent = True
+      Fill.Color = xFF202020
+      HitTest = False
+      Margins.Left = -50.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      object TColorAnimation
+        StyleName = 'buttonColorAnimation1'
+        Duration = 0.000000000000000000
+        PropertyName = 'Fill.Color'
+        StartValue = xFF202020
+        StopValue = xFF404040
+        Trigger = 'IsMouseOver=true;IsPressed=false;IsFocused=false'
+        TriggerInverse = 'IsMouseOver=false;IsPressed=false;IsFocused=false'
+      end
+      object TColorAnimation
+        StyleName = 'buttonColorAnimation3'
+        Duration = 0.000000000000000000
+        PropertyName = 'Fill.Color'
+        StartValue = xFF2A82E2
+        StopValue = xFF17579C
+        Trigger = 'IsPressed=true;IsMouseOver=true;IsFocused=true'
+        TriggerInverse = 'IsPressed=false;IsMouseOver=true;IsFocused=true'
+      end
+    end
+    object TText
+      StyleName = 'text'
+      Align = Client
+      HitTest = False
+      Size.Width = 50.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Text'
+      TextSettings.FontColor = claWhite
+    end
+    object TLayout
+      StyleName = 'Layout2'
+      Align = Left
+      Size.Width = 50.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      object TPath
+        StyleName = 'icon'
+        Align = Center
+        Data.Path = {
+          1C01000000000000333351423333E7410200000033335142CDCCE84102000000
+          333351426666EA4102000000333351423333EB410200000033335142CDCCEC41
+          02000000333351426666EE4102000000333351423333EF410200000033335142
+          CDCCF04102000000333351426666F24102000000333351423333F34102000000
+          33335142CDCCF44102000000333351426666F64102000000333351423333F741
+          0100000099996F4266660E4201000000CDCC5C4200003C420100000000003A42
+          0000344202000000000038420000364202000000000036420000384202000000
+          0000344200003A420100000000003C42CDCC5C4201000000CDCC0E429A996F42
+          010000000000F84133335142020000006666F6413333514202000000CDCCF441
+          33335142020000000000F44133335142020000006666F2413333514202000000
+          CDCCF04133335142020000000000F04133335142020000006666EE4133335142
+          02000000CDCCEC4133335142020000000000EC4133335142020000006666EA41
+          3333514202000000CDCCE84133335142020000000000E8413333514201000000
+          6666C24199996F4201000000FFFF4F41CCCC5C4201000000FFFF6F41FFFF3942
+          02000000FFFF6741FFFF374202000000FFFF5F41FFFF354202000000FFFF5741
+          FFFF33420100000098999940FFFF3B420100000000000000CDCC0E4201000000
+          3333F3400000F841020000003333F3406666F641020000003333F340CDCCF441
+          020000003333F3400000F441020000003333F3406666F241020000003333F340
+          CDCCF041020000003333F3400000F041020000003333F3406666EE4102000000
+          3333F340CDCCEC41020000003333F3400000EC41020000003333F3406666EA41
+          020000003333F340CDCCE841020000003333F3400000E8410100000000000000
+          CDCCC0410100000066669640CDCC4C410100000066665641CDCC6C4102000000
+          66665E41CDCC64410200000066666641CDCC5C410200000066666E41CDCC5441
+          0100000066664E413433934001000000CDCCC04100000000010000006666E641
+          3333F340020000000000E8413333F340020000009999E9413333F34002000000
+          6666EA413333F340020000000000EC413333F340020000009999ED413333F340
+          020000006666EE413333F340020000000000F0413333F340020000009999F141
+          3333F340020000006666F2413333F340020000000000F4413333F34002000000
+          9999F5413333F340020000006666F6413333F34001000000CDCC0E4200000000
+          0100000000003C42666696400100000000003442666656410200000000003642
+          66665E410200000000003842666666410200000000003A4266666E4101000000
+          CDCC5C4266664E41010000009A996F429A99C14101000000333351423333E741
+          03000000333351423333E7410000000033334342CDCC02420200000033334342
+          CDCC004202000000999943426766FE4102000000999943426766FA4102000000
+          999943426766F64102000000FFFF43423433F34102000000FFFF43423433EF41
+          02000000FFFF43423433EB4102000000FFFF43420100E8410200000099994342
+          0100E44102000000999943420100E0410200000033334342CECCDC4102000000
+          33334342CECCD84101000000CDCC5E426866B64101000000CDCC54429B998541
+          01000000CDCC3442CECC9441020000006766324234338F410200000000003042
+          9B9989410200000033332D42010084410200000066662A42CECC7C4102000000
+          000028423533734102000000CDCC24429C9969410100000067662C423833D340
+          0100000001001442383383400100000067660242020030410200000067660042
+          02003041020000009B99FD4168662E41020000009B99F94168662E4102000000
+          9B99F54168662E41020000006866F241CECC2C41020000006866EE41CECC2C41
+          020000006866EA41CECC2C41020000003533E741CECC2C41020000003533E341
+          68662E41020000003533DF4168662E41020000000200DC410200304102000000
+          0200D84102003041010000009C99B5413733834001000000CFCC84413733D340
+          01000000020094419C9969410200000068668E413633734102000000CFCC8841
+          CFCC7C410200000035338341010084410200000036337B419A99894102000000
+          9D99714167668E410200000004006841CECC9441010000000800D0409B998541
+          01000000080080406866B641010000006A662E419B99D941020000006A662E41
+          9B99DD4102000000D0CC2C41CECCE04102000000D0CC2C41CECCE44102000000
+          D0CC2C41CECCE8410200000036332B410100EC410200000036332B410100F041
+          0200000036332B410100F4410200000036332B413433F74102000000D0CC2C41
+          3433FB4102000000D0CC2C413433FF41020000006A662E413433014202000000
+          6A662E4134330342010000000700804067661442010000000700D040CDCC2C42
+          010000000400684133332542020000009E997141000028420200000037337B41
+          CDCC2A42020000003533834199992D4202000000CECC88416566304202000000
+          9B998D41CCCC324202000000020094413333354201000000CFCC844133335542
+          010000009C99B54133335F4201000000CFCCD8419999434202000000CFCCDC41
+          99994342020000000200E041FFFF4342020000000200E441FFFF434202000000
+          0200E841FFFF4342020000003533EB4165664442020000003533EF4165664442
+          020000003533F34165664442020000006866F64165664442020000006866FA41
+          FFFF4342020000006866FE41FFFF434202000000CECC00429999434202000000
+          CECC024299994342010000000100144233335F420100000067662C4233335542
+          01000000CDCC244233333542020000009A992742CDCC32420200000067662A42
+          666630420200000033332D4299992D4202000000FFFF2F42CCCC2A4202000000
+          666632426666284202000000CDCC34423333254201000000CDCC5442CDCC2C42
+          01000000CDCC5E42676614420100000033334342CDCC02420300000033334342
+          CDCC0242000000003333EF4133339741020000003333FB413333974102000000
+          9A9903429999994102000000CDCC084266669E410200000000000E423333A341
+          02000000CDCC12429999A94102000000CDCC16429999B14102000000CDCC1A42
+          9999B9410200000000001E423333C34102000000676620429999CD4102000000
+          CDCC2242FFFFD7410200000001002442FFFFE34102000000010024420000F041
+          02000000010024420100FC4102000000CECC2242000004420200000067662042
+          333309420200000001001E4266660E4202000000CDCC1A423333134202000000
+          CDCC16423333174202000000CDCC124233331B420200000000000E4266661E42
+          02000000CDCC0842CDCC2042020000009A99034233332342020000003433FB41
+          67662442020000003433EF4167662442020000003433E3416766244202000000
+          3433D7413433234202000000CECCCC41CDCC2042020000006866C24167661E42
+          02000000CECCB84133331B4202000000CECCB0413333174202000000CECCA841
+          33331342020000006866A24166660E42020000009B999D413333094202000000
+          CECC98410000044202000000686696410000FC4102000000686696410000F041
+          02000000686696410000E44102000000CECC98410000D841020000009B999D41
+          9A99CD41020000006866A2413433C34102000000CECCA8419A99B94102000000
+          CECCB0419A99B14102000000CECCB8419A99A941020000006866C2413433A341
+          02000000CECCCC4167669E41020000000000D8419A999941020000003333E341
+          33339741020000003333EF4133339741030000003333EF413333974100000000
+          3333EF41CDCC1642020000000000F841CDCC1642020000000000004200001642
+          020000009A990342676614420200000034330742CDCC124202000000CDCC0A42
+          67661042020000009A990D429A990D420200000067661042CDCC0A4202000000
+          CDCC12429A99074202000000676614429A990342020000000100164200000042
+          02000000CDCC16423433F74102000000CDCC16423433EF4102000000CDCC1642
+          6766E64102000000000016426766DE4102000000676614423433D74102000000
+          CDCC12420100D0410200000067661042CECCC841020000009A990D423433C341
+          02000000CDCC0A429A99BD41020000009A990742CECCB841020000009A990342
+          9A99B54102000000000000426766B241020000003433F741CDCCB04102000000
+          3433EF41CDCCB041020000006766E641CDCCB041020000006766DE416766B241
+          020000003433D7419A99B541020000000100D041CDCCB84102000000CECCC841
+          9A99BD41020000003433C3413433C341020000009A99BD41CECCC84102000000
+          CECCB8413433CF41020000009A99B5413433D741020000006766B2416766DE41
+          02000000CDCCB0413433E74102000000CDCCB0413433EF4102000000CDCCB041
+          0100F841020000006766B24100000042020000009A99B5419A99034202000000
+          CDCCB84134330742020000009A99BD41CDCC0A42020000003433C3419A990D42
+          02000000CECCC84167661042020000003433CF41CDCC1242020000003433D741
+          67661442020000003333DF4100001642020000003333E741CDCC164202000000
+          3333EF41CDCC1642030000003333EF41CDCC1642}
+        Fill.Color = claWhite
+        HitTest = False
+        Size.Width = 26.000000000000000000
+        Size.Height = 28.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        WrapMode = Fit
+      end
+    end
+  end
+  object TLayout
+    StyleName = 'removebuttonstyle'
+    Align = Center
+    Size.Width = 100.000000000000000000
+    Size.Height = 24.000000000000000000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 125
+    FixedHeight = 24
+    object TGlyph
+      StyleName = 'glyphstyle'
+      Margins.Left = 9.000000000000000000
+      Margins.Top = 9.000000000000000000
+      Margins.Bottom = 9.000000000000000000
+      Align = Left
+      Position.X = 33.000000000000000000
+      Position.Y = 9.000000000000000000
+      Size.Width = 32.000000000000000000
+      Size.Height = 6.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object TRectangle
+      StyleName = 'background'
+      Align = Client
+      ClipChildren = True
+      ClipParent = True
+      Fill.Color = xFF202020
+      HitTest = False
+      Margins.Left = -24.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      object TColorAnimation
+        StyleName = 'buttonColorAnimation1'
+        Duration = 0.000000000000000000
+        PropertyName = 'Fill.Color'
+        StartValue = xFF202020
+        StopValue = xFF404040
+        Trigger = 'IsMouseOver=true;IsPressed=false;IsFocused=false'
+        TriggerInverse = 'IsMouseOver=false;IsPressed=false;IsFocused=false'
+      end
+      object TColorAnimation
+        StyleName = 'buttonColorAnimation3'
+        Duration = 0.000000000000000000
+        PropertyName = 'Fill.Color'
+        StartValue = xFF2A82E2
+        StopValue = xFF17579C
+        Trigger = 'IsPressed=true;IsMouseOver=true;IsFocused=true'
+        TriggerInverse = 'IsPressed=false;IsMouseOver=true;IsFocused=true'
+      end
+    end
+    object TText
+      StyleName = 'text'
+      Align = Client
+      HitTest = False
+      Size.Width = 76.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Text'
+      TextSettings.FontColor = claWhite
+    end
+    object TLayout
+      StyleName = 'Layout2'
+      Align = Left
+      Size.Width = 24.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      object TPath
+        StyleName = 'icon'
+        Align = Contents
+        Data.Path = {
+          060000000000000000004041CDCC4C3F0100000000000000CDCC4C3F01000000
+          00000000000000000100000000004041000000000100000000004041CDCC4C3F
+          0300000000004041CDCC4C3F}
+        Fill.Color = claWhite
+        HitTest = False
+        Margins.Left = 4.000000000000000000
+        Margins.Top = 4.000000000000000000
+        Margins.Right = 4.000000000000000000
+        Margins.Bottom = 4.000000000000000000
+        Size.Width = 16.000000000000000000
+        Size.Height = 16.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        WrapMode = Fit
+      end
+    end
+  end
+  object TRectangle
+    StyleName = 'popupbackgroundstyle'
+    Align = Center
+    Fill.Color = xFF2D2D2D
+    Size.Width = 296.000000000000000000
+    Size.Height = 210.500000000000000000
+    Size.PlatformDefault = False
+    Stroke.Color = xFF151515
+    Visible = False
   end
 end
