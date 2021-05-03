@@ -5,8 +5,8 @@
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Generics.Collections,
-  AErenderLauncher.Math;
+  System.SysUtils, System.Classes, System.Generics.Collections, System.JSON,
+  AErenderLauncher.Math, AErenderLauncher.IO, AErenderLauncher.AerenderParser;
 
 //const
 //  RM_NORMAL = 0; RM_TILED = 1; RM_ALL_AT_ONCE = 2;
@@ -39,7 +39,15 @@ type
     Frames: TFrameSpan;
     Split: Cardinal;
     Executable: TExecutable;
+    IsRendering: Boolean;
     constructor Create(const CompName: String; const Frames: TFrameSpan; const Split: Integer = 1);
+  end;
+
+  TRenderObject = record
+    LogFile: String;
+    Duration: TTimecode;
+    Framerate: TFrameRate;
+    constructor Create(const ALogFile: String; const ADuration: TTimecode; const AFramerate: TFrameRate);
   end;
 
   TRenderThread = class(TThread)
@@ -79,7 +87,7 @@ type
     FRenderFinishEvent: TRenderFinishEvent;
 
     //procedure TaskTerminate(Sender: TObject);
-    function ToExec: TList<TExecutable>;
+    function ToExec: TList<String>;
   published   // Make some properties for tasks to use
     // Standard
     property Project: String read FProject write FProject;
@@ -111,7 +119,13 @@ type
                         const CacheLimit, MemoryLimit: Single;
                         const Compositions: TList<TComposition>);
 
-    procedure Render(Mode: Integer = 0);
+    constructor CreateFromJSON (const Project, Output, OutputModule, RenderSettings: String;
+                                const MissingFiles, Sound, Multiprocessing: Boolean;
+                                const CustomProperties: String;
+                                const CacheLimit, MemoryLimit: Single;
+                                const ProjectJSON: String);
+
+    procedure Render(Mode: TRenderMode = RM_NORMAL);
     function ToString: String; override;
     function Count: Integer;
   end;
@@ -143,24 +157,27 @@ type
 var
   AErenderPath, Errors: String;
   RenderTasks: TObjectList<TRenderTask>;
+  RenderQueue: TList<TRenderObject>;
 
 implementation
 
+uses
+  MainUnit;
 
 (*******************)
 (*  TRenderThread  *)
 (*******************)
 procedure TRenderThread.Execute;
 begin
-  var i: Integer := 0;
-  while IsRendering do begin
-    inc (i);
-    Writeln(i);
-    if i >= 5 then begin
-      IsRendering := False;
-    end;
-  end;
-  Self.DoTerminate;
+//  var i: Integer := 0;
+//  while IsRendering do begin
+//    inc (i);
+//    Writeln(i);
+//    if i >= 5 then begin
+//      IsRendering := False;
+//    end;
+//  end;
+//  Self.DoTerminate;
 end;
 
 (****************)
@@ -217,6 +234,14 @@ begin
   Self.Split := Split;
 end;
 
+constructor TRenderObject.Create(const ALogFile: String; const ADuration: TTimecode; const AFramerate: TFrameRate);
+begin
+  Self.LogFile := ALogFile;
+  Self.Duration := ADuration;
+  Self.Framerate := AFramerate;
+end;
+
+
 (*****************)
 (*  TRenderTask  *)
 (*****************)
@@ -247,29 +272,53 @@ begin
   Result := Res;
 end;
 
-function TRenderTask.ToExec: TList<TExecutable>;
+function TRenderTask.ToExec: TList<String>;
 begin
   // Start with empty string
-  var TempStr: WideString := '';
-  var List: TList<WideString> := TList<WideString>.Create();
+  var TempStr: String := '';
+  var List: TList<String> := TList<String>.Create();
 
-  // Append all the nesesary information in the beginning
-  TempStr := {$IFDEF MSWINDOWS}'chcp 65001' + #13#10 + {$ENDIF}
-    Format('("%s" -project "%s" -output "%s" %s %s %s -OMtemplate "%s" -RStemplate "%s" -mem_usage "%d" "%d" %s', [
-      AErenderPath,
-      Project,
-      Output,
-      IfThenElse(Sound, '-sound ON', ''),
-      IfThenElse(Multiprocessing, '-mp', ''),
-      IfThenElse(MissingFiles, '-continueOnMissingFootage', ''),
-      OutputModule,
-      RenderSettings,
-      Trunc(MemoryLimit),
-      Trunc(CacheLimit),
-      IfThenElse(CustomProperties.IsEmpty, CustomProperties, '')
-    ]);
+  for var Composition: TComposition in Compositions do begin
+    for var i := 0 to Composition.Split - 1 do begin
 
-  List.Add(TempStr);
+      var SplitFrameSpans: TArray<TFrameSpan> := Composition.Frames.Split(Composition.Split);
+      SetLength(SplitFrameSpans, Length(SplitFrameSpans));  // Calculate split once, so we don't have to calculate it everytime
+
+      // should match \[(.*?)\]\_\[(.*?)\]\_\[(.*?)\]\_\[(.*?)\]\.bat
+      var FilePath: String := APPFOLDER + Format('[%s]_[%s]_[%d]_[%d].ext', [ExtractFileName(Project).Replace('.aep', ''), Composition.CompName, SplitFrameSpans[i].StartFrame, SplitFrameSpans[i].EndFrame]);
+
+      // Append all the nesesary information in the beginning
+      TempStr := Format('"%s" -project "%s" -output "%s" %s %s %s -OMtemplate "%s" -RStemplate "%s" -mem_usage "%d" "%d" %s -comp "%s" -s "%d" -e "%d"', [
+        AErenderPath,
+        Project,
+        Output,
+        IfThenElse(Sound, '-sound ON', ''),                         // yeet
+        IfThenElse(Multiprocessing, '-mp', ''),                     // double yeet
+        IfThenElse(MissingFiles, '-continueOnMissingFootage', ''),  // tripple yeet
+        OutputModule,
+        RenderSettings,
+        Trunc(MemoryLimit),
+        Trunc(CacheLimit),
+        IfThenElse(CustomProperties.IsEmpty, CustomProperties, ''), // quadruple yeet
+        Composition.CompName,
+        SplitFrameSpans[i].StartFrame,
+        SplitFrameSpans[i].EndFrame
+      ]);
+
+      if SplitFrameSpans[i].StartFrame = 0 then
+        if SplitFrameSpans[i].EndFrame = 0 then
+          TempStr := TempStr.Replace('-s "0" -e "0"', '');
+
+      CreateCmd(
+        {$IFDEF MSWINDOWS}'chcp 65001' + #13#10 + {$ENDIF}Format('(%s) > "%s"', [TempStr, FilePath.Replace('.ext', '.log')]),
+        FilePath.Replace('.ext', {$IFDEF MSWINDOWS}'.bat'{$ELSE MACOS}'.command'{$ENDIF})
+      );
+      List.Add(FilePath);
+    end;
+  end;
+
+  Result := List;
+
   {for var Comp in Compositions do begin
     if Comp.Split = 0 then
       // yeet
@@ -279,9 +328,25 @@ begin
   end; }
 end;
 
-procedure TRenderTask.Render(Mode: Integer = 0);
+procedure TRenderTask.Render(Mode: TRenderMode = RM_NORMAL);
+var
+  Executables: TList<String>;
 begin
-  ToExec;
+  case Mode of
+    RM_NORMAL: begin
+      Executables := ToExec;
+      for var Exec: String in Executables do begin
+        RenderQueue.Add(TRenderObject.Create(Exec, TTimecode.Create(0, 0, 0, 0), 0.00));
+      end;
+    end;
+    RM_TILED: begin
+
+    end;
+    RM_ALL_AT_ONCE: begin
+
+    end;
+  end;
+
   {if Assigned(FRenderStartEvent) then FRenderStartEvent(Self);
 
   FRenderThread := TRenderThread.Create(True);
@@ -302,6 +367,40 @@ begin
 
   Self.Project        := Project;
   Self.Output         := Output;
+  Self.OutputModule   := OutputModule;
+  Self.RenderSettings := RenderSettings;
+
+  Self.MissingFiles   := MissingFiles;
+  Self.Sound          := Sound;
+  Self.Multiprocessing  := Multiprocessing;
+  Self.CustomProperties := CustomProperties;
+  Self.CacheLimit     := CacheLimit;
+  Self.MemoryLimit    := MemoryLimit;
+
+  Self.Compositions   := Compositions;
+end;
+
+constructor TRenderTask.CreateFromJSON(const Project, Output, OutputModule, RenderSettings: String;
+  const MissingFiles, Sound, Multiprocessing: Boolean;
+  const CustomProperties: String;
+  const CacheLimit, MemoryLimit: Single;
+  const ProjectJSON: String);
+begin
+  var ParsedProjectJSON: TJSONValue := TJSONObject.ParseJSONValue(ProjectJSON);
+
+  var Compositions: TList<TComposition> := TList<TComposition>.Create;
+
+  for var i := 0 to (ParsedProjectJSON as TJSONArray).Count - 1 do
+
+  Compositions.Add(TComposition.Create(
+    ParsedProjectJSON.A[i].P['Name'].Value,
+    TFrameSpan.Create(ParsedProjectJSON.A[i].P['Frames'].A[0].Value, ParsedProjectJSON.A[i].P['Frames'].A[1].Value),
+    1
+  ));
+
+  Self.Project        := Project;
+  Self.Output         := Output;
+
   Self.OutputModule   := OutputModule;
   Self.RenderSettings := RenderSettings;
 
@@ -420,6 +519,7 @@ end;
 (********************)
 initialization
   RenderTasks := TObjectList<TRenderTask>.Create;
+  RenderQueue := TList<TRenderObject>.Create;
   Errors := '';
 
 
@@ -428,5 +528,7 @@ initialization
 (******************)
 finalization
   if Assigned(RenderTasks) then FreeAndNil(RenderTasks);
+  if Assigned(RenderQueue) then FreeAndNil(RenderQueue);
+
 
 end.

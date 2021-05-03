@@ -2,7 +2,7 @@
 {                                                       }
 {              Delphi FireMonkey Platform               }
 {                                                       }
-{ Copyright(c) 2011-2020 Embarcadero Technologies, Inc. }
+{ Copyright(c) 2011-2021 Embarcadero Technologies, Inc. }
 {              All rights reserved                      }
 {                                                       }
 {*******************************************************}
@@ -1592,16 +1592,29 @@ var
   I: Integer;
 begin
   Result := True;
-  if FPoints.Count <> AGradient.FPoints.Count then Exit(False);
-  if not SameValue(FStartPosition.X, AGradient.FStartPosition.X, TEpsilon.Position) then Exit(False);
-  if not SameValue(FStartPosition.Y, AGradient.FStartPosition.Y, TEpsilon.Position) then Exit(False);
-  if not SameValue(FStopPosition.X, AGradient.FStopPosition.X, TEpsilon.Position) then Exit(False);
-  if not SameValue(FStopPosition.Y, AGradient.FStopPosition.Y, TEpsilon.Position) then Exit(False);
+  if FPoints.Count <> AGradient.FPoints.Count then
+    Exit(False);
+  if not SameValue(FStartPosition.X, AGradient.FStartPosition.X, TEpsilon.Position) then
+    Exit(False);
+  if not SameValue(FStartPosition.Y, AGradient.FStartPosition.Y, TEpsilon.Position) then
+    Exit(False);
+  if not SameValue(FStopPosition.X, AGradient.FStopPosition.X, TEpsilon.Position) then
+    Exit(False);
+  if not SameValue(FStopPosition.Y, AGradient.FStopPosition.Y, TEpsilon.Position) then
+    Exit(False);
   for I := 0 to FPoints.Count - 1 do
   begin
-    if FPoints[I].Color <> AGradient.FPoints[I].Color then Exit(False);
-    if not SameValue(FPoints[I].Offset, AGradient.FPoints[I].Offset, TEpsilon.Position) then Exit(False);
+    if FPoints[I].Color <> AGradient.FPoints[I].Color then
+      Exit(False);
+    if not SameValue(FPoints[I].Offset, AGradient.FPoints[I].Offset, TEpsilon.Position) then
+      Exit(False);
   end;
+  { Radial gradient }
+  if not SameValue(RadialTransform.RotationAngle, AGradient.RadialTransform.RotationAngle, TEpsilon.Angle)  then
+    Exit(False);
+  if not SameValue(RadialTransform.RotationCenter.X, AGradient.RadialTransform.RotationCenter.X, TEpsilon.Position) or
+     not SameValue(RadialTransform.RotationCenter.Y, AGradient.RadialTransform.RotationCenter.Y, TEpsilon.Position) then
+    Exit(False);
 end;
 
 procedure TGradient.Change;
@@ -4259,7 +4272,7 @@ begin
     try
       Surf.Assign(Self);
       if not TBitmapCodecManager.SaveToFile(AFileName, Surf, SaveParams) then
-        raise EBitmapSavingFailed.CreateFMT(SBitmapSavingFailed, [AFileName]);
+        raise EBitmapSavingFailed.CreateFMT(SBitmapSavingFailedNamed, [AFileName]);
     finally
       Surf.Free;
     end;

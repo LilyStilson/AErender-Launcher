@@ -30,13 +30,11 @@ program AErender_Launcher;
 uses
   System.StartUpCopy,
   System.SysUtils,
-
   FMX.Forms,
   FMX.Graphics in 'lib\FMX.Graphics.pas',
   FMX.Ani in 'lib\FMX.Ani.pas',
   FMX.TreeView in 'lib\FMX.TreeView.pas',
   FMX.CompLabel in 'lib\Components\TCompLabel\Package\FMX.CompLabel.pas',
-
   SplashScreenUnit in 'SplashScreenUnit.pas' {SplashScreenForm},
   MainUnit in 'MainUnit.pas' {MainForm},
   SettingsUnit in 'SettingsUnit.pas' {SettingsForm},
@@ -46,15 +44,13 @@ uses
   FFMPEGUnit in 'FFMPEGUnit.pas' {FFMPEGForm},
   RenderingUnit in 'RenderingUnit.pas' {RenderingForm},
   OutputModuleEditorUnit in 'OutputModuleEditorUnit.pas' {OutputModuleEditorForm},
-
   {$IFDEF MACOS}
   Mac.CodeBlocks in 'lib\Mac.CodeBlocks.pas',
+  MacApi.Dialogs in 'lib\MacApi.Dialogs.pas',
   {$ENDIF MACOS}
-
   {$IFDEF MSWINDOWS}
   FMX.Taskbar in 'lib\FMX.Taskbar.pas',
   {$ENDIF MSWINDOWS}
-
   AErenderLauncher.Localization in 'lib\AErenderLauncher.Localization.pas',
   AErenderLauncher.AerenderParser in 'lib\AErenderLauncher.AerenderParser.pas',
   AErenderLauncher.Math.ExpParser in 'lib\AErenderLauncher.Math.ExpParser.pas',

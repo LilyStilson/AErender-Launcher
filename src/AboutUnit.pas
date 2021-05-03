@@ -67,6 +67,8 @@ type
     GridPanelLayout1: TGridPanelLayout;
     GridPanelLayout2: TGridPanelLayout;
     LogoRotationAnim: TFloatAnimation;
+    Path2: TPath;
+    Layout1: TLayout;
     procedure WebsiteLabelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Image1DblClick(Sender: TObject);
@@ -114,7 +116,7 @@ end;
 
 procedure TAboutForm.FormShow(Sender: TObject);
 begin
-  LauncherLabel.Text := 'AErender Launcher (' + APPVERSION + ')';
+  LauncherLabel.Text := '(' + APPVERSION + ')';
   if MainUnit.FFMPEG then
     begin
       FFmpegLabel.FontColor := $FF1E90FF;
@@ -134,7 +136,7 @@ end;
 
 procedure TAboutForm.WebsiteLabelClick(Sender: TObject);
 begin
-  Open('http://aerenderlauncher.com', []);
+  Open('https://aerenderlauncher.com', []);
 end;
 
 procedure TAboutForm.LogoRotationAnimFinish(Sender: TObject);

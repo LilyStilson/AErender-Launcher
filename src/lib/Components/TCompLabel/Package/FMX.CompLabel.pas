@@ -3,21 +3,29 @@
 interface
 
 uses
-  System.Types, System.SysUtils, System.Classes, System.UITypes, FMX.Types, FMX.Controls, FMX.Styles, FMX.StdCtrls, FMX.Objects;
+  System.Types, System.SysUtils, System.Classes, System.UITypes, 
+  FMX.Types, FMX.Controls, FMX.Styles, FMX.StdCtrls, FMX.Objects;
 
 type
   TCompLabel = class(TStyledControl)
   private
-    FComposition, FInFrame, FOutFrame, FSplit: String;
+    FComposition, FProgress, FSplit: String;
+    FValue, FInFrame, FOutFrame: Single;
 
     function GetCompName: String;
     procedure SetCompName(Value: String);
 
-    function GetInFrame: String;
-    procedure SetInFrame(Value: String);
+    function GetProgress: String;
+    procedure SetProgress(Value: String);
 
-    function GetOutFrame: String;
-    procedure SetOutFrame(Value: String);
+    function GetValue: Single;
+    procedure SetValue(Value: Single);
+
+    function GetInFrame: Single;
+    procedure SetInFrame(Value: Single);
+
+    function GetOutFrame: Single;
+    procedure SetOutFrame(Value: Single);
 
     function GetSplit: String;
     procedure SetSplit(Value: String);
@@ -34,8 +42,10 @@ type
     property Size;
 
     property Composition: String read GetCompName write SetCompName;
-    property InFrame: String read GetInFrame write SetInFrame;
-    property OutFrame: String read GetOutFrame write SetOutFrame;
+    property Progress: String read GetProgress write SetProgress;
+    property Value: Single read GetValue write SetValue;
+    property InFrame: Single read GetInFrame write SetInFrame;
+    property OutFrame: Single read GetOutFrame write SetOutFrame;
     property Split: String read GetSplit write SetSplit;
   end;
 
@@ -62,10 +72,8 @@ end;
 {$REGION '    Composition    '}
 
 function TCompLabel.GetCompName: String;
-var
-  Base: TFmxObject;
 begin
-  Base := FindStyleResource('comp');
+  var Base: TFmxObject := FindStyleResource('comp');
   if Base <> nil then
     FComposition := TText(Base).Text;
 
@@ -73,63 +81,105 @@ begin
 end;
 
 procedure TCompLabel.SetCompName(Value: String);
-var
-  Base: TFmxObject;
 begin
   FComposition := Value;
-  Base := FindStyleResource('comp');
+  var Base: TFmxObject := FindStyleResource('comp');
   if Base <> nil then
     TText(Base).Text := Value;
+end;
+
+{$ENDREGION}
+
+{$REGION '    Progress    '}
+
+function TCompLabel.GetProgress: String;
+begin
+  var Base: TFmxObject := FindStyleResource('progress');
+  if Base <> nil then
+    FProgress := TText(Base).Text;
+
+  Result := FProgress;
+end;
+
+procedure TCompLabel.SetProgress(Value: String);
+begin
+  FProgress := Value;
+  var Base: TFmxObject := FindStyleResource('progress');
+  if Base <> nil then
+    TText(Base).Text := Value;
+end;
+
+{$ENDREGION}
+
+{$REGION '    Value    '}
+
+function TCompLabel.GetValue: Single;
+begin
+  var Base: TFmxObject := FindStyleResource('progressbar');
+  if Base <> nil then
+    FValue := TProgressBar(Base).Value;
+
+  Result := FValue;
+end;
+
+procedure TCompLabel.SetValue(Value: Single);
+begin
+  FValue := Value;
+  var Base: TFmxObject := FindStyleResource('progressbar');
+  if Base <> nil then begin
+    TProgressBar(Base).Value := Value;
+    TProgressBar(Base).Visible := Value >= FInFrame;
+  end;
 end;
 
 {$ENDREGION}
 
 {$REGION '    InFrame    '}
 
-function TCompLabel.GetInFrame: String;
-var
-  Base: TFmxObject;
+function TCompLabel.GetInFrame: Single;
 begin
-  Base := FindStyleResource('inframe');
+  var Base: TFmxObject := FindStyleResource('inframe');
   if Base <> nil then
-    FInFrame := TText(Base).Text;
+    FInFrame := StrToFloat(TText(Base).Text);
 
   Result := FInFrame;
 end;
 
-procedure TCompLabel.SetInFrame(Value: String);
-var
-  Base: TFmxObject;
+procedure TCompLabel.SetInFrame(Value: Single);
 begin
   FInFrame := Value;
-  Base := FindStyleResource('inframe');
+  var Base: TFmxObject := FindStyleResource('inframe');
   if Base <> nil then
-    TText(Base).Text := Value;
+    TText(Base).Text := IntToStr(Trunc(Value));
+
+  var ProgressBarBase: TFmxObject := FindStyleResource('progressbar');
+  if ProgressBarBase <> nil then
+    TProgressBar(ProgressBarBase).Min := FInFrame;
 end;
 
 {$ENDREGION}
 
 {$REGION '    OutFrame    '}
 
-function TCompLabel.GetOutFrame: String;
-var
-  Base: TFmxObject;
+function TCompLabel.GetOutFrame: Single;
 begin
-  Base := FindStyleResource('outframe');
+  var Base: TFmxObject := FindStyleResource('outframe');
   if Base <> nil then
-    FOutFrame := TText(Base).Text;
+    FOutFrame := StrToFloat(TText(Base).Text);
 
   Result := FOutFrame;
 end;
 
-procedure TCompLabel.SetOutFrame(Value: String);
-var
-  Base: TFmxObject;
+procedure TCompLabel.SetOutFrame(Value: Single);
 begin
   FOutFrame := Value;
-  Base := FindStyleResource('outframe');
+  var Base: TFmxObject := FindStyleResource('outframe');
   if Base <> nil then
-    TText(Base).Text := Value;
+    TText(Base).Text := IntToStr(Trunc(Value));
+
+  var ProgressBarBase: TFmxObject := FindStyleResource('progressbar');
+  if ProgressBarBase <> nil then
+    TProgressBar(ProgressBarBase).Max := FOutFrame;
 end;
 
 {$ENDREGION}
@@ -137,10 +187,8 @@ end;
 {$REGION '    Split    '}
 
 function TCompLabel.GetSplit: String;
-var
-  Base: TFmxObject;
 begin
-  Base := FindStyleResource('split');
+  var Base: TFmxObject := FindStyleResource('split');
   if Base <> nil then
     FSplit := TText(Base).Text;
 
@@ -148,11 +196,9 @@ begin
 end;
 
 procedure TCompLabel.SetSplit(Value: String);
-var
-  Base: TFmxObject;
 begin
   FSplit := Value;
-  Base := FindStyleResource('split');
+  var Base: TFmxObject := FindStyleResource('split');
   if Base <> nil then
     TText(Base).Text := Value;
 end;
@@ -163,6 +209,8 @@ procedure TCompLabel.ApplyStyle;
 begin
   inherited;
   SetCompName(FComposition);
+  SetProgress(FProgress);
+  SetValue(FValue);
   SetInFrame(FInFrame);
   SetOutFrame(FOutFrame);
   SetSplit(FSplit);
@@ -175,8 +223,10 @@ begin
   Width := 400;
 
   Composition := '';
-  InFrame := '';
-  OutFrame := '';
+  Progress := '';
+  Value := -1;
+  InFrame := 0;
+  OutFrame := 100;
   Split := '';
   HitTest := False;
 end;

@@ -33,6 +33,11 @@ uses
   System.UITypes,
   System.Classes,
   System.Variants,
+  System.JSON,
+  System.Generics.Collections,
+  System.Rtti,
+  System.Bindings.Outputs,
+
   FMX.Types,
   FMX.Controls,
   FMX.Forms,
@@ -50,20 +55,25 @@ uses
   FMX.Edit,
   FMX.DialogService.Sync,
   FMX.BufferedLayout,
+  Fmx.Bind.Editors,
+  Fmx.Bind.DBEngExt,
+  FMX.ListBox,
+
   Xml.xmldom,
   Xml.XMLIntf,
   Xml.XMLDoc,
-  FMX.ListBox,
+
   Data.Bind.EngExt,
-  Fmx.Bind.DBEngExt,
-  System.Rtti,
-  System.Bindings.Outputs,
-  Fmx.Bind.Editors,
   Data.Bind.Components,
+
+  AErenderLauncher.Rendering,
+  AErenderLauncher.Math,
+
   {$IFDEF MSWINDOWS}Fmx.Platform.Win, WinApi.Windows;{$ENDIF MSWINDOWS}
   {$IFDEF MACOS}MacApi.Foundation;{$ENDIF MACOS}
 
 type
+  TFormSender = (FS_JSON, FS_XML);
   TImportForm = class(TForm)
     importButton: TButton;
     topLayout: TLayout;
@@ -71,7 +81,7 @@ type
     projectPathLayout: TLayout;
     aerProjectPathLabel: TLabel;
     aerProjectPath: TEdit;
-    compositions: TListBox;
+    compListBox: TListBox;
     compLayout: TGroupBox;
     XMLDocument: TXMLDocument;
     compProp: TGroupBox;
@@ -82,33 +92,38 @@ type
     compRangeOut: TLabel;
     importProp: TGroupBox;
     compImportLayout: TLayout;
-    splitRenderCheckbox: TCheckBox;
+    SplitRenderCheckbox: TCheckBox;
     BindingsList1: TBindingsList;
     LinkControlToPropertyShowCheckboxes: TLinkControlToProperty;
-    XMLFile: TEdit;
+    ImportedFile: TEdit;
     selectallButton: TButton;
     deselallButton: TButton;
     StatusBar1: TStatusBar;
     GridPanelLayout1: TGridPanelLayout;
+    SplitRenderLayout: TLayout;
+    Splitter1: TSplitter;
     procedure FormShow(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure compositionsChangeCheck(Sender: TObject);
+    procedure compListBoxChangeCheck(Sender: TObject);
     procedure importButtonClick(Sender: TObject);
     procedure selectallButtonClick(Sender: TObject);
     procedure deselallButtonClick(Sender: TObject);
-    procedure compositionsChange(Sender: TObject);
+    procedure compListBoxChange(Sender: TObject);
     procedure SetLanguage(LanguageCode: Integer);
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
+    RootNode: IXMLNode;
+    Project: TJSONValue;
+
     {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
+    FormSender: TFormSender;
   end;
 
 var
   ImportForm: TImportForm;
-  RootNode: IXMLNode;
   CheckedComps, CompCount: Integer;
   PARAMSTART: Boolean = False;
   XMLPath: String;
@@ -158,13 +173,60 @@ begin
 end;
 
 procedure TImportForm.importButtonClick(Sender: TObject);
-var
-  i, k: Integer;
 begin
-  MainForm.projectPath.Text := RootNode.Attributes['project'];
+  var Compositions: TList<TComposition> := TList<TComposition>.Create;
+
+  if (CheckedComps = 1) or (CheckedComps = 0) then begin
+    Compositions.Add(TComposition.Create(
+       Project.A[compListBox.ItemIndex].P['Name'].Value,
+       TFrameSpan.Create(Project.A[compListBox.ItemIndex].P['Frames'].A[0].Value, Project.A[compListBox.ItemIndex].P['Frames'].A[1].Value),
+       1
+    ));
+  end else begin
+    for var i := 0 to compListBox.Count - 1 do
+      if compListBox.ListItems[i].IsChecked then
+        Compositions.Add(TComposition.Create(
+           Project.A[i].P['Name'].Value,
+           TFrameSpan.Create(Project.A[i].P['Frames'].A[0].Value, Project.A[i].P['Frames'].A[1].Value),
+           1
+        ));
+  end;
+
+  RenderTasks.Add(TRenderTask.Create(
+    MainForm.projectPath.Text,
+    MainForm.outputPath.Text,
+
+    MainForm.outputModuleBox.Items[MainForm.outputModuleBox.ItemIndex],
+    MainForm.renderSettingsBox.Items[MainForm.renderSettingsBox.ItemIndex],
+
+    MainForm.missingFilesCheckbox.IsChecked,
+    MainForm.soundCheckbox.IsChecked,
+    MainForm.threadedRender.IsChecked,
+    IfThenElse(MainForm.customCheckbox.IsChecked = True, MainForm.customProp.Text, ''),  // yeet,
+
+    MainForm.cacheUsageTrackBar.Value,
+    MainForm.memUsageTrackBar.Value,
+
+    Compositions
+  ));
+
+  {if ((SplitRenderCheckbox.Enabled) and (SplitRenderCheckbox.IsChecked)) and (CheckedComps <= 1) then begin
+
+  end else begin
+    if (CheckedComps = 1) or (CheckedComps = 0) then begin
+
+    end else begin
+      for var i := 0 to CheckedComps do
+
+    end;
+  end;      }
+
+
+
+  {MainForm.projectPath.Text := RootNode.Attributes['project'];
   MainForm.outputPath.Text := '';
   k := 0;
-  if ((splitRenderCheckbox.Enabled) and (splitRenderCheckbox.IsChecked)) and (CheckedComps <= 1) then
+  if ((SplitRenderCheckbox.Enabled) and (SplitRenderCheckbox.IsChecked)) and (CheckedComps <= 1) then
     begin
       MainForm.compSwitch.Enabled := False;
       MainForm.compSwitch.IsChecked := False;
@@ -182,9 +244,9 @@ begin
       MainForm.compGrid.Enabled := False;
       MainForm.compGrid.Visible := False;
 
-      MainForm.compName.Text := RootNode.ChildNodes['compositions'].ChildNodes[compositions.Selected.Index].ChildNodes['name'].Text;
-      MainForm.inFrame.Text := Trunc(StrToFloat(RootNode.ChildNodes['compositions'].ChildNodes[compositions.Selected.Index].ChildNodes['rangeStart'].Text)).ToString;
-      MainForm.outFrame.Text := Trunc(StrToFloat(RootNode.ChildNodes['compositions'].ChildNodes[compositions.Selected.Index].ChildNodes['rangeEnd'].Text)).ToString;
+      MainForm.compName.Text := RootNode.ChildNodes['compositions'].ChildNodes[compListBox.Selected.Index].ChildNodes['name'].Text;
+      MainForm.inFrame.Text := Trunc(StrToFloat(RootNode.ChildNodes['compositions'].ChildNodes[compListBox.Selected.Index].ChildNodes['rangeStart'].Text)).ToString;
+      MainForm.outFrame.Text := Trunc(StrToFloat(RootNode.ChildNodes['compositions'].ChildNodes[compListBox.Selected.Index].ChildNodes['rangeEnd'].Text)).ToString;
     end
   else
     begin
@@ -208,9 +270,9 @@ begin
           MainForm.threadsCount.Visible := False;
           MainForm.threadsCount.Enabled := False;
 
-          MainForm.compName.Text := RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['name'].Text;
-          MainForm.inFrame.Text := Trunc(StrToFloat(RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['rangeStart'].Text)).ToString;
-          MainForm.outFrame.Text := Trunc(StrToFloat(RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['rangeEnd'].Text)).ToString;
+          MainForm.compName.Text := RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['name'].Text;
+          MainForm.inFrame.Text := Trunc(StrToFloat(RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['rangeStart'].Text)).ToString;
+          MainForm.outFrame.Text := Trunc(StrToFloat(RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['rangeEnd'].Text)).ToString;
         end
       else
         begin
@@ -235,43 +297,57 @@ begin
           MainForm.compCount.Value := CheckedComps;
           MainForm.inFrame.Text := '';
           MainForm.outFrame.Text := '';
-          for i := 0 to CompCount - 1 do
-            if compositions.ListItems[i].IsChecked then
+          for var i := 0 to CompCount - 1 do
+            if compListBox.ListItems[i].IsChecked then
               begin
                 MainForm.compGrid.Cells[0, k] := RootNode.ChildNodes['compositions'].ChildNodes[i].ChildNodes['name'].Text;
                 inc (k);
               end;
         end;
-    end;
+    end; }
+
+
+
   XMLDocument.Active := False;
   ImportForm.Close;
 end;
 
-procedure TImportForm.compositionsChange(Sender: TObject);
+procedure TImportForm.compListBoxChange(Sender: TObject);
 begin
-  compName.Text := Language[LANG].ImportForm.Name + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['name'].Text;
-  compResolution.Text := Language[LANG].ImportForm.Resolution + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['resolution'].Text;
-  compFramerate.Text := Language[LANG].ImportForm.Framerate + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['framerate'].Text;
-  compRangeIn.Text := Language[LANG].ImportForm.RangeStart + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['rangeStart'].Text;
-  compRangeOut.Text := Language[LANG].ImportForm.RangeEnd + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compositions.ItemIndex].ChildNodes['rangeEnd'].Text;
+  case FormSender of
+    FS_JSON: begin
+      compName.Text := Language[LANG].ImportForm.Name + ': ' + Project.A[compListBox.ItemIndex].P['Name'].Value;
+      compResolution.Text := Language[LANG].ImportForm.Resolution + ': ' + Project.A[compListBox.ItemIndex].P['FootageDimensions'].A[0].Value + 'x' + Project.A[compListBox.ItemIndex].P['FootageDimensions'].A[1].Value;
+      compFramerate.Text :=  Language[LANG].ImportForm.Framerate + ': ' + Project.A[compListBox.ItemIndex].P['FootageFramerate'].Value;
+      compRangeIn.Text := Language[LANG].ImportForm.RangeStart + ': ' + Project.A[compListBox.ItemIndex].P['Frames'].A[0].Value;
+      compRangeOut.Text := Language[LANG].ImportForm.RangeEnd + ': ' + Project.A[compListBox.ItemIndex].P['Frames'].A[1].Value;
+    end;
+    FS_XML: begin
+      compName.Text := Language[LANG].ImportForm.Name + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['name'].Text;
+      compResolution.Text := Language[LANG].ImportForm.Resolution + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['resolution'].Text;
+      compFramerate.Text := Language[LANG].ImportForm.Framerate + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['framerate'].Text;
+      compRangeIn.Text := Language[LANG].ImportForm.RangeStart + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['rangeStart'].Text;
+      compRangeOut.Text := Language[LANG].ImportForm.RangeEnd + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['rangeEnd'].Text;
+    end;
+  end;
 end;
 
-procedure TImportForm.compositionsChangeCheck(Sender: TObject);
+procedure TImportForm.compListBoxChangeCheck(Sender: TObject);
 begin
   CheckedComps := 0;
   for var i := 0 to CompCount - 1 do
-    if compositions.ListItems[i].IsChecked then
+    if compListBox.ListItems[i].IsChecked then
       inc (CheckedComps);
   if CheckedComps > 0 then
-    splitRenderCheckbox.Enabled := False
+    SplitRenderCheckbox.Enabled := False
   else
-    splitRenderCheckbox.Enabled := True;
+    SplitRenderCheckbox.Enabled := True;
 end;
 
 procedure TImportForm.deselallButtonClick(Sender: TObject);
 begin
   for var i := 0 to CompCount-1 do
-    compositions.ListItems[i].IsChecked := False;
+    compListBox.ListItems[i].IsChecked := False;
 end;
 
 procedure TImportForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -279,46 +355,59 @@ begin
   CheckedComps := 0;
   CompCount := 0;
   aerProjectPath.Text := '';
-  compositions.Clear;
+  FreeAndNil(Project);
+  compListBox.Clear;
+  //compositions.Items.Clear;
 end;
 
 procedure TImportForm.FormCreate(Sender: TObject);
 begin
-  compositions.AniCalculations.Animation := True;
+  compListBox.AniCalculations.Animation := True;
 end;
 
 procedure TImportForm.FormShow(Sender: TObject);
 begin
-  try
-    if PARAMSTART then
-      begin
-        XMLFile.Text := ExtractFileName(XMLPath);
-        XMLDocument.LoadFromFile(XMLPath);
-      end
-    else
-      begin
-        {$IFDEF MSWINDOWS}
-        XMLFile.Text := ExtractFileName(MainForm.XMLOpenDialog.FileName);
-        {$ELSE}
-        XMLFile.Text := ExtractFileName(ImportedPath);
-        {$ENDIF}
-        XMLDocument.LoadFromFile(MainForm.XMLOpenDialog.FileName);
+  compListBox.Clear;
+  case FormSender of
+    FS_JSON: begin
+      //ShowMessage(MainForm.ProjectJson);
+      Project := TJSONObject.ParseJSONValue(MainForm.ProjectJson);
+      ImportedFile.Text := APPFOLDER + ExtractFileName(MainForm.projectPath.Text).Replace('.aep', '.json');
+      aerProjectPath.Text := MainForm.projectPath.Text;
+      CompCount := (Project as TJSONArray).Count;
+      for var i := 0 to CompCount - 1 do
+        compListBox.Items.Add(Project.A[i].P['Name'].Value);
+    end;
+    FS_XML: begin
+      try
+        if PARAMSTART then begin
+          ImportedFile.Text := ExtractFileName(XMLPath);
+          XMLDocument.LoadFromFile(XMLPath);
+        end else begin
+          {$IFDEF MSWINDOWS}
+          ImportedFile.Text := ExtractFileName(MainForm.XMLOpenDialog.FileName);
+          {$ELSE MACOS}
+          ImportedFile.Text := ExtractFileName(ImportedPath);
+          {$ENDIF}
+          XMLDocument.LoadFromFile(MainForm.XMLOpenDialog.FileName);
+        end;
+
+        XMLDocument.Active := True;
+
+        XMLDocument.Encoding := 'utf-8';
+
+        RootNode := XMLDocument.DocumentElement;
+
+        aerProjectPath.Text := RootNode.Attributes['project'];
+        CompCount := StrToInt(RootNode.ChildNodes['compositions'].Attributes['count']);
+        for var i := 0 to CompCount - 1 do
+          compListBox.Items.Add(RootNode.ChildNodes['compositions'].ChildNodes[i].ChildNodes['name'].Text);
+      except
+        on Exception do begin
+          TDialogServiceSync.MessageDialog(Language[LANG].Errors.IncompatibleFile, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
+          ImportForm.Close;
+        end;
       end;
-
-    XMLDocument.Active := True;
-
-    XMLDocument.Encoding := 'utf-8';
-
-    RootNode := XMLDocument.DocumentElement;
-
-    aerProjectPath.Text := RootNode.Attributes['project'];
-    CompCount := StrToInt(RootNode.ChildNodes['compositions'].Attributes['count']);
-    for var i := 0 to CompCount - 1 do
-      compositions.Items.Add(RootNode.ChildNodes['compositions'].ChildNodes[i].ChildNodes['name'].Text);
-  except
-    on Exception do begin
-      TDialogServiceSync.MessageDialog(Language[LANG].Errors.IncompatibleFile, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
-      ImportForm.Close;
     end;
   end;
 end;
@@ -326,7 +415,7 @@ end;
 procedure TImportForm.selectallButtonClick(Sender: TObject);
 begin
   for var i := 0 to CompCount - 1 do
-    compositions.ListItems[i].IsChecked := True;
+    compListBox.ListItems[i].IsChecked := True;
 end;
 
 end.

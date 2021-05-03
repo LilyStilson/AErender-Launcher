@@ -180,6 +180,7 @@ begin
   OpenPanel.retain;
 
   try
+
     IResult := OpenPanel.runModal;
     if IResult = NSOKButton then
       ADir := NSStrToStr(TNSUrl.Wrap(OpenPanel.URLs.objectAtIndex(0)).relativePath);

@@ -13,6 +13,8 @@ uses
   function Open(Path: String; Args: TArray<String>): Integer;
   function Execute(Path: String): Integer;
   function BackgroundExecute(Path: String): Integer;
+
+  procedure CreateCmd(const ACommand, AFile: String);
   //function ExecuteAndWait(Path: String; Timeout: Cardinal): WideString;
 
 implementation
@@ -30,7 +32,7 @@ begin
   for var i := 0 to High(Args) do
     TempArgs := TempArgs + Format('"%s" ', [Args[i]]);
 
-  Result := _system(PAnsiChar(Format('open -a "%s" --args %s & disown', [AnsiString(Path), AnsiString(TempArgs)]));
+  Result := _system(PAnsiChar(Format('open -a "%s" --args %s & disown', [AnsiString(Path), AnsiString(TempArgs)])));
   {$ENDIF}
 end;
 
@@ -54,39 +56,38 @@ begin
   {$ENDIF}
 end;
 
-{function ExecuteAndWait(Path: String; Timeout: Cardinal): WideString;
-begin
-  var Res: WideString;
-  var Elapsed: Cardinal;
-
-  var CheckOutputThread: TThread := TThread.CreateAnonymousThread(procedure begin
-    var F: TextFile;
-    AssignFile(F, Path);
-
-    Read(F, Res);
-    repeat
-      Sleep(1000);
-      Elapsed := Elapsed + 1000;
-    until (FileExists(Path) and (Res <> '')) or (Elapsed = Timeout);
-
-    if Elapsed >= Timeout then begin
-      Res := WideString('timeout');
-    end
-  end);
-
-  CheckOutputThread.Start;
-
-  Result := Res;
-
-end;    }
-
 function OpenAndWait(Path: String; Args: TArray<String>; Timeout: Cardinal): WideString;
 begin
-  // We need to create the following
-  // ("Path\To\App" "Project\Path") > "JSON\Result\Path"
-  //var Res: String := Format('(');
-
-
+  //
 end;
+
+procedure CreateCmd(const ACommand, AFile: String);
+var
+  F: TextFile;
+begin
+  AssignFile(F, AFile);
+  Rewrite(F);
+  Writeln(F, ACommand);
+  CloseFile(F);
+end;
+
+procedure CreateCmdAndExecute(const ACommand, AFile: String; const Background: Boolean = True);
+begin
+  CreateCmd(ACommand, AFile);
+
+  if Background then
+    Execute(AFile)
+  else
+    BackgroundExecute(AFile);
+end;
+
+procedure CreateCmdAndOpen(const ACommand, AFile: String; const Args: TArray<String>);
+begin
+  CreateCmd(ACommand, AFile);
+
+  Open(AFile, Args);
+end;
+
+//initialization
 
 end.

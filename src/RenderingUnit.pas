@@ -52,6 +52,7 @@ uses
   FMX.BehaviorManager,
 
   AErenderLauncher.AerenderParser,
+  AErenderLauncher.Rendering,
 
   {$IFDEF MSWINDOWS}
     System.Notification, FMX.TaskBar, FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
@@ -78,7 +79,7 @@ type
     totalProgressPercentage: TLabel;
     renderingTimer: TTimer;
     emptyLabel: TLabel;
-    VertScrollBox1: TVertScrollBox;
+    ProgressScrollBox: TVertScrollBox;
     AErenderLayout: TLayout;
     BlurEffect1: TBlurEffect;
     FFMPEGConcatLayout: TLayout;
@@ -99,6 +100,9 @@ type
     procedure StopwatchTimerTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure SetLanguage(LanguageCode: Integer);
+
+    procedure RenderQueueNotify(Sender: TObject; const Item: TRenderObject; Action: TCollectionNotification);
+
   private
     { Private declarations }
   public
@@ -156,12 +160,29 @@ begin
 end;
 {$ENDIF MSWINDOWS}
 
-function IntToCardinal (I: Integer): Cardinal;
+function IntToCardinal(I: Integer): Cardinal;
 begin
   if I < 0 then
     Result := 0
   else
     Result := I;
+end;
+
+procedure TRenderingForm.RenderQueueNotify(Sender: TObject; const Item: TRenderObject; Action: TCollectionNotification);
+begin
+  // Stop the timer temporarely
+  renderingTimer.Enabled := False;
+
+  //
+  ProgressScrollBox.DeleteChildren;
+  emptyLabel.Visible := RenderQueue.Count = 0;
+
+  ProgressScrollBox.BeginUpdate;
+
+  for var RenderObject: TRenderObject in RenderQueue do begin
+    //
+  end;
+
 end;
 
 procedure TRenderingForm.SetLanguage(LanguageCode: Integer);
@@ -240,7 +261,9 @@ begin
   TotalProgressBar.Value := 0;
 
   // RU:  Активация плавного скроллинга списка потоков
-  VertScrollBox1.AniCalculations.Animation := True;
+  ProgressScrollBox.AniCalculations.Animation := True;
+
+  RenderQueue.OnNotify := RenderQueueNotify;
 end;
 
 procedure TRenderingForm.FormShow(Sender: TObject);
@@ -271,7 +294,7 @@ begin
           for var i := 0 to High(RenderGroups) do begin
               //  RU: Создание фоновой TPanel
               RenderGroups[i].RenderPanel := TPanel.Create(Self);
-              RenderGroups[i].RenderPanel.Parent  := VertScrollBox1;
+              RenderGroups[i].RenderPanel.Parent  := ProgressScrollBox;
               RenderGroups[i].RenderPanel.Margins := TBounds.Create(TRectF.Create(8, 8, 8, 0));
               RenderGroups[i].RenderPanel.Align   := TAlignLayout.Top;
               RenderGroups[i].RenderPanel.Height  := 48;

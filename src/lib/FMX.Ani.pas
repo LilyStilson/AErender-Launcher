@@ -2,7 +2,7 @@
 {                                                       }
 {              Delphi FireMonkey Platform               }
 {                                                       }
-{ Copyright(c) 2011-2020 Embarcadero Technologies, Inc. }
+{ Copyright(c) 2011-2021 Embarcadero Technologies, Inc. }
 {              All rights reserved                      }
 {                                                       }
 {*******************************************************}
@@ -1343,9 +1343,9 @@ end;
 
 destructor TAniThread.Destroy;
 begin
+  inherited;
   FreeAndNil(FAniList);
   FTimerService := nil;
-  inherited;
 end;
 
 procedure TAniThread.AddAnimation(const Ani: TAnimation);
@@ -2826,6 +2826,7 @@ end;
 destructor TTimerThread.Destroy;
 begin
   Terminate;
+  FTimerEvent := nil;
   FEnabledEvent.setEvent;
   inherited;
   FreeAndNil(FEnabledEvent);

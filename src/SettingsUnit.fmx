@@ -114,7 +114,7 @@ object SettingsForm: TSettingsForm
           IsChecked = True
           Margins.Left = 8.000000000000000000
           Margins.Right = 8.000000000000000000
-          Size.Width = 414.000000000000000000
+          Size.Width = 412.000000000000000000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 0
@@ -126,8 +126,8 @@ object SettingsForm: TSettingsForm
           AutoSize = True
           Enabled = False
           Margins.Right = 16.000000000000000000
-          Position.X = 430.000000000000000000
-          Size.Width = 112.000000000000000000
+          Position.X = 428.000000000000000000
+          Size.Width = 114.000000000000000000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
           TextSettings.WordWrap = False
@@ -390,6 +390,7 @@ object SettingsForm: TSettingsForm
         TextSettings.HorzAlign = Center
         Text = 'Changes will take effect after restarting the program'
         Visible = False
+        TabOrder = 3
       end
     end
     object StatusBar1: TStatusBar
@@ -427,6 +428,7 @@ object SettingsForm: TSettingsForm
         Size.Width = 558.000000000000000000
         Size.Height = 64.000000000000000000
         Size.PlatformDefault = False
+        TabOrder = 0
         object aerenderPathLabel: TLabel
           Align = Top
           StyledSettings = [Family, Size, FontColor]
@@ -551,6 +553,7 @@ object SettingsForm: TSettingsForm
         Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
+        TabOrder = 1
         object defProjPathLabel: TLabel
           Align = Left
           Margins.Left = 8.000000000000000000
@@ -590,6 +593,7 @@ object SettingsForm: TSettingsForm
         Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
+        TabOrder = 2
         object defOutPathLabel: TLabel
           Align = Left
           Margins.Left = 8.000000000000000000
@@ -629,6 +633,7 @@ object SettingsForm: TSettingsForm
         Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
+        TabOrder = 3
         ColumnCollection = <
           item
             Value = 64.999999999999960000

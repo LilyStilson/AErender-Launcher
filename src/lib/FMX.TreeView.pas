@@ -2,7 +2,7 @@
 {                                                       }
 {              Delphi FireMonkey Platform               }
 {                                                       }
-{ Copyright(c) 2011-2020 Embarcadero Technologies, Inc. }
+{ Copyright(c) 2011-2021 Embarcadero Technologies, Inc. }
 {              All rights reserved                      }
 {                                                       }
 {*******************************************************}
@@ -2196,9 +2196,12 @@ procedure TCustomTreeView.MouseDown(Button: TMouseButton; Shift: TShiftState; X,
 
 var
   P: TPointF;
+  IsMouseInContent: Boolean;
 begin
-  inherited MouseDown(Button, Shift, X, Y);
-  if MouseInContentLayout(X, Y) then
+  // It's important to make selection before base mouse down processing. Because developer can remove nodes from this
+  // event handler. In this case, if he removes selected items, new node on old place will be repeatedly selected again.
+  IsMouseInContent := MouseInContentLayout(X, Y);
+  if IsMouseInContent then
   begin
     // Making selection of Items
     if Button = TMouseButton.mbLeft then
@@ -2209,12 +2212,15 @@ begin
         TryMakeSingleSelectAndStartDrag;
       FMouseSelecting := True;
     end;
-    // Transfer Click to Hovered Item
-    if HoveredItem <> nil then
-    begin
-      P := LocalPointToHoveredItemLocalPoint(X, Y);
-      HoveredItem.MouseDown(Button, Shift, P.X, P.Y);
-    end;
+  end;
+
+  inherited MouseDown(Button, Shift, X, Y);
+
+  // Transfer Click to Hovered Item
+  if IsMouseInContent and (HoveredItem <> nil) then
+  begin
+    P := LocalPointToHoveredItemLocalPoint(X, Y);
+    HoveredItem.MouseDown(Button, Shift, P.X, P.Y);
   end;
 end;
 

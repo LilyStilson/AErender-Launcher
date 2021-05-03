@@ -29,7 +29,12 @@
 
 requires
   rtl,
-  fmx;
+  fmx,
+  designide,
+  vcl,
+  vclactnband,
+  vclx,
+  xmlrtl;
 
 contains
   FMX.CompLabel in 'FMX.CompLabel.pas';

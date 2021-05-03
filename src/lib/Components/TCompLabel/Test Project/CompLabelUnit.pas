@@ -12,6 +12,7 @@ type
     Button1: TButton;
     CompLabel1: TCompLabel;
     Label1: TLabel;
+    StyleBook1: TStyleBook;
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Single);
   private

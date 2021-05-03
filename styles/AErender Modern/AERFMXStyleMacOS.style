@@ -978,7 +978,7 @@ object TStyleContainer
     StyleName = 'spinboxstyle'
     Align = Center
     Size.Width = 112.199996948242200000
-    Size.Height = 21.000000000000000000
+    Size.Height = 24.000000000000000000
     Size.PlatformDefault = False
     Visible = False
     TabOrder = 18
@@ -987,7 +987,7 @@ object TStyleContainer
       Align = Contents
       Fill.Color = xFF202020
       Size.Width = 112.199996948242200000
-      Size.Height = 21.000000000000000000
+      Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
       Stroke.Color = xFF151515
       XRadius = 3.000000000000000000
@@ -1019,13 +1019,13 @@ object TStyleContainer
       Margins.Top = 2.000000000000000000
       Margins.Right = 2.000000000000000000
       Margins.Bottom = 2.000000000000000000
-      Size.Width = 66.200073242187500000
-      Size.Height = 17.000000000000000000
+      Size.Width = 60.200077056884770000
+      Size.Height = 20.000000000000000000
       Size.PlatformDefault = False
     end
     object TButton
       StyleName = 'minusbutton'
-      Align = FitLeft
+      Align = Left
       CanFocus = False
       Cursor = crArrow
       Margins.Left = 2.000000000000000000
@@ -1034,55 +1034,47 @@ object TStyleContainer
       Margins.Bottom = 2.000000000000000000
       Position.X = 2.000000000000000000
       Position.Y = 2.000000000000000000
-      Size.Width = 16.999954223632810000
-      Size.Height = 17.000000000000000000
+      Size.Width = 19.999950408935550000
+      Size.Height = 20.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'buttonstyle'
       object TPath
-        Align = Client
+        Align = Center
         Data.Path = {
           05000000000000000000803F00000000010000000000803F0000803F01000000
           000000000000003F010000000000803F00000000030000000000803F00000000}
         Fill.Color = claWhite
         HitTest = False
-        Margins.Left = 6.000000000000000000
-        Margins.Top = 6.000000000000000000
-        Margins.Right = 6.000000000000000000
-        Margins.Bottom = 6.000000000000000000
-        Size.Width = 4.999954223632813000
-        Size.Height = 5.000000000000000000
+        Size.Width = 7.999950408935547000
+        Size.Height = 8.000000000000000000
         Size.PlatformDefault = False
         Stroke.Kind = None
       end
     end
     object TButton
       StyleName = 'plusbutton'
-      Align = FitRight
+      Align = Right
       CanFocus = False
       Cursor = crArrow
       Margins.Left = 2.000000000000000000
       Margins.Top = 2.000000000000000000
       Margins.Right = 2.000000000000000000
       Margins.Bottom = 2.000000000000000000
-      Position.X = 93.200027465820310000
+      Position.X = 90.200027465820310000
       Position.Y = 2.000000000000000000
-      Size.Width = 16.999969482421880000
-      Size.Height = 17.000000000000000000
+      Size.Width = 19.999969482421880000
+      Size.Height = 20.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = 'buttonstyle'
       object TPath
-        Align = Client
+        Align = Center
         Data.Path = {
           0400000000000000000000000000000001000000000000000000803F01000000
           0000803F0000003F030000000000000000000000}
         Fill.Color = claWhite
         HitTest = False
-        Margins.Left = 6.000000000000000000
-        Margins.Top = 6.000000000000000000
-        Margins.Right = 6.000000000000000000
-        Margins.Bottom = 6.000000000000000000
-        Size.Width = 4.999969482421875000
-        Size.Height = 5.000000000000000000
+        Size.Width = 7.999969482421875000
+        Size.Height = 8.000000000000000000
         Size.PlatformDefault = False
         Stroke.Kind = None
       end
@@ -3456,7 +3448,7 @@ object TStyleContainer
             HitTest = False
             Margins.Left = 10.000000000000000000
             Position.X = 10.000000000000000000
-            Size.Width = 24.964843750000000000
+            Size.Width = 26.136718750000000000
             Size.Height = 15.960937500000000000
             Size.PlatformDefault = False
             Text = 'Text'
@@ -3483,6 +3475,7 @@ object TStyleContainer
     Size.Height = 2.000000000000000000
     Size.PlatformDefault = False
     Visible = False
+    TabOrder = 59
     object TRectangle
       StyleName = 'Rectangle1'
       Align = Client
@@ -3522,6 +3515,7 @@ object TStyleContainer
     StyleName = 'aniindicatorstyle'
     Align = Center
     Visible = False
+    TabOrder = 60
     object TArc
       StyleName = 'Arc'
       Align = Contents
@@ -3531,7 +3525,8 @@ object TStyleContainer
       Size.Height = 50.000000000000000000
       Size.PlatformDefault = False
       Stroke.Color = claWhite
-      Stroke.Thickness = 2.000000000000000000
+      Stroke.Thickness = 4.000000000000000000
+      Stroke.Cap = Round
       EndAngle = -90.000000000000000000
       object TFloatAnimation
         StyleName = 'ani'
@@ -3552,6 +3547,7 @@ object TStyleContainer
     Size.Height = 164.000000000000000000
     Size.PlatformDefault = False
     Visible = False
+    TabOrder = 61
     object TRectangle
       StyleName = 'background'
       Align = Contents
@@ -3571,6 +3567,7 @@ object TStyleContainer
     Size.Height = 56.399997711181640000
     Size.PlatformDefault = False
     Visible = False
+    TabOrder = 62
     object TRectangle
       StyleName = 'htrack'
       Align = Contents
@@ -3718,6 +3715,7 @@ object TStyleContainer
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
     Visible = False
+    TabOrder = 64
     object TPath
       StyleName = 'Path1'
       Align = Center
@@ -3750,6 +3748,7 @@ object TStyleContainer
     Size.Height = 259.000000000000000000
     Size.PlatformDefault = False
     Visible = False
+    TabOrder = 65
     object TBrushObject
       StyleName = 'AlternatingRowBackground'
       Brush.Color = x0FFFFFFF
@@ -3912,16 +3911,151 @@ object TStyleContainer
       end
     end
     object TRectangle
-      Align = FitLeft
+      Align = Contents
       Fill.Kind = None
       HitTest = False
       Margins.Bottom = 1.000000000000000000
       Sides = [Left]
-      Size.Width = 68.760925292968750000
+      Size.Width = 87.000000000000000000
       Size.Height = 39.000000000000000000
       Size.PlatformDefault = False
       Stroke.Color = xFF2A82E2
       Stroke.Thickness = 2.000000000000000000
+    end
+  end
+  object TLayout
+    StyleName = 'progressbarfinishstyle'
+    Align = Center
+    Size.Width = 66.599998474121090000
+    Size.Height = 56.399997711181640000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 63
+    object TRectangle
+      StyleName = 'htrack'
+      Align = Contents
+      Fill.Color = xFF202020
+      Locked = True
+      HitTest = False
+      Size.Width = 66.599998474121090000
+      Size.Height = 56.399997711181640000
+      Size.PlatformDefault = False
+      Stroke.Color = xFF151515
+      XRadius = 3.000000000000000000
+      YRadius = 3.000000000000000000
+      object TRectangle
+        StyleName = 'hindicator'
+        Align = Left
+        Fill.Color = xFF2CE244
+        Locked = True
+        HitTest = False
+        Margins.Left = 1.000000000000000000
+        Margins.Top = 1.000000000000000000
+        Margins.Right = 1.000000000000000000
+        Margins.Bottom = 1.000000000000000000
+        Position.X = 1.000000000000000000
+        Position.Y = 1.000000000000000000
+        Size.Width = 50.000000000000000000
+        Size.Height = 54.399997711181640000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        XRadius = 3.000000000000000000
+        YRadius = 3.000000000000000000
+      end
+    end
+    object TRectangle
+      StyleName = 'vtrack'
+      Align = Contents
+      Fill.Color = xFF202020
+      Locked = True
+      HitTest = False
+      Size.Width = 66.599998474121090000
+      Size.Height = 56.399997711181640000
+      Size.PlatformDefault = False
+      Stroke.Color = xFF151515
+      XRadius = 3.000000000000000000
+      YRadius = 3.000000000000000000
+      object TRectangle
+        StyleName = 'vindicator'
+        Align = Bottom
+        Fill.Color = xFF2CE244
+        Locked = True
+        HitTest = False
+        Margins.Left = 1.000000000000000000
+        Margins.Top = 1.000000000000000000
+        Margins.Right = 1.000000000000000000
+        Margins.Bottom = 1.000000000000000000
+        Position.X = 1.000000000000000000
+        Position.Y = 34.399997711181640000
+        Size.Width = 64.599998474121090000
+        Size.Height = 21.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        XRadius = 3.000000000000000000
+        YRadius = 3.000000000000000000
+      end
+    end
+  end
+  object TLayout
+    StyleName = 'progressbarminifinishstyle'
+    Align = Center
+    Size.Width = 66.599998474121090000
+    Size.Height = 56.399997711181640000
+    Size.PlatformDefault = False
+    Visible = False
+    TabOrder = 74
+    object TRectangle
+      StyleName = 'htrack'
+      Align = Contents
+      Fill.Color = xFF404040
+      Locked = True
+      HitTest = False
+      Size.Width = 66.599998474121090000
+      Size.Height = 56.399997711181640000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      XRadius = 2.000000000000000000
+      YRadius = 2.000000000000000000
+      object TRectangle
+        StyleName = 'hindicator'
+        Align = Left
+        Fill.Color = xFF2CE244
+        Locked = True
+        HitTest = False
+        Size.Width = 50.000000000000000000
+        Size.Height = 56.399997711181640000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        XRadius = 2.000000000000000000
+        YRadius = 2.000000000000000000
+      end
+    end
+    object TRectangle
+      StyleName = 'vtrack'
+      Align = Contents
+      Fill.Color = xFF404040
+      Locked = True
+      HitTest = False
+      Size.Width = 66.599998474121090000
+      Size.Height = 56.399997711181640000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      XRadius = 2.000000000000000000
+      YRadius = 2.000000000000000000
+      object TRectangle
+        StyleName = 'vindicator'
+        Align = Bottom
+        Fill.Color = xFF2CE244
+        Locked = True
+        HitTest = False
+        Position.Y = 35.399997711181640000
+        Size.Width = 66.599998474121090000
+        Size.Height = 21.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        XRadius = 2.000000000000000000
+        YRadius = 2.000000000000000000
+      end
     end
   end
 end
