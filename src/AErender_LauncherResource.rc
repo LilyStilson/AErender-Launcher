@@ -1,0 +1,4 @@
+Language_EN RCDATA "..\\lang\\en-US.aerlang"
+Language_RU RCDATA "..\\lang\\ru-RU.aerlang"
+AEPARSER_MAC RCDATA "lib\\plugins\\AEP Parser\\aeparser_mac"
+AEPARSER_WIN RCDATA "lib\\plugins\\AEP Parser\\aeparser_win.exe"

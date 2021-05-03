@@ -1,0 +1,109 @@
+object TLayout
+  StyleName = 'renderprogressstyle'
+  Align = Center
+  Size.Width = 572.000000000000000000
+  Size.Height = 240.000000000000000000
+  Size.PlatformDefault = False
+  object TPanel
+    StyleName = 'bgpanel'
+    Align = Client
+    Size.Width = 572.000000000000000000
+    Size.Height = 240.000000000000000000
+    Size.PlatformDefault = False
+    object TLabel
+      StyleName = 'comp'
+      Align = MostLeft
+      StyledSettings = [Family, Style, FontColor]
+      Margins.Left = 16.000000000000000000
+      Margins.Top = 8.000000000000000000
+      Margins.Bottom = 8.000000000000000000
+      Position.X = 16.000000000000000000
+      Position.Y = 8.000000000000000000
+      Size.Width = 120.000000000000000000
+      Size.Height = 32.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 16.000000000000000000
+      Text = 'Composition'
+    end
+    object TLabel
+      StyleName = 'frames'
+      Align = MostRight
+      AutoSize = True
+      StyledSettings = [Family, FontColor]
+      Margins.Left = 8.000000000000000000
+      Margins.Right = 16.000000000000000000
+      Position.X = 449.000000000000000000
+      Size.Width = 59.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 16.000000000000000000
+      TextSettings.WordWrap = False
+      Text = '56 / 600'
+    end
+    object TButton
+      StyleName = 'logbutton'
+      Align = MostRight
+      Position.X = 524.000000000000000000
+      Size.Width = 48.000000000000000000
+      Size.Height = 48.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'logbuttonstyle'
+    end
+    object TLabel
+      StyleName = 'status'
+      Align = Top
+      StyledSettings = [Family, Size, FontColor]
+      Margins.Left = 16.000000000000000000
+      Margins.Top = 8.000000000000000000
+      Position.X = 152.000000000000000000
+      Position.Y = 8.000000000000000000
+      Size.Width = 289.000000000000000000
+      Size.Height = 17.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.StyleExt = {00070000000000000004000000}
+      Text = 'Status Text'
+    end
+    object TProgressBar
+      StyleName = 'progressbar'
+      Align = Client
+      HitTest = False
+      Orientation = Horizontal
+      Margins.Left = 16.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Bottom = 16.000000000000000000
+      Size.Width = 391.000000000000000000
+      Size.Height = 3.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = 'progressbarministyle'
+      Value = 50.000000000000000000
+      Visible = False
+    end
+    object TAniIndicator
+      StyleName = 'ani'
+      Align = Client
+      Enabled = True
+      StyleLookup = 'aniindicatorhorzstyle'
+      HitTest = False
+      Margins.Left = 16.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Bottom = 16.000000000000000000
+      Size.Width = 289.000000000000000000
+      Size.Height = 3.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object TMemo
+      StyleName = 'log'
+      Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+      DataDetectorTypes = []
+      StyledSettings = [Style, FontColor]
+      TextSettings.Font.Family = 'Consolas'
+      Align = MostBottom
+      Position.Y = 48.000000000000000000
+      Size.Width = 572.000000000000000000
+      Size.Height = 192.000000000000000000
+      Size.PlatformDefault = False
+      Viewport.Width = 568.000000000000000000
+      Viewport.Height = 188.000000000000000000
+    end
+  end
+end

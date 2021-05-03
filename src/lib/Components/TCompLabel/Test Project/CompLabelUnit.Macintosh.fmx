@@ -1,6 +1,0 @@
-inherited Form1_Macintosh: TForm1_Macintosh
-  DesignerMasterStyle = 0
-  inherited CompLabel1: TCompLabel
-    Position.X = 32.000000000000000000
-  end
-end
