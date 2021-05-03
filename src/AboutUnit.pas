@@ -54,7 +54,6 @@ uses
 type
   TAboutForm = class(TForm)
     Image1: TImage;
-    LauncherLabel: TLabel;
     AuthorsLabel: TLabel;
     DescriptionLabel: TLabel;
     FromRussiaWithLoveLabel: TLabel;
@@ -64,6 +63,9 @@ type
     GridPanelLayout1: TGridPanelLayout;
     GridPanelLayout2: TGridPanelLayout;
     LogoRotationAnim: TFloatAnimation;
+    Layout1: TLayout;
+    Path2: TPath;
+    LauncherLabel: TLabel;
     procedure WebsiteLabelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Image1DblClick(Sender: TObject);
@@ -111,7 +113,7 @@ end;
 
 procedure TAboutForm.FormShow(Sender: TObject);
 begin
-  LauncherLabel.Text := 'AErender Launcher (' + APPVERSION + ')';
+  LauncherLabel.Text := '(' + APPVERSION + ')';
   if MainUnit.FFMPEG then
     begin
       FFmpegLabel.FontColor := $FF1E90FF;
@@ -132,10 +134,10 @@ end;
 procedure TAboutForm.WebsiteLabelClick(Sender: TObject);
 begin
   {$IFDEF MSWINDOWS}
-    ShellExecute(0, 'open', PWideChar('http://aerenderlauncher.com'), nil, nil, SW_SHOW);
+    ShellExecute(0, 'open', PWideChar('https://aerenderlauncher.com'), nil, nil, SW_SHOW);
   {$ENDIF MSWINDOWS}
   {$IFDEF MACOS}
-    _system(PAnsiChar('open ' + AnsiString('"' + 'http://aerenderlauncher.com' + '"')));
+    _system(PAnsiChar('open ' + AnsiString('"' + 'https://aerenderlauncher.com' + '"')));
   {$ENDIF MACOS}
 end;
 

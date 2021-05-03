@@ -56,9 +56,9 @@ object RenderingForm: TRenderingForm
         Align = Right
         LineType = Left
         Position.X = 318.000000000000000000
-        Position.Y = 97.000000000000000000
+        Position.Y = 96.000000000000000000
         Size.Width = 10.000000000000000000
-        Size.Height = 31.000000000000000000
+        Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         Stroke.Color = xFF151515
       end
@@ -68,9 +68,9 @@ object RenderingForm: TRenderingForm
         Margins.Right = 24.000000000000000000
         Margins.Bottom = 4.000000000000000000
         Position.X = 328.000000000000000000
-        Position.Y = 101.000000000000000000
+        Position.Y = 100.000000000000000000
         Size.Width = 160.000000000000000000
-        Size.Height = 23.000000000000000000
+        Size.Height = 24.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 2
         Text = 'Abort rendering'
@@ -79,7 +79,7 @@ object RenderingForm: TRenderingForm
       object statusBarTopLayout: TLayout
         Align = Top
         Size.Width = 512.000000000000000000
-        Size.Height = 96.000000000000000000
+        Size.Height = 95.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 3
         object TotalProgressBar: TProgressBar
@@ -91,7 +91,7 @@ object RenderingForm: TRenderingForm
           Margins.Right = 16.000000000000000000
           Margins.Bottom = 8.000000000000000000
           Size.Width = 480.000000000000000000
-          Size.Height = 23.000000000000000000
+          Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
         end
         object framesLabel: TLabel
@@ -101,7 +101,7 @@ object RenderingForm: TRenderingForm
           Margins.Right = 15.000000000000000000
           Margins.Bottom = 5.000000000000000000
           Position.X = 15.000000000000000000
-          Position.Y = 69.000000000000000000
+          Position.Y = 68.000000000000000000
           Size.Width = 482.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
@@ -156,7 +156,7 @@ object RenderingForm: TRenderingForm
       object statusBarSeparator2: TLine
         Align = Top
         LineType = Bottom
-        Position.Y = 96.000000000000000000
+        Position.Y = 95.000000000000000000
         Size.Width = 512.000000000000000000
         Size.Height = 1.000000000000000000
         Size.PlatformDefault = False
@@ -167,9 +167,9 @@ object RenderingForm: TRenderingForm
         AutoSize = True
         Margins.Left = 8.000000000000000000
         Position.X = 8.000000000000000000
-        Position.Y = 97.000000000000000000
+        Position.Y = 96.000000000000000000
         Size.Width = 120.000000000000000000
-        Size.Height = 31.000000000000000000
+        Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TextSettings.WordWrap = False
         Text = 'Time Elapsed: 00:00:00'
@@ -180,9 +180,9 @@ object RenderingForm: TRenderingForm
         AutoSize = True
         Margins.Left = 10.000000000000000000
         Position.X = 138.000000000000000000
-        Position.Y = 97.000000000000000000
+        Position.Y = 96.000000000000000000
         Size.Width = 0.000000000000000000
-        Size.Height = 31.000000000000000000
+        Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 4
       end
@@ -196,8 +196,8 @@ object RenderingForm: TRenderingForm
         Align = Left
         AutoSize = True
         StyledSettings = [Family, FontColor]
-        Margins.Left = 20.000000000000000000
-        Position.X = 20.000000000000000000
+        Margins.Left = 16.000000000000000000
+        Position.X = 16.000000000000000000
         Size.Width = 148.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
@@ -247,6 +247,7 @@ object RenderingForm: TRenderingForm
         TextSettings.Font.StyleExt = {00070000000000000004000000}
         TextSettings.HorzAlign = Center
         Text = 'Queue is empty'
+        TabOrder = 0
       end
     end
   end

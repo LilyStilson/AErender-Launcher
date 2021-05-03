@@ -116,6 +116,7 @@ type
     resetLanucher: TMenuItem;
     opSettingsLabel: TMenuItem;
     separatorItem5: TMenuItem;
+    RenderingExpander: TExpander;
     procedure langBoxChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure aerenderPathSelectClick(Sender: TObject);

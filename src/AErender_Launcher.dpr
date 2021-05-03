@@ -44,14 +44,13 @@ uses
   OutputModuleEditorUnit in 'OutputModuleEditorUnit.pas' {OutputModuleEditorForm},
   {$IFDEF MACOS}
   Mac.CodeBlocks in 'lib\Mac.CodeBlocks.pas',
-  {$ENDIF MACOS}
-  {$IFDEF MSWINDOWS}
+  Macapi.Dialogs in 'lib\Macapi.Dialogs.pas',
+  {$ELSE MSWINDOWS}
   FMX.Taskbar in 'lib\FMX.Taskbar.pas',
-  {$ENDIF MSWINDOWS}
-  MathExpParser in 'MathExpParser.pas',
-  AErenderDataParser in '..\..\AErender Parser\AErenderDataParser.pas',
-  AErenderLauncherLocalization in 'lib\AErenderLauncherLocalization.pas',
-  MacApi.Dialogs in 'lib\MacApi.Dialogs.pas';
+  {$ENDIF}
+  AErenderLauncher.Localization in 'lib\AErenderLauncher.Localization.pas',
+  AErenderLauncher.AerenderParser in 'lib\AErenderLauncher.AerenderParser.pas',
+  AErenderLauncher.Math.ExpParser in 'lib\AErenderLauncher.Math.ExpParser.pas';
 
 {$R *.res}
 

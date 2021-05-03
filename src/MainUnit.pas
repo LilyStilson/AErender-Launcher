@@ -94,8 +94,8 @@ uses
   {$ENDREGION}
 
   {$REGION '    Additional Liraries    '}
-  MathExpParser,
-  AErenderLauncherLocalization,
+  AErenderLauncher.Math.ExpParser,
+  AErenderLauncher.Localization,
   {$ENDREGION}
 
   {$REGION '    Windows Only Libraries    '}{$IFDEF MSWINDOWS}
@@ -109,100 +109,21 @@ uses
   {$ENDIF MACOS}{$ENDREGION}
 
 type
-  // This won't be required in the next RAD Studio version
-  TComboEdit = class(TCustomComboEdit)
-  procedure OnValidateEvent(Sender: TObject; var Text: string);
-  procedure OnValidatingEvent(Sender: TObject; var Text: string);
-  published
-    property CanFocus default True;
-    property CanParentFocus;
-    property Cursor default crIBeam;
-    property DisableFocusEffect;
-    property DropDownCount default TComboEditModel.DefaultDropDownCount;
-    property DropDownKind default TComboEditModel.DefaultDropDownKind;
-    property KeyboardType;
-    property ReadOnly;
-    property ItemHeight;
-    property ItemWidth;
-    property Items;
-    property ItemIndex;
-    property ListBoxResource;
-    property Text;
-    property TextSettings;
-    property Position;
-    property Width;
-    property Height;
-    property HelpContext;
-    property HelpKeyword;
-    property HelpType;
-    property Hint;
-    property StyledSettings;
-    property StyleLookup;
-    property ClipChildren default False;
-    property ClipParent default False;
-    property DragMode default TDragMode.dmManual;
-    property EnableDragHighlight default True;
-    property Enabled default True;
-    property Locked default False;
-    property HitTest default True;
-    property Padding;
-    property Opacity;
-    property Margins;
-    property PopupMenu;
-    property RotationAngle;
-    property RotationCenter;
-    property Scale;
-    property Size;
-    property TouchTargetExpansion;
-    property Visible default True;
-    property Caret;
-    property KillFocusByReturn;
-    property ParentShowHint;
-    property ShowHint;
-    { events }
-    property OnChange;
-    property OnChangeTracking;
-    property OnTyping;
-    property OnApplyStyleLookup;
-    property OnClosePopup;
-    property OnPopup;
-    { Drag and Drop events }
-    property OnDragEnter;
-    property OnDragLeave;
-    property OnDragOver;
-    property OnDragDrop;
-    property OnDragEnd;
-    { Keyboard events }
-    property OnKeyDown;
-    property OnKeyUp;
-    { Mouse events }
-    property OnCanFocus;
-    property OnClick;
-    property OnDblClick;
-    property OnEnter;
-    property OnExit;
-    property OnMouseDown;
-    property OnMouseMove;
-    property OnMouseUp;
-    property OnMouseWheel;
-    property OnMouseEnter;
-    property OnMouseLeave;
-    property OnPainting;
-    property OnPaint;
-    property OnResize;
-    property OnResized;
-    property OnPresentationNameChoosing;
-    property OnValidate;
-    property OnValidating;
+  SizeConstraints = record
+  const
+    MIN_WIDTH         = 600;
+
+    MIN_HEIGHT_NO_UPD = {$IFDEF MSWINDOWS}470{$ELSE MACOS}440{$ENDIF};
+    EXP_HEIGHT_NO_UPD = {$IFDEF MSWINDOWS}630{$ELSE MACOS}600{$ENDIF};
+
+    MIN_HEIGHT_UPD    = {$IFDEF MSWINDOWS}505{$ELSE MACOS}475{$ENDIF};
+    EXP_HEIGHT_UPD    = {$IFDEF MSWINDOWS}675{$ELSE MACOS}635{$ENDIF};
   end;
   TMainForm = class(TForm)
     projectPathLabel: TLabel;
     inputFileLayout: TLayout;
     outputPathLabel: TLabel;
-    InputLabels: TLayout;
-    pathLayout: TLayout;
     projectPath: TEdit;
-    fileChooseLayout: TLayout;
     outputPath: TEdit;
     openFile: TButton;
     saveFile: TButton;
@@ -319,6 +240,8 @@ type
     Button1: TButton;
     recentItem: TMenuItem;
     separatorItem3: TMenuItem;
+    outputFileLayout: TLayout;
+    separator: TLine;
     procedure FormResize(Sender: TObject);
     procedure compSwitchSwitch(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -412,7 +335,7 @@ type
   procedure InitLanguage(PATH: String);
 
 const
-  APPVERSION = 'v0.8.5-beta';
+  APPVERSION = 'v0.8.9-beta';
   //APPVERSION_DEMO = 'v0.8.5-beta';
   AERL_REPO_RELEASES = 'https://api.github.com/repos/lilystilson/aerender-launcher/releases';
   PLATFORMPATHSEPARATOR = {$IFDEF MSWINDOWS}'\'{$ENDIF MSWINDOWS}
@@ -434,7 +357,7 @@ var
   RenderSettings: TArray<RenderSetting>;
   OMCount: Cardinal;
   //TempOutputModule: OutputModule;                         (*  Temporary Output Module used from import    *)
-  TMathParser: MathExpParser.TExpressionParser;             (*  Mathematical parser for frames calculation  *)
+  TMathParser: TExpressionParser;                           (*  Mathematical parser for frames calculation  *)
   FHandleDragDirectly: Boolean = False;                     (*  For implementation of DragDrop functional   *)
   PARAMSTART: Boolean = False;
   isRendering: Boolean = False;
@@ -459,19 +382,6 @@ uses
   {$ENDREGION}
 
 {$R *.fmx}
-
-procedure TComboEdit.OnValidateEvent(Sender: TObject; var Text: string);
-begin
-  TempThreadsStr := Text;
-end;
-
-procedure TComboEdit.OnValidatingEvent(Sender: TObject; var Text: string);
-begin
-  if (TempThreadsStr <> '') then begin
-    Text := TempThreadsStr;
-    TempThreadsStr := '';
-  end;
-end;
 
 {$REGION '    Routines    '}
 
@@ -1303,12 +1213,12 @@ begin
   if compSwitch.IsChecked then begin
     if UpdateAvailable = True then
       begin
-        if MainForm.Height <= 490 then
-          MainForm.Height := 630;//MainForm.Height + 130;
+        if MainForm.Height <= SizeConstraints.MIN_HEIGHT_UPD then
+          MainForm.Height := SizeConstraints.EXP_HEIGHT_UPD;//MainForm.Height + 130;
       end
     else
-      if MainForm.Height <= 450 then
-        MainForm.Height := 580;//MainForm.Height + 130;
+      if MainForm.Height <= SizeConstraints.MIN_HEIGHT_NO_UPD then
+        MainForm.Height := SizeConstraints.EXP_HEIGHT_NO_UPD;//MainForm.Height + 130;
 
     compSwitchLabel.Text := Language[LANG].MainForm.MultiComp;
 
@@ -1318,10 +1228,10 @@ begin
   end else begin
     if UpdateAvailable = True then begin
       if MainForm.WindowState <> TWindowState.wsMaximized then
-        MainForm.Height := 490//MainForm.Height - 130
+        MainForm.Height := SizeConstraints.MIN_HEIGHT_UPD//490//MainForm.Height - 130
     end else
       if MainForm.WindowState <> TWindowState.wsMaximized then
-        MainForm.Height := 450;//MainForm.Height - 130;
+        MainForm.Height := SizeConstraints.MIN_HEIGHT_NO_UPD;//MainForm.Height - 130;
 
     compSwitchLabel.Text := Language[LANG].MainForm.SingleComp;
     compName.Text := compGrid.Cells[0, 0];
@@ -1330,8 +1240,8 @@ end;
 
 procedure TMainForm.docsItemClick(Sender: TObject);
 begin
-  //HelpForm.Show;
-  TDialogServiceSync.MessageDialog('Not ready yet!', TMsgDlgType.mtInformation, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
+  HelpForm.Show;
+  //TDialogServiceSync.MessageDialog('Not ready yet!', TMsgDlgType.mtInformation, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
 end;
 
 procedure TMainForm.downloadButtonClick(Sender: TObject);
@@ -1383,20 +1293,20 @@ begin
   {$IFDEF MSWINDOWS}DwmCompositionEnabled();{$ENDIF MSWINDOWS}
   FormatSettings := TFormatSettings.Invariant;
   MainForm.Width := 600;
-  MainForm.Height := {$IFDEF MSWINDOWS}450{$ENDIF MSWINDOWS}  {$IFDEF MACOS}430{$ENDIF MACOS};
+  MainForm.Height := SizeConstraints.MIN_HEIGHT_NO_UPD;
   //MainForm.Caption := 'AErender Launcher (' + APPVERSION_DEMO + ')';
   MainForm.Caption := 'AErender Launcher (' + APPVERSION + ')';
   APPFOLDER :=  {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\'{$ENDIF MSWINDOWS}
                 {$IFDEF MACOS}GetEnvironmentVariable('HOME') + '/Documents/AErender/'{$ENDIF MACOS};
   {$IFDEF MSWINDOWS}
-  FreeAndNil(launcherItem);
+  launcherItem.Visible := False;
   exitItem.ShortCut := TextToShortCut('Alt+F4');
   exportConfigItem.ShortCut := TextToShortCut('Ctrl+E');
   importConfigItem.ShortCut := TextToShortCut('Ctrl+I');
   {$ENDIF MSWINDOWS}
   {$IFDEF MACOS}
-  FreeAndNil(editItem);
-  FreeAndNil(exitItem);
+  editItem.Visible := False;
+  exitItem.Visible := False;
   {$ENDIF MACOS}
 
   if DirectoryExists(APPFOLDER) then
@@ -1448,13 +1358,11 @@ begin
   compGrid.AniCalculations.Animation := True;
 
   threadsGrid.AniCalculations.Animation := True;
-
-  threadsCount.OnValidate := threadsCount.OnValidateEvent;
-  threadsCount.OnValidating := threadsCount.OnValidatingEvent;
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
 begin
+  //launchButton.Text := Format('H:%s; W:%s', [MainForm.Height.ToString, MainForm.Width.ToString]);
   // RU: Установка размеров для колонн в таблицах
   StringColumn1.Width := compGrid.Width;
   StringColumn2.Width := threadsGrid.Width * 0.5;
@@ -1466,13 +1374,13 @@ begin
 
   // RU: Ограничение высоты формы в зависимости от платформы и видимости панели с обновлением
   if UpdateAvailable then begin
-    if MainForm.Height < {$IFDEF MSWINDOWS}490{$ENDIF MSWINDOWS}  {$IFDEF MACOS}470{$ENDIF MACOS} then begin
-      MainForm.Height := {$IFDEF MSWINDOWS}490{$ENDIF MSWINDOWS}  {$IFDEF MACOS}470{$ENDIF MACOS};
+    if MainForm.Height < SizeConstraints.MIN_HEIGHT_UPD then begin
+      MainForm.Height := SizeConstraints.MIN_HEIGHT_UPD;
       {$IFDEF MSWINDOWS}Mouse_Event(MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);{$ENDIF MSWINDOWS}
     end;
   end else begin
-    if MainForm.Height < {$IFDEF MSWINDOWS}450{$ENDIF MSWINDOWS}  {$IFDEF MACOS}430{$ENDIF MACOS} then begin
-      MainForm.Height := {$IFDEF MSWINDOWS}450{$ENDIF MSWINDOWS}  {$IFDEF MACOS}430{$ENDIF MACOS};
+    if MainForm.Height < SizeConstraints.MIN_HEIGHT_NO_UPD then begin
+      MainForm.Height := SizeConstraints.MIN_HEIGHT_NO_UPD;
     {$IFDEF MSWINDOWS}Mouse_Event(MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);{$ENDIF MSWINDOWS}
     end;
   end;
@@ -2090,12 +1998,12 @@ begin
     begin
       if UpdateAvailable = True then
         begin
-          if MainForm.Height <= 490 then
-            MainForm.Height := 630;
+          if MainForm.Height <= SizeConstraints.MIN_HEIGHT_UPD then
+            MainForm.Height := SizeConstraints.EXP_HEIGHT_UPD;
         end
       else
-        if MainForm.Height <= 450 then
-          MainForm.Height := 580;
+        if MainForm.Height <= SizeConstraints.MIN_HEIGHT_NO_UPD then
+          MainForm.Height := SizeConstraints.EXP_HEIGHT_NO_UPD;
 
       threadsSwitchLabel.Text := Language[LANG].MainForm.SplitRender;
       outFrame.TextPrompt     := Language[LANG].MainForm.EndFrameHint;
@@ -2107,11 +2015,11 @@ begin
       if UpdateAvailable = True then
         begin
           if MainForm.WindowState <> TWindowState.wsMaximized then
-            MainForm.Height := 490
+            MainForm.Height := SizeConstraints.MIN_HEIGHT_UPD
         end
       else
         if MainForm.WindowState <> TWindowState.wsMaximized then
-          MainForm.Height := 450;
+          MainForm.Height := SizeConstraints.MIN_HEIGHT_NO_UPD;
 
       threadsSwitchLabel.Text := Language[LANG].MainForm.SingleRener;
       outFrame.TextPrompt     := '';
@@ -2131,16 +2039,19 @@ begin
 
   if UpdateAvailable then begin
     if threadsSwitch.IsChecked or compSwitch.IsChecked then
-      MainForm.Height := 630
+      MainForm.Height := SizeConstraints.EXP_HEIGHT_UPD
     else
-      MainForm.Height := {$IFDEF MSWINDOWS}490{$ENDIF MSWINDOWS}  {$IFDEF MACOS}470{$ENDIF MACOS};
+      MainForm.Height := SizeConstraints.MIN_HEIGHT_UPD;
     MainForm.UpdateInfo.Visible := True;
     MainForm.UpdateInfo.Enabled := True;
     MainForm.downloadButton.Text := Language[LANG].MainForm.Download + ' (' + gitVersion + ')';
     {$IFDEF MSWINDOWS}gitDownload := gitRelease.A[0].P['assets'].A[1].P['browser_download_url'].Value;{$ENDIF MSWINDOWS}
     {$IFDEF MACOS}gitDownload := gitRelease.A[0].P['assets'].A[0].P['browser_download_url'].Value;{$ENDIF MACOS}
   end else begin
-    MainForm.Height := {$IFDEF MSWINDOWS}450{$ENDIF MSWINDOWS}  {$IFDEF MACOS}430{$ENDIF MACOS};
+    if threadsSwitch.IsChecked or compSwitch.IsChecked then
+      MainForm.Height := SizeConstraints.EXP_HEIGHT_NO_UPD
+    else
+      MainForm.Height := SizeConstraints.MIN_HEIGHT_NO_UPD;
     MainForm.UpdateInfo.Visible := False;
     MainForm.UpdateInfo.Enabled := False;
   end;

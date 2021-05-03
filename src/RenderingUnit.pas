@@ -51,7 +51,7 @@ uses
   FMX.BufferedLayout,
   FMX.BehaviorManager,
 
-  AErenderDataParser,
+  AErenderLauncher.AerenderParser,
 
   {$IFDEF MSWINDOWS}
     System.Notification, FMX.TaskBar, FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;

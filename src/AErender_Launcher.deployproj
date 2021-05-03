@@ -3,19 +3,14 @@
     <ProjectExtensions>
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>
-    <PropertyGroup/>
+    <PropertyGroup>
+        <DeviceId Condition="'$(Platform)'=='Android'"/>
+        <DeviceId Condition="'$(Platform)'=='Android64'"/>
+        <DeviceId Condition="'$(Platform)'=='iOSDevice64'"/>
+        <DeviceId Condition="'$(Platform)'=='iOSSimulator'"/>
+    </PropertyGroup>
     <ItemGroup Condition="'$(Platform)'=='iOSDevice64'"/>
     <ItemGroup Condition="'$(Platform)'=='Win64'">
-        <DeployFile Include="Win64\Beta\AErender_Launcher.exe" Condition="'$(Config)'=='Beta'">
-            <RemoteDir>AErender_Launcher\</RemoteDir>
-            <RemoteName>AErender_Launcher.exe</RemoteName>
-            <DeployClass>ProjectOutput</DeployClass>
-            <Operation>0</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-            <Required>True</Required>
-        </DeployFile>
         <DeployFile Include="..\lang\ru-RU.aerlang" Condition="'$(Config)'=='Beta'">
             <RemoteDir>AErender_Launcher\</RemoteDir>
             <RemoteName>ru-RU.aerlang</RemoteName>
@@ -53,6 +48,16 @@
             <Overwrite>True</Overwrite>
         </DeployFile>
         <DeployFile Include="Win64\Debug\AErender_Launcher.exe" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher\</RemoteDir>
+            <RemoteName>AErender_Launcher.exe</RemoteName>
+            <DeployClass>ProjectOutput</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+            <Required>True</Required>
+        </DeployFile>
+        <DeployFile Include="Win64\Beta\AErender_Launcher.exe" Condition="'$(Config)'=='Beta'">
             <RemoteDir>AErender_Launcher\</RemoteDir>
             <RemoteName>AErender_Launcher.exe</RemoteName>
             <DeployClass>ProjectOutput</DeployClass>

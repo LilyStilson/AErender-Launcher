@@ -37,9 +37,6 @@ Coordinates=935,221,93,33
 [docsItem]
 Coordinates=2369,1266,59,33
 
-[InputLabels]
-Coordinates=2262,1266,72,33
-
 [LaunchIcon]
 Coordinates=290,1120,72,51
 
@@ -95,9 +92,6 @@ Coordinates=852,1266,50,33
 [memUsageInfo]
 Coordinates=1391,1036,88,51
 
-[pathLayout]
-Coordinates=748,1266,69,33
-
 [settingsItem]
 Coordinates=638,1266,74,33
 
@@ -130,9 +124,6 @@ Coordinates=797,1036,49,51
 
 [mainLayout]
 Coordinates=2149,1204,72,33
-
-[fileChooseLayout]
-Coordinates=1894,1204,100,33
 
 [separatorItem2]
 Coordinates=1767,1204,88,33
@@ -304,7 +295,7 @@ Coordinates=1179,1036,94,51
 Coordinates=968,1036,90,51
 
 []
-Coordinates=2124,1120,123,33
+Coordinates=748,1266,69,33
 
 [threadsCount]
 Coordinates=400,580,81,123

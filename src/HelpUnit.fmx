@@ -30,9 +30,9 @@ object HelpForm: THelpForm
   end
   object Contents: TListBox
     Align = Left
-    Position.Y = 33.000000000000000000
+    Position.Y = 32.000000000000000000
     Size.Width = 200.000000000000000000
-    Size.Height = 567.000000000000000000
+    Size.Height = 568.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 3
     DisableFocusEffect = True
@@ -40,8 +40,8 @@ object HelpForm: THelpForm
     DefaultItemStyles.GroupHeaderStyle = ''
     DefaultItemStyles.GroupFooterStyle = ''
     OnChange = ContentsChange
-    Viewport.Width = 200.000000000000000000
-    Viewport.Height = 567.000000000000000000
+    Viewport.Width = 196.000000000000000000
+    Viewport.Height = 564.000000000000000000
     object ListBoxGroupHeader1: TListBoxGroupHeader
       Selectable = False
       TabOrder = 0
@@ -128,23 +128,23 @@ object HelpForm: THelpForm
   end
   object WebBrowser1: TWebBrowser
     Align = Client
-    Size.Width = 750.000000000000000000
-    Size.Height = 567.000000000000000000
+    Size.Width = 734.000000000000000000
+    Size.Height = 568.000000000000000000
     Size.PlatformDefault = False
   end
   object Toolbar: TToolBar
     Size.Width = 960.000000000000000000
-    Size.Height = 33.000000000000000000
+    Size.Height = 32.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 6
     object Title: TLabel
       Align = Left
       AutoSize = True
       StyledSettings = [Family, FontColor]
-      Margins.Left = 20.000000000000000000
-      Position.X = 20.000000000000000000
+      Margins.Left = 16.000000000000000000
+      Position.X = 16.000000000000000000
       Size.Width = 183.000000000000000000
-      Size.Height = 33.000000000000000000
+      Size.Height = 32.000000000000000000
       Size.PlatformDefault = False
       TextSettings.Font.Size = 16.000000000000000000
       TextSettings.Font.StyleExt = {00070000000000000004000000}
@@ -159,10 +159,12 @@ object HelpForm: THelpForm
     Align = Left
     Cursor = crHSplit
     MinSize = 20.000000000000000000
-    Position.X = 200.000000000000000000
-    Position.Y = 33.000000000000000000
+    Margins.Left = 8.000000000000000000
+    Margins.Right = 8.000000000000000000
+    Position.X = 208.000000000000000000
+    Position.Y = 32.000000000000000000
     Size.Width = 10.000000000000000000
-    Size.Height = 567.000000000000000000
+    Size.Height = 568.000000000000000000
     Size.PlatformDefault = False
   end
 end

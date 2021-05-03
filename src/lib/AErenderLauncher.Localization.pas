@@ -1,4 +1,4 @@
-unit AErenderLauncherLocalization;
+unit AErenderLauncher.Localization;
 
 interface
 
