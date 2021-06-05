@@ -4,7 +4,7 @@ uses
   System.StartUpCopy,
   FMX.Forms,
   FMX.RenderProgress in '..\Package\FMX.RenderProgress.pas',
-  RenderProgressTestUnit in 'RenderProgressTestUnit.pas' {Form1};
+  RenderProgressUnit in 'RenderProgressUnit.pas' {Form1};
 
 {$R *.res}
 

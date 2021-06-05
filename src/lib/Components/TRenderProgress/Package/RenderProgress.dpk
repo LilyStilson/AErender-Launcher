@@ -29,6 +29,7 @@
 
 requires
   rtl,
+  designide,
   fmx;
 
 contains

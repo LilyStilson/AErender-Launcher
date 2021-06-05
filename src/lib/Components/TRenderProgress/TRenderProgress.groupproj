@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{6DC5DB84-E3A9-48CB-8B52-E81110201511}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Package\RenderProgress.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Test Project\RenderProgressTest.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="RenderProgress">
+        <MSBuild Projects="Package\RenderProgress.dproj"/>
+    </Target>
+    <Target Name="RenderProgress:Clean">
+        <MSBuild Projects="Package\RenderProgress.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="RenderProgress:Make">
+        <MSBuild Projects="Package\RenderProgress.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="RenderProgressTest">
+        <MSBuild Projects="Test Project\RenderProgressTest.dproj"/>
+    </Target>
+    <Target Name="RenderProgressTest:Clean">
+        <MSBuild Projects="Test Project\RenderProgressTest.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="RenderProgressTest:Make">
+        <MSBuild Projects="Test Project\RenderProgressTest.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="RenderProgress;RenderProgressTest"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="RenderProgress:Clean;RenderProgressTest:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="RenderProgress:Make;RenderProgressTest:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
