@@ -1,0 +1,17 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Target Name="Build">
+        <!-- <MSBuild Projects="..\src\AErender_Launcher.dproj"
+            Targets="Build"
+            Properties="Config=Debug;DCC_Exeoutput=$(DCC_ExeOutput)\Debug"/> -->
+        <MSBuild Projects="..\src\AErender_Launcher.dproj"
+            Targets="Build"
+            Properties="Config=Beta;DCC_Exeoutput=$(DCC_ExeOutput)\Beta;Platform=Win32"/>
+        <MSBuild Projects="..\src\AErender_Launcher.dproj"
+            Targets="Build"
+            Properties="Config=Beta;DCC_Exeoutput=$(DCC_ExeOutput)\Beta;Platform=Win64"/>
+        <!-- Disabled for now, looking in how to make it possible... -->
+        <!-- <MSBuild Projects="..\src\AErender_Launcher.dproj"
+            Targets="Build"
+            Properties="Config=Beta;DCC_Exeoutput=$(DCC_ExeOutput)\Beta;Platform=OSX64"/> -->
+    </Target>
+</Project>
