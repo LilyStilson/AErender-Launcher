@@ -1,7 +1,7 @@
 ---
 name: Bug
 about: Something is not working? Tell us here! For "Access violation" errors use another
-  template.
+  template. For problems with AErender Launcher Script report them in a Script's specific repository.
 title: "[Bug]"
 labels: bug
 assignees: ''
