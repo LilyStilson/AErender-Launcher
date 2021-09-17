@@ -297,8 +297,8 @@ object OutputModuleEditorForm: TOutputModuleEditorForm
     DefaultItemStyles.GroupHeaderStyle = ''
     DefaultItemStyles.GroupFooterStyle = ''
     OnChange = outputModulesBoxChange
-    Viewport.Width = 200.000000000000000000
-    Viewport.Height = 342.000000000000000000
+    Viewport.Width = 196.000000000000000000
+    Viewport.Height = 338.000000000000000000
   end
   object Splitter1: TSplitter
     Align = Left

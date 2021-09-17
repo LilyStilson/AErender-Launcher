@@ -52,6 +52,8 @@ uses
   FMX.Objects,
   FMX.Platform,
 
+  AErenderLauncher.Types,
+
   MainUnit,
 
   {$IFDEF MSWINDOWS}
@@ -109,9 +111,9 @@ type
     procedure SetLanguage(LanguageCode: Integer);
   private
     { Private declarations }
-    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
+    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   end;
   //{$IFDEF MACOS}TOCLocalAccess = class(TOCLocal);{$ENDIF MACOS}
   {$IFDEF MACOS}procedure NSWindowEditStateChange (State: Boolean);{$ENDIF MACOS}
@@ -128,7 +130,7 @@ const
 var
   OutputModuleEditorForm: TOutputModuleEditorForm;
   FlagButton: TArray<TButton>;
-  TempOutputModules: TArray<MainUnit.OutputModule>;
+  TempOutputModules: TArray<OutputModule>;
 
 implementation
 
@@ -141,7 +143,7 @@ begin
   var hWnd: HWND := FormToHWND(Self);
 
   SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) or WS_EX_APPWINDOW);
-  SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or CS_DROPSHADOW);
+  //SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or CS_DROPSHADOW);
 end;
 {$ENDIF MSWINDOWS}
 
@@ -157,7 +159,7 @@ begin
 end;
 {$ENDIF MACOS}
 
-function CompareOutputModules(a, b: TArray<MainUnit.OutputModule>): Boolean;
+function CompareOutputModules(a, b: TArray<OutputModule>): Boolean;
 begin
   Result := False;
   if Length(a) = Length(b) then

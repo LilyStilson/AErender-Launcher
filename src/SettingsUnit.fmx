@@ -90,7 +90,6 @@ object SettingsForm: TSettingsForm
         TabOrder = 0
         object HandleCheckBox: TCheckBox
           Align = Client
-          Hint = 'Not available on macOS now!'
           IsChecked = True
           Margins.Left = 8.000000000000000000
           Margins.Right = 8.000000000000000000
@@ -114,7 +113,7 @@ object SettingsForm: TSettingsForm
           IsChecked = True
           Margins.Left = 8.000000000000000000
           Margins.Right = 8.000000000000000000
-          Size.Width = 412.000000000000000000
+          Size.Width = 414.000000000000000000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 0
@@ -126,8 +125,8 @@ object SettingsForm: TSettingsForm
           AutoSize = True
           Enabled = False
           Margins.Right = 16.000000000000000000
-          Position.X = 428.000000000000000000
-          Size.Width = 114.000000000000000000
+          Position.X = 430.000000000000000000
+          Size.Width = 112.000000000000000000
           Size.Height = 32.000000000000000000
           Size.PlatformDefault = False
           TextSettings.WordWrap = False
@@ -593,7 +592,7 @@ object SettingsForm: TSettingsForm
         Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 2
+        TabOrder = 3
         object defOutPathLabel: TLabel
           Align = Left
           Margins.Left = 8.000000000000000000
@@ -629,11 +628,13 @@ object SettingsForm: TSettingsForm
       end
       object GridPanelLayout2: TGridPanelLayout
         Align = Top
+        Enabled = False
         Position.Y = 128.000000000000000000
         Size.Width = 558.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 3
+        Visible = False
+        TabOrder = 4
         ColumnCollection = <
           item
             Value = 64.999999999999960000
@@ -742,7 +743,7 @@ object SettingsForm: TSettingsForm
             TextSettings.WordWrap = False
             Text = 'Limit to'
           end
-          object Edit1: TEdit
+          object MaxThreadsCountEdit: TEdit
             Touch.InteractiveGestures = [LongTap, DoubleTap]
             Align = Left
             KeyboardType = DecimalNumberPad
@@ -764,6 +765,51 @@ object SettingsForm: TSettingsForm
             Size.PlatformDefault = False
             Text = 'threads'
           end
+        end
+      end
+      object limitRenderLayout: TLayout
+        Align = Top
+        Position.Y = 128.000000000000000000
+        Size.Width = 558.000000000000000000
+        Size.Height = 32.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 2
+        object limitRenderCheckbox: TCheckBox
+          Align = Left
+          IsChecked = True
+          Margins.Left = 8.000000000000000000
+          Margins.Right = 8.000000000000000000
+          Position.X = 8.000000000000000000
+          Size.Width = 209.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          Text = 'Limit render threads amount to'
+          OnChange = limitRenderCheckboxChange
+        end
+        object limitRenderEdit: TEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = Client
+          TabOrder = 1
+          KeyboardType = NumberPad
+          FilterChar = '1234567890'
+          Margins.Top = 4.000000000000000000
+          Margins.Right = 4.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Size.Width = 91.000000000000000000
+          Size.Height = 24.000000000000000000
+          Size.PlatformDefault = False
+          KillFocusByReturn = True
+        end
+        object limitRenderSubLabel: TLabel
+          Align = Right
+          Margins.Left = 8.000000000000000000
+          Position.X = 328.000000000000000000
+          Size.Width = 230.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'simultaneous renders'
+          TabOrder = 2
         end
       end
     end

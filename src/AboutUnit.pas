@@ -76,9 +76,9 @@ type
     procedure SetLanguage(LanguageCode: Integer);
   private
     { Private declarations }
-    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
+    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   end;
 
 var

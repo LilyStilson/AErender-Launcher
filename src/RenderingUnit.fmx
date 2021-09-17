@@ -3,8 +3,8 @@ object RenderingForm: TRenderingForm
   Left = 0
   Top = 0
   Caption = 'Rendering Progress'
-  ClientHeight = 448
-  ClientWidth = 512
+  ClientHeight = 460
+  ClientWidth = 480
   Position = MainFormCenter
   Quality = HighQuality
   StyleBook = MainForm.AERModernStyle
@@ -24,15 +24,15 @@ object RenderingForm: TRenderingForm
   end
   object AErenderLayout: TLayout
     Align = Contents
-    Size.Width = 512.000000000000000000
-    Size.Height = 448.000000000000000000
+    Size.Width = 480.000000000000000000
+    Size.Height = 460.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 4
     object RenderingStatusBar: TStatusBar
       Align = MostBottom
-      Position.Y = 320.000000000000000000
+      Position.Y = 332.000000000000000000
       ShowSizeGrip = True
-      Size.Width = 512.000000000000000000
+      Size.Width = 480.000000000000000000
       Size.Height = 128.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
@@ -44,7 +44,7 @@ object RenderingForm: TRenderingForm
         Margins.Right = 10.000000000000000000
         Position.X = 5.000000000000000000
         Position.Y = 86.000000000000000000
-        Size.Width = 98.000000000000000000
+        Size.Width = 97.000000000000000000
         Size.Height = 24.000000000000000000
         Size.PlatformDefault = False
         TextSettings.WordWrap = False
@@ -55,7 +55,7 @@ object RenderingForm: TRenderingForm
       object statusBarSeparator1: TLine
         Align = Right
         LineType = Left
-        Position.X = 318.000000000000000000
+        Position.X = 286.000000000000000000
         Position.Y = 97.000000000000000000
         Size.Width = 10.000000000000000000
         Size.Height = 31.000000000000000000
@@ -67,7 +67,7 @@ object RenderingForm: TRenderingForm
         Margins.Top = 4.000000000000000000
         Margins.Right = 24.000000000000000000
         Margins.Bottom = 4.000000000000000000
-        Position.X = 328.000000000000000000
+        Position.X = 296.000000000000000000
         Position.Y = 101.000000000000000000
         Size.Width = 160.000000000000000000
         Size.Height = 23.000000000000000000
@@ -78,7 +78,7 @@ object RenderingForm: TRenderingForm
       end
       object statusBarTopLayout: TLayout
         Align = Top
-        Size.Width = 512.000000000000000000
+        Size.Width = 480.000000000000000000
         Size.Height = 96.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 3
@@ -90,7 +90,7 @@ object RenderingForm: TRenderingForm
           Margins.Top = 8.000000000000000000
           Margins.Right = 16.000000000000000000
           Margins.Bottom = 8.000000000000000000
-          Size.Width = 480.000000000000000000
+          Size.Width = 448.000000000000000000
           Size.Height = 23.000000000000000000
           Size.PlatformDefault = False
         end
@@ -102,7 +102,7 @@ object RenderingForm: TRenderingForm
           Margins.Bottom = 5.000000000000000000
           Position.X = 15.000000000000000000
           Position.Y = 69.000000000000000000
-          Size.Width = 482.000000000000000000
+          Size.Width = 450.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
           TextSettings.Font.Size = 16.000000000000000000
@@ -118,7 +118,7 @@ object RenderingForm: TRenderingForm
           Margins.Right = 16.000000000000000000
           Position.X = 16.000000000000000000
           Position.Y = 8.000000000000000000
-          Size.Width = 480.000000000000000000
+          Size.Width = 448.000000000000000000
           Size.Height = 22.000000000000000000
           Size.PlatformDefault = False
           TabOrder = 2
@@ -139,7 +139,7 @@ object RenderingForm: TRenderingForm
             Align = Right
             AutoSize = True
             StyledSettings = [Family, FontColor]
-            Position.X = 456.000000000000000000
+            Position.X = 424.000000000000000000
             Size.Width = 24.000000000000000000
             Size.Height = 22.000000000000000000
             Size.PlatformDefault = False
@@ -157,7 +157,7 @@ object RenderingForm: TRenderingForm
         Align = Top
         LineType = Bottom
         Position.Y = 96.000000000000000000
-        Size.Width = 512.000000000000000000
+        Size.Width = 480.000000000000000000
         Size.Height = 1.000000000000000000
         Size.PlatformDefault = False
         Stroke.Color = xFF151515
@@ -188,7 +188,7 @@ object RenderingForm: TRenderingForm
       end
     end
     object RenderingToolBar: TToolBar
-      Size.Width = 512.000000000000000000
+      Size.Width = 480.000000000000000000
       Size.Height = 32.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
@@ -198,7 +198,7 @@ object RenderingForm: TRenderingForm
         StyledSettings = [Family, FontColor]
         Margins.Left = 20.000000000000000000
         Position.X = 20.000000000000000000
-        Size.Width = 148.000000000000000000
+        Size.Width = 147.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Size = 16.000000000000000000
@@ -214,7 +214,7 @@ object RenderingForm: TRenderingForm
         AutoSize = True
         StyledSettings = [Family, FontColor]
         Margins.Right = 20.000000000000000000
-        Position.X = 492.000000000000000000
+        Position.X = 460.000000000000000000
         Size.Width = 0.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
@@ -232,16 +232,16 @@ object RenderingForm: TRenderingForm
     end
     object ProgressScrollBox: TVertScrollBox
       Align = Client
-      Size.Width = 512.000000000000000000
-      Size.Height = 288.000000000000000000
+      Size.Width = 480.000000000000000000
+      Size.Height = 300.000000000000000000
       Size.PlatformDefault = False
-      Viewport.Width = 512.000000000000000000
-      Viewport.Height = 288.000000000000000000
+      Viewport.Width = 480.000000000000000000
+      Viewport.Height = 300.000000000000000000
       object emptyLabel: TLabel
         Align = Client
         StyledSettings = [Family, FontColor]
-        Size.Width = 512.000000000000000000
-        Size.Height = 288.000000000000000000
+        Size.Width = 480.000000000000000000
+        Size.Height = 300.000000000000000000
         Size.PlatformDefault = False
         TextSettings.Font.Size = 20.000000000000000000
         TextSettings.Font.StyleExt = {00070000000000000004000000}

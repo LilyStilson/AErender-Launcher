@@ -8,9 +8,6 @@ uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.JSON,
   AErenderLauncher.Math, AErenderLauncher.IO, AErenderLauncher.AerenderParser;
 
-//const
-//  RM_NORMAL = 0; RM_TILED = 1; RM_ALL_AT_ONCE = 2;
-
 type
   AERParamException = class(Exception);
   AERFrameSpanException = class(Exception);
@@ -18,22 +15,22 @@ type
 
   TRenderState = (RS_WAITING, RS_RENDERING, RS_FINISHED, RS_STOPPED, RS_ERROR);
   TRenderMode = (RM_NORMAL, RM_TILED, RM_ALL_AT_ONCE);
-  //TRenderMode = Cardinal;
 
-  //
   TExecutable = record
     Contents: WideString;
     Exec: TextFile;
+    /// Add procedure to start executable
   end;
 
-  //
+  ///
   TFrameSpan = record
     StartFrame, EndFrame: Integer;
     constructor Create(const StartFrame, EndFrame: Integer); overload;
     constructor Create(const StartFrame, EndFrame: String); overload;
     function Split(const Division: Integer): TArray<TFrameSpan>;
   end;
-  //
+
+  ///
   TComposition = record
     CompName: String;
     Frames: TFrameSpan;
@@ -43,23 +40,22 @@ type
     constructor Create(const CompName: String; const Frames: TFrameSpan; const Split: Integer = 1);
   end;
 
-  TRenderObject = record
-    LogFile: String;
+  /// Rendering Events
+//  TRenderStartEvent = procedure (Task: TObject) of object;
+//  TRenderFinishEvent = procedure (Task: TObject) of object;
+
+  /// <summary>
+  /// Structure that contains basic required
+  /// data for displaying rendering progress
+  /// </summary
+  TRenderQueueObject = record
+    TempFilePath: String;
     Duration: TTimecode;
-    Framerate: TFrameRate;
-    constructor Create(const ALogFile: String; const ADuration: TTimecode; const AFramerate: TFrameRate);
+    FrameRate: TFrameRate;
+    constructor Create(const ATempFilePath: String; const ADuration: TTimecode; const AFrameRate: TFrameRate);
+    //constructor Create(const ALogFile: String; const ACompositions: TList<TComposition>; const ARenderMode: TRenderMode); overload;
+    //constructor Create(const ALogFile: String; const ATask: TRenderTask); overload; deprecated 'Use non-overloaded constructor';
   end;
-
-  TRenderThread = class(TThread)
-  private
-    IsRendering: Boolean;
-  published
-    procedure Execute; override;
-  end;
-
-  // Rendering Envents
-  TRenderStartEvent = procedure (Task: TObject) of object;
-  TRenderFinishEvent = procedure (Task: TObject) of object;
 
   /// <summary>
   /// Class for storing rendering tasks data
@@ -83,8 +79,8 @@ type
 
     //FRenderThread: TRenderThread;
 
-    FRenderStartEvent: TRenderStartEvent;
-    FRenderFinishEvent: TRenderFinishEvent;
+//    FRenderStartEvent: TRenderStartEvent;
+//    FRenderFinishEvent: TRenderFinishEvent;
 
     //procedure TaskTerminate(Sender: TObject);
     function ToExec: TList<String>;
@@ -110,8 +106,8 @@ type
     property LogFilePaths: TList<String> read FLogFilePaths write FLogFilePaths;
     property State: TRenderState read FState write FState default TRenderState.RS_WAITING;
 
-    property OnRenderStart: TRenderStartEvent read FRenderStartEvent write FRenderStartEvent;
-    property OnRenderFinish: TRenderFinishEvent read FRenderFinishEvent write FRenderFinishEvent;
+//    property OnRenderStart: TRenderStartEvent read FRenderStartEvent write FRenderStartEvent;
+//    property OnRenderFinish: TRenderFinishEvent read FRenderFinishEvent write FRenderFinishEvent;
 
     constructor Create (const Project, Output, OutputModule, RenderSettings: String;
                         const MissingFiles, Sound, Multiprocessing: Boolean;
@@ -125,68 +121,34 @@ type
                                 const CacheLimit, MemoryLimit: Single;
                                 const ProjectJSON: String);
 
-    procedure Render(Mode: TRenderMode = RM_NORMAL);
+    procedure Render(const ThreadsLimit: Integer = 4{; const Mode: TRenderMode = RM_NORMAL});
     function ToString: String; override;
     function Count: Integer;
   end;
 
-  //
-  TAErender = class(TObject)
-  private
-    FPath: String;
-
-    FRenderThreads: TArray<TRenderThread>;
-    function TaskToExec(Task: TRenderTask): TArray<TExecutable>;
-  published
-    property Path: String read FPath write FPath;
-
-
-
-    procedure Run(Task: TRenderTask);
-    procedure BackgroundRun(Task: TRenderTask);
-    procedure RenderTasks(Tasks: TArray<TRenderTask>; Mode: TRenderMode);
-
-    constructor Create;
-  end;
-
   function GetTaskByProject(const AProject: String): TRenderTask;
-  function GetTaskByCompName(const ACompName: String): TRenderTask; deprecated 'Useless in this context, we CAN get Project without browsing through compositions';
+  function GetTaskByCompName(const ACompName: String): TRenderTask; deprecated 'Useless in this context, we can get Project without browsing through compositions';
   function GetCompByName(const ATask: TRenderTask; const ACompName: String): TComposition;
   function GetCompIndexInTask(const ATask: TRenderTask; const ACompName: String): Integer;
 
 var
   AErenderPath, Errors: String;
   RenderTasks: TObjectList<TRenderTask>;
-  RenderQueue: TList<TRenderObject>;
+  RenderQueue: TList<String>;
+  AbortRender: Boolean = False;
+  TiledRenderThread: TThread;
 
 implementation
 
 uses
   MainUnit;
 
-(*******************)
-(*  TRenderThread  *)
-(*******************)
-procedure TRenderThread.Execute;
-begin
-//  var i: Integer := 0;
-//  while IsRendering do begin
-//    inc (i);
-//    Writeln(i);
-//    if i >= 5 then begin
-//      IsRendering := False;
-//    end;
-//  end;
-//  Self.DoTerminate;
-end;
-
 (****************)
 (*  TFrameSpan  *)
 (****************)
 function TFrameSpan.Split(const Division: Integer): TArray<TFrameSpan>;
 var
-  I, J, K, Start, Stop: Integer;
-  Tm: String;
+  I, J, K: Integer;
 begin
   SetLength(Result, Division);
   Result[0].StartFrame := StartFrame;
@@ -234,13 +196,42 @@ begin
   Self.Split := Split;
 end;
 
-constructor TRenderObject.Create(const ALogFile: String; const ADuration: TTimecode; const AFramerate: TFrameRate);
+(***********************)
+(*  TRenderQueueObject *)
+(***********************)
+//function TRenderQueueObject.GetDuration: TTimecode;
+//begin
+//  Result := FDuration;
+//end;
+//
+//procedure TRenderQueueObject.SetDuration(Value: TTimecode);
+//begin
+//  FDuration := Value;
+//end;
+//
+//function TRenderQueueObject.GetFrameRate: TFrameRate;
+//begin
+//  Result := FFrameRate;
+//end;
+//
+//procedure TRenderQueueObject.SetFrameRate(Value: TFrameRate);
+//begin
+//  FFrameRate := Value;
+//end;
+
+constructor TRenderQueueObject.Create(const ATempFilePath: String; const ADuration: TTimecode; const AFrameRate: TFrameRate);
 begin
-  Self.LogFile := ALogFile;
+  Self.TempFilePath := ATempFilePath;
   Self.Duration := ADuration;
-  Self.Framerate := AFramerate;
+  Self.FrameRate := AFrameRate;
 end;
 
+//constructor TRenderQueueObject.Create(const ALogFile: String; const ATask: TRenderTask);
+//begin
+//  Self.LogFile := ALogFile;
+//  Self.Compositions := ATask.Compositions;
+//  Self.RenderMode := RM_NORMAL;
+//end;
 
 (*****************)
 (*  TRenderTask  *)
@@ -272,6 +263,16 @@ begin
   Result := Res;
 end;
 
+/// <summary>
+/// Creates executable files for Launcher to start and provides a list of
+/// paths to them in *.ext format.
+/// </summary>
+/// <remarks>
+/// "ext" must be replaced with a special format!!!
+/// </remarks>
+/// <returns>
+/// A list of paths to executable files
+/// </returns
 function TRenderTask.ToExec: TList<String>;
 begin
   // Start with empty string
@@ -287,11 +288,33 @@ begin
       // should match \[(.*?)\]\_\[(.*?)\]\_\[(.*?)\]\_\[(.*?)\]\.bat
       var FilePath: String := APPFOLDER + Format('[%s]_[%s]_[%d]_[%d].ext', [ExtractFileName(Project).Replace('.aep', ''), Composition.CompName, SplitFrameSpans[i].StartFrame, SplitFrameSpans[i].EndFrame]);
 
+      // Add Pass output path to temporary wariable
+      var AdjustedOutput: String := Output;
+
+      // Create folder if '[projectName]/' or '[projectName]\' is used
+      // Because aerender won't do it for you
+      if Output.Contains('[projectName]' + PLATFORMPATHSEPARATOR) then
+        begin
+          AdjustedOutput := StringReplace(AdjustedOutput, '[projectName]', ExtractFileName(Project), [rfReplaceAll, rfIgnoreCase]);
+          if not DirectoryExists(ExtractFilePath(AdjustedOutput)) then
+            CreateDir(ExtractFilePath(AdjustedOutput));
+        end;
+
+      // Adjust file output path if split render is enabled
+      // because they can conflict
+      if Composition.Split > 1 then
+        begin
+          var OutFilePath: String := ExtractFilePath(AdjustedOutput);
+          var OutFileName: String := StringReplace(ExtractFileName(AdjustedOutput), ExtractFileExt(AdjustedOutput), '', [rfReplaceAll, rfIgnoreCase]);
+          var OutFileExt:  String := ExtractFileExt(AdjustedOutput);
+          AdjustedOutput := OutFilePath + OutFileName + '_' + i.ToString + OutFileExt;
+        end;
+
       // Append all the nesesary information in the beginning
       TempStr := Format('"%s" -project "%s" -output "%s" %s %s %s -OMtemplate "%s" -RStemplate "%s" -mem_usage "%d" "%d" %s -comp "%s" -s "%d" -e "%d"', [
         AErenderPath,
         Project,
-        Output,
+        AdjustedOutput,
         IfThenElse(Sound, '-sound ON', ''),                         // yeet
         IfThenElse(Multiprocessing, '-mp', ''),                     // double yeet
         IfThenElse(MissingFiles, '-continueOnMissingFootage', ''),  // tripple yeet
@@ -328,32 +351,42 @@ begin
   end; }
 end;
 
-procedure TRenderTask.Render(Mode: TRenderMode = RM_NORMAL);
-var
-  Executables: TList<String>;
+procedure TRenderTask.Render(const ThreadsLimit: Integer = 4{; const Mode: TRenderMode = RM_NORMAL});
 begin
-  case Mode of
-    RM_NORMAL: begin
-      Executables := ToExec;
-      for var Exec: String in Executables do begin
-        RenderQueue.Add(TRenderObject.Create(Exec, TTimecode.Create(0, 0, 0, 0), 0.00));
+  var Executables: TList<String> := ToExec;
+  //var i: Integer := 0;
+
+  /// If files to render count is less than ThreadsLimit
+  /// then render them all at once, no need for continous execution here
+  if Executables.Count <= ThreadsLimit then
+    for var i := 0 to Executables.Count - 1 do begin
+      BackgroundExecute(Executables[i].Replace('.ext', {$IFDEF MSWINDOWS}'.bat'{$ELSE MACOS}'.command'{$ENDIF}));
+        RenderQueue.Add(Executables[i]);
+    end
+  else begin
+    /// This thread will launch new renders when the existing ones will finish
+    ///
+    /// Will be started only if the ammount of things to render is more than ThreadsLimit const
+    /// If otherwise, it has a problem of not starting some of the renders, which bothers me...
+    TiledRenderThread := TThread.CreateAnonymousThread(procedure begin
+      var i: Integer := 0;   /// Counter
+
+      while Executables.Count > 0 do begin
+        while RenderQueue.Count <> ThreadsLimit do begin
+          BackgroundExecute(Executables[i].Replace('.ext', {$IFDEF MSWINDOWS}'.bat'{$ELSE MACOS}'.command'{$ENDIF}));
+          RenderQueue.Add(Executables[i]);
+          Executables.Delete(i);
+          inc(i);
+
+          if AbortRender then
+            exit;
+        end;
+        i := 0;
       end;
-    end;
-    RM_TILED: begin
+    end);
 
-    end;
-    RM_ALL_AT_ONCE: begin
-
-    end;
+    TiledRenderThread.Start;
   end;
-
-  {if Assigned(FRenderStartEvent) then FRenderStartEvent(Self);
-
-  FRenderThread := TRenderThread.Create(True);
-
-  FRenderThread.OnTerminate := Self.TaskTerminate;
-  FRenderThread.IsRendering := True;
-  FRenderThread.Start;}
 end;
 
 constructor TRenderTask.Create(const Project, Output, OutputModule, RenderSettings: String;
@@ -378,7 +411,7 @@ begin
   Self.MemoryLimit    := MemoryLimit;
 
   Self.Compositions   := Compositions;
-end;
+end; 
 
 constructor TRenderTask.CreateFromJSON(const Project, Output, OutputModule, RenderSettings: String;
   const MissingFiles, Sound, Multiprocessing: Boolean;
@@ -413,62 +446,6 @@ begin
 
   Self.Compositions   := Compositions;
 end;
-
-
-(***************)
-(*  TAErender  *)       // but do I really need it, though?
-(***************)
-constructor TAErender.Create;
-begin
-  inherited;
-end;
-
-function TAErender.TaskToExec(Task: TRenderTask): TArray<TExecutable>;
-var
-  TempStr: String;
-begin
-  TempStr := '';
-  with Task do begin
-    for var Comp in Compositions do begin
-      if Comp.Split = 0 then
-        // yeet
-      else
-        for var FrameSpan in Comp.Frames.Split(Comp.Split) do
-          TempStr := TempStr + Format('-s %d -e %d ', [FrameSpan.StartFrame, FrameSpan.EndFrame]);
-    end;
-  end;
-end;
-
-procedure TAErender.Run(Task: TRenderTask);
-begin
-  //
-  TaskToExec(Task);
-  // Fire event
-  //if Assigned(FRenderStartEvent) then FRenderStartEvent(Task as TObject);
-end;
-
-procedure TAErender.BackgroundRun(Task: TRenderTask);
-begin
-  //
-end;
-
-procedure TAErender.RenderTasks(Tasks: TArray<TRenderTask>; Mode: TRenderMode);
-begin
-  case Mode of
-    RM_NORMAL: begin
-
-    end;
-    RM_TILED: begin
-
-    end;
-    RM_ALL_AT_ONCE: begin
-
-    end;
-  end;
-  // Fire event
-  //if Assigned(FRenderStartEvent) then FRenderStartEvent(Tasks[0]);
-end;
-
 
 (*************)
 (*  Helpers  *)
@@ -519,7 +496,7 @@ end;
 (********************)
 initialization
   RenderTasks := TObjectList<TRenderTask>.Create;
-  RenderQueue := TList<TRenderObject>.Create;
+  RenderQueue := TList<String>.Create;
   Errors := '';
 
 
@@ -527,8 +504,14 @@ initialization
 (*  Finalization  *)
 (******************)
 finalization
-  if Assigned(RenderTasks) then FreeAndNil(RenderTasks);
-  if Assigned(RenderQueue) then FreeAndNil(RenderQueue);
+  if Assigned(RenderTasks) then begin
+    RenderTasks.OnNotify := nil;
+    FreeAndNil(RenderTasks);
+  end;
 
+  if Assigned(RenderQueue) then begin
+    RenderQueue.OnNotify := nil;
+    FreeAndNil(RenderQueue);
+  end;
 
 end.

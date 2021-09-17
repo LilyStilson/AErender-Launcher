@@ -4,7 +4,8 @@ interface
 
 uses
   System.Types, System.SysUtils, System.Classes,
-  FMX.Types, FMX.Controls, FMX.Styles, FMX.StdCtrls, FMX.Objects, FMX.ActnList, FMX.Memo;
+  FMX.Types, FMX.Controls, FMX.Styles, FMX.StdCtrls, FMX.Objects, FMX.ActnList, FMX.Memo,
+  AErenderLauncher.AerenderParser;
 
 type
   TRenderProgress = class(TStyledControl)
@@ -14,6 +15,8 @@ type
     FLog: TStrings;
     FInFrame, FOutFrame, FValue: Single;
     FMemoVisible, FIsError: Boolean;
+    FDuration: TTimecode;
+    FFrameRate: Real;
 
     function GetComposition: String;
     procedure SetComposition(Value: String);
@@ -44,6 +47,7 @@ type
     function GetStyleObject: TFmxObject; override;
     procedure ApplyStyle; override;
   public
+    procedure GoToTextEnd;
     constructor Create(AOwner: TComponent); override;
   published
     property Align default TAlignLayout.None;
@@ -65,6 +69,9 @@ type
     property IsError: Boolean read GetIsError write SetIsError;
 
     property Log: TStrings read GetLog write SetLog;
+
+    property Duration: TTimecode read FDuration write FDuration;
+    property FrameRate: Real read FFrameRate write FFrameRate;
   end;
 
 procedure Register;
@@ -89,7 +96,7 @@ end;
 
 {$ENDREGION}
 
-//{$REGION 'Status'}
+{$REGION '[DEPRECATED] Status'}
 //
 //function TRenderProgress.GetStatus: String;
 //begin
@@ -103,7 +110,7 @@ end;
 //  FStatus := Value;
 //end;
 //
-//{$ENDREGION}
+{$ENDREGION}
 
 {$REGION 'InFrame'}
 
@@ -187,13 +194,17 @@ end;
 function TRenderProgress.GetLog: TStrings;
 begin
   FLog := StylesData['log.lines'].AsType<TStrings>;
-  Result := FLog
+  Result := FLog;
 end;
 
 procedure TRenderProgress.SetLog(Value: TStrings);
 begin
   StylesData['log.lines'] := Value;
   FLog := Value;
+
+    var memo: TMemo := StylesData['log'].AsType<TMemo>;
+  if memo <> nil then
+    memo.GoToTextEnd;
 end;
 {$ENDREGION}
 
@@ -226,6 +237,7 @@ begin
   if Value then begin
     StylesData['status.text'] := FST_RenderError;
     StylesData['progressbar.stylelookup'] := 'progressbarminierrorstyle';
+    //StylesData['frames.text'] := '...';
   end else
     if (FValue >= 0) and (FValue < FOutFrame) then begin
       StylesData['status.text'] := FST_Rendering;
@@ -269,6 +281,14 @@ begin
     MemoVisible := True;
 end;
 
+procedure TRenderProgress.GoToTextEnd;
+var
+  Memo: TMemo;
+begin
+  if FindStyleResource<TMemo>('log', Memo) then
+    Memo.GoToTextEnd;
+end;
+
 constructor TRenderProgress.Create(AOwner: TComponent);
 begin
   inherited;
@@ -279,10 +299,14 @@ begin
   ST_Rendering := 'Rendering';
   ST_FinishedRender := 'Rendering finished';
   ST_RenderError := 'ERROR: See log for more info';
-  InFrame := 0;
+  InFrame := -1;
   OutFrame := 100;
   Value := -1;
+  Log := TStringList.Create;
   MemoVisible := False;
+
+  Duration := TTimecode.Create(0, 0, 0, 0);
+  FrameRate := 0.00;
   //Log := TStrings.Create;
 end;
 

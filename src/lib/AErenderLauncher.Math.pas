@@ -8,6 +8,8 @@ interface
   function IfThenElse(const AValue: Boolean; const ATrue: Integer; const AFalse: Integer): Integer; overload;
   function IfThenElse(const AValue: Boolean; const ATrue: Variant; const AFalse: Variant): Variant; overload;
 
+  function IntToCardinal(I: Integer): Cardinal;
+
 implementation
 
 {function IfThen(const AValue: Boolean; const ATrue: Variant): Variant;
@@ -37,6 +39,14 @@ begin
     Result := ATrue
   else
     Result := AFalse;
+end;
+
+function IntToCardinal(I: Integer): Cardinal;
+begin
+  if I < 0 then
+    Result := 0
+  else
+    Result := I;
 end;
 
 end.

@@ -26,7 +26,6 @@ object Form1: TForm1
     Size.Height = 24.000000000000000000
     Size.PlatformDefault = False
     Composition = 'Composition'
-    Value = 50.000000000000000000
     OutFrame = 150.000000000000000000
     Split = '0'
   end

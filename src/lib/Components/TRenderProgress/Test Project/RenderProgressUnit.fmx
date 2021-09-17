@@ -3534,27 +3534,33 @@ object Form1: TForm1
     Value = -1.000000000000000000
     OnChange = TrackBar1Change
   end
-  object RenderProgress1: TRenderProgress
-    Size.Width = 649.000000000000000000
-    Size.Height = 48.000000000000000000
-    Size.PlatformDefault = False
-    Position.X = 240.000000000000000000
-    Position.Y = 24.000000000000000000
-    Composition = 'comptext'
-    ST_WaitingForAErender = 'Waiting for aerender...'
-    ST_Rendering = 'Rendering'
-    ST_FinishedRender = 'Rendering finished'
-    ST_RenderError = 'ERROR: See log for more info'
-    OutFrame = 100.000000000000000000
-    MemoVisible = False
-    IsError = False
-    Log.Strings = (
-      '')
-  end
   object CheckBox1: TCheckBox
     Position.X = 24.000000000000000000
     Position.Y = 296.000000000000000000
     Text = 'IsError'
     OnChange = CheckBox1Change
+  end
+  object RenderProgress1: TRenderProgress
+    Size.Width = 633.000000000000000000
+    Size.Height = 48.000000000000000000
+    Size.PlatformDefault = False
+    Position.X = 248.000000000000000000
+    Position.Y = 40.000000000000000000
+    Composition = 'Web Icons'
+    ST_WaitingForAErender = 'Waiting for aerender...'
+    ST_Rendering = 'Rendering'
+    ST_FinishedRender = 'Rendering finished'
+    ST_RenderError = 'ERROR: See log for more info'
+    InFrame = -1.000000000000000000
+    OutFrame = 100.000000000000000000
+    MemoVisible = False
+    IsError = False
+  end
+  object Button1: TButton
+    Position.X = 904.000000000000000000
+    Position.Y = 296.000000000000000000
+    TabOrder = 2
+    Text = 'Button1'
+    OnClick = Button1Click
   end
 end

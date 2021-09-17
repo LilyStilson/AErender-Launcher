@@ -116,10 +116,10 @@ type
     RootNode: IXMLNode;
     Project: TJSONValue;
 
-    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   public
     { Public declarations }
     FormSender: TFormSender;
+    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   end;
 
 var

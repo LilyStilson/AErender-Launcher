@@ -72,6 +72,11 @@ type
       /// Calculates total ammount of seconds from timecode
       /// </summary>
       function ToSeconds(): Cardinal;
+
+      /// <summary>
+      /// Calculates total ammount of frames from timecode
+      /// </summary>
+      function ToFrames(): Cardinal;
   end;
 
   ///<summary>
@@ -168,6 +173,12 @@ function TTimecode.ToSeconds(): Cardinal;
 begin
   //  {H -> MM} + {MM -> SS} + SS
   Result := (Self.H * 60 * 60) + (Self.MM * 60) + Self.SS;
+end;
+
+function TTimecode.ToFrames(): Cardinal;
+begin
+  //  {H -> MM} + {MM -> SS} + SS
+  Result := (Self.H * 60 * 60) + (Self.MM * 60) + Self.SS + Self.FR;
 end;
 
 function StrToTimecode (const ITimecodeString: String; var ATimecode: TTimecode): String;

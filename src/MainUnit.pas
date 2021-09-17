@@ -100,11 +100,13 @@ uses
   {$ENDREGION}
 
   {$REGION '    Additional Liraries    '}
+  AErenderLauncher.Types,
   AErenderLauncher.Localization,
   AErenderLauncher.IO,
   AErenderLauncher.Rendering,
   AErenderLauncher.Math,
   AErenderLauncher.Math.ExpParser,
+  AErenderLauncher.SysUtils,
   {$ENDREGION}
 
   {$REGION '    Windows Only Libraries    '}{$IFDEF MSWINDOWS}
@@ -118,26 +120,16 @@ uses
   {$ENDIF MACOS}{$ENDREGION}
 
 type
-  {TSettings = record
-    Language: Integer;
-    Style: Integer;
-    AErenderPath: String;
-    OnRenderStart: Integer;
-    DefaultProjectPath: String;
-    DefaultOutputPath: String;
-    AErenderHandle: Boolean;
-    DeleteTemporary: Boolean;
-    //RenderTasks: TList<RenderTask>;
-  end;      }
-  MainFormSizeConstraints = record
-  const
-    MIN_WIDTH         = 600;
+  SizeConstraints = record
+  private
+    const
+      MIN_WIDTH         = 640;
 
-    MIN_HEIGHT_NO_UPD = {$IFDEF MSWINDOWS}470{$ELSE MACOS}430{$ENDIF};
-    EXP_HEIGHT_NO_UPD = {$IFDEF MSWINDOWS}630{$ELSE MACOS}600{$ENDIF};
+      MIN_HEIGHT_NO_UPD = 540;
+      //EXP_HEIGHT_NO_UPD = 540;
 
-    MIN_HEIGHT_UPD    = {$IFDEF MSWINDOWS}500{$ELSE MACOS}470{$ENDIF};
-    EXP_HEIGHT_UPD    = {$IFDEF MSWINDOWS}665{$ELSE MACOS}635{$ENDIF};
+      MIN_HEIGHT_UPD    = 576;         // 540 + 36
+      //EXP_HEIGHT_UPD    = 576;
   end;
   TMainForm = class(TForm)
     _projectPathLabel: TLabel;
@@ -200,8 +192,6 @@ type
     LinkControlToPropertyEnabled9: TLinkControlToProperty;
     OnyxBlueStyle: TStyleBook;
     infoButton: TButton;
-    Image1: TImage;
-    Image2: TImage;
     launcherLayout: TLayout;
     outputModuleBox: TComboBox;
     outputModuleLabel: TLabel;
@@ -233,8 +223,6 @@ type
     memUsageInfoEdit: TEdit;
     cacheUsageInfoEdit: TEdit;
     AERModernStyle: TStyleBook;
-    settingsIconFill: TFillRGBEffect;
-    infoIconFill: TFillRGBEffect;
     AERModernAnimatedStyle: TStyleBook;
     UpdateLabel: TLabel;
     downloadButton: TButton;
@@ -260,7 +248,6 @@ type
     LinkControlToPropertyVisible7: TLinkControlToProperty;
     LinkControlToPropertyEnabled10: TLinkControlToProperty;
     UpdateNetHTTPClient: TNetHTTPClient;
-    Button1: TButton;
     recentItem: TMenuItem;
     separatorItem3: TMenuItem;
     TasksToolbar: TToolBar;
@@ -330,6 +317,7 @@ type
     ProjectAwait: TLayout;
     ProjectAwaitStatusLabel: TLabel;
     Label6: TLabel;
+    launchPopupBox: TPopupBox;
     procedure FormResize(Sender: TObject);
     procedure compSwitchSwitch(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -442,18 +430,9 @@ type
     procedure DragOver(const Data: TDragObject; const Point: TPointF; var Operation: TDragOperation); override;
     procedure DragDrop(const Data: TDragObject; const Point: TPointF); override;
   end;
-  OutputModule = record
-    Module,
-    Mask: String;
-    Imported: Boolean;
-  end;
-  RenderSetting = record
-    Setting: String;
-    Imported: Boolean;
-  end;
+
   function GetPlatformMemorySize: Int64;
   function GetFFMPEGPath: WideString;
-  function GetDirectoryFiles(Directory: String): TArray<System.String>;
   function KillProcess(ProcessName: String): Integer;
   procedure InitOutputModules;
   procedure InitRenderSettings;
@@ -465,12 +444,12 @@ type
   procedure InitLanguage(PATH: String);
 
 const
-  APPVERSION = 'v0.8.6-beta';
+  APPVERSION = 'v0.8.9-beta';
   AERL_REPO_RELEASES = 'https://api.github.com/repos/lilystilson/aerender-launcher/releases';
   PLATFORMPATHSEPARATOR = {$IFDEF MSWINDOWS}'\'{$ENDIF MSWINDOWS}
                           {$IFDEF MACOS}'/'{$ENDIF MACOS};
   AWAIT_TIMEOUT = 10000;
-  MAX_SIMULTANEOUS_THREADS = 8;
+  //MAX_SIMULTANEOUS_THREADS = 8;
 
 
 var
@@ -525,20 +504,9 @@ uses
 
 {$R *.fmx}
 
-//{$REGION '    Custom TComboEdit    '}
-//procedure TComboEdit.OnValidateEvent(Sender: TObject; var Text: string);
-//begin
-//  TempThreadsStr := Text;
-//end;
-//
-//procedure TComboEdit.OnValidatingEvent(Sender: TObject; var Text: string);
-//begin
-//  if (TempThreadsStr <> '') then begin
-//    Text := TempThreadsStr;
-//    TempThreadsStr := '';
-//  end;
-//end;
-//{$ENDREGION}
+
+
+
 
 {$REGION '    Routines    '}
 
@@ -551,7 +519,7 @@ procedure TMainForm.WMNCPaint(var AMessage: TMessage);
 begin
   var hWnd: HWND := FormToHWND(Self);
 
-  //SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or  CS_DROPSHADOW);
+  SetClassLong(hWnd, GCL_STYLE, GetClassLong(hWnd, GCL_STYLE) or  CS_DROPSHADOW);
 
   SystemParametersInfo(SPI_SETDROPSHADOW, 0, PVOID(True), 0);
 
@@ -594,25 +562,13 @@ begin
   {$IFDEF MSWINDOWS}AERenderDirectory := 'C:\ProgramData\AErender';{$ENDIF MSWINDOWS}
   {$IFDEF MACOS}AERenderDirectory := GetEnvironmentVariable('HOME') + '/Documents/AErender/';{$ENDIF}
 
-  Folders := TDirectory.GetDirectories(AErenderDirectory);
+  Folders := TDirectory.GetDirectories(APPFOLDER);
   for var i := 0 to High(Folders) do
     if Folders[i].Contains('ffmpeg') then begin
       Result := Folders[i];
       break
     end else
       Result := '';
-end;
-
-function GetDirectoryFiles(Directory: String): TArray<System.String>;
-var
-  Files: System.TArray<System.String>;
-begin
-  Files := TDirectory.GetFiles(Directory);
-  for var i := 0 to High(Files) do
-    begin
-      SetLength(Result, i+1);
-      Result[i] := Files[i];
-    end;
 end;
 
 function KillProcess(ProcessName: String): Integer;
@@ -1124,7 +1080,7 @@ begin
       CompLabel.InFrame := Comp.Frames.StartFrame;
       CompLabel.OutFrame := Comp.Frames.EndFrame;
       CompLabel.Split := IntToStr(Comp.Split);
-      CompLabel.Value := Comp.Frames.StartFrame;
+      CompLabel.Value := -1;//Comp.Frames.StartFrame;
     end;
   end;
   TasksTreeView.EndUpdate;
@@ -1415,7 +1371,6 @@ begin
 
     {$IFDEF DEBUG_MODE}
     ShowMessage(RenderTasks.Items[TaskIndex].ToString);
-    //ShowMessage(IntToStr(RenderTasks.Items[0].Count));
     {$ENDIF}
 
     Compositions.Free;
@@ -1731,32 +1686,32 @@ end;
 
 procedure TMainForm.compSwitchSwitch(Sender: TObject);
 begin
-  if compSwitch.IsChecked then begin
-    if UpdateAvailable = True then
-      begin
-        if MainForm.Height <= 490 then
-          MainForm.Height := 630;//MainForm.Height + 130;
-      end
-    else
-      if MainForm.Height <= 450 then
-        MainForm.Height := 580;//MainForm.Height + 130;
-
-    compSwitchLabel.Text := Language[LANG].MainForm.MultiComp;
-
-    compGrid.RowCount := Round(compCount.Value);
-    compGrid.Cells[0, 0] := compName.Text;
-    compGrid.Model.ScrollDirections := TScrollDirections.Vertical;
-  end else begin
-    if UpdateAvailable = True then begin
-      if MainForm.WindowState <> TWindowState.wsMaximized then
-        MainForm.Height := 490//MainForm.Height - 130
-    end else
-      if MainForm.WindowState <> TWindowState.wsMaximized then
-        MainForm.Height := 450;//MainForm.Height - 130;
-
-    compSwitchLabel.Text := Language[LANG].MainForm.SingleComp;
-    compName.Text := compGrid.Cells[0, 0];
-  end;
+//  if compSwitch.IsChecked then begin
+//    if UpdateAvailable = True then
+//      begin
+//        if MainForm.Height <= 490 then
+//          MainForm.Height := 630;//MainForm.Height + 130;
+//      end
+//    else
+//      if MainForm.Height <= 450 then
+//        MainForm.Height := 580;//MainForm.Height + 130;
+//
+//    compSwitchLabel.Text := Language[LANG].MainForm.MultiComp;
+//
+//    compGrid.RowCount := Round(compCount.Value);
+//    compGrid.Cells[0, 0] := compName.Text;
+//    compGrid.Model.ScrollDirections := TScrollDirections.Vertical;
+//  end else begin
+//    if UpdateAvailable = True then begin
+//      if MainForm.WindowState <> TWindowState.wsMaximized then
+//        MainForm.Height := 490//MainForm.Height - 130
+//    end else
+//      if MainForm.WindowState <> TWindowState.wsMaximized then
+//        MainForm.Height := 450;//MainForm.Height - 130;
+//
+//    compSwitchLabel.Text := Language[LANG].MainForm.SingleComp;
+//    compName.Text := compGrid.Cells[0, 0];
+//  end;
 end;
 
 procedure TMainForm.docsItemClick(Sender: TObject);
@@ -1767,7 +1722,7 @@ end;
 
 procedure TMainForm.downloadButtonClick(Sender: TObject);
 begin
-  Open(gitDownload, []);
+  Open(gitDownload);
 end;
 
 procedure TMainForm.exitItemClick(Sender: TObject);
@@ -1813,8 +1768,8 @@ var
 begin
   {$IFDEF MSWINDOWS}DwmCompositionEnabled();{$ENDIF}
   FormatSettings := TFormatSettings.Invariant;
-  MainForm.Width := 768;
-  MainForm.Height := {$IFDEF MSWINDOWS}450{$ELSE MACOS}430{$ENDIF};
+  MainForm.Width := 960;
+  MainForm.Height := 540;
   MainForm.Caption := 'AErender Launcher (' + APPVERSION + ')';
   APPFOLDER :=  {$IFDEF MSWINDOWS}'C:\ProgramData\AErender\'
                 {$ELSE MACOS}GetEnvironmentVariable('HOME') + '/Documents/AErender/'{$ENDIF};
@@ -1900,24 +1855,24 @@ end;
 
 procedure TMainForm.FormResize(Sender: TObject);
 begin
-  // RU: Установка размеров для колонн в таблицах
-  StringColumn1.Width := compGrid.Width;
-  StringColumn2.Width := threadsGrid.Width * 0.5;
-  StringColumn3.Width := threadsGrid.Width * 0.5;
+  /// Composition grid collumns width
+//  StringColumn1.Width := compGrid.Width;
+//  StringColumn2.Width := threadsGrid.Width * 0.5;
+//  StringColumn3.Width := threadsGrid.Width * 0.5;
 
-  // RU: Ограничение ширины формы
-  if MainForm.Width < 600 then
-    MainForm.Width := 600;
+  /// Limit form's width
+  if MainForm.Width < SizeConstraints.MIN_WIDTH then
+    MainForm.Width := SizeConstraints.MIN_WIDTH;
 
-  // RU: Ограничение высоты формы в зависимости от платформы и видимости панели с обновлением
+  /// RU: Ограничение высоты формы в зависимости от платформы и видимости панели с обновлением
   if UpdateAvailable then begin
-    if MainForm.Height < {$IFDEF MSWINDOWS}490{$ENDIF MSWINDOWS}  {$IFDEF MACOS}470{$ENDIF MACOS} then begin
-      MainForm.Height := {$IFDEF MSWINDOWS}490{$ENDIF MSWINDOWS}  {$IFDEF MACOS}470{$ENDIF MACOS};
+    if MainForm.Height < SizeConstraints.MIN_HEIGHT_UPD then begin
+      MainForm.Height := SizeConstraints.MIN_HEIGHT_UPD;
       {$IFDEF MSWINDOWS}Mouse_Event(MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);{$ENDIF MSWINDOWS}
     end;
   end else begin
-    if MainForm.Height < {$IFDEF MSWINDOWS}450{$ENDIF MSWINDOWS}  {$IFDEF MACOS}430{$ENDIF MACOS} then begin
-      MainForm.Height := {$IFDEF MSWINDOWS}450{$ENDIF MSWINDOWS}  {$IFDEF MACOS}430{$ENDIF MACOS};
+    if MainForm.Height < SizeConstraints.MIN_HEIGHT_NO_UPD then begin
+      MainForm.Height := SizeConstraints.MIN_HEIGHT_NO_UPD;
     {$IFDEF MSWINDOWS}Mouse_Event(MOUSEEVENTF_ABSOLUTE or MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);{$ENDIF MSWINDOWS}
     end;
   end;
@@ -2075,6 +2030,12 @@ begin
 end;
 
 procedure TMainForm.launchButtonClick(Sender: TObject);
+/// So, we need some rendering modes
+/// NORMAL MODE: It's the old Launcher's behaviour
+///   Will render all the compositions one-by-one and render them
+///   if Composition.Split > 1, then all the splits will be rendered with default method in settings
+///
+
 type
   exec = record
     script: String;
@@ -2117,257 +2078,18 @@ begin
       end
     else    }
       begin
-        {var Compositions: TList<TComposition>;
-        if compSwitch.IsChecked then
-          SetLength(Compositions, StrToInt(compCount.Value.ToString))
-        else
-          SetLength(Compositions, 1);
-        for var i := 0 to StrToInt(compCount.Value.ToString) High(Compositions) do begin
-          var TempCompName: String;
-
-          if compSwitch.IsChecked then
-            Compositions[i].CompName := compGrid.Cells[0, i]
-          else
-            Compositions[i].CompName := compName.Text;
-          //ShowMessage(IfThenElse(inFrame.Text = '', -1, StrToInt(inFrame.Text)).ToString);
-          //ShowMessage(IfThenElse(threadsSwitch.IsChecked = True, -1, 0).ToString());
-
-          if inFrame.Text = '' then
-            ShowMessage('Empty');
-
-          var TempInFrame: Integer; var tempOutFrame: Integer;
-          if inFrame.Text = '' then TempInFrame := -1 else TempInFrame := StrToInt(inFrame.Text);
-          if inFrame.Text = '' then TempInFrame := -1 else TempInFrame := StrToInt(outFrame.Text);
-
-          Compositions[i].Frames := TFrameSpan.Create(TempInFrame, tempOutFrame);
-
-          Compositions[i].Split := IfThenElse(threadsSwitch.IsChecked = True, StrToInt(threadsCount.Text), 0); // yeet
-        end;
-
-        var Task: TRenderTask := TRenderTask.Create(
-          projectPath.Text,
-          outputPath.Text,
-          outputModuleBox.Items[outputModuleBox.ItemIndex],
-          renderSettingsBox.Items[renderSettingsBox.ItemIndex],
-          missingFilesCheckbox.IsChecked,
-          soundCheckbox.IsChecked,
-          threadedRender.IsChecked,
-          IfThenElse(customCheckbox.IsChecked = True, customProp.Text, ''),  // double yeet
-          cacheUsageTrackBar.Value,
-          memUsageTrackBar.Value,
-          Compositions
-        );
-        }
-        //RenderTasks.Add(Task);
-        {$IFDEF DEBUG_MODE}
+        AbortRender := False;
         ShowMessage(RenderTasks.Items[0].ToString);
-        //ShowMessage(IntToStr(RenderTasks.Items[0].Count));
-        for var Task: TRenderTask in RenderTasks do begin
-          Task.Render();
-          ShowMessage(Format('RenderQueue.Count = %d; Task.Count = %d', [RenderQueue.Count, Task.Count]));
-        end;
 
-        {$ENDIF}
-        //RenderTasks.Remove(Task);
-//        if threadsSwitch.IsChecked then
-//          begin
-//            threads := threadsCount.Text.ToInteger;
-//            SetLength (LogFiles, threads);
-//          end
-//        else
-//          begin
-//            threads := 1;
-//            if Length(LogFiles) = 0 then
-//              SetLength (LogFiles, threads);
-//          end;
-//        if compSwitch.IsChecked then
-//          begin
-//            comps := StrToInt(compCount.Value.ToString);
-//            SetLength (LogFiles, comps);
-//          end
-//        else
-//          begin
-//            comps := 1;
-//            if Length(LogFiles) = 0 then
-//              SetLength (LogFiles, comps);
-//          end;
-//
-//        for var j := 0 to comps-1 do
-//          for var i := 1 to threads do
-//            begin
-//              /// Script compiling section
-//
-//              // Clear the string
-//              execFile[i].script := '';
-//
-//              // Add encoding header to ensure that our CMD on Windows will use UTF-8
-//              {$IFDEF MSWINDOWS}
-//              execFile[i].script := 'chcp 65001' + #13#10;
-//              {$ENDIF MSWINDOWS}
-//
-//              // Make console output data from it if progress display is enabled
-//              // Made by using default in Shell and Bash  ( command ) > data/output/path.log
-//              // Open bracket here
-//              if SettingsForm.HandleCheckBox.IsChecked then
-//                execFile[i].script := execFile[i].script + '(';
-//
-//              // Ensure that logs paths won't comflict with each other
-//              if comps = 1 then
-//                logPath := APPFOLDER + compName.Text + '_' + i.ToString
-//              else
-//                logPath := APPFOLDER + compGrid.Cells[0, j] + '_' + i.ToString;
-//
-//              // Add Pass output path to temporary wariable
-//              PATH := outputPath.Text;
-//
-//              // Create folder if '[projectName]/' or '[projectName]\' is used
-//              // Because aerender won't do it for you
-//              if outputPath.Text.Contains('[projectName]' + PLATFORMPATHSEPARATOR) then
-//                begin
-//                  PATH := StringReplace(PATH, '[projectName]', ExtractFileName(projectPath.Text), [rfReplaceAll, rfIgnoreCase]);
-//                  if not DirectoryExists(ExtractFilePath(PATH)) then
-//                    CreateDir(ExtractFilePath(PATH));
-//                end;
-//
-//              // Adjust file output path if split render is enabled
-//              // because they can conflict
-//              if threadsSwitch.IsChecked then
-//                begin
-//                  var FilePath: String := ExtractFilePath(PATH);
-//                  var FileName: String := StringReplace(ExtractFileName(PATH), ExtractFileExt(PATH), '', [rfReplaceAll, rfIgnoreCase]);
-//                  var FileExt:  String := ExtractFileExt(PATH);
-//                  PATH := FilePath + FileName + '_' + i.ToString + FileExt;
-//                end;
-//
-//              // Adjust file output path if multi comp render is enabled
-//              // because they can conflict
-//              if compSwitch.IsChecked then
-//                if not outputPath.Text.Contains('[compName]') then
-//                  begin
-//                    var FilePath: String := ExtractFilePath(PATH);
-//                    var FileName: String := StringReplace(ExtractFileName(PATH), ExtractFileExt(PATH), '', [rfReplaceAll, rfIgnoreCase]);
-//                    var FileExt:  String := ExtractFileExt(PATH);
-//                    PATH := FilePath + FileName + '_' + compGrid.Cells[0, j] + FileExt;
-//                  end;
-//
-//              /// Begin executable compiling section
-//              // Add aerender path to script
-//              execFile[i].script := execFile[i].script + '"' + AErenderPath + '" ' + '-project "' + projectPath.Text + '" -output "' + PATH + '" ';
-//
-//              // Add comp name to script
-//              if compSwitch.IsChecked then
-//                execFile[i].script := execFile[i].script + '-comp "' + compGrid.Cells[0, j] + '" '
-//              else
-//                execFile[i].script := execFile[i].script + '-comp "' + compName.Text + '" ';
-//
-//              // Add start and end ranges to script
-//              if threadsSwitch.IsChecked then
-//                begin
-//                  execFile[i].script := execFile[i].script + '-s "' + threadsGrid.Cells[0, i-1] + '" ';
-//                  execFile[i].script := execFile[i].script + '-e "' + threadsGrid.Cells[1, i-1] + '" ';
-//                end
-//              else
-//                begin
-//                  if not inFrame.Text.IsEmpty then
-//                    execFile[i].script := execFile[i].script + '-s "' + inFrame.Text + '" ';
-//                  if not outFrame.Text.IsEmpty then
-//                    execFile[i].script := execFile[i].script + '-e "' + outFrame.Text + '" ';
-//                end;
-//
-//              // Add sound flag to script
-//              if soundCheckbox.IsChecked then
-//                execFile[i].script := execFile[i].script + '-sound ON ';
-//
-//              // Add multiprocessing flag to script
-//              if threadedRender.IsChecked then
-//                execFile[i].script := execFile[i].script + '-mp ';
-//
-//              // Add missing footage flag to script
-//              if missingFilesCheckbox.IsChecked then
-//                execFile[i].script := execFile[i].script + '-continueOnMissingFootage ';
-//
-//              // Add output module flag to script
-//              if outputModuleBox.ItemIndex <> -1 then
-//                execFile[i].script := execFile[i].script + '-OMtemplate "' + OutputModules[outputModuleBox.ItemIndex].Module + '" ';
-//
-//              if renderSettingsBox.ItemIndex <> -1 then
-//                execFile[i].script := execFile[i].script + '-RStemplate "' + RenderSettings[renderSettingsBox.ItemIndex].Setting + '" ';
-//
-//              // Add memory usage flags to script
-//              execFile[i].script := execFile[i].script + '-mem_usage "' + Trunc(memUsageTrackBar.Value).ToString + '" "' + Trunc(cacheUsageTrackBar.Value).ToString + '" ';
-//
-//              // Add whatever user typed parameters to script
-//              if customCheckbox.IsChecked then
-//                execFile[i].script := execFile[i].script + customProp.Text;
-//
-//              if SettingsForm.HandleCheckBox.IsChecked then
-//                begin
-//                  execFile[i].script := execFile[i].script + ') > "' + logPath + '.log"';
-//
-//                  if threadsSwitch.IsChecked then
-//                    LogFiles[i-1] := logPath + '.log'
-//                  else
-//                    LogFiles[j] := logPath + '.log';
-//                end;
-//
-//              //File section
-//              {$IFDEF MSWINDOWS}
-//                if compSwitch.IsChecked then
-//                  AssignFile (execFile[i].F, 'C:\ProgramData\AErender\aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.bat', CP_UTF8)
-//                else
-//                  AssignFile (execFile[i].F, 'C:\ProgramData\AErender\aerender' + i.ToString + '.bat', CP_UTF8);
-//                Rewrite (execFile[i].F);
-//                Writeln (execFile[i].F, execFile[i].script);
-//                //Writeln (execFile[i].F, '@PAUSE');
-//                CloseFile (execFile[i].F);
-//                if SettingsForm.HandleCheckBox.IsChecked then
-//                  if compSwitch.IsChecked then
-//                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_HIDE)
-//                  else
-//                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_HIDE)
-//                else
-//                  if compSwitch.IsChecked then
-//                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '_' +  compGrid.Cells[0, j] + '.bat'), '', '', SW_SHOWNORMAL)
-//                  else
-//                    ShellExecute(0, 'OPEN', PChar('C:\ProgramData\AErender\aerender' + i.ToString + '.bat'), '', '', SW_SHOWNORMAL)
-//                    //Execute('C:\ProgramData\AErender\aerender' + i.ToString + '.bat');
-//              {$ENDIF MSWINOWS}
-//              {$IFDEF MACOS}
-//                if compSwitch.IsChecked then
-//                  AssignFile (execFile[i].F, GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command', CP_UTF8)
-//                else
-//                  AssignFile (execFile[i].F, GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command', CP_UTF8);
-//                Rewrite (execFile[i].F);
-//                Writeln (execFile[i].F, execFile[i].script);
-//                //Writeln (execFile[i].F, 'read -p "Press any key to continue..."');
-//                CloseFile (execFile[i].F);
-//                if SettingsForm.HandleCheckBox.IsChecked then
-//                  if compSwitch.IsChecked then
-//                    begin
-//                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
-//                      _system(PAnsiChar('command "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command" & disown')));
-//                    end
-//                  else
-//                    begin
-//                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
-//                      _system(PAnsiChar('command "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command" & disown')));
-//                    end
-//                else
-//                  if compSwitch.IsChecked then
-//                    begin
-//                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
-//                      _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '_' + compGrid.Cells[0, j] + '.command"')));
-//                    end
-//                  else
-//                    begin
-//                      _system(PAnsiChar('chmod +x "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
-//                      _system(PAnsiChar('open "' + AnsiString(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"')));
-//                      //Execute(GetEnvironmentVariable('HOME') + '/Documents/AErender/aerender' + i.ToString + '.command"');
-//                    end
-//              {$ENDIF MACOS}
-//            end;
+        /// It would be really nice to have an await keyword here, but...
+        RenderTasks[0].Render();
+
+//        for var Task: TRenderTask in RenderTasks do begin
+//          Task.Render(4);
+//        end;
+
         // Wait untill aerender launches
-        //Sleep (200);
+        Sleep (200);
         if SettingsForm.HandleCheckBox.IsChecked then
           begin
             if RenderingUnit.VISIBLE then
@@ -2730,7 +2452,7 @@ begin
   TaskEditorSaveButton.Visible := True;
   TaskEditorCreateTaskButton.Visible := False;
 
-  TaskEditorPopup.IsOpen := True;//PopupModal;
+  TaskEditorPopup.PopupModal; //IsOpen := True;//PopupModal;
 end;
 
 procedure TMainForm.TasksTreeViewDragChange(SourceItem, DestItem: TTreeViewItem; var Allow: Boolean);
@@ -2898,36 +2620,36 @@ end;
 
 procedure TMainForm.threadsSwitchSwitch(Sender: TObject);
 begin
-  if threadsSwitch.IsChecked then
-    begin
-      if UpdateAvailable = True then
-        begin
-          if MainForm.Height <= 490 then
-            MainForm.Height := 630;
-        end
-      else
-        if MainForm.Height <= 450 then
-          MainForm.Height := 580;
-
-      threadsSwitchLabel.Text := Language[LANG].MainForm.SplitRender;
-      outFrame.TextPrompt     := Language[LANG].MainForm.EndFrameHint;
-      threadsGrid.AniCalculations.AutoShowing := False;
-      threadsGrid.Model.ScrollDirections := TScrollDirections.Vertical;
-    end
-  else
-    begin
-      if UpdateAvailable = True then
-        begin
-          if MainForm.WindowState <> TWindowState.wsMaximized then
-            MainForm.Height := 490
-        end
-      else
-        if MainForm.WindowState <> TWindowState.wsMaximized then
-          MainForm.Height := 450;
-
-      threadsSwitchLabel.Text := Language[LANG].MainForm.SingleRener;
-      outFrame.TextPrompt     := '';
-    end;
+//  if threadsSwitch.IsChecked then
+//    begin
+//      if UpdateAvailable = True then
+//        begin
+//          if MainForm.Height <= 490 then
+//            MainForm.Height := 630;
+//        end
+//      else
+//        if MainForm.Height <= 450 then
+//          MainForm.Height := 580;
+//
+//      threadsSwitchLabel.Text := Language[LANG].MainForm.SplitRender;
+//      outFrame.TextPrompt     := Language[LANG].MainForm.EndFrameHint;
+//      threadsGrid.AniCalculations.AutoShowing := False;
+//      threadsGrid.Model.ScrollDirections := TScrollDirections.Vertical;
+//    end
+//  else
+//    begin
+//      if UpdateAvailable = True then
+//        begin
+//          if MainForm.WindowState <> TWindowState.wsMaximized then
+//            MainForm.Height := 490
+//        end
+//      else
+//        if MainForm.WindowState <> TWindowState.wsMaximized then
+//          MainForm.Height := 450;
+//
+//      threadsSwitchLabel.Text := Language[LANG].MainForm.SingleRener;
+//      outFrame.TextPrompt     := '';
+//    end;
 end;
 
 procedure TMainForm.UpdateNetHTTPClientRequestCompleted(const Sender: TObject; const AResponse: IHTTPResponse);
@@ -2941,17 +2663,14 @@ begin
     UpdateAvailable := True;
 
   if UpdateAvailable then begin
-    if threadsSwitch.IsChecked or compSwitch.IsChecked then
-      MainForm.Height := 630
-    else
-      MainForm.Height := {$IFDEF MSWINDOWS}490{$ENDIF MSWINDOWS}  {$IFDEF MACOS}470{$ENDIF MACOS};
+    MainForm.Height := SizeConstraints.MIN_HEIGHT_UPD;
     MainForm.UpdateInfo.Visible := True;
     MainForm.UpdateInfo.Enabled := True;
     MainForm.downloadButton.Text := Language[LANG].MainForm.Download + ' (' + gitVersion + ')';
     {$IFDEF MSWINDOWS}gitDownload := gitRelease.A[0].P['assets'].A[1].P['browser_download_url'].Value;{$ENDIF MSWINDOWS}
     {$IFDEF MACOS}gitDownload := gitRelease.A[0].P['assets'].A[0].P['browser_download_url'].Value;{$ENDIF MACOS}
   end else begin
-    MainForm.Height := {$IFDEF MSWINDOWS}450{$ENDIF MSWINDOWS}  {$IFDEF MACOS}430{$ENDIF MACOS};
+    MainForm.Height := SizeConstraints.MIN_HEIGHT_NO_UPD;
     MainForm.UpdateInfo.Visible := False;
     MainForm.UpdateInfo.Enabled := False;
   end;
@@ -3093,7 +2812,6 @@ begin
     RenderTasks.Add(Task);
     {$IFDEF DEBUG_MODE}
     ShowMessage(RenderTasks.Items[0].ToString);
-    //ShowMessage(IntToStr(RenderTasks.Items[0].Count));
     {$ENDIF}
 
     Compositions.Free;

@@ -12,10 +12,12 @@ type
     StyleBook1: TStyleBook;
     StyleBook2: TStyleBook;
     TrackBar1: TTrackBar;
-    RenderProgress1: TRenderProgress;
     CheckBox1: TCheckBox;
+    RenderProgress1: TRenderProgress;
+    Button1: TButton;
     procedure TrackBar1Change(Sender: TObject);
     procedure CheckBox1Change(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -28,6 +30,11 @@ var
 implementation
 
 {$R *.fmx}
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  RenderProgress1.Log.Add('String ' + Random(9999).ToString);
+end;
 
 procedure TForm1.CheckBox1Change(Sender: TObject);
 begin

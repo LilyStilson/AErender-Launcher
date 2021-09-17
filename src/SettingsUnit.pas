@@ -55,6 +55,8 @@ uses
   FMX.Menus,
   {$ENDREGION}
 
+  AErenderLauncher.SysUtils,
+
   {$REGION '  Windows Only Libraries  '}{$IFDEF MSWINDOWS}
     Winapi.ShellAPI, Winapi.Windows, FMX.Platform.Win, Winapi.TlHelp32;
   {$ENDIF MSWINDOWS}{$ENDREGION}
@@ -125,9 +127,13 @@ type
     SpeedButton2: TSpeedButton;
     Layout4: TLayout;
     Label1: TLabel;
-    Edit1: TEdit;
+    MaxThreadsCountEdit: TEdit;
     Label2: TLabel;
     TempFilesLabel: TLabel;
+    limitRenderLayout: TLayout;
+    limitRenderCheckbox: TCheckBox;
+    limitRenderEdit: TEdit;
+    limitRenderSubLabel: TLabel;
     procedure langBoxChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure aerenderPathSelectClick(Sender: TObject);
@@ -150,11 +156,13 @@ type
     procedure SetLanguage(LanguageCode: Integer);
     procedure openConfigClick(Sender: TObject);
     procedure resetLanucherClick(Sender: TObject);
+    procedure limitRenderCheckboxChange(Sender: TObject);
   private
     { Private declarations }
-    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
+
   public
     { Public declarations }
+    {$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
   end;
   procedure ChangeDPI(DPI: Single);
 
@@ -250,16 +258,6 @@ begin
     raise Exception.Create('Adobe After Effects may not be installed on this computer.')
   else
     Result := maxVerStr;
-end;
-
-function GetTempFilesCount: Integer;
-begin
-  var LauncherDirectory: TArray<String> := GetDirectoryFiles(APPFOLDER);
-  var Res: Integer := 0;
-  for var i := 0 to High(LauncherDirectory) do
-    if (LauncherDirectory[i].Contains('.bat')) or (LauncherDirectory[i].Contains('.command')) or (LauncherDirectory[i].Contains('.log')) then
-      inc(Res);
-  Result := Res;
 end;
 
 procedure TSettingsForm.SetLanguage(LanguageCode: Integer);
@@ -463,6 +461,7 @@ begin
         AERPATH := '';
     end;
     {$IFDEF MSWINDOWS}OpenDialog1.InitialDir := 'C:\Program Files\Adobe';{$ENDIF MSWINDOWS}
+    limitRenderEdit.Text := (GetPlatformThreadsCount / 2).ToString;
   end);
 
   AErenderDetectionThread.Start;
@@ -523,6 +522,11 @@ begin
     langChangeLabel.Visible := True;
   end;
   //MainUnit.ChangeLanguage(langBox.ItemIndex);
+end;
+
+procedure TSettingsForm.limitRenderCheckboxChange(Sender: TObject);
+begin
+  limitRenderEdit.Enabled := limitRenderCheckbox.IsChecked;
 end;
 
 procedure TSettingsForm.onRenderStartBoxChange(Sender: TObject);

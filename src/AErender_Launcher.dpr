@@ -35,6 +35,7 @@ uses
   FMX.Ani in 'lib\FMX.Ani.pas',
   FMX.TreeView in 'lib\FMX.TreeView.pas',
   FMX.CompLabel in 'lib\Components\TCompLabel\Package\FMX.CompLabel.pas',
+  FMX.RenderProgress in 'lib\Components\TRenderProgress\Package\FMX.RenderProgress.pas',
   SplashScreenUnit in 'SplashScreenUnit.pas' {SplashScreenForm},
   MainUnit in 'MainUnit.pas' {MainForm},
   SettingsUnit in 'SettingsUnit.pas' {SettingsForm},
@@ -46,7 +47,6 @@ uses
   OutputModuleEditorUnit in 'OutputModuleEditorUnit.pas' {OutputModuleEditorForm},
   {$IFDEF MACOS}
   Mac.CodeBlocks in 'lib\Mac.CodeBlocks.pas',
-  MacApi.Dialogs in 'lib\MacApi.Dialogs.pas',
   {$ENDIF MACOS}
   {$IFDEF MSWINDOWS}
   FMX.Taskbar in 'lib\FMX.Taskbar.pas',
@@ -56,8 +56,11 @@ uses
   AErenderLauncher.Math.ExpParser in 'lib\AErenderLauncher.Math.ExpParser.pas',
   AErenderLauncher.Rendering in 'lib\AErenderLauncher.Rendering.pas',
   AErenderLauncher.IO in 'lib\AErenderLauncher.IO.pas',
-  AErenderLauncher.Math in 'lib\AErenderLauncher.Math.pas',
-  System.Types.Nullable in 'lib\System.Types.Nullable.pas';
+  AErenderLauncher.Math in 'lib\AErenderLauncher.Math.pas' {/System.Types.Nullable in 'lib\System.Types.Nullable.pas';},
+  AErenderLauncher.SysUtils in 'lib\AErenderLauncher.SysUtils.pas',
+  AErenderLauncher.Types in 'lib\AErenderLauncher.Types.pas';
+
+//System.Types.Nullable in 'lib\System.Types.Nullable.pas';
 
 {$R *.res}
 

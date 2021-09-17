@@ -10,7 +10,7 @@ uses
   Posix.Stdlib, Posix.Unistd;
   {$ENDIF}
 
-  function Open(Path: String; Args: TArray<String>): Integer;
+  function Open(Path: String; Args: TArray<String> = []): Integer;
   function Execute(Path: String): Integer;
   function BackgroundExecute(Path: String): Integer;
 
@@ -19,12 +19,12 @@ uses
 
 implementation
 
-function Open(Path: String; Args: TArray<String>): Integer;
+function Open(Path: String; Args: TArray<String> = []): Integer;
 begin
   {$IFDEF MSWINDOWS}
   var TempPath: String := Path;
   for var i := 0 to High(Args) do
-    Path := Path + Args[i];
+    TempPath := TempPath + Args[i];
 
   Result := ShellExecute(0, 'open', PWideChar(TempPath), nil, nil, SW_SHOW);
   {$ELSE MACOS}
@@ -41,7 +41,7 @@ begin
   {$IFDEF MSWINDOWS}
     Result := ShellExecute(0, 'OPEN', PWideChar(Path), '', '', SW_SHOWNORMAL)
   {$ELSE MACOS}
-    _system(PAnsiChar(Format('chmox +x "%s"', [AnsiString(Path)])));
+    _system(PAnsiChar(Format('chmod +x "%s"', [AnsiString(Path)])));
     Result := _system(PAnsiChar(Format('command "%s"', [AnsiString(Path)])));
   {$ENDIF}
 end;
@@ -49,10 +49,16 @@ end;
 function BackgroundExecute(Path: String): Integer;
 begin
   {$IFDEF MSWINDOWS}
-    Result := ShellExecute(0, 'OPEN', PWideChar(Path), '', '', SW_HIDE)
+    Result := ShellExecute(0, 'OPEN', PWideChar(Path), '', '', SW_HIDE);
+//    var exInfo: SHELLEXECUTEINFO;
+//    exInfo.lpVerb := 'open';
+//    exInfo.lpFile := PWideChar(Path);
+//    exInfo.nShow := SW_HIDE;
+//    exInfo.fMask := SEE_MASK_NOCLOSEPROCESS;
+//    Result := ShellExecuteExA(@exInfo).ToInteger;
   {$ELSE MACOS}
-    _system(PAnsiChar('chmox +x ' + AnsiString('"' + Path + '"')));
-    Result := _system(PAnsiChar('command ' + AnsiString('"' + Path + '" & disown')));
+    _system(PAnsiChar(Format('chmod +x "%s"', [AnsiString(Path)])));
+    Result := _system(PAnsiChar(Format('command "%s" & disown', [AnsiString(Path)])));
   {$ENDIF}
 end;
 

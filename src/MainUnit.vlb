@@ -58,9 +58,6 @@ Coordinates=1812,1266,102,33
 [soundCheckbox]
 Coordinates=1047,1036,94,51
 
-[Image1]
-Coordinates=372,1036,49,51
-
 [customProp]
 Coordinates=881,10,74,69
 
@@ -98,9 +95,6 @@ Coordinates=638,1266,74,33
 [compLayout]
 Coordinates=528,1266,75,33
 
-[infoIconFill]
-Coordinates=422,928,69,33
-
 [threadsLayout]
 Coordinates=406,1266,85,33
 
@@ -118,9 +112,6 @@ Coordinates=2493,1204,81,33
 
 [StringColumn3]
 Coordinates=2256,1204,88,33
-
-[Image2]
-Coordinates=797,1036,49,51
 
 [mainLayout]
 Coordinates=2149,1204,72,33
@@ -225,9 +216,6 @@ Coordinates=481,1002,97,33
 [launcherLayout]
 Coordinates=2292,1120,91,33
 
-[settingsIconFill]
-Coordinates=263,1002,89,33
-
 [cacheUsageTrackBar]
 Coordinates=2234,10,119,51
 
@@ -286,7 +274,7 @@ Coordinates=1179,1036,94,51
 Coordinates=968,1036,90,51
 
 []
-Coordinates=2124,1120,123,33
+Coordinates=797,1036,49,51
 
 [threadsCount]
 Coordinates=400,580,81,123
