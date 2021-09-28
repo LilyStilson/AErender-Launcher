@@ -19586,19 +19586,6 @@ object MainForm: TMainForm
         Size.Width = 784.000000000000000000
         Size.Height = 32.000000000000000000
         Size.PlatformDefault = False
-        object renderSettingsBox: TComboBox
-          Align = Client
-          Enabled = False
-          DropDownKind = Custom
-          Margins.Left = 16.000000000000000000
-          Margins.Top = 4.000000000000000000
-          Margins.Bottom = 4.000000000000000000
-          Size.Width = 640.000000000000000000
-          Size.Height = 24.000000000000000000
-          Size.PlatformDefault = False
-          Visible = False
-          OnChange = renderSettingsBoxChange
-        end
         object renderSettingsLabel: TLabel
           Align = Left
           Size.Width = 128.000000000000000000

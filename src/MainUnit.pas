@@ -288,16 +288,13 @@ type
     procedure ReadAERQ(Path: String);
     procedure SetLanguage(LanguageCode: Integer);
     procedure UpdateOutputModules;
-    procedure UpdateRenderSettings;
     procedure threadsCountTyping(Sender: TObject);
     procedure threadsCountExit(Sender: TObject);
     procedure AddToRecents(Item: String);
     procedure RecentProjectSelected(Sender: TObject);
     procedure InflateRecents;
     procedure ReInflateRecents;
-    procedure compGridEditingDone(Sender: TObject; const ACol,
-      ARow: Integer);
-    procedure renderSettingsBoxChange(Sender: TObject);
+    procedure compGridEditingDone(Sender: TObject; const ACol, ARow: Integer);
     procedure customCheckboxChange(Sender: TObject);
   private
     { Private declarations }
@@ -980,14 +977,6 @@ begin
   InflateRecents;
 end;
 
-procedure TMainForm.renderSettingsBoxChange(Sender: TObject);
-begin
-  if (renderSettingsBox.ItemIndex = renderSettingsBox.Count - 1) and (renderSettingsBox.Count <> 0) then begin
-    //OutputModuleEditorForm.Show;
-    //renderSettingsBox.ItemIndex := 0;
-  end
-end;
-
 /// This will add instance to Recents[] and call
 /// ReInflateRecents() to update recentItem
 procedure TMainForm.AddToRecents(Item: String);
@@ -1106,21 +1095,6 @@ begin
   outputModuleBox.ItemIndex := Index;
 end;
 
-procedure TMainForm.UpdateRenderSettings;
-begin
-  var Index: Integer := renderSettingsBox.ItemIndex;
-  if (renderSettingsBox.Count <> 0) then
-    renderSettingsBox.Clear;
-
-  for var i := 0 to High(RenderSettings) do
-    if RenderSettings[i].Imported then
-      renderSettingsBox.Items.Add(RenderSettings[i].Setting + ' ' + Language[LANG].OutputModuleConfiguratorForm.Imported)
-    else
-      renderSettingsBox.Items.Add(RenderSettings[i].Setting);
-  //renderSettingsBox.Items.Add(Language[LANG].MainForm.ConfigureRenderSettings);
-  renderSettingsBox.ItemIndex := Index;
-end;
-
 procedure TMainForm.ReadAERQ(Path: String);
 begin
   var AERQXMLDocument: IXMLDocument := TXMLDocument.Create(nil);
@@ -1153,21 +1127,8 @@ begin
   outputModuleBoxChange(Self);
 
   if RootNode.ChildNodes['queueItem'].ChildNodes['renderSettings'].Text.IsEmpty <> True then begin
-    var TempRenderSetting: RenderSetting;
-    TempRenderSetting.Setting := RootNode.ChildNodes['queueItem'].ChildNodes['renderSettings'].Text;
-
-    if GetRSIndex(TempRenderSetting) <> -1 then
-      renderSettingsBox.ItemIndex := GetRSIndex(TempRenderSetting)
-    else begin
-      SetLength(RenderSettings, Length(RenderSettings) + 1);
-      RenderSettings[High(RenderSettings)].Setting := RootNode.ChildNodes['queueItem'].ChildNodes['renderSettings'].Text;
-      RenderSettings[High(RenderSettings)].Imported := True;
-
-      renderSettingsBox.Items.Insert(renderSettingsBox.Items.Count - 1, RenderSettings[High(RenderSettings)].Setting + ' ' + Language[LANG].OutputModuleConfiguratorForm.Imported);
-      renderSettingsBox.ItemIndex := renderSettingsBox.Items.Count - 2;
-    end;
+    renderSettingsEdit.Text := RootNode.ChildNodes['queueItem'].ChildNodes['renderSettings'].Text; 
   end;
-  renderSettingsBoxChange(Self);
 
   compName.Text := RootNode.ChildNodes['queueItem'].ChildNodes['composition'].ChildNodes['name'].Text;
   inFrame.Text  := RootNode.ChildNodes['queueItem'].ChildNodes['composition'].ChildNodes['rangeStart'].Text;
