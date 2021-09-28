@@ -1,307 +1,329 @@
 ﻿[StringColumn2]
-Coordinates=1105,1328,88,33
+Coordinates=1105,1328,100,36
 
 [bottomButtonsLayout]
-Coordinates=943,1328,121,33
+Coordinates=943,1328,136,36
 
 [downloadButton]
-Coordinates=239,1036,95,51
+Coordinates=239,1036,107,58
 
 [cacheUsageInfo]
-Coordinates=1608,1036,93,51
+Coordinates=1608,1036,107,58
 
 [UpdateLabel]
-Coordinates=646,1120,76,51
+Coordinates=646,1120,87,58
 
 [memUsageTrackBar]
-Coordinates=1960,10,113,51
+Coordinates=1960,10,132,58
 
 [memUsageLayout]
-Coordinates=799,1328,103,33
+Coordinates=799,1328,118,36
 
 [saveFile]
-Coordinates=201,1120,54,51
+Coordinates=201,1120,63,58
 
 [properiesLayout2]
-Coordinates=659,1328,100,33
+Coordinates=659,1328,114,36
 
 [propertiesLayout1]
-Coordinates=185,1328,104,33
+Coordinates=185,1328,118,36
 
 [infoButton]
-Coordinates=547,1120,66,51
+Coordinates=547,1120,73,58
 
 [XMLOpenDialog]
-Coordinates=935,221,93,33
+Coordinates=935,221,109,36
 
 [docsItem]
-Coordinates=2369,1266,59,33
+Coordinates=2369,1266,67,36
 
 [LaunchIcon]
-Coordinates=290,1120,72,51
+Coordinates=290,1120,81,58
 
 [exitItem]
-Coordinates=2176,1266,53,33
+Coordinates=2176,1266,60,36
 
 [SettingsIcon]
-Coordinates=10,1120,76,51
+Coordinates=10,1120,86,58
 
 [launcherItem]
-Coordinates=2061,1266,78,33
+Coordinates=2061,1266,89,36
 
 [outputModuleBox]
-Coordinates=741,10,101,123
+Coordinates=741,10,114,146
 
 [GridPanelLayout2]
-Coordinates=1812,1266,102,33
+Coordinates=1812,1266,118,36
 
 [soundCheckbox]
-Coordinates=1047,1036,94,51
+Coordinates=1047,1036,106,58
 
 [Image1]
-Coordinates=372,1036,49,51
+Coordinates=372,1036,57,58
 
 [customProp]
-Coordinates=881,10,74,69
+Coordinates=881,10,83,58
 
 [outModuleEditorItem0]
-Coordinates=1309,1266,123,33
+Coordinates=1309,1266,140,36
 
 [projectPath]
-Coordinates=1897,1036,70,51
+Coordinates=1897,1036,80,58
 
 [memUsageInfoEdit]
-Coordinates=89,1036,107,51
+Coordinates=89,1036,124,58
 
 [BindingsList1]
-Coordinates=817,928,82,33
+Coordinates=817,928,91,36
 Visible=True
 
 [cacheUsageInfoEdit]
-Coordinates=1741,1036,112,51
+Coordinates=1741,1036,130,58
 
 [InfoIcon]
-Coordinates=880,1036,54,51
+Coordinates=880,1036,62,58
 
 [settingsButton]
-Coordinates=1529,10,86,51
+Coordinates=1529,10,96,58
 
 [fileItem]
-Coordinates=852,1266,50,33
+Coordinates=852,1266,56,36
 
 [memUsageInfo]
-Coordinates=1391,1036,88,51
+Coordinates=1391,1036,101,58
 
 [settingsItem]
-Coordinates=638,1266,74,33
+Coordinates=638,1266,84,36
 
 [compLayout]
-Coordinates=528,1266,75,33
+Coordinates=528,1266,84,36
 
 [infoIconFill]
-Coordinates=422,928,69,33
+Coordinates=422,928,77,36
 
 [threadsLayout]
-Coordinates=406,1266,85,33
+Coordinates=406,1266,96,36
 
 [ffmpegConcateLayout]
-Coordinates=240,1266,123,33
+Coordinates=240,1266,140,36
 
 [GridPanelLayout1]
-Coordinates=96,1266,102,33
+Coordinates=96,1266,118,36
 
 [Layout2]
-Coordinates=10,1266,53,33
+Coordinates=10,1266,60,36
 
 [framesLayout]
-Coordinates=2493,1204,81,33
+Coordinates=2493,1204,92,36
 
 [StringColumn3]
-Coordinates=2256,1204,88,33
+Coordinates=2256,1204,100,36
 
 [Image2]
-Coordinates=797,1036,49,51
+Coordinates=797,1036,57,58
 
 [mainLayout]
-Coordinates=2149,1204,72,33
+Coordinates=2149,1204,81,36
 
 [separatorItem2]
-Coordinates=1767,1204,88,33
+Coordinates=1767,1204,101,36
 
 [launchButton]
-Coordinates=2118,10,80,51
+Coordinates=2118,10,90,58
 
 [GridPanelLayout3]
-Coordinates=1623,1204,102,33
+Coordinates=1623,1204,118,36
 
 [StringColumn1]
-Coordinates=1497,1204,88,33
+Coordinates=1497,1204,100,36
 
 [missingFilesCheckbox]
-Coordinates=2228,1036,125,51
+Coordinates=2228,1036,143,58
 
 [compSwitchLabel]
-Coordinates=656,1036,101,51
+Coordinates=656,1036,115,58
 
 [compCount]
-Coordinates=508,10,71,87
+Coordinates=508,10,80,102
 
 [editItem]
-Coordinates=1304,1204,53,33
+Coordinates=1304,1204,61,36
 
 [compSwitch]
-Coordinates=344,131,75,177
+Coordinates=344,131,84,184
 
 [calculateButton]
-Coordinates=335,746,91,87
+Coordinates=390,750,103,102
 
 [cacheUsageLayout]
-Coordinates=1036,1204,108,33
+Coordinates=1036,1204,124,36
 
 [memUsageLabel]
-Coordinates=2003,1036,96,51
+Coordinates=2003,1036,111,58
 
 [compName]
-Coordinates=508,334,69,87
+Coordinates=508,334,80,102
 
 [UpdateInfo]
-Coordinates=933,1204,68,33
+Coordinates=933,1204,77,36
 
 [ffmpegCheckBox]
-Coordinates=1391,21,99,51
+Coordinates=1391,21,112,58
 
 [outputModuleLabel]
-Coordinates=397,1120,109,51
+Coordinates=397,1120,124,58
 
 [outFrame]
-Coordinates=10,632,61,51
+Coordinates=10,632,69,58
 Visible=True
 
 [settingsItem0]
-Coordinates=550,1204,80,33
+Coordinates=550,1204,91,36
 
 [customCheckbox]
-Coordinates=1044,21,100,51
+Coordinates=1000,20,113,58
+Visible=True
 
 [MainMenu1]
-Coordinates=1145,936,70,33
+Coordinates=1145,936,81,36
 
 [AEPOpenDialog]
-Coordinates=1145,991,93,33
+Coordinates=1145,991,108,36
 
 [outModuleEditorItem]
-Coordinates=391,1204,117,33
+Coordinates=391,1204,133,36
 
 [importConfigItem]
-Coordinates=137,1204,100,33
+Coordinates=137,1204,113,36
 
 [AERModernAnimatedStyle]
-Coordinates=1323,1,144,33
+Coordinates=1323,1,167,36
 
 [OnyxBlueStyle]
-Coordinates=818,1002,87,33
+Coordinates=818,1002,99,36
 
 [outputPath]
-Coordinates=553,1036,68,51
+Coordinates=553,1036,77,58
 
 [threadsSwitch]
-Coordinates=160,571,84,177
+Coordinates=160,571,95,184
 
 [renderSettingsLabel]
-Coordinates=1651,10,113,51
+Coordinates=1651,10,130,58
 
 [separatorItem1]
-Coordinates=10,1204,88,33
+Coordinates=10,1204,101,36
 
 [inputFileLayout]
-Coordinates=2421,1120,91,33
+Coordinates=2421,1120,102,36
 
 [threadsSwitchLabel]
-Coordinates=1807,10,111,51
+Coordinates=1807,10,127,58
 
 [AERModernStyle]
-Coordinates=481,1002,97,33
+Coordinates=481,1002,113,36
 
 [launcherLayout]
-Coordinates=2292,1120,91,33
+Coordinates=2292,1120,103,36
 
 [settingsIconFill]
-Coordinates=263,1002,89,33
+Coordinates=263,1002,100,36
 
 [cacheUsageTrackBar]
-Coordinates=2234,10,119,51
+Coordinates=2234,10,138,58
 
 [ffmpegConfigButton]
-Coordinates=1183,10,114,69
+Coordinates=1170,10,128,58
 
 [renderSettingsLayout]
-Coordinates=1961,1120,120,33
+Coordinates=1961,1120,137,36
 
 [threadedRender]
-Coordinates=1258,1036,93,51
+Coordinates=1258,1036,107,58
 
 [threadsTopLayout]
-Coordinates=1636,1120,104,33
+Coordinates=1636,1120,118,36
 
 [SaveDialog1]
-Coordinates=55,1002,75,33
+Coordinates=55,1002,87,36
 
 [threadsGrid]
-Coordinates=345,908,72,87
+Coordinates=345,908,82,102
 
 [outputModuleLayout]
-Coordinates=1479,1120,116,33
+Coordinates=1479,1120,131,36
 
 [inFrame]
-Coordinates=2140,1036,54,51
+Coordinates=2140,1036,62,58
 
 [Layout1]
-Coordinates=1393,1120,53,33
+Coordinates=1393,1120,60,36
 
 [properties]
-Coordinates=455,1036,64,51
+Coordinates=455,1036,72,58
 
 [aboutItem]
-Coordinates=1295,1120,63,33
+Coordinates=1295,1120,72,36
 
 [exportConfigItem]
-Coordinates=1156,1120,99,33
+Coordinates=1156,1120,113,36
 
 [compTopLayout]
-Coordinates=1024,1120,94,33
+Coordinates=1024,1120,106,36
 
 [helpItem]
-Coordinates=934,1120,56,33
+Coordinates=934,1120,64,36
 
 [openFile]
-Coordinates=1518,1036,56,51
+Coordinates=1518,1036,64,58
 
 [compGrid]
-Coordinates=513,172,62,87
+Coordinates=513,172,70,102
 
 [cacheUsageLimitLabel]
-Coordinates=2397,1036,125,51
+Coordinates=2397,1036,145,58
 
 [projectPathLabel]
-Coordinates=122,1120,97,51
+Coordinates=122,1120,111,58
 
 [outputPathLabel]
-Coordinates=10,1036,95,51
+Coordinates=10,1036,108,58
 
 [startFrameLabel]
-Coordinates=1179,1036,94,51
+Coordinates=1179,1036,108,58
 
 [endFrameLabel]
-Coordinates=968,1036,90,51
+Coordinates=968,1036,104,58
 
 []
 Coordinates=748,1266,69,33
 
 [threadsCount]
-Coordinates=400,580,81,123
+Coordinates=400,580,92,146
 Visible=True
 ExplicitSubNodes=Enabled;Visible
 
 [renderSettingsBox]
-Coordinates=614,10,87,123
+Coordinates=614,10,120,146
+
+[recentItem]
+Coordinates=78,1,75,36
+
+[Button1]
+Coordinates=0,0,59,58
+
+[outputFileLayout]
+Coordinates=172,1,110,36
+
+[separatorItem3]
+Coordinates=172,56,101,36
+
+[UpdateNetHTTPClient]
+Coordinates=23,77,142,36
+
+[separator]
+Coordinates=203,111,69,36
+
+[renderSettingsEdit]
+Coordinates=74,132,121,102
 

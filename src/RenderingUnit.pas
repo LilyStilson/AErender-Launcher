@@ -95,10 +95,12 @@ type
     procedure renderingTimerTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure abortRenderingButtonClick(Sender: TObject);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure StopwatchTimerTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure SetLanguage(LanguageCode: Integer);
+    procedure RenderingToolBarClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormHide(Sender: TObject);
   private
     { Private declarations }
   public
@@ -132,8 +134,6 @@ var
   ///  So, it's easier to use simple TArray<>, that we'll have to reset when render finishes
   RenderGroups: TArray<TRenderGroup>;
   CurrentTime: TDateTime;
-
-  { TODO -oLily Stilson -cRendering Unit - macOS : Add NSApplication.requestUserAttention for macOS when Rendering is finished }
 
 implementation
 
@@ -218,18 +218,20 @@ begin
   end;
 end;
 
-procedure TRenderingForm.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TRenderingForm.FormClose(Sender: TObject;
+  var Action: TCloseAction);
 begin
+  {$IFDEF MSWINDOWS}
   VISIBLE := False;
 
   // RU:  При закрытии формы, если рендеринг закончен
   //      очистить окно
-  if TotalProgressBar.Value = TotalProgressBar.Max then
-    begin
-      abortRenderingButtonClick(Sender);
-      TotalProgressBar.Value := 0;
-      {$IFDEF MSWINDOWS}MainTaskBar.TaskBarState := 0;{$ENDIF MSWINDOWS}
-    end;
+  if Trunc(TotalProgressBar.Value) = Trunc(TotalProgressBar.Max) then begin
+    abortRenderingButtonClick(Sender);
+    TotalProgressBar.Value := 0;
+    {$IFDEF MSWINDOWS}MainTaskBar.TaskBarState := 0;{$ENDIF MSWINDOWS}
+  end;
+  {$ENDIF}
 end;
 
 procedure TRenderingForm.FormCreate(Sender: TObject);
@@ -241,6 +243,22 @@ begin
 
   // RU:  Активация плавного скроллинга списка потоков
   VertScrollBox1.AniCalculations.Animation := True;
+end;
+
+procedure TRenderingForm.FormHide(Sender: TObject);
+begin
+  {$IFDEF MACOS}    // Workaround
+                    // Somehow after update to RAD 10.4.2
+                    // form can't get to the OnClose event on macOS
+  VISIBLE := False;
+
+  // RU:  При закрытии формы, если рендеринг закончен
+  //      очистить окно
+  if Trunc(TotalProgressBar.Value) = Trunc(TotalProgressBar.Max) then begin
+    abortRenderingButtonClick(Sender);
+    TotalProgressBar.Value := 0;
+  end;
+  {$ENDIF}
 end;
 
 procedure TRenderingForm.FormShow(Sender: TObject);
@@ -351,7 +369,7 @@ begin
               RenderGroups[i].LogMemo.Height          := 192;
               RenderGroups[i].LogMemo.Visible         := False;
               RenderGroups[i].LogMemo.StyledSettings  := [TStyledSetting.Style, TStyledSetting.FontColor];
-              RenderGroups[i].LogMemo.Font.Family     := 'Consolas';
+              RenderGroups[i].LogMemo.Font.Family     := {$IFDEF MSWINDOWS}'Consolas'{$ELSE MACOS}'Menlo'{$ENDIF};
               RenderGroups[i].LogMemo.Font.Size       := 12;
               RenderGroups[i].LogMemo.ScrollAnimation := TBehaviorBoolean.True;
               RenderGroups[i].LogMemo.WordWrap        := True;
@@ -580,6 +598,12 @@ begin
   // Workaround: Get string that is already in array and pass it through an inline variable
   var TimeElapsed: String := Language[LANG].RenderingForm.TimeElapsed;
   timeElapsedLabel.Text := TimeElapsed + FormatDateTime('hh:nn:ss', Now - CurrentTime);
+end;
+
+procedure TRenderingForm.RenderingToolBarClick(Sender: TObject);
+begin
+  ShowMessage(TotalProgressBar.Value.ToString + ' / ' + TotalProgressBar.Max.ToString);
+  ShowMessage(BoolToStr((Trunc(TotalProgressBar.Value) = Trunc(TotalProgressBar.Max)), True));
 end;
 
 end.

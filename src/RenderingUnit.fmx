@@ -14,6 +14,7 @@ object RenderingForm: TRenderingForm
   OnCreate = FormCreate
   OnClose = FormClose
   OnShow = FormShow
+  OnHide = FormHide
   DesignerMasterStyle = 0
   object renderingTimer: TTimer
     Enabled = False
@@ -192,6 +193,7 @@ object RenderingForm: TRenderingForm
       Size.Height = 32.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 1
+      OnClick = RenderingToolBarClick
       object WindowTitle: TLabel
         Align = Left
         AutoSize = True

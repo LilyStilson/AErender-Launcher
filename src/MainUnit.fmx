@@ -19358,11 +19358,11 @@ object MainForm: TMainForm
             Touch.InteractiveGestures = [LongTap, DoubleTap]
             Align = Right
             TextSettings.HorzAlign = Trailing
-            Position.X = 349.000000000000000000
+            Position.X = 540.000000000000000000
             Enabled = False
-            Margins.Left = 13.000000000000000000
-            Margins.Right = 15.000000000000000000
-            Margins.Bottom = 5.000000000000000000
+            Margins.Left = 12.000000000000000000
+            Margins.Right = 16.000000000000000000
+            Margins.Bottom = 4.000000000000000000
             Size.Width = 100.000000000000000000
             Size.Height = 24.000000000000000000
             Size.PlatformDefault = False
@@ -19423,9 +19423,9 @@ object MainForm: TMainForm
             Position.X = 357.000000000000000000
             Position.Y = 5.000000000000000000
             Enabled = False
-            Margins.Left = 13.000000000000000000
-            Margins.Right = 15.000000000000000000
-            Margins.Bottom = 5.000000000000000000
+            Margins.Left = 12.000000000000000000
+            Margins.Right = 16.000000000000000000
+            Margins.Bottom = 4.000000000000000000
             Size.Width = 100.000000000000000000
             Size.Height = 24.000000000000000000
             Size.PlatformDefault = False
@@ -19497,6 +19497,7 @@ object MainForm: TMainForm
               Size.Height = 19.000000000000000000
               Size.PlatformDefault = False
               Text = 'Custom Properies'
+              OnChange = customCheckboxChange
             end
           end
           object propertiesLayout1: TLayout
@@ -19587,6 +19588,7 @@ object MainForm: TMainForm
         Size.PlatformDefault = False
         object renderSettingsBox: TComboBox
           Align = Client
+          Enabled = False
           DropDownKind = Custom
           Margins.Left = 16.000000000000000000
           Margins.Top = 4.000000000000000000
@@ -19594,6 +19596,7 @@ object MainForm: TMainForm
           Size.Width = 640.000000000000000000
           Size.Height = 24.000000000000000000
           Size.PlatformDefault = False
+          Visible = False
           OnChange = renderSettingsBoxChange
         end
         object renderSettingsLabel: TLabel
@@ -19603,6 +19606,27 @@ object MainForm: TMainForm
           Size.PlatformDefault = False
           TextSettings.WordWrap = False
           Text = 'Render Settings:'
+        end
+        object renderSettingsEdit: TComboEdit
+          Touch.InteractiveGestures = [LongTap, DoubleTap]
+          Align = Client
+          TabOrder = 0
+          ItemHeight = 20.000000000000000000
+          Items.Strings = (
+            'Current Settings'
+            'Best Settings'
+            'DV Settings'
+            'Multi-Machine Settings'
+            'Custom')
+          ItemIndex = -1
+          Margins.Left = 16.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Size.Width = 640.000000000000000000
+          Size.Height = 24.000000000000000000
+          Size.PlatformDefault = False
+          KillFocusByReturn = True
+          OnChange = renderSettingsBoxChange
         end
       end
       object GridPanelLayout1: TGridPanelLayout
@@ -20074,13 +20098,6 @@ object MainForm: TMainForm
     OutputConverters = <>
     Left = 136
     Top = 488
-    object LinkControlToPropertyEnabled: TLinkControlToProperty
-      Category = 'Quick Bindings'
-      Control = customCheckbox
-      Track = True
-      Component = customProp
-      ComponentProperty = 'Enabled'
-    end
     object LinkControlToPropertyEnabled2: TLinkControlToProperty
       Category = 'Quick Bindings'
       Control = compSwitch
@@ -20179,13 +20196,6 @@ object MainForm: TMainForm
       ComponentProperty = 'Enabled'
       CustomFormat = 'IfThen(IsChecked, False, True)'
       InitializeControlValue = False
-    end
-    object LinkControlToPropertyEnabled11: TLinkControlToProperty
-      Category = 'Quick Bindings'
-      Control = ffmpegCheckBox
-      Track = True
-      Component = ffmpegConfigButton
-      ComponentProperty = 'Enabled'
     end
     object LinkControlToPropertyVisible7: TLinkControlToProperty
       Category = 'Quick Bindings'

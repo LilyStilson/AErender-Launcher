@@ -136,7 +136,6 @@ type
     customProp: TEdit;
     customCheckbox: TCheckBox;
     BindingsList1: TBindingsList;
-    LinkControlToPropertyEnabled: TLinkControlToProperty;
     compLayout: TLayout;
     bottomButtonsLayout: TLayout;
     launchButton: TButton;
@@ -218,7 +217,6 @@ type
     ffmpegCheckBox: TCheckBox;
     ffmpegConfigButton: TButton;
     ffmpegConcateLayout: TLayout;
-    LinkControlToPropertyEnabled11: TLinkControlToProperty;
     mainLayout: TLayout;
     GridPanelLayout1: TGridPanelLayout;
     GridPanelLayout2: TGridPanelLayout;
@@ -242,6 +240,7 @@ type
     separatorItem3: TMenuItem;
     outputFileLayout: TLayout;
     separator: TLine;
+    renderSettingsEdit: TComboEdit;
     procedure FormResize(Sender: TObject);
     procedure compSwitchSwitch(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -299,6 +298,7 @@ type
     procedure compGridEditingDone(Sender: TObject; const ACol,
       ARow: Integer);
     procedure renderSettingsBoxChange(Sender: TObject);
+    procedure customCheckboxChange(Sender: TObject);
   private
     { Private declarations }
     //{$IFDEF MSWINDOWS}procedure CreateHandle; override;{$ENDIF MSWINDOWS}
@@ -562,22 +562,22 @@ end;
 
 procedure InitRenderSettings;
 begin
-  SetLength (RenderSettings, 5);
-
-  RenderSettings[0].Setting   := 'Current Settings';
-  RenderSettings[0].Imported  := False;
-
-  RenderSettings[1].Setting   := 'Best Settings';
-  RenderSettings[1].Imported  := False;
-
-  RenderSettings[2].Setting   := 'DV Settings';
-  RenderSettings[2].Imported  := False;
-
-  RenderSettings[3].Setting   := 'Draft Settings';
-  RenderSettings[3].Imported  := False;
-
-  RenderSettings[4].Setting   := 'Multi-Machine Settings';
-  RenderSettings[4].Imported  := False;
+//  SetLength (RenderSettings, 5);
+//
+//  RenderSettings[0].Setting   := 'Current Settings';
+//  RenderSettings[0].Imported  := False;
+//
+//  RenderSettings[1].Setting   := 'Best Settings';
+//  RenderSettings[1].Imported  := False;
+//
+//  RenderSettings[2].Setting   := 'DV Settings';
+//  RenderSettings[2].Imported  := False;
+//
+//  RenderSettings[3].Setting   := 'Draft Settings';
+//  RenderSettings[3].Imported  := False;
+//
+//  RenderSettings[4].Setting   := 'Multi-Machine Settings';
+//  RenderSettings[4].Imported  := False;
 
   //RenderSettings[4].Setting   := 'Custom';
   //RenderSettings[4].Imported  := False;
@@ -639,15 +639,16 @@ begin
   MainForm.outputModuleBox.ItemIndex := 0;
 
   ChildNode := RootNode.AddChild('renderSettings');
-  ChildNode.Attributes['selected'] := '0';
+//  ChildNode.Attributes['selected'] := '0';
+  ChildNode.Text := 'Best Settings';
+//  for var i := 0 to High(RenderSettings) do begin
+//    var SettingNode: IXMLNode := RootNode.ChildNodes['renderSettings'].AddChild('setting');
+//    SettingNode.Text := RenderSettings[i].Setting;
+//    SettingNode.Attributes['imported'] := 'False';
+//  end;
 
-  for var i := 0 to High(RenderSettings) do begin
-    var SettingNode: IXMLNode := RootNode.ChildNodes['renderSettings'].AddChild('setting');
-    SettingNode.Text := RenderSettings[i].Setting;
-    SettingNode.Attributes['imported'] := 'False';
-  end;
-
-  MainForm.renderSettingsBox.ItemIndex := 0;
+//  MainForm.renderSettingsBox.ItemIndex := 0;
+  MainForm.renderSettingsEdit.Text := 'Best Settings';
 
   ChildNode := RootNode.AddChild('recentProjects');
   for var i := 0 to 9 do
@@ -701,10 +702,13 @@ begin
       OutputModules[i].Imported := False;
     end;
 
-  InitRenderSettings;
+  //InitRenderSettings;
 
   MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
-  MainForm.renderSettingsBox.ItemIndex := 0;
+
+  MainForm.renderSettingsEdit.Text := RootNode.ChildNodes['renderSettings'].ChildNodes[StrToInt(RootNode.ChildNodes['renderSettings'].Attributes['selected'])].Text;
+  //MainForm.renderSettingsBox.ItemIndex := 0;
+  //MainForm.renderSettingsEdit.Text := 'Best Settings';
 end;
 
 procedure LoadConfiguration(Path: String);
@@ -754,15 +758,17 @@ begin
   end else
     InitOutputModules;
 
-  if RootNode.ChildNodes['renderSettings'].ChildNodes.Count <> 0 then begin
-    SetLength (RenderSettings, RootNode.ChildNodes['renderSettings'].ChildNodes.Count);
-    for var i := 0 to High(RenderSettings) do begin
-      RenderSettings[i].Setting := RootNode.ChildNodes['renderSettings'].ChildNodes[i].Text;
-      RenderSettings[i].Imported := StrToBool(RootNode.ChildNodes['renderSettings'].ChildNodes[i].Attributes['imported']);
-    end;
-    MainForm.renderSettingsBox.ItemIndex := StrToInt(RootNode.ChildNodes['renderSettings'].Attributes['selected']);
-  end else
-    InitRenderSettings;
+//  if RootNode.ChildNodes['renderSettings'].ChildNodes.Count <> 0 then begin
+//    SetLength (RenderSettings, RootNode.ChildNodes['renderSettings'].ChildNodes.Count);
+//    for var i := 0 to High(RenderSettings) do begin
+//      RenderSettings[i].Setting := RootNode.ChildNodes['renderSettings'].ChildNodes[i].Text;
+//      RenderSettings[i].Imported := StrToBool(RootNode.ChildNodes['renderSettings'].ChildNodes[i].Attributes['imported']);
+//    end;
+//    MainForm.renderSettingsBox.ItemIndex := StrToInt(RootNode.ChildNodes['renderSettings'].Attributes['selected']);
+//  end else
+//    InitRenderSettings;
+
+  MainForm.renderSettingsEdit.Text := RootNode.ChildNodes['renderSettings'].Text;
 
   for var i := 0 to 9 do begin
     Recents[i] := RootNode.ChildNodes['recentProjects'].ChildNodes[i].Text;
@@ -818,12 +824,13 @@ begin
   end;
 
   ChildNode := RootNode.AddChild('renderSettings');
-  ChildNode.Attributes['selected'] := MainForm.renderSettingsBox.ItemIndex.ToString;
-  for var i := 0 to High(RenderSettings) do begin
-    var SettingNode: IXMLNode := RootNode.ChildNodes['renderSettings'].AddChild('setting');
-    SettingNode.Text := RenderSettings[i].Setting;
-    SettingNode.Attributes['imported'] := RenderSettings[i].Imported;
-  end;
+  ChildNode.Text := MainForm.renderSettingsEdit.Text;
+//  ChildNode.Attributes['selected'] := MainForm.renderSettingsBox.ItemIndex.ToString;
+//  for var i := 0 to High(RenderSettings) do begin
+//    var SettingNode: IXMLNode := RootNode.ChildNodes['renderSettings'].AddChild('setting');
+//    SettingNode.Text := RenderSettings[i].Setting;
+//    SettingNode.Attributes['imported'] := RenderSettings[i].Imported;
+//  end;
 
   ChildNode := RootNode.AddChild('recentProjects');
   for var i := 0 to 9 do begin
@@ -1236,6 +1243,11 @@ begin
     compSwitchLabel.Text := Language[LANG].MainForm.SingleComp;
     compName.Text := compGrid.Cells[0, 0];
   end;
+end;
+
+procedure TMainForm.customCheckboxChange(Sender: TObject);
+begin
+  customProp.Enabled := customCheckbox.IsChecked;
 end;
 
 procedure TMainForm.docsItemClick(Sender: TObject);
@@ -1681,8 +1693,8 @@ begin
               if outputModuleBox.ItemIndex <> -1 then
                 execFile[i].script := execFile[i].script + '-OMtemplate "' + OutputModules[outputModuleBox.ItemIndex].Module + '" ';
 
-              if renderSettingsBox.ItemIndex <> -1 then
-                execFile[i].script := execFile[i].script + '-RStemplate  "' + RenderSettings[outputModuleBox.ItemIndex].Setting + '" ';
+              if renderSettingsEdit.Text <> '' then
+                execFile[i].script := execFile[i].script + '-RStemplate "' + renderSettingsEdit.Text + '" ';
 
               // Add memory usage flags to script
               execFile[i].script := execFile[i].script + '-mem_usage "' + Trunc(memUsageTrackBar.Value).ToString + '" "' + Trunc(cacheUsageTrackBar.Value).ToString + '" ';

@@ -126,6 +126,15 @@
         </DeployFile>
     </ItemGroup>
     <ItemGroup Condition="'$(Platform)'=='OSX64'">
+        <DeployFile Include="OSX64\Debug\AErenderLauncher.info.plist" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher.app\Contents\</RemoteDir>
+            <RemoteName>Info.plist</RemoteName>
+            <DeployClass>ProjectOSXInfoPList</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
         <DeployFile Include="..\lang\en-US.aerlang" Condition="'$(Config)'=='Beta'">
             <RemoteDir>AErender_Launcher.app\Contents\Resources\StartUp\</RemoteDir>
             <RemoteName>en-US.aerlang</RemoteName>
@@ -249,15 +258,6 @@
             <RemoteDir>AErender_Launcher.app\..\</RemoteDir>
             <RemoteName>AErender_Launcher.entitlements</RemoteName>
             <DeployClass>ProjectOSXEntitlements</DeployClass>
-            <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
-        </DeployFile>
-        <DeployFile Include="OSX64\Debug\AErenderLauncher.info.plist" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>AErender_Launcher.app\Contents\</RemoteDir>
-            <RemoteName>Info.plist</RemoteName>
-            <DeployClass>ProjectOSXInfoPList</DeployClass>
             <Operation>1</Operation>
             <LocalCommand/>
             <RemoteCommand/>
