@@ -98,10 +98,11 @@ type
     procedure renderingTimerTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure abortRenderingButtonClick(Sender: TObject);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure StopwatchTimerTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure SetLanguage(LanguageCode: Integer);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormHide(Sender: TObject);
 
     procedure RenderQueueNotify(Sender: TObject; const Item: String; Action: TCollectionNotification);
   private
@@ -256,6 +257,7 @@ end;
 
 procedure TRenderingForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  {$IFDEF MSWINDOWS}
   VISIBLE := False;
 
   /// If rendering is finished and there is still
@@ -266,6 +268,23 @@ begin
       TotalProgressBar.Value := 0;
       {$IFDEF MSWINDOWS}MainTaskBar.TaskBarState := 0;{$ENDIF MSWINDOWS}
     end;
+  {$ENDIF}
+end;
+
+procedure TRenderingForm.FormHide(Sender: TObject);
+begin
+  {$IFDEF MACOS}    // Workaround
+                    // Somehow after update to RAD 10.4.2
+                    // form can't get to the OnClose event on macOS
+  VISIBLE := False;
+
+  // RU:  При закрытии формы, если рендеринг закончен
+  //      очистить окно
+  if Trunc(TotalProgressBar.Value) = Trunc(TotalProgressBar.Max) then begin
+    abortRenderingButtonClick(Sender);
+    TotalProgressBar.Value := 0;
+  end;
+  {$ENDIF}
 end;
 
 procedure TRenderingForm.FormCreate(Sender: TObject);

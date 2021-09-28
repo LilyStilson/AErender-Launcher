@@ -20,6 +20,15 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
+        <DeployFile Include="lib\plugins\AEP Parser\aeparser_win.exe" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher\</RemoteDir>
+            <RemoteName>aeparser_win.exe</RemoteName>
+            <DeployClass>ProjectFile</DeployClass>
+            <Operation>0</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
         <DeployFile Include="..\lang\ru-RU.aerlang" Condition="'$(Config)'=='Debug'">
             <RemoteDir>AErender_Launcher\</RemoteDir>
             <RemoteName>ru-RU.aerlang</RemoteName>
@@ -34,6 +43,15 @@
             <RemoteName>Logo150x150.png</RemoteName>
             <DeployClass>UWP_DelphiLogo150</DeployClass>
             <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
+        <DeployFile Include="lib\plugins\AEP Parser\aeparser_mac" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher\</RemoteDir>
+            <RemoteName>aeparser_mac</RemoteName>
+            <DeployClass>ProjectFile</DeployClass>
+            <Operation>0</Operation>
             <LocalCommand/>
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
@@ -189,6 +207,15 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
         </DeployFile>
+        <DeployFile Include="..\icons\platform\Launcher2020.icns" Condition="'$(Config)'=='Debug'">
+            <RemoteDir>AErender_Launcher.app\Contents\Resources\</RemoteDir>
+            <RemoteName>AErender_Launcher.icns</RemoteName>
+            <DeployClass>ProjectOSXResource</DeployClass>
+            <Operation>1</Operation>
+            <LocalCommand/>
+            <RemoteCommand/>
+            <Overwrite>True</Overwrite>
+        </DeployFile>
         <DeployFile Include="..\lang\ru-RU.aerlang" Condition="'$(Config)'=='Debug'">
             <RemoteDir>AErender_Launcher.app\Contents\Resources\StartUp\</RemoteDir>
             <RemoteName>ru-RU.aerlang</RemoteName>
@@ -207,15 +234,6 @@
             <RemoteCommand/>
             <Overwrite>True</Overwrite>
             <Required>True</Required>
-        </DeployFile>
-        <DeployFile Include="..\icons\platform\Launcher2020.icns" Condition="'$(Config)'=='Debug'">
-            <RemoteDir>AErender_Launcher.app\Contents\Resources\</RemoteDir>
-            <RemoteName>AErender_Launcher.icns</RemoteName>
-            <DeployClass>ProjectOSXResource</DeployClass>
-            <Operation>1</Operation>
-            <LocalCommand/>
-            <RemoteCommand/>
-            <Overwrite>True</Overwrite>
         </DeployFile>
         <DeployFile Include="..\lang\ru-RU.aerlang" Condition="'$(Config)'=='Beta'">
             <RemoteDir>AErender_Launcher.app\Contents\Resources\StartUp\</RemoteDir>

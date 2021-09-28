@@ -197,7 +197,7 @@ begin
     MainForm.outputPath.Text,
 
     MainForm.outputModuleBox.Items[MainForm.outputModuleBox.ItemIndex],
-    MainForm.renderSettingsBox.Items[MainForm.renderSettingsBox.ItemIndex],
+    MainForm.renderSettingsEdit.Text,
 
     MainForm.missingFilesCheckbox.IsChecked,
     MainForm.soundCheckbox.IsChecked,

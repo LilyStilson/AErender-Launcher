@@ -95,8 +95,8 @@ uses
   Xml.XMLIntf,
   Xml.adomxmldom,
   Xml.XMLDoc,
-  Data.Bind.Components,
   Xml.omnixmldom,
+  Data.Bind.Components,
   {$ENDREGION}
 
   {$REGION '    Additional Liraries    '}
@@ -197,8 +197,8 @@ type
     outputModuleLabel: TLabel;
     outputModuleLayout: TLayout;
     renderSettingsLayout: TLayout;
-    renderSettingsBox: TComboBox;
     renderSettingsLabel: TLabel;
+    renderSettingsEdit: TComboEdit;
     MainMenu1: TMainMenu;
     launcherItem: TMenuItem;
     fileItem: TMenuItem;
@@ -363,7 +363,6 @@ type
 
     procedure SetLanguage(LanguageCode: Integer);
     procedure UpdateOutputModules;
-    procedure UpdateRenderSettings;
 
     procedure threadsCountTyping(Sender: TObject);
     procedure threadsCountExit(Sender: TObject);
@@ -375,7 +374,6 @@ type
     procedure ReInflateRecents;
 
     procedure compGridEditingDone(Sender: TObject; const ACol, ARow: Integer);
-    procedure renderSettingsBoxChange(Sender: TObject);
     procedure TasksTreeViewDragChange(SourceItem, DestItem: TTreeViewItem; var Allow: Boolean);
     procedure TasksTreeViewKeyDown(Sender: TObject; var Key: Word; var KeyChar: Char; Shift: TShiftState);
     procedure TasksTreeViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Single);
@@ -410,8 +408,7 @@ type
     procedure TasksTreeViewItemDblClick(Sender: TObject);
     procedure TaskEditorSaveButtonClick(Sender: TObject);
     procedure ProjectReaderAwaitTimer(Sender: TObject);
-    procedure TaskEditorToolbarMouseDown(Sender: TObject;
-      Button: TMouseButton; Shift: TShiftState; X, Y: Single);
+    procedure TaskEditorToolbarMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Single);
   private
     { Private declarations }
     FCurrentItem: String;
@@ -755,7 +752,7 @@ begin
     SettingNode.Attributes['imported'] := 'False';
   end;
 
-  MainForm.renderSettingsBox.ItemIndex := 0;
+  MainForm.renderSettingsEdit.Text := 'Best Settings';
 
   ChildNode := RootNode.AddChild('recentProjects');
   for var i := 0 to 9 do
@@ -813,7 +810,7 @@ begin
   InitRenderSettings;
 
   MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
-  MainForm.renderSettingsBox.ItemIndex := 0;
+  MainForm.renderSettingsEdit.Text := RootNode.ChildNodes['renderSettings'].ChildNodes[StrToInt(RootNode.ChildNodes['renderSettings'].Attributes['selected'])].Text;
 end;
 
 procedure LoadConfiguration(Path: String);
@@ -864,15 +861,7 @@ begin
   end else
     InitOutputModules;
 
-  if RootNode.ChildNodes['renderSettings'].ChildNodes.Count <> 0 then begin
-    SetLength (RenderSettings, RootNode.ChildNodes['renderSettings'].ChildNodes.Count);
-    for var i := 0 to High(RenderSettings) do begin
-      RenderSettings[i].Setting := RootNode.ChildNodes['renderSettings'].ChildNodes[i].Text;
-      RenderSettings[i].Imported := StrToBool(RootNode.ChildNodes['renderSettings'].ChildNodes[i].Attributes['imported']);
-    end;
-    MainForm.renderSettingsBox.ItemIndex := StrToInt(RootNode.ChildNodes['renderSettings'].Attributes['selected']);
-  end else
-    InitRenderSettings;
+  MainForm.renderSettingsEdit.Text := RootNode.ChildNodes['renderSettings'].Text;
 
   for var i := 0 to 9 do begin
     Recents[i] := RootNode.ChildNodes['recentProjects'].ChildNodes[i].Text;
@@ -928,12 +917,7 @@ begin
   end;
 
   ChildNode := RootNode.AddChild('renderSettings');
-  ChildNode.Attributes['selected'] := MainForm.renderSettingsBox.ItemIndex.ToString;
-  for var i := 0 to High(RenderSettings) do begin
-    var SettingNode: IXMLNode := RootNode.ChildNodes['renderSettings'].AddChild('setting');
-    SettingNode.Text := RenderSettings[i].Setting;
-    SettingNode.Attributes['imported'] := RenderSettings[i].Imported;
-  end;
+  ChildNode.Text := MainForm.renderSettingsEdit.Text;
 
   ChildNode := RootNode.AddChild('recentProjects');
   for var i := 0 to 9 do begin
@@ -1286,14 +1270,6 @@ begin
 //  PathCheckThread.Start;
 end;
 
-procedure TMainForm.renderSettingsBoxChange(Sender: TObject);
-begin
-  if (renderSettingsBox.ItemIndex = renderSettingsBox.Count - 1) and (renderSettingsBox.Count <> 0) then begin
-    //OutputModuleEditorForm.Show;
-    //renderSettingsBox.ItemIndex := 0;
-  end
-end;
-
 /// This will add instance to Recents[] and call
 /// ReInflateRecents() to update recentItem
 procedure TMainForm.AddToRecents(Item: String);
@@ -1358,7 +1334,7 @@ begin
     RenderTasks.Items[TaskIndex].Project := projectPath.Text;
     RenderTasks.Items[TaskIndex].Output := outputPath.Text;
     RenderTasks.Items[TaskIndex].OutputModule := outputModuleBox.Items[outputModuleBox.ItemIndex];
-    RenderTasks.Items[TaskIndex].RenderSettings := renderSettingsBox.Items[renderSettingsBox.ItemIndex];
+    RenderTasks.Items[TaskIndex].RenderSettings := renderSettingsEdit.Text;
     RenderTasks.Items[TaskIndex].MissingFiles := missingFilesCheckbox.IsChecked;
     RenderTasks.Items[TaskIndex].Sound := soundCheckbox.IsChecked;
     RenderTasks.Items[TaskIndex].Multiprocessing := threadedRender.IsChecked;
@@ -1505,21 +1481,6 @@ begin
   outputModuleBox.ItemIndex := Index;
 end;
 
-procedure TMainForm.UpdateRenderSettings;
-begin
-  var Index: Integer := renderSettingsBox.ItemIndex;
-  if (renderSettingsBox.Count <> 0) then
-    renderSettingsBox.Clear;
-
-  for var i := 0 to High(RenderSettings) do
-    if RenderSettings[i].Imported then
-      renderSettingsBox.Items.Add(RenderSettings[i].Setting + ' ' + Language[LANG].OutputModuleConfiguratorForm.Imported)
-    else
-      renderSettingsBox.Items.Add(RenderSettings[i].Setting);
-  //renderSettingsBox.Items.Add(Language[LANG].MainForm.ConfigureRenderSettings);
-  renderSettingsBox.ItemIndex := Index;
-end;
-
 function TMainForm.ReadAERQ(Path: String): TObjectList<TRenderTask>;
 begin
   Result := TObjectList<TRenderTask>.Create;
@@ -1556,22 +1517,9 @@ begin
     end;
     outputModuleBoxChange(Self);
 
-    if RootNode.ChildNodes['queueItem'].ChildNodes['renderSettings'].Text.IsEmpty <> True then begin
-      var TempRenderSetting: RenderSetting;
-      TempRenderSetting.Setting := RootNode.ChildNodes['queueItem'].ChildNodes['renderSettings'].Text;
-
-      if GetRSIndex(TempRenderSetting) <> -1 then
-        renderSettingsBox.ItemIndex := GetRSIndex(TempRenderSetting)
-      else begin
-        SetLength(RenderSettings, Length(RenderSettings) + 1);
-        RenderSettings[High(RenderSettings)].Setting := RootNode.ChildNodes['queueItem'].ChildNodes['renderSettings'].Text;
-        RenderSettings[High(RenderSettings)].Imported := True;
-
-        renderSettingsBox.Items.Insert(renderSettingsBox.Items.Count - 1, RenderSettings[High(RenderSettings)].Setting + ' ' + Language[LANG].OutputModuleConfiguratorForm.Imported);
-        renderSettingsBox.ItemIndex := renderSettingsBox.Items.Count - 2;
-      end;
+     if RootNode.ChildNodes['queueItem'].ChildNodes['renderSettings'].Text.IsEmpty <> True then begin
+      renderSettingsEdit.Text := RootNode.ChildNodes['queueItem'].ChildNodes['renderSettings'].Text; 
     end;
-    renderSettingsBoxChange(Self);
 
     var Compositions: TList<TComposition> := TList<TComposition>.Create;
     Compositions.Add(TComposition.Create(
@@ -1589,7 +1537,7 @@ begin
       RootNode.Attributes['project'],
       outputPath.Text,
       outputModuleBox.Items[outputModuleBox.ItemIndex],
-      renderSettingsBox.Items[renderSettingsBox.ItemIndex],
+      renderSettingsEdit.Text,
       missingFilesCheckbox.IsChecked,
       soundCheckbox.IsChecked,
       threadedRender.IsChecked,
@@ -1632,7 +1580,7 @@ begin
     RootNode.Attributes['project'],
     outputPath.Text,
     outputModuleBox.Items[outputModuleBox.ItemIndex],
-    renderSettingsBox.Items[renderSettingsBox.ItemIndex],
+    renderSettingsEdit.Text,
     missingFilesCheckbox.IsChecked,
     soundCheckbox.IsChecked,
     threadedRender.IsChecked,
@@ -2259,21 +2207,6 @@ begin
 
       ImportForm.FormSender := FS_JSON;
       ImportForm.ShowModal;
-
-//      RenderTasks.Add(TRenderTask.CreateFromJSON(
-//        projectPath.Text,
-//        outputPath.Text,
-//        outputModuleBox.Items[outputModuleBox.ItemIndex],
-//        renderSettingsBox.Items[renderSettingsBox.ItemIndex],
-//        missingFilesCheckbox.IsChecked,
-//        soundCheckbox.IsChecked,
-//        threadedRender.IsChecked,
-//        IfThenElse(customCheckbox.IsChecked = True, customProp.Text, ''),  // yeet
-//        cacheUsageTrackBar.Value,
-//        memUsageTrackBar.Value,
-//        ProjectJson
-//      ));
-
     end;// else
       //Status.Text := 'File is empty, repeating...';
   end;
@@ -2424,7 +2357,7 @@ begin
     outputPath.Text := Task.Output;
 
     outputModuleBox.Index := outputModuleBox.Items.IndexOf(Task.OutputModule);
-    renderSettingsBox.Index := renderSettingsBox.Items.IndexOf(Task.RenderSettings);
+    renderSettingsEdit.Text := Task.RenderSettings;
 
     missingFilesCheckbox.IsChecked := Task.MissingFiles;
     soundCheckbox.IsChecked := Task.Sound;
@@ -2799,7 +2732,7 @@ begin
       projectPath.Text,
       outputPath.Text,
       outputModuleBox.Items[outputModuleBox.ItemIndex],
-      renderSettingsBox.Items[renderSettingsBox.ItemIndex],
+      renderSettingsEdit.Text,
       missingFilesCheckbox.IsChecked,
       soundCheckbox.IsChecked,
       threadedRender.IsChecked,
