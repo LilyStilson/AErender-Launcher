@@ -194,8 +194,8 @@ end;
 
 procedure TOutputModuleEditorForm.cancelButtonClick(Sender: TObject);
 begin
-  MainUnit.OutputModules := TempOutputModules;
-  SetLength(MainUnit.OutputModules, Length(TempOutputModules));
+  Settings.OutputModules := TempOutputModules;
+  SetLength(Settings.OutputModules, Length(TempOutputModules));
   OutputModuleEditorForm.Close;
 end;
 
@@ -225,7 +225,7 @@ end;
 
 procedure TOutputModuleEditorForm.fileMaskTyping(Sender: TObject);
 begin
-  MainUnit.OutputModules[outputModulesBox.ItemIndex].Mask := fileMask.Text;
+  Settings.OutputModules[outputModulesBox.ItemIndex].Mask := fileMask.Text;
   {$IFDEF MACOS}NSWindowEditStateChange(True);{$ENDIF MACOS}
 end;
 
@@ -239,8 +239,8 @@ end;
 procedure TOutputModuleEditorForm.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
-  if not CompareOutputModules(MainUnit.OutputModules, TempOutputModules) then
-    case TDialogServiceSync.MessageDialog(Language[LANG].OutputModuleConfiguratorForm.CloseDialog, TMsgDlgType.mtConfirmation, mbYesNoCancel, TMsgDlgBtn.mbYes, 0) of
+  if not CompareOutputModules(Settings.OutputModules, TempOutputModules) then
+    case TDialogServiceSync.MessageDialog(Language[Settings.Language].OutputModuleConfiguratorForm.CloseDialog, TMsgDlgType.mtConfirmation, mbYesNoCancel, TMsgDlgBtn.mbYes, 0) of
       6: begin CanClose := True; saveModulesButtonClick(Sender); end;
       7: begin CanClose := True; cancelButtonClick(Sender); end;
       2: CanClose := False;
@@ -288,13 +288,13 @@ end;
 
 procedure TOutputModuleEditorForm.FormShow(Sender: TObject);
 begin
-  TempOutputModules := MainUnit.OutputModules;
-  SetLength(TempOutputModules, Length(MainUnit.OutputModules));
-  for var i := 0 to High(MainUnit.OutputModules) do
-    if MainUnit.OutputModules[i].Imported then
-      outputModulesBox.Items.Add(MainUnit.OutputModules[i].Module + ' ' + Language[LANG].OutputModuleConfiguratorForm.Imported)
+  TempOutputModules := Settings.OutputModules;
+  SetLength(TempOutputModules, Length(Settings.OutputModules));
+  for var i := 0 to High(Settings.OutputModules) do
+    if Settings.OutputModules[i].Imported then
+      outputModulesBox.Items.Add(Settings.OutputModules[i].Module + ' ' + Language[Settings.Language].OutputModuleConfiguratorForm.Imported)
     else
-      outputModulesBox.Items.Add(MainUnit.OutputModules[i].Module);
+      outputModulesBox.Items.Add(Settings.OutputModules[i].Module);
   outputModulesBox.ItemIndex := 0;
   {$IFDEF MACOS}NSWindowEditStateChange(False);{$ENDIF MACOS}
 end;
@@ -303,9 +303,9 @@ procedure TOutputModuleEditorForm.outputModulesBoxChange(Sender: TObject);
 begin
   if outputModulesBox.ItemIndex > -1 then
     begin
-      outputModule.Text := MainUnit.OutputModules[outputModulesBox.ItemIndex].Module;
-      fileMask.Text := MainUnit.OutputModules[outputModulesBox.ItemIndex].Mask;
-      if MainUnit.OutputModules[outputModulesBox.ItemIndex].Imported then
+      outputModule.Text := Settings.OutputModules[outputModulesBox.ItemIndex].Module;
+      fileMask.Text := Settings.OutputModules[outputModulesBox.ItemIndex].Mask;
+      if Settings.OutputModules[outputModulesBox.ItemIndex].Imported then
         outputModule.Enabled := False
       else
         outputModule.Enabled := True;
@@ -315,7 +315,7 @@ end;
 procedure TOutputModuleEditorForm.outputModuleTyping(Sender: TObject);
 begin
   outputModulesBox.Items[outputModulesBox.ItemIndex] := outputModule.Text;
-  MainUnit.OutputModules[outputModulesBox.ItemIndex].Module := outputModule.Text;
+  Settings.OutputModules[outputModulesBox.ItemIndex].Module := outputModule.Text;
   {$IFDEF MACOS}NSWindowEditStateChange(True);{$ENDIF MACOS}
 end;
 
@@ -323,14 +323,14 @@ procedure TOutputModuleEditorForm.removeModuleButtonClick(Sender: TObject);
 begin
   var tempIndex: Integer := outputModulesBox.ItemIndex;
 
-  MainUnit.OutputModules[tempIndex].Module := '';
-  MainUnit.OutputModules[tempIndex].Mask := '';
+  Settings.OutputModules[tempIndex].Module := '';
+  Settings.OutputModules[tempIndex].Mask := '';
 
-  if tempIndex <> High(MainUnit.OutputModules) then
-    for var i := tempIndex + 1 to High(MainUnit.OutputModules) - 1 do
-      MainUnit.OutputModules[i - 1] := MainUnit.OutputModules[i];
+  if tempIndex <> High(Settings.OutputModules) then
+    for var i := tempIndex + 1 to High(Settings.OutputModules) - 1 do
+      Settings.OutputModules[i - 1] := Settings.OutputModules[i];
 
-  SetLength (MainUnit.OutputModules, Length(MainUnit.OutputModules) - 1);
+  SetLength (Settings.OutputModules, Length(Settings.OutputModules) - 1);
 
   outputModulesBox.Items.Delete(tempIndex);
   outputModulesBox.ItemIndex := tempIndex - 1;
@@ -340,17 +340,17 @@ end;
 
 procedure TOutputModuleEditorForm.saveModulesButtonClick(Sender: TObject);
 begin
-  TempOutputModules := MainUnit.OutputModules;
-  SetLength(TempOutputModules, Length(MainUnit.OutputModules));
+  TempOutputModules := Settings.OutputModules;
+  SetLength(TempOutputModules, Length(Settings.OutputModules));
   MainForm.UpdateOutputModules;
   OutputModuleEditorForm.Close;
 end;
 
 procedure TOutputModuleEditorForm.addModuleButtonClick(Sender: TObject);
 begin
-  SetLength (MainUnit.OutputModules, Length(MainUnit.OutputModules) + 1);
-  outputModulesBox.Items.Insert(High(MainUnit.OutputModules), 'Untitled');
-  outputModulesBox.ItemIndex := High(MainUnit.OutputModules);
+  SetLength (Settings.OutputModules, Length(Settings.OutputModules) + 1);
+  outputModulesBox.Items.Insert(High(Settings.OutputModules), 'Untitled');
+  outputModulesBox.ItemIndex := High(Settings.OutputModules);
   {$IFDEF MACOS}NSWindowEditStateChange(True);{$ENDIF MACOS}
 end;
 

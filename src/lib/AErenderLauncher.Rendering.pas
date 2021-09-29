@@ -6,7 +6,10 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.JSON,
-  AErenderLauncher.Math, AErenderLauncher.IO, AErenderLauncher.AerenderParser;
+
+  AErenderLauncher.Math,
+  AErenderLauncher.IO,
+  AErenderLauncher.AerenderParser;
 
 type
   AERParamException = class(Exception);
@@ -141,7 +144,7 @@ var
 implementation
 
 uses
-  MainUnit;
+  AErenderLauncher.Types;
 
 (****************)
 (*  TFrameSpan  *)

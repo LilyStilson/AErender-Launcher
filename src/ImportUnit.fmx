@@ -197,7 +197,7 @@ object ImportForm: TImportForm
         Size.Height = 16.000000000000000000
         Size.PlatformDefault = False
         Text = 'Name: '
-        TabOrder = 5
+        TabOrder = 6
       end
       object compResolution: TLabel
         Align = Top

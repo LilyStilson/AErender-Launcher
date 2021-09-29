@@ -46,6 +46,7 @@ uses
   FMX.Effects,
 
   AErenderLauncher.IO,
+  AErenderLauncher.Types,
 
   {$IFDEF MSWINDOWS}
     FMX.Platform.Win, Winapi.ShellAPI, Winapi.Windows;
@@ -120,12 +121,12 @@ begin
   if MainUnit.FFMPEG then
     begin
       FFmpegLabel.FontColor := $FF1E90FF;
-      FFmpegLabel.Text := Language[LANG].AboutForm.FFMPEG + MainUnit.ffmpegPath;
+      FFmpegLabel.Text := Language[Settings.Language].AboutForm.FFMPEG + MainUnit.ffmpegPath;
     end
   else
     begin
       FFmpegLabel.FontColor := $FFDDDDDD;
-      FFmpegLabel.Text := Language[LANG].AboutForm.FFMPEGNotFound;
+      FFmpegLabel.Text := Language[Settings.Language].AboutForm.FFMPEGNotFound;
     end;
 end;
 

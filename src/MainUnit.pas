@@ -431,39 +431,37 @@ type
   function GetPlatformMemorySize: Int64;
   function GetFFMPEGPath: WideString;
   function KillProcess(ProcessName: String): Integer;
-  procedure InitOutputModules;
-  procedure InitRenderSettings;
-  procedure InitConfiguration(Path: String);
-  procedure LoadConfiguration(Path: String);
-  procedure LoadLegacyConfiguration(Path: String);
-  procedure SaveConfiguration(Path: String);
+//  procedure InitOutputModules;
+//  procedure InitConfiguration(Path: String);
+//  procedure LoadConfiguration(Path: String);
+//  procedure LoadLegacyConfiguration(Path: String);
+//  procedure SaveConfiguration(Path: String);
   procedure ChangeLanguage(LanguageCode: Integer);
   procedure InitLanguage(PATH: String);
 
 const
   APPVERSION = 'v0.8.9-beta';
   AERL_REPO_RELEASES = 'https://api.github.com/repos/lilystilson/aerender-launcher/releases';
-  PLATFORMPATHSEPARATOR = {$IFDEF MSWINDOWS}'\'{$ENDIF MSWINDOWS}
-                          {$IFDEF MACOS}'/'{$ENDIF MACOS};
   AWAIT_TIMEOUT = 10000;
   //MAX_SIMULTANEOUS_THREADS = 8;
 
 
 var
   MainForm: TMainForm;                                      (*  Main Form Declaration                       *)
-  APPFOLDER, VER, AERPATH, DEFPRGPATH, DEFOUTPATH,
-  ERR, gitResponse, gitVersion, gitDownload, ffmpegPath,
-  AERH, tempSavePath, DelTempFiles: String;                 (*  Required variables for configuration file   *)
+//  APPFOLDER, VER, AERPATH, DEFPRGPATH, DEFOUTPATH,
+//  ERR,
+//  AERH, tempSavePath, DelTempFiles: String;                 (*  Required variables for configuration file   *)
+  gitResponse, gitVersion, gitDownload, ffmpegPath: String;
   gitRelease: TJsonValue;                                   (*  GitHub API's returning JSON file            *)
   UpdateAvailable: Boolean = False;                         (*  Represents app updates availability         *)
   FFMPEG: Boolean = False;                                  (*  Represents FFMPEG availability              *)
   AEParser: String = '';
   RenderWindowSender: TButton;                              (*  Who opened Rendering window?                *)
-  LANG, STYLE, ONRENDERSTART: Integer;                      (*  Language, Theme and OnRenderStart values    *)
-  LogFiles: TArray<String>;                                 (*  All the aerender log files here             *)
-  OutputModules: TArray<OutputModule>;                      (*  All the After Effects output modules here   *)
-  RenderSettings: TArray<RenderSetting>;
-  OMCount: Cardinal;
+//  Settings.Language, STYLE, ONRENDERSTART: Integer;                      (*  Language, Theme and OnRenderStart values    *)
+//  LogFiles: TArray<String>;                                 (*  All the aerender log files here             *)
+//  Settings.OutputModules: TArray<OutputModule>;                      (*  All the After Effects output modules here   *)
+//  RenderSettings: TArray<RenderSetting>;
+//  OMCount: Cardinal;
   //TempOutputModule: OutputModule;                         (*  Temporary Output Module used from import    *)
   //TMathParser: TExpressionParser;                           (*  Mathematical parser for frames calculation  *)
 
@@ -500,10 +498,6 @@ uses
   {$ENDREGION}
 
 {$R *.fmx}
-
-
-
-
 
 {$REGION '    Routines    '}
 
@@ -609,7 +603,7 @@ end;
 
 procedure InitLanguage(PATH: String);
 begin
-  //LANG := 1;
+  //Settings.Language := 1;
   var ResourceEN: TResourceStream := TResourceStream.Create(HInstance, 'Language_EN', RT_RCDATA);
   var ResourceRU: TResourceStream := TResourceStream.Create(HInstance, 'Language_RU', RT_RCDATA);
   Language := [
@@ -617,334 +611,301 @@ begin
                 LauncherText.InitFromResourceStream(ResourceRU)
               ];
 
-  ChangeLanguage(LANG);
+  ChangeLanguage(Settings.Language);
 end;
 
-procedure InitOutputModules;
-begin
-  SetLength (OutputModules, 10);
-
-  OutputModules[0].Module := 'Lossless';
-  OutputModules[0].Mask := '[compName].[fileExtension]';
-  OutputModules[0].Imported := False;
-
-  OutputModules[1].Module := 'AIFF 48kHz';
-  OutputModules[1].Mask := '[compName].[fileExtension]';
-  OutputModules[1].Imported := False;
-
-  OutputModules[2].Module := 'Alpha Only';
-  OutputModules[2].Mask := '[compName].[fileExtension]';
-  OutputModules[2].Imported := False;
-
-  OutputModules[3].Module := 'AVI DV NTSC 48kHz';
-  OutputModules[3].Mask := '[compName].[fileExtension]';
-  OutputModules[3].Imported := False;
-
-  OutputModules[4].Module := 'AVI DV PAL 48kHz';
-  OutputModules[4].Mask := '[compName].[fileExtension]';
-  OutputModules[4].Imported := False;
-
-  OutputModules[5].Module := 'Lossless with Alpha';
-  OutputModules[5].Mask := '[compName].[fileExtension]';
-  OutputModules[5].Imported := False;
-
-  OutputModules[6].Module := 'Multi-Machine Sequence';
-  OutputModules[6].Mask := '[compName]_[#####].[fileExtension]';
-  OutputModules[6].Imported := False;
-
-  OutputModules[7].Module := 'Photoshop';
-  OutputModules[7].Mask := '[compName]_[#####].[fileExtension]';
-  OutputModules[7].Imported := False;
-
-  OutputModules[8].Module := 'Save Current Preview';
-  OutputModules[8].Mask := '[compName].[fileExtension]';
-  OutputModules[8].Imported := False;
-
-  OutputModules[9].Module := 'TIFF Sequence with Alpha';
-  OutputModules[9].Mask := '[compName]_[#####].[fileExtension]';
-  OutputModules[9].Imported := False;
-end;
-
-procedure InitRenderSettings;
-begin
-  SetLength (RenderSettings, 5);
-
-  RenderSettings[0].Setting   := 'Current Settings';
-  RenderSettings[0].Imported  := False;
-
-  RenderSettings[1].Setting   := 'Best Settings';
-  RenderSettings[1].Imported  := False;
-
-  RenderSettings[2].Setting   := 'DV Settings';
-  RenderSettings[2].Imported  := False;
-
-  RenderSettings[3].Setting   := 'Draft Settings';
-  RenderSettings[3].Imported  := False;
-
-  RenderSettings[4].Setting   := 'Multi-Machine Settings';
-  RenderSettings[4].Imported  := False;
-
-  //RenderSettings[4].Setting   := 'Custom';
-  //RenderSettings[4].Imported  := False;
-end;
-
-procedure InitConfiguration(Path: String);
-var
-  Config: IXMLDocument;
-  RootNode: IXMLNode;
-  ChildNode: IXMLNode;
-begin
-  //InitLanguage;
-  InitOutputModules;
-  InitRenderSettings;
-
-  Config := TXMLDocument.Create(nil);
-  Config.Active := True;
-  Config.Encoding := 'utf-8';
-  Config.Options := [doNodeAutoIndent];
-
-  RootNode := Config.AddChild('launcherconfig');
-
-  RootNode.AddChild('lang').Text := '0';
-  RootNode.AddChild('style').Text := '0';
-  RootNode.AddChild('aerender').Text := '';
-  RootNode.AddChild('onRenderStart').Text := '0';
-  RootNode.AddChild('defprgpath').Text := '';
-  RootNode.AddChild('defoutpath').Text := '';
-  RootNode.AddChild('handle').Text := 'True';
-  RootNode.AddChild('delTempFiles').Text := 'True';
-
-  RootNode.AddChild('projectPath').Text := '';
-  RootNode.AddChild('outputPath').Text := '';
-  RootNode.AddChild('tempSavePath').Text := '';
-
-  RootNode.AddChild('comp').Text := '';
-  RootNode.AddChild('startFrame').Text := '';
-  RootNode.AddChild('endFrame').Text := '';
-
-  RootNode.AddChild('missingFiles').Text := 'False';
-  RootNode.AddChild('sound').Text := 'False';
-  RootNode.AddChild('thread').Text := 'False';
-  RootNode.AddChild('prop').Text := '';
-  RootNode.ChildNodes['prop'].Attributes['enabled'] := 'False';
-
-  RootNode.AddChild('memoryLimit').Text := '100';
-  RootNode.AddChild('cacheLimit').Text := '100';
-
-  ChildNode := RootNode.AddChild('outputModule');
-  ChildNode.Attributes['selected'] := '0';
-
-  for var i := 0 to High(OutputModules) do begin
-    var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
-    ModuleNode.AddChild('moduleName').Text := OutputModules[i].Module;
-    ModuleNode.Attributes['imported'] := 'False';
-    ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
-  end;
-
-  MainForm.outputModuleBox.ItemIndex := 0;
-
-  ChildNode := RootNode.AddChild('renderSettings');
-  ChildNode.Attributes['selected'] := '0';
-
-  for var i := 0 to High(RenderSettings) do begin
-    var SettingNode: IXMLNode := RootNode.ChildNodes['renderSettings'].AddChild('setting');
-    SettingNode.Text := RenderSettings[i].Setting;
-    SettingNode.Attributes['imported'] := 'False';
-  end;
-
-  MainForm.renderSettingsEdit.Text := 'Best Settings';
-
-  ChildNode := RootNode.AddChild('recentProjects');
-  for var i := 0 to 9 do
-    ChildNode.AddChild('project').Text := '(empty)';
-
-  Config.SaveToFile(Path);
-end;
-
-procedure LoadLegacyConfiguration(Path: String);
-var
-  Config: IXMLDocument;
-  RootNode: IXMLNode;
-begin
-  Config := TXMLDocument.Create(nil);
-  Config.LoadFromFile(Path);
-  Config.Active := True;
-  RootNode := Config.DocumentElement;
-
-  LANG := 0;
-  STYLE := RootNode.ChildNodes['style'].Text.ToInteger();
-  AErenderPath := RootNode.ChildNodes['aerender'].Text;
-  ONRENDERSTART := RootNode.ChildNodes['onRenderStart'].Text.ToInteger();
-  DEFPRGPATH := RootNode.ChildNodes['defprgpath'].Text;
-  DEFOUTPATH := RootNode.ChildNodes['defoutpath'].Text;
-  AERH := RootNode.ChildNodes['handle'].Text;
-  DelTempFiles := RootNode.ChildNodes['delTempFiles'].Text;
-
-  MainForm.projectPath.Text := RootNode.ChildNodes['projectPath'].Text;
-  MainForm.outputPath.Text := RootNode.ChildNodes['outputPath'].Text;
-  tempSavePath := RootNode.ChildNodes['tempSavePath'].Text;
-
-  MainForm.compName.Text := RootNode.ChildNodes['comp'].Text;
-  MainForm.inFrame.Text := RootNode.ChildNodes['startFrame'].Text;
-  MainForm.outFrame.Text := RootNode.ChildNodes['endFrame'].Text;
-
-  MainForm.missingFilesCheckbox.IsChecked := RootNode.ChildNodes['missingFiles'].Text.ToBoolean();
-  MainForm.soundCheckbox.IsChecked := RootNode.ChildNodes['sound'].Text.ToBoolean();
-  MainForm.threadedRender.IsChecked := RootNode.ChildNodes['thread'].Text.ToBoolean();
-  MainForm.customCheckbox.IsChecked := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
-  MainForm.customProp.Enabled := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
-  MainForm.customProp.Text := RootNode.ChildNodes['prop'].Text;
-
-  MainForm.memUsageTrackBar.Value := RootNode.ChildNodes['memoryLimit'].Text.ToSingle();
-  MainForm.cacheUsageTrackBar.Value := RootNode.ChildNodes['cacheLimit'].Text.ToSingle();
-
-  //MainUnit.OMCount := RootNode.ChildNodes['outputModule'].ChildNodes.Count;
-  SetLength (OutputModules, RootNode.ChildNodes['outputModule'].ChildNodes.Count);
-  for var i := 0 to High(OutputModules) do
-    begin
-      OutputModules[i].Module := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['moduleName'].Text;
-      OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
-      OutputModules[i].Imported := False;
-    end;
-
-  InitRenderSettings;
-
-  MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
-  MainForm.renderSettingsEdit.Text := RootNode.ChildNodes['renderSettings'].ChildNodes[StrToInt(RootNode.ChildNodes['renderSettings'].Attributes['selected'])].Text;
-end;
-
-procedure LoadConfiguration(Path: String);
-var
-  Config: IXMLDocument;
-  RootNode: IXMLNode;
-begin
-  Config := TXMLDocument.Create(nil);
-  Config.LoadFromFile(Path);
-  Config.Active := True;
-  RootNode := Config.DocumentElement;
-
-  LANG := RootNode.ChildNodes['lang'].Text.ToInteger();
-  STYLE := RootNode.ChildNodes['style'].Text.ToInteger();
-  AErenderPath := RootNode.ChildNodes['aerender'].Text;
-  ONRENDERSTART := RootNode.ChildNodes['onRenderStart'].Text.ToInteger();
-  DEFPRGPATH := RootNode.ChildNodes['defprgpath'].Text;
-  DEFOUTPATH := RootNode.ChildNodes['defoutpath'].Text;
-  AERH := RootNode.ChildNodes['handle'].Text;
-  DelTempFiles := RootNode.ChildNodes['delTempFiles'].Text;
-
-  MainForm.projectPath.Text := RootNode.ChildNodes['projectPath'].Text;
-  MainForm.outputPath.Text := RootNode.ChildNodes['outputPath'].Text;
-  tempSavePath := RootNode.ChildNodes['tempSavePath'].Text;
-
-  MainForm.compName.Text := RootNode.ChildNodes['comp'].Text;
-  MainForm.inFrame.Text := RootNode.ChildNodes['startFrame'].Text;
-  MainForm.outFrame.Text := RootNode.ChildNodes['endFrame'].Text;
-
-  MainForm.missingFilesCheckbox.IsChecked := RootNode.ChildNodes['missingFiles'].Text.ToBoolean();
-  MainForm.soundCheckbox.IsChecked := RootNode.ChildNodes['sound'].Text.ToBoolean();
-  MainForm.threadedRender.IsChecked := RootNode.ChildNodes['thread'].Text.ToBoolean();
-  MainForm.customCheckbox.IsChecked := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
-  MainForm.customProp.Enabled := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
-  MainForm.customProp.Text := RootNode.ChildNodes['prop'].Text;
-
-  MainForm.memUsageTrackBar.Value := RootNode.ChildNodes['memoryLimit'].Text.ToSingle();
-  MainForm.cacheUsageTrackBar.Value := RootNode.ChildNodes['cacheLimit'].Text.ToSingle();
-
-  if RootNode.ChildNodes['outputModule'].ChildNodes.Count <> 0 then begin
-    SetLength (OutputModules, RootNode.ChildNodes['outputModule'].ChildNodes.Count);
-    for var i := 0 to High(OutputModules) do begin
-      OutputModules[i].Module := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['moduleName'].Text;
-      OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
-      OutputModules[i].Imported := StrToBool(RootNode.ChildNodes['outputModule'].ChildNodes[i].Attributes['imported']);
-    end;
-    MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
-  end else
-    InitOutputModules;
-
-  MainForm.renderSettingsEdit.Text := RootNode.ChildNodes['renderSettings'].Text;
-
-  for var i := 0 to 9 do begin
-    Recents[i] := RootNode.ChildNodes['recentProjects'].ChildNodes[i].Text;
-  end;
-end;
-
-procedure SaveConfiguration(Path: String);
-var
-  Config: IXMLDocument;
-  RootNode: IXMLNode;
-  ChildNode: IXMLNode;
-begin
-  Config := TXMLDocument.Create(nil);
-  Config.Active := True;
-  Config.Encoding := 'utf-8';
-  Config.Options := [doNodeAutoIndent];
-
-  RootNode := Config.AddChild('launcherconfig');
-
-  RootNode.AddChild('lang').Text := LANG.ToString;
-  RootNode.AddChild('style').Text := STYLE.ToString;
-  RootNode.AddChild('aerender').Text := AErenderPath;
-  RootNode.AddChild('onRenderStart').Text := ONRENDERSTART.ToString;
-  RootNode.AddChild('defprgpath').Text := DEFPRGPATH;
-  RootNode.AddChild('defoutpath').Text := DEFOUTPATH;
-  RootNode.AddChild('handle').Text := AERH;
-  RootNode.AddChild('delTempFiles').Text := DelTempFiles;
-
-  RootNode.AddChild('projectPath').Text := MainForm.projectPath.Text;
-  RootNode.AddChild('outputPath').Text := MainForm.outputPath.Text;
-  RootNode.AddChild('tempSavePath').Text := tempSavePath;
-
-  RootNode.AddChild('comp').Text := MainForm.compName.Text;
-  RootNode.AddChild('startFrame').Text := MainForm.inFrame.Text;
-  RootNode.AddChild('endFrame').Text := MainForm.outFrame.Text;
-  RootNode.AddChild('missingFiles').Text := BoolToStr(MainForm.missingFilesCheckbox.IsChecked, True);
-
-  RootNode.AddChild('sound').Text := BoolToStr(MainForm.soundCheckbox.IsChecked, True);
-  RootNode.AddChild('thread').Text := BoolToStr(MainForm.threadedRender.IsChecked, True);
-  RootNode.AddChild('prop').Text := MainForm.customProp.Text;
-  RootNode.ChildNodes['prop'].Attributes['enabled'] := BoolToStr(MainForm.customCheckbox.IsChecked, True);
-
-  RootNode.AddChild('memoryLimit').Text := MainForm.memUsageTrackBar.Value.ToString;
-  RootNode.AddChild('cacheLimit').Text := MainForm.cacheUsageTrackBar.Value.ToString;
-
-  ChildNode := RootNode.AddChild('outputModule');
-  ChildNode.Attributes['selected'] := MainForm.outputModuleBox.ItemIndex.ToString;
-  for var i := 0 to High(OutputModules) do begin
-    var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
-    ModuleNode.Attributes['imported'] := BoolToStr(OutputModules[i].Imported, True);
-    ModuleNode.AddChild('moduleName').Text := OutputModules[i].Module;
-    ModuleNode.AddChild('filemask').Text := OutputModules[i].Mask;
-  end;
-
-  ChildNode := RootNode.AddChild('renderSettings');
-  ChildNode.Text := MainForm.renderSettingsEdit.Text;
-
-  ChildNode := RootNode.AddChild('recentProjects');
-  for var i := 0 to 9 do begin
-    if Recents[i] = '' then
-      ChildNode.AddChild('project').Text := '(empty)'
-    else
-      ChildNode.AddChild('project').Text := Recents[i]
-  end;
-
-  Config.SaveToFile(Path);
-end;
+//procedure InitOutputModules;
+//begin
+//  SetLength (Settings.OutputModules, 10);
+//
+//  Settings.OutputModules[0].Module := 'Lossless';
+//  Settings.OutputModules[0].Mask := '[compName].[fileExtension]';
+//  Settings.OutputModules[0].Imported := False;
+//
+//  Settings.OutputModules[1].Module := 'AIFF 48kHz';
+//  Settings.OutputModules[1].Mask := '[compName].[fileExtension]';
+//  Settings.OutputModules[1].Imported := False;
+//
+//  Settings.OutputModules[2].Module := 'Alpha Only';
+//  Settings.OutputModules[2].Mask := '[compName].[fileExtension]';
+//  Settings.OutputModules[2].Imported := False;
+//
+//  Settings.OutputModules[3].Module := 'AVI DV NTSC 48kHz';
+//  Settings.OutputModules[3].Mask := '[compName].[fileExtension]';
+//  Settings.OutputModules[3].Imported := False;
+//
+//  Settings.OutputModules[4].Module := 'AVI DV PAL 48kHz';
+//  Settings.OutputModules[4].Mask := '[compName].[fileExtension]';
+//  Settings.OutputModules[4].Imported := False;
+//
+//  Settings.OutputModules[5].Module := 'Lossless with Alpha';
+//  Settings.OutputModules[5].Mask := '[compName].[fileExtension]';
+//  Settings.OutputModules[5].Imported := False;
+//
+//  Settings.OutputModules[6].Module := 'Multi-Machine Sequence';
+//  Settings.OutputModules[6].Mask := '[compName]_[#####].[fileExtension]';
+//  Settings.OutputModules[6].Imported := False;
+//
+//  Settings.OutputModules[7].Module := 'Photoshop';
+//  Settings.OutputModules[7].Mask := '[compName]_[#####].[fileExtension]';
+//  Settings.OutputModules[7].Imported := False;
+//
+//  Settings.OutputModules[8].Module := 'Save Current Preview';
+//  Settings.OutputModules[8].Mask := '[compName].[fileExtension]';
+//  Settings.OutputModules[8].Imported := False;
+//
+//  Settings.OutputModules[9].Module := 'TIFF Sequence with Alpha';
+//  Settings.OutputModules[9].Mask := '[compName]_[#####].[fileExtension]';
+//  Settings.OutputModules[9].Imported := False;
+//end;
+//
+//procedure InitConfiguration(Path: String);
+//var
+//  Config: IXMLDocument;
+//  RootNode: IXMLNode;
+//  ChildNode: IXMLNode;
+//begin
+//  //InitLanguage;
+//  InitOutputModules;
+//  InitRenderSettings;
+//
+//  Config := TXMLDocument.Create(nil);
+//  Config.Active := True;
+//  Config.Encoding := 'utf-8';
+//  Config.Options := [doNodeAutoIndent];
+//
+//  RootNode := Config.AddChild('launcherconfig');
+//
+//  RootNode.AddChild('lang').Text := '0';
+//  RootNode.AddChild('style').Text := '0';
+//  RootNode.AddChild('aerender').Text := '';
+//  RootNode.AddChild('onRenderStart').Text := '0';
+//  RootNode.AddChild('defprgpath').Text := '';
+//  RootNode.AddChild('defoutpath').Text := '';
+//  RootNode.AddChild('handle').Text := 'True';
+//  RootNode.AddChild('delTempFiles').Text := 'True';
+//
+//  RootNode.AddChild('projectPath').Text := '';
+//  RootNode.AddChild('outputPath').Text := '';
+//  RootNode.AddChild('tempSavePath').Text := '';
+//
+//  RootNode.AddChild('comp').Text := '';
+//  RootNode.AddChild('startFrame').Text := '';
+//  RootNode.AddChild('endFrame').Text := '';
+//
+//  RootNode.AddChild('missingFiles').Text := 'False';
+//  RootNode.AddChild('sound').Text := 'False';
+//  RootNode.AddChild('thread').Text := 'False';
+//  RootNode.AddChild('prop').Text := '';
+//  RootNode.ChildNodes['prop'].Attributes['enabled'] := 'False';
+//
+//  RootNode.AddChild('memoryLimit').Text := '100';
+//  RootNode.AddChild('cacheLimit').Text := '100';
+//
+//  ChildNode := RootNode.AddChild('outputModule');
+//  ChildNode.Attributes['selected'] := '0';
+//
+//  for var i := 0 to High(Settings.OutputModules) do begin
+//    var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
+//    ModuleNode.AddChild('moduleName').Text := Settings.OutputModules[i].Module;
+//    ModuleNode.Attributes['imported'] := 'False';
+//    ModuleNode.AddChild('filemask').Text := Settings.OutputModules[i].Mask;
+//  end;
+//
+//  MainForm.outputModuleBox.ItemIndex := 0;
+//
+//  ChildNode := RootNode.AddChild('renderSettings');
+//  ChildNode.Attributes['selected'] := '0';
+//
+//  for var i := 0 to High(RenderSettings) do begin
+//    var SettingNode: IXMLNode := RootNode.ChildNodes['renderSettings'].AddChild('setting');
+//    SettingNode.Text := RenderSettings[i].Setting;
+//    SettingNode.Attributes['imported'] := 'False';
+//  end;
+//
+//  MainForm.renderSettingsEdit.Text := 'Best Settings';
+//
+//  ChildNode := RootNode.AddChild('recentProjects');
+//  for var i := 0 to 9 do
+//    ChildNode.AddChild('project').Text := '(empty)';
+//
+//  Config.SaveToFile(Path);
+//end;
+//
+//procedure LoadLegacyConfiguration(Path: String);
+//var
+//  Config: IXMLDocument;
+//  RootNode: IXMLNode;
+//begin
+//  Config := TXMLDocument.Create(nil);
+//  Config.LoadFromFile(Path);
+//  Config.Active := True;
+//  RootNode := Config.DocumentElement;
+//
+//  Settings.Language := 0;
+//  STYLE := RootNode.ChildNodes['style'].Text.ToInteger();
+//  AErenderPath := RootNode.ChildNodes['aerender'].Text;
+//  ONRENDERSTART := RootNode.ChildNodes['onRenderStart'].Text.ToInteger();
+//  DEFPRGPATH := RootNode.ChildNodes['defprgpath'].Text;
+//  DEFOUTPATH := RootNode.ChildNodes['defoutpath'].Text;
+//  AERH := RootNode.ChildNodes['handle'].Text;
+//  DelTempFiles := RootNode.ChildNodes['delTempFiles'].Text;
+//
+//  MainForm.projectPath.Text := RootNode.ChildNodes['projectPath'].Text;
+//  MainForm.outputPath.Text := RootNode.ChildNodes['outputPath'].Text;
+//  tempSavePath := RootNode.ChildNodes['tempSavePath'].Text;
+//
+//  MainForm.compName.Text := RootNode.ChildNodes['comp'].Text;
+//  MainForm.inFrame.Text := RootNode.ChildNodes['startFrame'].Text;
+//  MainForm.outFrame.Text := RootNode.ChildNodes['endFrame'].Text;
+//
+//  MainForm.missingFilesCheckbox.IsChecked := RootNode.ChildNodes['missingFiles'].Text.ToBoolean();
+//  MainForm.soundCheckbox.IsChecked := RootNode.ChildNodes['sound'].Text.ToBoolean();
+//  MainForm.threadedRender.IsChecked := RootNode.ChildNodes['thread'].Text.ToBoolean();
+//  MainForm.customCheckbox.IsChecked := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
+//  MainForm.customProp.Enabled := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
+//  MainForm.customProp.Text := RootNode.ChildNodes['prop'].Text;
+//
+//  MainForm.memUsageTrackBar.Value := RootNode.ChildNodes['memoryLimit'].Text.ToSingle();
+//  MainForm.cacheUsageTrackBar.Value := RootNode.ChildNodes['cacheLimit'].Text.ToSingle();
+//
+//  //MainUnit.OMCount := RootNode.ChildNodes['outputModule'].ChildNodes.Count;
+//  SetLength (Settings.OutputModules, RootNode.ChildNodes['outputModule'].ChildNodes.Count);
+//  for var i := 0 to High(Settings.OutputModules) do
+//    begin
+//      Settings.OutputModules[i].Module := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['moduleName'].Text;
+//      Settings.OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
+//      Settings.OutputModules[i].Imported := False;
+//    end;
+//
+//  InitRenderSettings;
+//
+//  MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
+//  MainForm.renderSettingsEdit.Text := RootNode.ChildNodes['renderSettings'].ChildNodes[StrToInt(RootNode.ChildNodes['renderSettings'].Attributes['selected'])].Text;
+//end;
+//
+//procedure LoadConfiguration(Path: String);
+//var
+//  Config: IXMLDocument;
+//  RootNode: IXMLNode;
+//begin
+//  Config := TXMLDocument.Create(nil);
+//  Config.LoadFromFile(Path);
+//  Config.Active := True;
+//  RootNode := Config.DocumentElement;
+//
+//  Settings.Language := RootNode.ChildNodes['lang'].Text.ToInteger();
+//  STYLE := RootNode.ChildNodes['style'].Text.ToInteger();
+//  AErenderPath := RootNode.ChildNodes['aerender'].Text;
+//  ONRENDERSTART := RootNode.ChildNodes['onRenderStart'].Text.ToInteger();
+//  DEFPRGPATH := RootNode.ChildNodes['defprgpath'].Text;
+//  DEFOUTPATH := RootNode.ChildNodes['defoutpath'].Text;
+//  AERH := RootNode.ChildNodes['handle'].Text;
+//  DelTempFiles := RootNode.ChildNodes['delTempFiles'].Text;
+//
+//  MainForm.projectPath.Text := RootNode.ChildNodes['projectPath'].Text;
+//  MainForm.outputPath.Text := RootNode.ChildNodes['outputPath'].Text;
+//  tempSavePath := RootNode.ChildNodes['tempSavePath'].Text;
+//
+//  MainForm.compName.Text := RootNode.ChildNodes['comp'].Text;
+//  MainForm.inFrame.Text := RootNode.ChildNodes['startFrame'].Text;
+//  MainForm.outFrame.Text := RootNode.ChildNodes['endFrame'].Text;
+//
+//  MainForm.missingFilesCheckbox.IsChecked := RootNode.ChildNodes['missingFiles'].Text.ToBoolean();
+//  MainForm.soundCheckbox.IsChecked := RootNode.ChildNodes['sound'].Text.ToBoolean();
+//  MainForm.threadedRender.IsChecked := RootNode.ChildNodes['thread'].Text.ToBoolean();
+//  MainForm.customCheckbox.IsChecked := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
+//  MainForm.customProp.Enabled := StrToBool(RootNode.ChildNodes['prop'].Attributes['enabled']);
+//  MainForm.customProp.Text := RootNode.ChildNodes['prop'].Text;
+//
+//  MainForm.memUsageTrackBar.Value := RootNode.ChildNodes['memoryLimit'].Text.ToSingle();
+//  MainForm.cacheUsageTrackBar.Value := RootNode.ChildNodes['cacheLimit'].Text.ToSingle();
+//
+//  if RootNode.ChildNodes['outputModule'].ChildNodes.Count <> 0 then begin
+//    SetLength (Settings.OutputModules, RootNode.ChildNodes['outputModule'].ChildNodes.Count);
+//    for var i := 0 to High(Settings.OutputModules) do begin
+//      Settings.OutputModules[i].Module := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['moduleName'].Text;
+//      Settings.OutputModules[i].Mask := RootNode.ChildNodes['outputModule'].ChildNodes[i].ChildNodes['filemask'].Text;
+//      Settings.OutputModules[i].Imported := StrToBool(RootNode.ChildNodes['outputModule'].ChildNodes[i].Attributes['imported']);
+//    end;
+//    MainForm.outputModuleBox.ItemIndex := StrToInt(RootNode.ChildNodes['outputModule'].Attributes['selected']);
+//  end else
+//    InitOutputModules;
+//
+//  MainForm.renderSettingsEdit.Text := RootNode.ChildNodes['renderSettings'].Text;
+//
+//  for var i := 0 to 9 do begin
+//    Recents[i] := RootNode.ChildNodes['recentProjects'].ChildNodes[i].Text;
+//  end;
+//end;
+//
+//procedure SaveConfiguration(Path: String);
+//var
+//  Config: IXMLDocument;
+//  RootNode: IXMLNode;
+//  ChildNode: IXMLNode;
+//begin
+//  Config := TXMLDocument.Create(nil);
+//  Config.Active := True;
+//  Config.Encoding := 'utf-8';
+//  Config.Options := [doNodeAutoIndent];
+//
+//  RootNode := Config.AddChild('launcherconfig');
+//
+//  RootNode.AddChild('lang').Text := Settings.Language.ToString;
+//  RootNode.AddChild('style').Text := STYLE.ToString;
+//  RootNode.AddChild('aerender').Text := AErenderPath;
+//  RootNode.AddChild('onRenderStart').Text := ONRENDERSTART.ToString;
+//  RootNode.AddChild('defprgpath').Text := DEFPRGPATH;
+//  RootNode.AddChild('defoutpath').Text := DEFOUTPATH;
+//  RootNode.AddChild('handle').Text := AERH;
+//  RootNode.AddChild('delTempFiles').Text := DelTempFiles;
+//
+//  RootNode.AddChild('projectPath').Text := MainForm.projectPath.Text;
+//  RootNode.AddChild('outputPath').Text := MainForm.outputPath.Text;
+//  RootNode.AddChild('tempSavePath').Text := tempSavePath;
+//
+//  RootNode.AddChild('comp').Text := MainForm.compName.Text;
+//  RootNode.AddChild('startFrame').Text := MainForm.inFrame.Text;
+//  RootNode.AddChild('endFrame').Text := MainForm.outFrame.Text;
+//  RootNode.AddChild('missingFiles').Text := BoolToStr(MainForm.missingFilesCheckbox.IsChecked, True);
+//
+//  RootNode.AddChild('sound').Text := BoolToStr(MainForm.soundCheckbox.IsChecked, True);
+//  RootNode.AddChild('thread').Text := BoolToStr(MainForm.threadedRender.IsChecked, True);
+//  RootNode.AddChild('prop').Text := MainForm.customProp.Text;
+//  RootNode.ChildNodes['prop'].Attributes['enabled'] := BoolToStr(MainForm.customCheckbox.IsChecked, True);
+//
+//  RootNode.AddChild('memoryLimit').Text := MainForm.memUsageTrackBar.Value.ToString;
+//  RootNode.AddChild('cacheLimit').Text := MainForm.cacheUsageTrackBar.Value.ToString;
+//
+//  ChildNode := RootNode.AddChild('outputModule');
+//  ChildNode.Attributes['selected'] := MainForm.outputModuleBox.ItemIndex.ToString;
+//  for var i := 0 to High(Settings.OutputModules) do begin
+//    var ModuleNode: IXMLNode := RootNode.ChildNodes['outputModule'].AddChild('module');
+//    ModuleNode.Attributes['imported'] := BoolToStr(Settings.OutputModules[i].Imported, True);
+//    ModuleNode.AddChild('moduleName').Text := Settings.OutputModules[i].Module;
+//    ModuleNode.AddChild('filemask').Text := Settings.OutputModules[i].Mask;
+//  end;
+//
+//  ChildNode := RootNode.AddChild('renderSettings');
+//  ChildNode.Text := MainForm.renderSettingsEdit.Text;
+//
+//  ChildNode := RootNode.AddChild('recentProjects');
+//  for var i := 0 to 9 do begin
+//    if Recents[i] = '' then
+//      ChildNode.AddChild('project').Text := '(empty)'
+//    else
+//      ChildNode.AddChild('project').Text := Recents[i]
+//  end;
+//
+//  Config.SaveToFile(Path);
+//end;
 
 function GetOMIndex(AOutputModule: OutputModule): Integer;
 begin
   Result := -1;
-  for var i := 0 to High(OutputModules) do
-    if (AOutputModule.Module = OutputModules[i].Module) and (AOutputModule.Mask = OutputModules[i].Mask) then begin
-      Result := i;
-      break;
-    end;
-end;
-
-function GetRSIndex(ARenderSetting: RenderSetting): Integer;
-begin
-  Result := -1;
-  for var i := 0 to High(RenderSettings) do
-    if ARenderSetting.Setting = RenderSettings[i].Setting then begin
+  for var i := 0 to High(Settings.OutputModules) do
+    if AOutputModule = Settings.OutputModules[i] then begin
       Result := i;
       break;
     end;
@@ -1316,7 +1277,7 @@ begin
   end;
 
   if ErrorStr <> '' then begin
-    raise AERParamException.Create(Format('%s%s%s', [Language[LANG].Errors.errorsOccured, #13#10, ErrorStr]));
+    raise AERParamException.Create(Format('%s%s%s', [Language[Settings.Language].Errors.errorsOccured, #13#10, ErrorStr]));
   end else begin
     var TaskIndex: Integer := RenderTasks.IndexOf(GetTaskByProject(ExtractFileName(projectPath.Text)));
     var Compositions: TList<TComposition> := TList<TComposition>.Create;
@@ -1472,12 +1433,12 @@ begin
   if (outputModuleBox.Count <> 0) then
     outputModuleBox.Clear;
 
-  for var i := 0 to High(OutputModules) do
-    if OutputModules[i].Imported then
-      outputModuleBox.Items.Add(OutputModules[i].Module + ' ' + Language[LANG].OutputModuleConfiguratorForm.Imported)
+  for var i := 0 to High(Settings.OutputModules) do
+    if Settings.OutputModules[i].Imported then
+      outputModuleBox.Items.Add(Settings.OutputModules[i].Module + ' ' + Language[Settings.Language].OutputModuleConfiguratorForm.Imported)
     else
-      outputModuleBox.Items.Add(OutputModules[i].Module);
-  outputModuleBox.Items.Add(Language[LANG].MainForm.ConfigureOutputModules);
+      outputModuleBox.Items.Add(Settings.OutputModules[i].Module);
+  outputModuleBox.Items.Add(Language[Settings.Language].MainForm.ConfigureOutputModules);
   outputModuleBox.ItemIndex := Index;
 end;
 
@@ -1495,7 +1456,7 @@ begin
 
   for var i := 0 to RootNode.ChildNodes.Count - 1 do begin
     outputPath.Text := RootNode.ChildNodes[i].Attributes['outputFolder'];
-    tempSavePath := RootNode.ChildNodes[i].Attributes['outputFolder'] + PLATFORMPATHSEPARATOR;
+    Settings.TemporarySavePath := RootNode.ChildNodes[i].Attributes['outputFolder'] + PLATFORMPATHSEPARATOR;
 
     /// Add new Output Module to library if it don't exist
     if StrToBool(RootNode.ChildNodes[i].ChildNodes['outputModule'].Attributes['use']) then begin
@@ -1506,12 +1467,12 @@ begin
       if GetOMIndex(TempOutputModule) <> -1 then
         outputModuleBox.ItemIndex := GetOMIndex(TempOutputModule)
       else begin
-        SetLength(OutputModules, Length(OutputModules) + 1);
-        OutputModules[High(OutputModules)].Module   := RootNode.ChildNodes[i].ChildNodes['outputModule'].ChildNodes['module'].Text;
-        OutputModules[High(OutputModules)].Mask     := RootNode.ChildNodes[i].ChildNodes['outputModule'].ChildNodes['mask'].Text;
-        OutputModules[High(OutputModules)].Imported := True;
+        SetLength(Settings.OutputModules, Length(Settings.OutputModules) + 1);
+        Settings.OutputModules[High(Settings.OutputModules)].Module   := RootNode.ChildNodes[i].ChildNodes['outputModule'].ChildNodes['module'].Text;
+        Settings.OutputModules[High(Settings.OutputModules)].Mask     := RootNode.ChildNodes[i].ChildNodes['outputModule'].ChildNodes['mask'].Text;
+        Settings.OutputModules[High(Settings.OutputModules)].Imported := True;
 
-        outputModuleBox.Items.Insert(outputModuleBox.Items.Count - 1, OutputModules[High(OutputModules)].Module + ' ' + Language[LANG].OutputModuleConfiguratorForm.Imported);
+        outputModuleBox.Items.Insert(outputModuleBox.Items.Count - 1, Settings.OutputModules[High(Settings.OutputModules)].Module + ' ' + Language[Settings.Language].OutputModuleConfiguratorForm.Imported);
         outputModuleBox.ItemIndex := outputModuleBox.Items.Count - 2;
       end;
     end;
@@ -1559,9 +1520,9 @@ begin
 
   var RootNode: IXMLNode := AERXMLDocument.DocumentElement;
 
-  if DEFOUTPATH <> '' then begin
-    outputPath.Text := DEFOUTPATH;
-    tempSavePath := DEFOUTPATH + PLATFORMPATHSEPARATOR;
+  if Settings.DefaultOutputPath <> '' then begin
+    outputPath.Text := Settings.DefaultOutputPath;
+    Settings.TemporarySavePath := Settings.DefaultOutputPath + PLATFORMPATHSEPARATOR;
   end;
   outputModuleBoxChange(Self);
 
@@ -1621,9 +1582,9 @@ begin
   except
     on Exception do
       if outFrame.Text = '' then
-        TDialogServiceSync.MessageDialog(Language[LANG].Errors.CalculateFrameError, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
+        TDialogServiceSync.MessageDialog(Language[Settings.Language].Errors.CalculateFrameError, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
       else
-        TDialogServiceSync.MessageDialog(Language[LANG].Errors.CalculateUnknownError, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
+        TDialogServiceSync.MessageDialog(Language[Settings.Language].Errors.CalculateUnknownError, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
   end;
 end;
 
@@ -1644,7 +1605,7 @@ begin
 //      if MainForm.Height <= 450 then
 //        MainForm.Height := 580;//MainForm.Height + 130;
 //
-//    compSwitchLabel.Text := Language[LANG].MainForm.MultiComp;
+//    compSwitchLabel.Text := Language[Settings.Language].MainForm.MultiComp;
 //
 //    compGrid.RowCount := Round(compCount.Value);
 //    compGrid.Cells[0, 0] := compName.Text;
@@ -1657,7 +1618,7 @@ begin
 //      if MainForm.WindowState <> TWindowState.wsMaximized then
 //        MainForm.Height := 450;//MainForm.Height - 130;
 //
-//    compSwitchLabel.Text := Language[LANG].MainForm.SingleComp;
+//    compSwitchLabel.Text := Language[Settings.Language].MainForm.SingleComp;
 //    compName.Text := compGrid.Cells[0, 0];
 //  end;
 end;
@@ -1690,8 +1651,9 @@ begin
     {$IFDEF MACOS}KillProcess('aerendercore');{$ENDIF MACOS}
   end;
 
-  SaveConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
-  if StrToBool(DelTempFiles) = True then
+  //SaveConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
+  Settings.SaveToFile(APPFOLDER + 'AErenderConfiguration.xml');
+  if Settings.DeleteTemporary then
     begin
       var LauncherDirectory: TArray<String> := GetDirectoryFiles(APPFOLDER);
       for var i := 0 to High(LauncherDirectory) do
@@ -1744,11 +1706,13 @@ begin
 
   if FileExists(APPFOLDER + 'AErenderConfiguration.xml') then begin
     try
-      LoadConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
+      //LoadConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
+      Settings.LoadFromXMLFile(APPFOLDER + 'AErenderConfiguration.xml');
     except
       on Exception do begin
         try
-          LoadLegacyConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
+          //LoadLegacyConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
+          Settings.LoadFromXMLFileLegacy(APPFOLDER + 'AErenderConfiguration.xml');
         except
           on Exception do begin
             if (TDialogServiceSync.MessageDialog(
@@ -1767,12 +1731,11 @@ begin
       end;
     end;
   end else begin
-    InitConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
-    AERH := 'True';
-    DelTempFiles := 'True';
+    //InitConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
+    Settings.ResetAndSave(APPFOLDER + 'AErenderConfiguration.xml');
   end;
-  AEPOpenDialog.InitialDir := DEFPRGPATH;
-  SaveDialog1.InitialDir := DEFOUTPATH;
+  AEPOpenDialog.InitialDir := Settings.DefaultProjectPath;
+  SaveDialog1.InitialDir := Settings.DefaultOutputPath;
 
   if not FileExists(APPFOLDER + {$IFDEF MSWINDOWS}'aeparser_win.exe'{$ELSE MACOS}'aeparser_mac'{$ENDIF}) then begin
     ExtractParserToAppDir;
@@ -1867,28 +1830,27 @@ begin
   end;
 
   UpdateOutputModules;
-  UpdateRenderSettings;
 
-  SettingsForm.styleBox.ItemIndex := STYLE;
-  SettingsForm.onRenderStartBox.ItemIndex := ONRENDERSTART;
-  SettingsForm.HandleCheckBox.IsChecked := StrToBool(AERH);
-  SettingsForm.delFilesCheckBox.IsChecked := StrToBool(DelTempFiles);
+  SettingsForm.styleBox.ItemIndex := Settings.Style;
+  SettingsForm.onRenderStartBox.ItemIndex := Settings.OnRenderStart;
+  SettingsForm.HandleCheckBox.IsChecked := Settings.AErenderHandle;
+  SettingsForm.delFilesCheckBox.IsChecked := Settings.DeleteTemporary;
 
   var FormVisualUpdateThread: TThread :=TThread.CreateAnonymousThread(procedure begin
 
     {$IFDEF MACOS}
-    if LANG = 1 then begin
+    if Settings.Language = 1 then begin
       outputModuleLabel.Width := 148;
       renderSettingsLabel.Width := 148;
     end;
     {$ENDIF MACOS}
 
     if memUsageTrackBar.Value = 100 then
-      memUsageInfo.Text := Language[LANG].MainForm.Unlimited
+      memUsageInfo.Text := Language[Settings.Language].MainForm.Unlimited
     else
       memUsageInfo.Text := Trunc(memUsageTrackBar.Value).ToString + '% (' + Trunc((GetPlatformMemorySize/1024/1024) * (memUsageTrackBar.Value / 100)).ToString + ' MB)';
     if cacheUsageTrackBar.Value = 100 then
-      cacheUsageInfo.Text := Language[LANG].MainForm.Unlimited
+      cacheUsageInfo.Text := Language[Settings.Language].MainForm.Unlimited
     else
       cacheUsageInfo.Text := Trunc(cacheUsageTrackBar.Value).ToString + '%';
 
@@ -2000,28 +1962,28 @@ begin
   if not (SettingsForm.HandleCheckBox.IsChecked and isRendering) then begin
     {emptyComps := 0;
     if AErenderPath.IsEmpty then
-      ERR := ERR + #13#10 + '[Error 1]: ' + Language[LANG].Errors.aerenderIsEmpty;
+      ERR := ERR + #13#10 + '[Error 1]: ' + Language[Settings.Language].Errors.aerenderIsEmpty;
     if projectPath.Text.IsEmpty then
-      ERR := ERR + #13#10 + '[Error 2]: ' + Language[LANG].Errors.projectIsEmpty;
+      ERR := ERR + #13#10 + '[Error 2]: ' + Language[Settings.Language].Errors.projectIsEmpty;
     if outputPath.Text.IsEmpty then
-      ERR := ERR + #13#10 + '[Error 3]: ' + Language[LANG].Errors.outputIsEmpty;
+      ERR := ERR + #13#10 + '[Error 3]: ' + Language[Settings.Language].Errors.outputIsEmpty;
     if compName.Text.IsEmpty then
-      ERR := ERR + #13#10 + '[Error 4]: ' + Language[LANG].Errors.compositionIsEmpty;
+      ERR := ERR + #13#10 + '[Error 4]: ' + Language[Settings.Language].Errors.compositionIsEmpty;
     if compSwitch.IsChecked then
       begin
         for var i := 0 to compCount.Value.ToString.ToInteger - 1 do
           if compGrid.Cells[0, i].IsEmpty then
             inc(emptyComps);
         if emptyComps > 0 then
-          ERR := ERR + #13#10 + '[Error 5]: ' + Language[LANG].Errors.multiCompIsEmpty;
+          ERR := ERR + #13#10 + '[Error 5]: ' + Language[Settings.Language].Errors.multiCompIsEmpty;
       end;
     if StrToInt(threadsCount.Text) > 128 then
-      ERR := ERR + #13#10 + '[Error 6]: ' + Language[LANG].Errors.tooManyThreads;
+      ERR := ERR + #13#10 + '[Error 6]: ' + Language[Settings.Language].Errors.tooManyThreads;
 
     //Proceed if no errors occured
     if not ERR.IsEmpty then
       begin
-        TDialogServiceSync.MessageDialog((Language[LANG].Errors.errorsOccured + ERR), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
+        TDialogServiceSync.MessageDialog((Language[Settings.Language].Errors.errorsOccured + ERR), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
         ERR := '';
       end
     else    }
@@ -2059,7 +2021,7 @@ begin
           end
       end;
   end else begin
-    TDialogServiceSync.MessageDialog(Language[LANG].Errors.isCurrentlyRendering, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
+    TDialogServiceSync.MessageDialog(Language[Settings.Language].Errors.isCurrentlyRendering, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
     RenderWindowSender := infoButton;
     RenderingForm.ShowModal;
   end;
@@ -2132,17 +2094,17 @@ begin
     end
   else
     if not outputPath.Text.IsEmpty then
-      if tempSavePath.Contains('Def') or tempSavePath.Contains('def') then
-        outputPath.Text := ExtractFilePath(tempSavePath) + OutputModules[outputModuleBox.ItemIndex].Mask
+      if Settings.TemporarySavePath.ToLower.Contains('def') then
+        outputPath.Text := ExtractFilePath(Settings.TemporarySavePath) + Settings.OutputModules[outputModuleBox.ItemIndex].Mask
       else
-        if ExtractFileName(tempSavePath).IsEmpty then
-          outputPath.Text := tempSavePath + OutputModules[outputModuleBox.ItemIndex].Mask
+        if ExtractFileName(Settings.TemporarySavePath).IsEmpty then
+          outputPath.Text := Settings.TemporarySavePath + Settings.OutputModules[outputModuleBox.ItemIndex].Mask
         else
-          if ExtractFileExt(tempSavePath).IsEmpty then
-            outputPath.Text := ExtractFilePath(tempSavePath) + ExtractFileName(tempSavePath) + '_' + OutputModules[outputModuleBox.ItemIndex].Mask
+          if ExtractFileExt(Settings.TemporarySavePath).IsEmpty then
+            outputPath.Text := ExtractFilePath(Settings.TemporarySavePath) + ExtractFileName(Settings.TemporarySavePath) + '_' + Settings.OutputModules[outputModuleBox.ItemIndex].Mask
           else
-            outputPath.Text := ExtractFilePath(tempSavePath) + StringReplace(ExtractFileName(tempSavePath), ExtractFileExt(tempSavePath), '', [rfReplaceAll, rfIgnoreCase])
-                            + '_' + OutputModules[outputModuleBox.ItemIndex].Mask;
+            outputPath.Text := ExtractFilePath(Settings.TemporarySavePath) + StringReplace(ExtractFileName(Settings.TemporarySavePath), ExtractFileExt(Settings.TemporarySavePath), '', [rfReplaceAll, rfIgnoreCase])
+                            + '_' + Settings.OutputModules[outputModuleBox.ItemIndex].Mask;
 end;
 
 procedure TMainForm.TaskEditorPopupPopup(Sender: TObject);
@@ -2242,7 +2204,7 @@ begin
   NSWin := WindowHandleToPlatform(Screen.ActiveForm.Handle).Wnd;
 
   FSaveFile :=TNSSavePanel.Wrap(TNSSavePanel.OCClass.savePanel);
-  FSaveFile.setAccessoryView(CreateMessageView(Language[LANG].MainForm.DarwinDialogTip));
+  FSaveFile.setAccessoryView(CreateMessageView(Language[Settings.Language].MainForm.DarwinDialogTip));
   //FSaveFile.setAccessoryView();
   FSaveFile.setDirectory(StrToNSStr(DEFOUTPATH));
   FSaveFile.setNameFieldLabel(StrToNSStr('Output file name:'));
@@ -2260,13 +2222,13 @@ begin
                     else
                       tempSavePath := NSStrToStr(FSaveFile.URL.relativePath);
                       if tempSavePath.Contains('Def') or tempSavePath.Contains('def') then
-                        outputPath.Text := ExtractFilePath(tempSavePath) + OutputModules[outputModuleBox.ItemIndex].Mask
+                        outputPath.Text := ExtractFilePath(tempSavePath) + Settings.OutputModules[outputModuleBox.ItemIndex].Mask
                       else
                         if ExtractFileExt(tempSavePath) = '' then
-                          outputPath.Text := tempSavePath + '_' + OutputModules[outputModuleBox.ItemIndex].Mask
+                          outputPath.Text := tempSavePath + '_' + Settings.OutputModules[outputModuleBox.ItemIndex].Mask
                         else
                           outputPath.Text := ExtractFilePath(tempSavePath) + StringReplace(ExtractFileName(tempSavePath), ExtractFileExt(tempSavePath), '', [rfReplaceAll, rfIgnoreCase])
-                                          + ExtractFileExt(OutputModules[outputModuleBox.ItemIndex].Mask);
+                                          + ExtractFileExt(Settings.OutputModules[outputModuleBox.ItemIndex].Mask);
                   end));
 {$ENDIF MACOS}
 {$IFDEF MSWINDOWS}
@@ -2274,16 +2236,16 @@ begin
   with SaveDialog1 do
     if Execute then
       begin
-        tempSavePath := SaveDialog1.FileName;
+        Settings.TemporarySavePath := SaveDialog1.FileName;
 
-        if tempSavePath.Contains('Def') or tempSavePath.Contains('def') then
-          outputPath.Text := ExtractFilePath(tempSavePath) + OutputModules[outputModuleBox.ItemIndex].Mask
+        if Settings.TemporarySavePath.ToLower.Contains('def') then
+          outputPath.Text := ExtractFilePath(Settings.TemporarySavePath) + Settings.OutputModules[outputModuleBox.ItemIndex].Mask
         else
-          if ExtractFileExt(tempSavePath) = '' then
-            outputPath.Text := tempSavePath + '_' + OutputModules[outputModuleBox.ItemIndex].Mask
+          if ExtractFileExt(Settings.TemporarySavePath) = '' then
+            outputPath.Text := Settings.TemporarySavePath + '_' + Settings.OutputModules[outputModuleBox.ItemIndex].Mask
           else
-            outputPath.Text := ExtractFilePath(tempSavePath) + StringReplace(ExtractFileName(tempSavePath), ExtractFileExt(tempSavePath), '', [rfReplaceAll, rfIgnoreCase])
-                            + ExtractFileExt(OutputModules[outputModuleBox.ItemIndex].Mask);
+            outputPath.Text := ExtractFilePath(Settings.TemporarySavePath) + StringReplace(ExtractFileName(Settings.TemporarySavePath), ExtractFileExt(Settings.TemporarySavePath), '', [rfReplaceAll, rfIgnoreCase])
+                            + ExtractFileExt(Settings.OutputModules[outputModuleBox.ItemIndex].Mask);
       end;
 {$ENDIF MSWINDOWS}
 end;
@@ -2564,8 +2526,8 @@ begin
 //        if MainForm.Height <= 450 then
 //          MainForm.Height := 580;
 //
-//      threadsSwitchLabel.Text := Language[LANG].MainForm.SplitRender;
-//      outFrame.TextPrompt     := Language[LANG].MainForm.EndFrameHint;
+//      threadsSwitchLabel.Text := Language[Settings.Language].MainForm.SplitRender;
+//      outFrame.TextPrompt     := Language[Settings.Language].MainForm.EndFrameHint;
 //      threadsGrid.AniCalculations.AutoShowing := False;
 //      threadsGrid.Model.ScrollDirections := TScrollDirections.Vertical;
 //    end
@@ -2580,7 +2542,7 @@ begin
 //        if MainForm.WindowState <> TWindowState.wsMaximized then
 //          MainForm.Height := 450;
 //
-//      threadsSwitchLabel.Text := Language[LANG].MainForm.SingleRener;
+//      threadsSwitchLabel.Text := Language[Settings.Language].MainForm.SingleRener;
 //      outFrame.TextPrompt     := '';
 //    end;
 end;
@@ -2599,7 +2561,7 @@ begin
     MainForm.Height := SizeConstraints.MIN_HEIGHT_UPD;
     MainForm.UpdateInfo.Visible := True;
     MainForm.UpdateInfo.Enabled := True;
-    MainForm.downloadButton.Text := Language[LANG].MainForm.Download + ' (' + gitVersion + ')';
+    MainForm.downloadButton.Text := Language[Settings.Language].MainForm.Download + ' (' + gitVersion + ')';
     {$IFDEF MSWINDOWS}gitDownload := gitRelease.A[0].P['assets'].A[1].P['browser_download_url'].Value;{$ENDIF MSWINDOWS}
     {$IFDEF MACOS}gitDownload := gitRelease.A[0].P['assets'].A[0].P['browser_download_url'].Value;{$ENDIF MACOS}
   end else begin
@@ -2672,7 +2634,7 @@ begin
         memUsageTrackBar.Value := (100 * memUsageInfoEdit.Text.ToInteger()) / (GetPlatformMemorySize / 1024 / 1024);
       except
         on Exception do
-          TDialogServiceSync.MessageDialog((Text + ' ' + Language[LANG].Errors.MemoryValueInvalid), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
+          TDialogServiceSync.MessageDialog((Text + ' ' + Language[Settings.Language].Errors.MemoryValueInvalid), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
       end;
     end;
   memUsageInfo.Visible := True;
@@ -2684,7 +2646,7 @@ end;
 procedure TMainForm.memUsageTrackBarChange(Sender: TObject);
 begin
   if memUsageTrackBar.Value = 100 then
-    memUsageInfo.Text := Language[LANG].MainForm.Unlimited
+    memUsageInfo.Text := Language[Settings.Language].MainForm.Unlimited
   else
     memUsageInfo.Text := Trunc(memUsageTrackBar.Value).ToString + '% (' + Trunc((GetPlatformMemorySize/1024/1024) * (memUsageTrackBar.Value / 100)).ToString + ' MB)';
 end;
@@ -2712,7 +2674,7 @@ begin
   end;
 
   if ErrorStr <> '' then begin
-    raise AERParamException.Create(Format('%s%s%s', [Language[LANG].Errors.errorsOccured, #13#10, ErrorStr]));
+    raise AERParamException.Create(Format('%s%s%s', [Language[Settings.Language].Errors.errorsOccured, #13#10, ErrorStr]));
   end else begin
     /// Create all the compositions beforehand
     /// to append them to [Task]
@@ -2804,7 +2766,7 @@ begin
         cacheUsageInfoEdit.Text := '100';
   except
     on Exception do
-      TDialogServiceSync.MessageDialog((Text + ' ' + Language[LANG].Errors.CacheValueInvalid), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
+      TDialogServiceSync.MessageDialog((Text + ' ' + Language[Settings.Language].Errors.CacheValueInvalid), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
   end;
   tempText := '';
   cacheUsageTrackBar.Value := cacheUsageInfoEdit.Text.ToSingle();
@@ -2818,7 +2780,7 @@ end;
 procedure TMainForm.cacheUsageTrackBarChange(Sender: TObject);
 begin
   if cacheUsageTrackBar.Value = 100 then
-    cacheUsageInfo.Text := Language[LANG].MainForm.Unlimited
+    cacheUsageInfo.Text := Language[Settings.Language].MainForm.Unlimited
   else
     cacheUsageInfo.Text := Trunc(cacheUsageTrackBar.Value).ToString + '%';
 end;

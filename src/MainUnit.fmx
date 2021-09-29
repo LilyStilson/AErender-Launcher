@@ -18812,8 +18812,8 @@ object MainForm: TMainForm
       ItemHeight = 24.000000000000000000
       OnDragChange = TasksTreeViewDragChange
       OnKeyDown = TasksTreeViewKeyDown
-      Viewport.Width = 1280.000000000000000000
-      Viewport.Height = 537.000000000000000000
+      Viewport.Width = 1282.000000000000000000
+      Viewport.Height = 538.000000000000000000
       object TasksIsEmpty: TLayout
         Align = Client
         Size.Width = 1280.000000000000000000
@@ -19579,8 +19579,8 @@ object MainForm: TMainForm
                 RowCount = 1
                 Options = [Editing, RowLines, RowSelect, Header]
                 OnEditingDone = compGridEditingDone
-                Viewport.Width = 299.000000000000000000
-                Viewport.Height = 206.000000000000000000
+                Viewport.Width = 303.000000000000000000
+                Viewport.Height = 231.000000000000000000
                 object StringColumn1: TStringColumn
                   Header = 'Compositions list'
                 end
@@ -19734,8 +19734,8 @@ object MainForm: TMainForm
                 Visible = False
                 RowCount = 2
                 Options = [ColLines, RowLines, AutoDisplacement]
-                Viewport.Width = 289.000000000000000000
-                Viewport.Height = 187.000000000000000000
+                Viewport.Width = 293.000000000000000000
+                Viewport.Height = 191.000000000000000000
                 object StringColumn2: TStringColumn
                   Header = 'In'
                   Size.Width = 145.000000000000000000
@@ -20188,8 +20188,8 @@ object MainForm: TMainForm
           RowCount = 1
           Options = [Editing, AlwaysShowEditor, ColumnResize, ColLines, RowLines, RowSelect, Tabs, Header, CancelEditingByDefault, AutoDisplacement]
           OnEditingDone = TaskEditorCompGridEditingDone
-          Viewport.Width = 628.000000000000000000
-          Viewport.Height = 289.000000000000000000
+          Viewport.Width = 632.000000000000000000
+          Viewport.Height = 314.000000000000000000
           object CompNumCol: TIntegerColumn
             Header = '#'
             ReadOnly = True

@@ -68,6 +68,7 @@ uses
 
   AErenderLauncher.Rendering,
   AErenderLauncher.Math,
+  AErenderLauncher.Types,
 
   {$IFDEF MSWINDOWS}Fmx.Platform.Win, WinApi.Windows;{$ENDIF MSWINDOWS}
   {$IFDEF MACOS}MacApi.Foundation;{$ENDIF MACOS}
@@ -316,18 +317,18 @@ procedure TImportForm.compListBoxChange(Sender: TObject);
 begin
   case FormSender of
     FS_JSON: begin
-      compName.Text := Language[LANG].ImportForm.Name + ': ' + Project.A[compListBox.ItemIndex].P['Name'].Value;
-      compResolution.Text := Language[LANG].ImportForm.Resolution + ': ' + Project.A[compListBox.ItemIndex].P['FootageDimensions'].A[0].Value + 'x' + Project.A[compListBox.ItemIndex].P['FootageDimensions'].A[1].Value;
-      compFramerate.Text :=  Language[LANG].ImportForm.Framerate + ': ' + Project.A[compListBox.ItemIndex].P['FootageFramerate'].Value;
-      compRangeIn.Text := Language[LANG].ImportForm.RangeStart + ': ' + Project.A[compListBox.ItemIndex].P['Frames'].A[0].Value;
-      compRangeOut.Text := Language[LANG].ImportForm.RangeEnd + ': ' + Project.A[compListBox.ItemIndex].P['Frames'].A[1].Value;
+      compName.Text := Language[Settings.Language].ImportForm.Name + ': ' + Project.A[compListBox.ItemIndex].P['Name'].Value;
+      compResolution.Text := Language[Settings.Language].ImportForm.Resolution + ': ' + Project.A[compListBox.ItemIndex].P['FootageDimensions'].A[0].Value + 'x' + Project.A[compListBox.ItemIndex].P['FootageDimensions'].A[1].Value;
+      compFramerate.Text :=  Language[Settings.Language].ImportForm.Framerate + ': ' + Project.A[compListBox.ItemIndex].P['FootageFramerate'].Value;
+      compRangeIn.Text := Language[Settings.Language].ImportForm.RangeStart + ': ' + Project.A[compListBox.ItemIndex].P['Frames'].A[0].Value;
+      compRangeOut.Text := Language[Settings.Language].ImportForm.RangeEnd + ': ' + Project.A[compListBox.ItemIndex].P['Frames'].A[1].Value;
     end;
     FS_XML: begin
-      compName.Text := Language[LANG].ImportForm.Name + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['name'].Text;
-      compResolution.Text := Language[LANG].ImportForm.Resolution + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['resolution'].Text;
-      compFramerate.Text := Language[LANG].ImportForm.Framerate + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['framerate'].Text;
-      compRangeIn.Text := Language[LANG].ImportForm.RangeStart + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['rangeStart'].Text;
-      compRangeOut.Text := Language[LANG].ImportForm.RangeEnd + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['rangeEnd'].Text;
+      compName.Text := Language[Settings.Language].ImportForm.Name + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['name'].Text;
+      compResolution.Text := Language[Settings.Language].ImportForm.Resolution + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['resolution'].Text;
+      compFramerate.Text := Language[Settings.Language].ImportForm.Framerate + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['framerate'].Text;
+      compRangeIn.Text := Language[Settings.Language].ImportForm.RangeStart + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['rangeStart'].Text;
+      compRangeOut.Text := Language[Settings.Language].ImportForm.RangeEnd + ': ' + RootNode.ChildNodes['compositions'].ChildNodes[compListBox.ItemIndex].ChildNodes['rangeEnd'].Text;
     end;
   end;
 end;
@@ -404,7 +405,7 @@ begin
           compListBox.Items.Add(RootNode.ChildNodes['compositions'].ChildNodes[i].ChildNodes['name'].Text);
       except
         on Exception do begin
-          TDialogServiceSync.MessageDialog(Language[LANG].Errors.IncompatibleFile, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
+          TDialogServiceSync.MessageDialog(Language[Settings.Language].Errors.IncompatibleFile, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0);
           ImportForm.Close;
         end;
       end;

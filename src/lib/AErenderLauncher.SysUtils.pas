@@ -43,7 +43,7 @@ uses
 implementation
 
 uses
-  MainUnit;
+  AErenderLauncher.Types;
 
 function GetPlatformMemorySize: Int64;
 begin

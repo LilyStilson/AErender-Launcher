@@ -47,6 +47,8 @@ uses
   FMX.Memo,
   FMX.WebBrowser,
 
+  AErenderLauncher.Types,
+
   {$IFDEF MSWINDOWS}
     FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
   {$ENDIF MSWINDOWS}

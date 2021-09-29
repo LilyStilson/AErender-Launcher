@@ -5,7 +5,7 @@
         <Config Condition="'$(Config)'==''">Debug</Config>
         <FrameworkType>FMX</FrameworkType>
         <MainSource>AErender_Launcher.dpr</MainSource>
-        <Platform Condition="'$(Platform)'==''">Win64</Platform>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <ProjectGuid>{C2DB1030-533B-41FD-8468-632CB85028C7}</ProjectGuid>
         <ProjectVersion>19.2</ProjectVersion>
         <TargetedPlatforms>4099</TargetedPlatforms>
@@ -219,10 +219,10 @@
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
         <Icon_MainIcon>..\icons\platform\Launcher2020.ico</Icon_MainIcon>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>3</VerInfo_Build>
+        <VerInfo_Build>5</VerInfo_Build>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.6.3;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.5.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Night Sky Studio;FileDescription=AErender Launcher;FileVersion=0.8.6.5;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.NightSkyStudio.AErenderLauncher;ProductName=AErender Launcher;ProductVersion=0.8.5.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
@@ -234,9 +234,9 @@
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
         <Icon_MainIcon>..\icons\platform\Launcher2020.ico</Icon_MainIcon>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>3</VerInfo_Build>
+        <VerInfo_Build>5</VerInfo_Build>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>FileVersion=1.0.0.3;ProductVersion=1.0.0.0</VerInfo_Keys>
+        <VerInfo_Keys>FileVersion=1.0.0.5;ProductVersion=1.0.0.0</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_PreRelease>true</VerInfo_PreRelease>
     </PropertyGroup>

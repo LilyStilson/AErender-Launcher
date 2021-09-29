@@ -56,6 +56,7 @@ uses
   {$ENDREGION}
 
   AErenderLauncher.SysUtils,
+  AErenderLauncher.Types,
 
   {$REGION '  Windows Only Libraries  '}{$IFDEF MSWINDOWS}
     Winapi.ShellAPI, Winapi.Windows, FMX.Platform.Win, Winapi.TlHelp32;
@@ -284,7 +285,7 @@ begin
     Language[LanguageCode].SettingsForm.MinimizeLauncher,
     Language[LanguageCode].SettingsForm.CloseLauncher
   ]);
-  onRenderStartBox.ItemIndex := ONRENDERSTART;
+  onRenderStartBox.ItemIndex := Settings.OnRenderStart;
 
 end;
 
@@ -324,7 +325,7 @@ begin
         //AERPATH := OpenDialog1.FileName;
       end;
 {$ENDIF MSWINDOWS}
-  AERPATH := aerenderPath.Text;
+  Settings.AErenderPath := aerenderPath.Text;
 end;
 
 procedure TSettingsForm.Button1Click(Sender: TObject);
@@ -409,7 +410,7 @@ end;
 
 procedure TSettingsForm.delFilesCheckBoxChange(Sender: TObject);
 begin
-  MainUnit.DelTempFiles := BoolToStr(delFilesCheckBox.IsChecked, True);
+  Settings.DeleteTemporary := delFilesCheckBox.IsChecked;
 end;
 
 procedure TSettingsForm.dpi100Change(Sender: TObject);
@@ -440,11 +441,11 @@ procedure TSettingsForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := True;
   SettingsForm.Close;
-  AERPATH := aerenderPath.Text;
-  LANG := langBox.ItemIndex;
-  DEFPRGPATH := defaultProjectsPath.Text;
-  DEFOUTPATH := defaultOutputPath.Text;
-  ONRENDERSTART := onRenderStartBox.ItemIndex;
+  Settings.AErenderPath := aerenderPath.Text;
+  Settings.Language := langBox.ItemIndex;
+  Settings.DefaultProjectPath := defaultProjectsPath.Text;
+  Settings.DefaultOutputPath := defaultOutputPath.Text;
+  Settings.OnRenderStart := onRenderStartBox.ItemIndex;
 end;
 
 procedure TSettingsForm.FormCreate(Sender: TObject);
@@ -453,12 +454,12 @@ procedure TSettingsForm.FormCreate(Sender: TObject);
 begin
   var AErenderDetectionThread: TThread := TThread.CreateAnonymousThread(procedure begin
     try
-      if AERPATH.IsEmpty then
-        AERPATH := DetectAerender + {$IFDEF MSWINDOWS}'\Support Files\aerender.exe'{$ENDIF MSWINDOWS}
+      if Settings.AErenderPath.IsEmpty then
+        Settings.AErenderPath := DetectAerender + {$IFDEF MSWINDOWS}'\Support Files\aerender.exe'{$ENDIF MSWINDOWS}
                                     {$IFDEF MACOS}'/aerender'{$ENDIF MACOS};
     except
       on Exception do
-        AERPATH := '';
+        Settings.AErenderPath := '';
     end;
     {$IFDEF MSWINDOWS}OpenDialog1.InitialDir := 'C:\Program Files\Adobe';{$ENDIF MSWINDOWS}
     limitRenderEdit.Text := (GetPlatformThreadsCount / 2).ToString;
@@ -479,13 +480,13 @@ end;
 
 procedure TSettingsForm.FormShow(Sender: TObject);
 begin
-  aerenderPath.Text := AERPATH;
-  defaultProjectsPath.Text := DEFPRGPATH;
-  defaultOutputPath.Text := DEFOUTPATH;
-  HandleCheckBox.IsChecked := StrToBool(AERH);
-  delFilesCheckBox.IsChecked := StrToBool(DelTempFiles);
-  langBox.ItemIndex := LANG;
-  onRenderStartBox.ItemIndex := ONRENDERSTART;
+  aerenderPath.Text := Settings.AErenderPath;
+  defaultProjectsPath.Text := Settings.DefaultProjectPath;
+  defaultOutputPath.Text := Settings.DefaultOutputPath;
+  HandleCheckBox.IsChecked := Settings.AErenderHandle;
+  delFilesCheckBox.IsChecked := Settings.AErenderHandle;
+  langBox.ItemIndex := Settings.Language;
+  onRenderStartBox.ItemIndex := Settings.OnRenderStart;
   {$IFDEF MSWINDOWS}
     aerenderPath.TextPrompt := 'C:\Program Files\Adobe\Adobe After Effects CC\Support Files\aerender.exe';
     OpenDialog1.Filter := 'After Effects Render Engine|aerender.exe';
@@ -499,16 +500,13 @@ end;
 
 procedure TSettingsForm.HandleCheckBoxChange(Sender: TObject);
 begin
-  if HandleCheckBox.IsChecked then
-    begin
-      AERH := 'True';
-      RenderingForm.emptyLabel.Text := Language[LANG].RenderingForm.QueueIsEmpty;
-    end
-  else
-    begin
-      AERH := 'False';
-      RenderingForm.emptyLabel.Text := Language[LANG].RenderingForm.HandleDisabled;
-    end;
+  if HandleCheckBox.IsChecked then begin
+    Settings.AErenderHandle := True;
+    RenderingForm.emptyLabel.Text := Language[Settings.Language].RenderingForm.QueueIsEmpty;
+  end else begin
+    Settings.AErenderHandle := False;
+    RenderingForm.emptyLabel.Text := Language[Settings.Language].RenderingForm.HandleDisabled;
+  end;
 end;
 
 procedure TSettingsForm.langBoxChange(Sender: TObject);
@@ -517,8 +515,8 @@ begin
   /// will be invoked by the OnShow event of the form
   if (not langChangeLabel.Visible) and (langBox.IsFocused) then begin
     UIExpander.Height := 112;
-    LANG := langBox.ItemIndex;
-    langChangeLabel.Text := Language[LANG].SettingsForm.LangChange;
+    Settings.Language := langBox.ItemIndex;
+    langChangeLabel.Text := Language[Settings.Language].SettingsForm.LangChange;
     langChangeLabel.Visible := True;
   end;
   //MainUnit.ChangeLanguage(langBox.ItemIndex);
@@ -540,7 +538,7 @@ begin
     aerenderPath.Text := DetectAerender + {$IFDEF MSWINDOWS}'\Support Files\aerender.exe'{$ENDIF MSWINDOWS}   {$IFDEF MACOS}'/aerender'{$ENDIF MACOS};
   except
     on E: Exception do begin
-      TDialogServiceSync.MessageDialog((Language[LANG].Errors.aerenderUndetectable + #13#10 + E.ToString()), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
+      TDialogServiceSync.MessageDialog((Language[Settings.Language].Errors.aerenderUndetectable + #13#10 + E.ToString()), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], TMsgDlgBtn.mbOK, 0)
     end;
   end;
 end;
@@ -560,7 +558,7 @@ begin
   if (TDialogServiceSync.MessageDialog(('Launcher configuration will be renewed. This will delete all your setting and output modules. Application will be restarted'
                                         + #13#10 + 'This action is irreversible! Proceed?'), TMsgDlgType.mtWarning, mbOKCancel, TMsgDlgBtn.mbOK, 0) = 1) then
     begin
-      InitConfiguration(APPFOLDER + 'AErenderConfiguration.xml');
+      Settings.ResetAndSave(APPFOLDER + 'AErenderConfiguration.xml');
       {$IFDEF MSWINDOWS}ShellExecute(0, 'OPEN', PChar(ParamStr(0)), '', '', SW_SHOWNORMAL);{$ENDIF MSWINDOWS}
       {$IFDEF MACOS}_system(PAnsiChar('open "' + AnsiString(ParamStr(0)) + '" &'));{$ENDIF MACOS}
       Halt;
@@ -571,7 +569,7 @@ procedure TSettingsForm.styleBoxChange(Sender: TObject);
 begin
   case styleBox.ItemIndex of
     0:begin
-        STYLE := 0;
+        Settings.Style := 0;
 
         MainForm.SettingsIcon.Fill.Color := $FFFFFFFF;
         MainForm.InfoIcon.Fill.Color := $FFFFFFFF;
@@ -592,7 +590,7 @@ begin
         OutputModuleEditorForm.StyleBook := MainForm.AERModernStyle;
       end;
     1:begin
-        STYLE := 1;
+        Settings.Style := 1;
 
         MainForm.SettingsIcon.Fill.Color := $FFFFFFFF;
         MainForm.InfoIcon.Fill.Color := $FFFFFFFF;
@@ -613,7 +611,7 @@ begin
         OutputModuleEditorForm.StyleBook := MainForm.AERModernAnimatedStyle;
       end;
     2:begin
-        STYLE := 2;
+        Settings.Style := 2;
 
         MainForm.SettingsIcon.Fill.Color := $FF000000;
         MainForm.InfoIcon.Fill.Color := $FF000000;

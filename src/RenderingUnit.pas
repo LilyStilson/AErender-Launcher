@@ -56,6 +56,7 @@ uses
   AErenderLauncher.AerenderParser,
   AErenderLauncher.Rendering,
   AErenderLauncher.Math,
+  AErenderLauncher.Types,
 
   {$IFDEF MSWINDOWS}
     System.Notification, FMX.TaskBar, FMX.Platform.Win, Winapi.Windows, Winapi.TlHelp32;
@@ -175,10 +176,10 @@ begin
       Progress.Align := TAlignLayout.Top;
       Progress.Margins := TBounds.Create(TRectF.Create(8, 8, 8, 0));
       Progress.Composition := Format('%s[%s]', [RegExmatch.Groups[2].Value, (RenderQueue.IndexOf(Item) + 1).ToString]);
-      Progress.ST_WaitingForAErender := Language[LANG].RenderingForm.WaitingForAerender;
-      Progress.ST_Rendering := Language[LANG].RenderingForm.Rendering;
-      Progress.ST_FinishedRender := Language[LANG].RenderingForm.RenderingFinished;
-      Progress.ST_RenderError := Language[LANG].RenderingForm.RenderingError;
+      Progress.ST_WaitingForAErender := Language[Settings.Language].RenderingForm.WaitingForAerender;
+      Progress.ST_Rendering := Language[Settings.Language].RenderingForm.Rendering;
+      Progress.ST_FinishedRender := Language[Settings.Language].RenderingForm.RenderingFinished;
+      Progress.ST_RenderError := Language[Settings.Language].RenderingForm.RenderingError;
       Progress.InFrame := -1;
       Progress.OutFrame := 1;
       Progress.Value := -1;
@@ -448,7 +449,7 @@ begin
           totalProgressPercentage.Text := Trunc((TotalProgressBar.Value / TotalProgressBar.Max) * 100).ToString + '%';
           {$IFDEF MSWINDOWS}MainTaskBar.TaskBarProgress := Trunc((TotalProgressBar.Value / TotalProgressBar.Max) * 100);{$ENDIF MSWINDOWS}
           if (TotalProgressBar.Max = 0) or (TotalProgressBar.Max = 1) then
-            framesLabel.Text := Language[LANG].RenderingForm.WaitingForAerender
+            framesLabel.Text := Language[Settings.Language].RenderingForm.WaitingForAerender
           else
             framesLabel.Text := TotalProgressBar.Value.ToString + ' / ' + (TotalProgressBar.Max - 1).ToString;
         end;
@@ -509,7 +510,7 @@ begin
   // This causes on macOS
   // [dccosx64 Fatal Error] RenderingUnit.pas(587): F2084 Internal Error: URW1237
   // Workaround: Get string that is already in array and pass it through an inline variable
-  var TimeElapsed: String := Language[LANG].RenderingForm.TimeElapsed;
+  var TimeElapsed: String := Language[Settings.Language].RenderingForm.TimeElapsed;
   timeElapsedLabel.Text := TimeElapsed + FormatDateTime('hh:nn:ss', Now - CurrentTime);
 end;
 
