@@ -58,9 +58,8 @@ uses
   AErenderLauncher.IO in 'lib\AErenderLauncher.IO.pas',
   AErenderLauncher.Math in 'lib\AErenderLauncher.Math.pas' {/System.Types.Nullable in 'lib\System.Types.Nullable.pas';},
   AErenderLauncher.SysUtils in 'lib\AErenderLauncher.SysUtils.pas',
-  AErenderLauncher.Types in 'lib\AErenderLauncher.Types.pas';
-
-//System.Types.Nullable in 'lib\System.Types.Nullable.pas';
+  AErenderLauncher.Types in 'lib\AErenderLauncher.Types.pas',
+  MacApi.Dialogs in 'lib\MacApi.Dialogs.pas';
 
 {$R *.res}
 

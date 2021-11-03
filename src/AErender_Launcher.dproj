@@ -228,6 +228,8 @@
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <VerInfo_PreRelease>true</VerInfo_PreRelease>
         <VerInfo_Release>6</VerInfo_Release>
+        <DCC_CodePage>65001</DCC_CodePage>
+        <DCC_OutputXMLDocumentation>true</DCC_OutputXMLDocumentation>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <BT_BuildType>Debug</BT_BuildType>
@@ -267,9 +269,9 @@
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MajorVer>0</VerInfo_MajorVer>
-        <VerInfo_MinorVer>8</VerInfo_MinorVer>
+        <VerInfo_MinorVer>9</VerInfo_MinorVer>
         <VerInfo_PreRelease>true</VerInfo_PreRelease>
-        <VerInfo_Release>5</VerInfo_Release>
+        <DCC_CodePage>65001</DCC_CodePage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <Icns_MainIcns>..\icons\platform\Launcher2020.icns</Icns_MainIcns>
@@ -410,6 +412,7 @@
         </DCCReference>
         <DCCReference Include="lib\AErenderLauncher.SysUtils.pas"/>
         <DCCReference Include="lib\AErenderLauncher.Types.pas"/>
+        <DCCReference Include="lib\MacApi.Dialogs.pas"/>
         <RcItem Include="..\lang\en-US.aerlang">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>
