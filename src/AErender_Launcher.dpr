@@ -37,9 +37,6 @@ uses
   FMX.Graphics in 'lib\FMX\DX 10.4\FMX.Graphics.pas',
   FMX.Ani in 'lib\FMX\DX 10.4\FMX.Ani.pas',
   FMX.TreeView in 'lib\FMX\DX 10.4\FMX.TreeView.pas',
-  {$IFDEF MSWINDOWS}
-  FMX.Platform.Win in 'lib\FMX\DX 10.4\FMX.Platform.Win.pas',
-  {$ENDIF MSWINDOWS}
 
   /// RAD Studio 11.0 Alexandria
   ///
@@ -48,9 +45,6 @@ uses
   {$ELSE CompilerVersion = 35.0}
   FMX.Graphics in 'lib\FMX\DX 11.0\FMX.Graphics.pas',
   FMX.TreeView in 'lib\FMX\DX 11.0\FMX.TreeView.pas',
-  {$IFDEF MSWINDOWS}
-  FMX.Platform.Win in 'lib\FMX\DX 11.0\FMX.Platform.Win.pas',
-  {$ENDIF MSWINDOWS}
 
   {$ENDIF}
 
