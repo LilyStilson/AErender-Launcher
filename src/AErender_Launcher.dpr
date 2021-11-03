@@ -31,9 +31,29 @@ uses
   System.StartUpCopy,
   System.SysUtils,
   FMX.Forms,
-  FMX.Graphics in 'lib\FMX.Graphics.pas',
-  FMX.Ani in 'lib\FMX.Ani.pas',
-  FMX.TreeView in 'lib\FMX.TreeView.pas',
+  
+  /// RAD Studio 10.4 Sydney
+  {$IF CompilerVersion = 34.0}
+  FMX.Graphics in 'lib\FMX\DX 10.4\FMX.Graphics.pas',
+  FMX.Ani in 'lib\FMX\DX 10.4\FMX.Ani.pas',
+  FMX.TreeView in 'lib\FMX\DX 10.4\FMX.TreeView.pas',
+  {$IFDEF MSWINDOWS}
+  FMX.Platform.Win in 'lib\FMX\DX 10.4\FMX.Platform.Win.pas',
+  {$ENDIF MSWINDOWS}
+
+  /// RAD Studio 11.0 Alexandria
+  ///
+  /// Bug with double animation on text fields in FMX.Ani was fixed,
+  /// no need to include it anymore
+  {$ELSE CompilerVersion = 35.0}
+  FMX.Graphics in 'lib\FMX\DX 11.0\FMX.Graphics.pas',
+  FMX.TreeView in 'lib\FMX\DX 11.0\FMX.TreeView.pas',
+  {$IFDEF MSWINDOWS}
+  FMX.Platform.Win in 'lib\FMX\DX 11.0\FMX.Platform.Win.pas',
+  {$ENDIF MSWINDOWS}
+
+  {$ENDIF}
+
   FMX.CompLabel in 'lib\Components\TCompLabel\Package\FMX.CompLabel.pas',
   FMX.RenderProgress in 'lib\Components\TRenderProgress\Package\FMX.RenderProgress.pas',
   SplashScreenUnit in 'SplashScreenUnit.pas' {SplashScreenForm},
@@ -47,9 +67,10 @@ uses
   OutputModuleEditorUnit in 'OutputModuleEditorUnit.pas' {OutputModuleEditorForm},
   {$IFDEF MACOS}
   Mac.CodeBlocks in 'lib\Mac.CodeBlocks.pas',
+  MacApi.Dialogs in 'lib\MacApi.Dialogs.pas',
   {$ENDIF MACOS}
   {$IFDEF MSWINDOWS}
-  FMX.Taskbar in 'lib\FMX.Taskbar.pas',
+  FMX.Taskbar in 'lib\FMX\FMX.Taskbar.pas',
   {$ENDIF MSWINDOWS}
   AErenderLauncher.Localization in 'lib\AErenderLauncher.Localization.pas',
   AErenderLauncher.AerenderParser in 'lib\AErenderLauncher.AerenderParser.pas',
@@ -58,8 +79,7 @@ uses
   AErenderLauncher.IO in 'lib\AErenderLauncher.IO.pas',
   AErenderLauncher.Math in 'lib\AErenderLauncher.Math.pas' {/System.Types.Nullable in 'lib\System.Types.Nullable.pas';},
   AErenderLauncher.SysUtils in 'lib\AErenderLauncher.SysUtils.pas',
-  AErenderLauncher.Types in 'lib\AErenderLauncher.Types.pas',
-  MacApi.Dialogs in 'lib\MacApi.Dialogs.pas';
+  AErenderLauncher.Types in 'lib\AErenderLauncher.Types.pas';
 
 {$R *.res}
 

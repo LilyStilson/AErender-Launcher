@@ -4307,6 +4307,7 @@ begin
     TMonitor.Enter(Self);
     try
       CopyToNewReference;
+      //! Launcher Fix
       FCanvas := CanvasClass.CreateFromBitmap(Self, TCanvasQuality.HighQuality);
     finally
       TMonitor.Exit(Self);

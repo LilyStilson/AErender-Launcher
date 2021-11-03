@@ -27,8 +27,9 @@ interface
 {$SCOPEDENUMS ON}
 
 uses
-  Winapi.CommCtrl, Winapi.Windows, Winapi.ActiveX, System.Types, System.Classes, System.UITypes, System.UIConsts,
-  System.Generics.Collections, FMX.Forms, FMX.Platform, FMX.Types, FMX.Graphics, FMX.ZOrder.Win;
+  System.Messaging, Winapi.CommCtrl, Winapi.Windows, Winapi.ActiveX, System.Types, Winapi.Messages, System.Classes,
+  System.UITypes, System.UIConsts, System.Generics.Collections, FMX.Forms, FMX.Platform, FMX.Types, FMX.Graphics,
+  FMX.ZOrder.Win;
 
 type
   TWinDropTarget = class;
@@ -42,6 +43,7 @@ type
   private class var
     FForcedScale: Single;
   private
+    FForm: TCommonCustomForm;
     FWnd: HWND;
     FZOrderManager: TWinZOrderManager;
     FBufferBitmap: THandle;
@@ -49,7 +51,6 @@ type
     FBufferBits: Pointer;
     FBufferHandle: THandle;
     FBufferSize: TSize;
-    FForm: TCommonCustomForm;
     FDisableDeactivate: Boolean;
     FWinDropTarget: TWinDropTarget;
     FCurrentScale: Single;
@@ -60,69 +61,89 @@ type
     FNearestIntegerMultiple: Integer;
     procedure UpdateLayer;
     function GetZOrderManager: TWinZOrderManager;
-    procedure SetBounds(const Value: TRect);
+    procedure SetBounds(const Value: TRectF);
     procedure SetWndBounds(const Value: TRect);
-    procedure SetClientSize(const Value: TSize);
-    procedure UpdateClientSize;
-    procedure SetWindowSizeByClientSize;
+    procedure SetClientSize(const Value: TSizeF);
+    procedure CalculateClientSizeFromWindow;
+    procedure ApplyWndBoundsToWnd;
+    procedure ApplyWndClientSizeToWnd;
     procedure CalcNearestIntegerMultiple;
     function GetNearestIntegerMultiple: Integer;
+    function GetWndBorderSize: TSize;
   protected
-    function GetBounds: TRect; virtual;
-    function GetClientSize: TSize; virtual;
+    function GetBounds: TRectF; virtual;
+    function GetClientSize: TSizeF; virtual;
     function GetWndBounds: TRect; virtual;
     function GetWndClientSize: TSize; virtual;
     function GetTransparency: Boolean; virtual;
     function GetScale: Single; override;
+    { WinAPI Messages }
+    procedure WMDpiChanged(var AMessage: TWMDpi); message WM_DPICHANGED;
+    procedure WMWindowPosChanging(var AMessage: TWMWindowPosChanging); message WM_WINDOWPOSCHANGING;
+    procedure WMWindowPosChanged(var AMessage: TWMWindowPosChanged); message WM_WINDOWPOSCHANGED;
+    procedure WMSize(var AMessage: TWMSize); message WM_SIZE;
+    procedure WMGetMinMaxInfo(var Message: TWMGetMinMaxInfo); message WM_GETMINMAXINFO;
   public
     constructor Create(const AForm: TCommonCustomForm; const AWnd: HWND);
     destructor Destroy; override;
-    class procedure SetForcedScale(NewScale: Single);
+    class procedure SetForcedScale(const ANewScale: Single);
+    procedure SetForcedScaleForForm(const ANewScale: Single);
+    { Buffer }
     procedure CreateBuffer(const Width, Height: Integer);
     procedure ResizeBuffer(const Width, Height: Integer);
     procedure FreeBuffer;
-    /// <summary>Rounds physical window bounds to match scale and logical window bounds.</summary>
-    procedure CorrectWindowSize(const WindowPos: PWindowPos);
-    procedure ScaleChanged;
-    procedure DpiChanged(const NewDpi: Integer);
+    { Rounding to match scale }
+    /// <summary>Rounds physical size of client window to match scale and logical client window size.</summary>
+    function RoundWndClientSizeToMatchScale(const AWndClientSize: TSize): TSize;
+    /// <summary>Rounds physical size of window to match scale and logical window bounds.</summary>
+    function RoundWndSizeToMatchScale(const AWndSize: TSize): TSize;
+    { PX to DP conversions }
     /// <summary>Converts physical rect to logical.</summary>
     function WndToForm(const Rect: TRect): TRectF; overload;
     /// <summary>Converts physical rect to logical.</summary>
     function WndToForm(const Rect: TRectF): TRectF; overload;
     /// <summary>Converts logical rect to physical.</summary>
     function FormToWnd(const Rect: TRectF): TRectF;
+    property NearestIntegerMultiple: Integer read GetNearestIntegerMultiple;
+  public
+    /// <summary>Native WinAPI window handle.</summary>
     property Wnd: HWND read FWnd;
+    /// <summary>Returns related FMX form.</summary>
     property Form: TCommonCustomForm read FForm;
+    /// <summary>The Z-Order manager responsible for using native controls on this form.</summary>
+    property ZOrderManager: TWinZOrderManager read GetZOrderManager;
+    /// <summary>Is form transparent or not?</summary>
+    property Transparency: Boolean read GetTransparency;
+    { Buffer }
     property BufferBits: Pointer read FBufferBits;
     property BufferHandle: THandle read FBufferHandle;
     /// <summary>Allocated buffer size for native window.</summary>
     property BufferSize: TSize read FBufferSize;
-    property ZOrderManager: TWinZOrderManager read GetZOrderManager;
-    property Transparency: Boolean read GetTransparency;
-    /// <summary>Logical form's client size.</summary>
-    property ClientSize: TSize read GetClientSize write SetClientSize;
-    property NearestIntegerMultiple: Integer read GetNearestIntegerMultiple;
-    /// <summary>Logical form bounds.</summary>
-    property Bounds: TRect read GetBounds write SetBounds;
-    /// <summary>Logical form bounds.</summary>
-    property BoundsF: TRectF read FBounds;
-    /// <summary>Physical form size.</summary>
+    { Frame/Bounds }
+    /// <summary>Logical form's client size (dp).</summary>
+    property ClientSize: TSizeF read GetClientSize write SetClientSize;
+    /// <summary>Logical form bounds (dp).</summary>
+    property Bounds: TRectF read GetBounds write SetBounds;
+    /// <summary>Physical size of client part (px).</summary>
     property WndClientSize: TSize read GetWndClientSize;
-    /// <summary>Physical form bounds.</summary>
+    /// <summary>Physical form bounds (px).</summary>
     property WndBounds: TRect read GetWndBounds write SetWndBounds;
+    /// <summary>Total physical thickness of window frame (px).</summary>
+    property WndBorderSize: TSize read GetWndBorderSize;
   end;
 
   TWinDropTarget = class(TComponent, IDropTarget)
   private
     Form: TCommonCustomForm;
     function GetDataObject: TDragObject;
-    function DragEnter(const dataObj: IDataObject; grfKeyState: Longint; pt: TPoint;
-      var dwEffect: Longint): HRESULT; stdcall;
+    function DragEnter(const dataObj: IDataObject; grfKeyState: Longint; pt: TPoint; var dwEffect: Longint): HRESULT; stdcall;
     function DragOver(grfKeyState: Longint; pt: TPoint; var dwEffect: Longint): HRESULT; stdcall;
     function DragLeave: HRESULT; stdcall;
-    function Drop(const dataObj: IDataObject; grfKeyState: Longint; pt: TPoint;
-      var dwEffect: Longint): HRESULT; stdcall;
+    function Drop(const dataObj: IDataObject; grfKeyState: Longint; pt: TPoint; var dwEffect: Longint): HRESULT; stdcall;
   end;
+
+function PxToDp(const AValue: TPoint): TPointF;
+function DpToPx(const AValue: TPointF): TPoint;
 
 function FindWindow(Handle: HWND): TCommonCustomForm;
 function WindowHandleToPlatform(const AHandle: TWindowHandle): TWinWindowHandle;
@@ -135,11 +156,10 @@ procedure RegisterCorePlatformServices;
 procedure UnregisterCorePlatformServices;
 
 const
-  // We cannot change constant values in update, however we reallocated resources. So new values are placed in the comments below.
-  IDC_NODROP =    PChar(32767); // -> 32760
-  IDC_DRAG   =    PChar(32766); // -> 32759
-  IDC_MULTIDRAG = PChar(32763); // -> 32756
-  IDC_SQLWAIT =   PChar(32762); // -> 32755
+  IDC_NODROP    = PChar(32760);
+  IDC_DRAG      = PChar(32759);
+  IDC_MULTIDRAG = PChar(32756);
+  IDC_SQLWAIT   = PChar(32755);
 
 type
   TApplicationHWNDProc = function: HWND;
@@ -153,23 +173,21 @@ implementation
 {$SCOPEDENUMS OFF}
 
 uses
-  System.Messaging, System.IOUtils, Winapi.CommDlg, Winapi.Messages, Winapi.ShlObj, Winapi.MMSystem, Winapi.ShellAPI,
+  System.IOUtils, Winapi.CommDlg, Winapi.ShlObj, Winapi.MMSystem, Winapi.ShellAPI,
   Winapi.MultiMon, Winapi.Imm, Winapi.UxTheme, Winapi.ShellScaling, System.Variants, System.SysUtils, System.Math,
   System.Math.Vectors, System.StrUtils, System.DateUtils, System.RTLConsts, System.SyncObjs, System.Rtti, System.Devices,
   FMX.Consts, FMX.Menus, FMX.Helpers.Win, FMX.Printer, FMX.Printer.Win, FMX.Dialogs.Win, FMX.Canvas.GDIP, FMX.Canvas.D2D,
   FMX.Context.DX9, FMX.Context.DX11, FMX.Canvas.GPU, FMX.Forms.Border.Win, FMX.Controls.Win, FMX.Gestures.Win,
   FMX.TextLayout, FMX.Text, FMX.Types3D, FMX.VirtualKeyboard, FMX.Controls, FMX.BehaviorManager, FMX.Styles,
   FMX.MultiTouch.Win, FMX.ImgList, FMX.WebBrowser, FMX.Surfaces, FMX.Utils, FMX.KeyMapping, FMX.AcceleratorKey,
-  FMX.AcceleratorKey.Win;
+  FMX.AcceleratorKey.Win, FMX.Platform.Screen.Win, FMX.Platform.SaveState.Win, FMX.Platform.Device.Win,
+  FMX.Platform.Metrics.Win, FMX.VirtualKeyboard.Win, FMX.Platform.Timer.Win, FMX.Platform.Logger.Win,
+  FMX.Platform.Menu.Win;
 
 type
-  EUnavailableMenuId = class(Exception);
-
-  TOpenMenuItem = class(TMenuItem);
-
   MySTGMEDIUM = record // for compatibility
     Tymed: DWORD;
-    Case Integer Of
+    case Integer Of
       0:
         (HBITMAP: HBITMAP; UnkForRelease: Pointer { IUnknown } );
       1:
@@ -230,8 +248,8 @@ type
   TFullScreenParams = record
     BorderStyle: TFmxFormBorderStyle;
     WindowState: TWindowState;
-    Position: TPoint;
-    Size: TPoint;
+    Position: TPointF;
+    Size: TSizeF;
   public
     function IsFullScreen: Boolean;
     procedure Clean;
@@ -241,17 +259,12 @@ type
     WasLeftMouseButtonPressed: Boolean;
   end;
 
-  TWinTimerService = class;
   TImmManager = class;
 
-  TPlatformWin = class(TInterfacedObject, IFMXApplicationService, IFMXSystemFontService,
-    IFMXWindowService, IFMXDragDropService, IFMXCursorService, IFMXMouseService,
-    IFMXScreenService, IFMXLocaleService, IFMXTextService, IFMXContextService, IFMXCanvasService, IFMXDeviceService,
-    IFMXWindowBorderService, IFMXSystemInformationService, IFMXLoggingService, IFMXFullScreenWindowService,
-    IFMXListingService, IFMXSaveStateService, IFMXDeviceMetricsService, IFMXGestureRecognizersService,
-    IFMXWindowsTouchService, IFMXDefaultMetricsService, IFMXKeyMappingService)
-  private const
-    DefaultWindowsFontSize = 12;
+  TPlatformWin = class(TInterfacedObject, IFMXApplicationService, IFMXWindowService, IFMXDragDropService,
+    IFMXCursorService, IFMXMouseService, IFMXTextService, IFMXContextService, IFMXCanvasService, IFMXWindowBorderService,
+    IFMXFullScreenWindowService, IFMXGestureRecognizersService, IFMXWindowsTouchService, IFMXKeyMappingService,
+    IFMXWindowConstraintsService)
   private
     FTitle: string;
     FDefaultTitle: string;
@@ -268,7 +281,6 @@ type
     FCaptionChangedId: Integer;
     FMultiTouchManager: TMultiTouchManagerWin;
     FEnabledInteractiveGestures: TInteractiveGestures;
-    FSaveStateStoragePath: string;
     FDragAndDropActive: Boolean;
     FKeyMapping: TKeyMapping;
     FAcceleratorKeyRegistry: IFMXAcceleratorKeyRegistryService;
@@ -282,36 +294,13 @@ type
     function CreateAppHandle: HWND;
     procedure MinimizeApp;
     procedure RestoreApp;
-    // IFMXListingService
-    function GetListingHeaderBehaviors: TListingHeaderBehaviors;
-    function GetListingSearchFeatures: TListingSearchFeatures;
-    function GetListingTransitionFeatures: TListingTransitionFeatures;
-    function GetListingEditModeFeatures: TListingEditModeFeatures;
-    function IFMXListingService.GetHeaderBehaviors = GetListingHeaderBehaviors;
-    function IFMXListingService.GetSearchFeatures = GetListingSearchFeatures;
-    function IFMXListingService.GetTransitionFeatures = GetListingTransitionFeatures;
-    function IFMXListingService.GetEditModeFeatures = GetListingEditModeFeatures;
-    // IFMXSaveStateService
-    function GetSaveStateFileName(const ABlockName: string): string;
-    function GetSaveStateBlock(const ABlockName: string; const ABlockData: TStream): Boolean;
-    function SetSaveStateBlock(const ABlockName: string; const ABlockData: TStream): Boolean;
-    function GetSaveStateStoragePath: string;
-    procedure SetSaveStateStoragePath(const ANewPath: string);
-    function GetSaveStateNotifications: Boolean;
-    function IFMXSaveStateService.GetBlock = GetSaveStateBlock;
-    function IFMXSaveStateService.SetBlock = SetSaveStateBlock;
-    function IFMXSaveStateService.GetStoragePath = GetSaveStateStoragePath;
-    procedure IFMXSaveStateService.SetStoragePath = SetSaveStateStoragePath;
-    function IFMXSaveStateService.GetNotifications = GetSaveStateNotifications;
-    // IFMXDeviceMetricsService
-    function GetDisplayMetrics: TDeviceDisplayMetrics;
     procedure UpdateAppTitle;
     procedure CaptionChangedHandler(const Sender: TObject; const Msg: System.Messaging.TMessage);
     function GetApplicationHWND: HWND;
     procedure SetApplicationHWNDProc(const Value: TApplicationHWNDProc);
     procedure UpdateApplicationHwnd;
 
-    //IFMXKeyMappingService
+    { IFMXKeyMappingService }
     /// <summary>Registers a platform key as the given virtual key.</summary>
     function RegisterKeyMapping(const PlatformKey, VirtualKey: Word; const KeyKind: TKeyKind): Boolean;
     /// <summary>Unegisters a platform key as the given virtual key.</summary>
@@ -338,9 +327,6 @@ type
     function GetVersionString: string;
     property ApplicationHWND: HWND read GetApplicationHWND;
     property ApplicationHWNDProc: TApplicationHWNDProc read FApplicationHWNDProc write SetApplicationHWNDProc;
-    { IFMXSystemFontService }
-    function GetDefaultFontFamilyName: string;
-    function GetDefaultFontSize: Single;
     { IFMXWindowService }
     function FindForm(const AHandle: TWindowHandle): TCommonCustomForm;
     function CreateWindow(const AForm: TCommonCustomForm): TWindowHandle;
@@ -366,6 +352,9 @@ type
     function ClientToScreen(const AForm: TCommonCustomForm; const Point: TPointF): TPointF;
     function ScreenToClient(const AForm: TCommonCustomForm; const Point: TPointF): TPointF;
     function GetWindowScale(const AForm: TCommonCustomForm): Single;
+    { IFMXWindowConstraintsService }
+    procedure SetConstraints(const AForm: TCommonCustomForm; const AMinWidth, AMinHeight, AMaxWidth, AMaxHeight: Single);
+    { IFMXFullScreenWindowService }
     // for desingtime and testing only
     procedure SetFullScreen(const AForm: TCommonCustomForm; const AValue: Boolean);
     function GetFullScreen(const AForm: TCommonCustomForm): Boolean;
@@ -379,15 +368,6 @@ type
     function GetCursor: TCursor;
     { IFMXMouseService }
     function GetMousePos: TPointF;
-    { IFMXScreenService }
-    function GetScreenSize: TPointF;
-    function GetScreenScale: Single;
-    function GetScreenOrientation: TScreenOrientation;
-    procedure SetSupportedScreenOrientations(const AOrientations: TScreenOrientations);
-    { IFMXLocaleService }
-    function GetCurrentLangID: string;
-    function GetLocaleFirstDayOfWeek: string;
-    function GetFirstWeekday: Byte;
     { IFMXTextService }
     function GetTextServiceClass: TTextServiceClass;
     { IFMXContextService }
@@ -396,216 +376,17 @@ type
     { IFMXCanvasService }
     procedure RegisterCanvasClasses;
     procedure UnregisterCanvasClasses;
-    { IFMXSystemInformationService }
-    function GetScrollingBehaviour: TScrollingBehaviours;
-    function GetMinScrollThumbSize: Single;
-    function GetCaretWidth: Integer;
-    function GetMenuShowDelay: Integer;
-    { IFMXLoggingService }
-    procedure Log(const AFormat: string; const AParams: array of const);
     { IFMXGestureRecognizersService }
     procedure AddRecognizer(const ARec: TInteractiveGesture; const AForm: TCommonCustomForm);
     procedure RemoveRecognizer(const ARec: TInteractiveGesture; const AForm: TCommonCustomForm);
     { IFMXWindowsTouchService }
     procedure HookTouchHandler(const AForm: TCommonCustomForm);
     procedure UnhookTouchHandler(const AForm: TCommonCustomForm);
-    { IFMXDeviceService }
-    function GetModel: string;
-    function GetFeatures: TDeviceFeatures;
-    function GetDeviceClass: TDeviceInfo.TDeviceClass;
-    { IFMXDefaultMetricsService }
-    function SupportsDefaultSize(const AComponent: TComponentKind): Boolean;
-    function GetDefaultSize(const AComponent: TComponentKind): TSize;
 
     property ImmManager[const Index: TCommonCustomForm]: TImmManager read GetImmManager;
     property TimerService: TWinTimerService read FTimerService;
     /// <summary>Returns additional platform dependent data about fmx form.</summary>
     property FormInfo[const Index: TCommonCustomForm]: TFormInfo read GetFormInfo;
-  end;
-
-  TWin32TimerInfo = record
-    TimerID: UIntPtr; // the Windows timer ID for this timer
-    TimerHandle: TFmxHandle; // the unique FMX Handle for this timer
-    TimerFunc: TTimerProc; // owner function to handle timer
-  end;
-
-  TWinTimerService = class(TInterfacedObject, IFMXTimerService)
-  private
-    FHandleCounter: TFmxHandle;
-    FTimers: TList<TWin32TimerInfo>;
-    FPerformanceFrequency: Int64;
-    FTerminating: Boolean;
-    procedure DestroyTimers;
-    { Handlers }
-    class procedure TimerCallback(window_hwnd: HWND; Msg: Longint; idEvent: UINT; dwTime: Longint); static; stdcall;
-    procedure ApplicationTerminatingHandler(const Sender: TObject; const Msg: System.Messaging.TMessage);
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    { IFMXTimerService }
-    function CreateTimer(AInterval: Integer; ATimerFunc: TTimerProc): TFmxHandle;
-    function DestroyTimer(Timer: TFmxHandle): Boolean;
-    function GetTick: Double;
-  end;
-
-  TMenuLooperWin = class
-  private
-    FView: IMenuView;
-    function IsItemSelectable(const Item: TFmxObject): Boolean;
-    procedure SelectFirstMenuItem(const AView: IMenuView);
-    procedure SelectLastMenuItem(const AView: IMenuView);
-    procedure SelectNextMenuItem(const AView: IMenuView; const ABackward: Boolean);
-    function BackwardSelectNextMenuItem(const AView: IMenuView; const AStartInd, AEndInd: Integer): Boolean;
-    function ForwardSelectNextMenuItem(const AView: IMenuView; const AStartInd, AEndInd: Integer): Boolean;
-  public
-    procedure StartLoop(const AView: IMenuView);
-    procedure EndLoop(const AView: IMenuView);
-  end;
-
-  TWin32MenuInfo = record
-    MenuID: Integer;
-    FMXMenuItem: TMenuItem;
-    constructor Create(const AMenuId: Integer; const AnItem: TMenuItem);
-  end;
-
-  TMenuServiceWin = class(TInterfacedObject, IFMXMenuService)
-  private type
-    TState = (CreatingOSMenu, DestroyingMenuItem);
-    TStates = set of TState;
-    TMenuId = Integer;
-  private
-    FHMenuMap: TDictionary<TFmxHandle, TWin32MenuInfo>;
-    FHMenuIdMap: TDictionary<TMenuId, TFmxHandle>;
-    FStates: TStates;
-    FMenuLooper: TMenuLooperWin;
-    { Menu Item Id}
-    function GenerateMenuId: TMenuId;
-    function AssignNewIdToMenu(const AParentMenu, AMenu: HMENU): TMenuId;
-    function FindMenuInfoById(const AMenuItemId: TMenuId; var AMenuInfo: TWin32MenuInfo): Boolean;
-    { Removing }
-    procedure DestroysAllMenuItems(const AMenu: IItemsContainer);
-    procedure RemoveMenuFromMaps(const AMenuHandle: TFmxHandle);
-    { Menu Item Bitmap }
-    procedure AddBitmapToMenu(const AParentMenu: HMENU; const AMenuItemId: TMenuId; const ABitmap: HBITMAP);
-    procedure RemoveBitmapFromMenu(const AParentMenu, AMenu: HMENU);
-  protected
-    procedure WMCommand(var Message: TWMCommand); message WM_COMMAND;
-    procedure WMInitMenuPopup(var Message: TWMInitMenuPopup); message WM_INITMENUPOPUP;
-    procedure WMMenuSelect(var Message: TWMMenuSelect); message WM_MENUSELECT;
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    { IFMXMenuService }
-
-    procedure StartMenuLoop(const AView: IMenuView);
-    function ShortCutToText(ShortCut: TShortCut): string;
-    procedure ShortCutToKey(ShortCut: TShortCut; var Key: Word; var Shift: TShiftState);
-    function TextToShortCut(Text: string): Integer;
-    procedure CreateOSMenu(AForm: TCommonCustomForm; const AMenu: IItemsContainer);
-    procedure UpdateMenuItem(const AItem: IItemsContainer; AChange: TMenuItemChanges);
-    procedure DestroyMenuItem(const AItem: IItemsContainer);
-    function IsMenuBarOnWindowBorder: Boolean;
-    procedure UpdateMenuBar;
-  end;
-
-  TVirtualKeyboardWin = class(TInterfacedObject, IFMXVirtualKeyboardService)
-  private type
-    TvkbState = (None, Hidden, Shown);
-  private
-    FPath: string;
-    FExeName: string;
-    FWndClassName: string;
-    FHTmerLang: TFmxHandle;
-    FHTmerVisible: TFmxHandle;
-    FKBPresent: Boolean;
-    FFormHandle: HWND;
-    FInst: HINST;
-    FError: Boolean;
-    FLastvkbState: TvkbState;
-    FLastHandle: HWND;
-    FLastTime: TDateTime;
-    FNewvkbState: TvkbState;
-    FWait: Boolean;
-    FStepActivate: Integer;
-    FCodeKeyboard: HKL;
-    FTimerService: IFMXTimerService;
-
-    procedure KillTimerLang;
-    procedure TimerLangProc;
-    procedure StartTimerLang;
-
-    procedure KillTimerVisible;
-    procedure TimerVisibleProc;
-    procedure StartTimerVisible;
-    function FindKeyValue(const Key: HKey; const Name, Value, SubKeyName, SubValueName: string): string;
-    function GetVirtualKeyboardState: TVirtualKeyboardStates;
-    procedure vkbExecute(FormHandle: HWND);
-    function vkbHandle: HWND;
-    function vkbState: TvkbState;
-    function GetVKBounds: TRect;
-  protected
-    procedure Clear;
-    function IsAutoShow: Boolean;
-  public
-    constructor Create;
-    destructor Destroy; override;
-    function ShowVirtualKeyboard(const AControl: TFmxObject): Boolean;
-    function HideVirtualKeyboard: Boolean;
-    procedure SetTransientState(Value: Boolean);
-    property VirtualKeyboardState: TVirtualKeyboardStates read GetVirtualKeyboardState;
-    property ExeName: string read FExeName write FExeName;
-    property Path: string read FPath write FPath;
-    property WndClassName: string read FWndClassName write FWndClassName;
-  end;
-
-{ TMultiDisplayWin }
-
-  TOrderedDictionary<TKey, TValue> = class
-  private
-    FValues: TList<TValue>;
-    FIndex: TDictionary<TKey, Integer>;
-    function GetCount: Integer;
-    function GetValues(const AIndex: Integer): TValue;
-  public
-    constructor Create;
-    destructor Destroy; override;
-    procedure Add(const AKey: TKey; const AValue: TValue);
-    function TryGetValue(const AKey: TKey; out AValue: TValue): Boolean;
-    procedure Clear;
-    property Values[const AIndex: Integer]: TValue read GetValues; default;
-    property Count: Integer read GetCount;
-  end;
-
-  TMultiDisplayWin = class(TInterfacedObject, IFMXMultiDisplayService)
-  private type
-    TParameter = (DisplayCount, Displays, WorkareaRect, DesktopRect);
-    TParameters = set of TParameter;
-  private
-    FDisplays: TOrderedDictionary<HMONITOR, TDisplay>;
-    FDisplayCount: Integer;
-    FWorkAreaRect: TRect;
-    FDesktopRect: TRect;
-    FOutdatedParameters: TParameters;
-    procedure AddDisplay(const AMonitorHandle: HMONITOR);
-    function FindDisplay(const AMonitorHandle: HMONITOR): TDisplay;
-    procedure UpdateDisplaysIfNeeded;
-    class function ScaleRect(const ARect: TRect; const AScale: Single): TRect;
-    class function GetMonitorScale(const AHandle: HMONITOR): Single;
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    { IFMXMultiDisplayService }
-    procedure UpdateDisplayInformation;
-    function GetDisplayCount: Integer;
-    function GetWorkAreaRect: TRect;
-    function GetDesktopRect: TRect;
-    function GetDisplay(const AIndex: Integer): TDisplay;
-    function GetDesktopCenterRect(const ASize: TSize): TRect;
-    function DisplayFromWindow(const AHandle: TWindowHandle): TDisplay;
-    function DisplayFromPoint(const AHandle: TWindowHandle; const APoint: TPoint): TDisplay;
   end;
 
   TOpenForm = class(TCommonCustomForm);
@@ -667,6 +448,8 @@ type
     procedure EnterControl(const AFormHandle: TWindowHandle); override;
     procedure ExitControl(const AFormHandle: TWindowHandle); override;
 
+    function HasMarkedText: Boolean; override;
+
     { Deprecated }
     procedure DrawSingleLine(const ACanvas: TCanvas; const ARect: TRectF; const AFirstVisibleChar: Integer;
       const AFont: TFont; const AOpacity: Single; const AFlags: TFillTextFlags; const ATextAlign: TTextAlign;
@@ -675,16 +458,14 @@ type
       const AOpacity: Single; const Flags: TFillTextFlags; const ATextAlign: TTextAlign;
       const AVTextAlign: TTextAlign = TTextAlign.Center; const AWordWrap: Boolean = False); overload; override;
 
-    function HasMarkedText: Boolean; override;
-
     /// <summary>Returns caret position in <c>MarkedText</c> bounds.</summary>
     property MarkedTextCursorPosition: Integer read FMarkedTextCursorPosition write SetMarkedTextCursorPosition;
   end;
 
 var
-  VirtualKeyboardWin: TVirtualKeyboardWin;
-  MultiDisplayWin: TMultiDisplayWin;
-  MenuServiceWin: TMenuServiceWin;
+  VirtualKeyboardWin: TWinVirtualKeyboard;
+  MultiDisplayWin: TWinMultiDisplay;
+  MenuServiceWin: TWinMenuService;
 
 const
   CF_FMOBJECT = CF_PRIVATEFIRST + 1;
@@ -694,6 +475,22 @@ var
   WindowAtomString: string;
   PlatformWin: TPlatformWin;
   CapturedGestureControl: TComponent;
+
+function PxToDp(const AValue: TPoint): TPointF;
+begin
+  if MultiDisplayWin = nil then
+    Result := AValue
+  else
+    Result := MultiDisplayWin.PxToDp(AValue);
+end;
+
+function DpToPx(const AValue: TPointF): TPoint;
+begin
+  if MultiDisplayWin = nil then
+    Result := AValue.Truncate
+  else
+    Result := MultiDisplayWin.DpToPx(AValue);
+end;
 
 procedure DisableProcessWindowsGhosting;
 var
@@ -705,40 +502,45 @@ begin
 end;
 
 procedure RegisterCorePlatformServices;
+var
+  MetricsService: TWinMetricsServices;
 begin
   PlatformWin := TPlatformWin.Create;
   TPlatformServices.Current.AddPlatformService(IFMXApplicationService, PlatformWin);
-  TPlatformServices.Current.AddPlatformService(IFMXSystemFontService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXTimerService, PlatformWin.TimerService);
   TPlatformServices.Current.AddPlatformService(IFMXWindowService, PlatformWin);
+  TPlatformServices.Current.AddPlatformService(IFMXWindowConstraintsService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXDragDropService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXCursorService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXMouseService, PlatformWin);
-  TPlatformServices.Current.AddPlatformService(IFMXScreenService, PlatformWin);
-  TPlatformServices.Current.AddPlatformService(IFMXLocaleService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXTextService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXContextService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXCanvasService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXWindowBorderService, PlatformWin);
-  TPlatformServices.Current.AddPlatformService(IFMXSystemInformationService, PlatformWin);
-  TPlatformServices.Current.AddPlatformService(IFMXLoggingService, PlatformWin);
+  TPlatformServices.Current.AddPlatformService(IFMXLoggingService, TWinLoggerService.Create);
   TPlatformServices.Current.AddPlatformService(IFMXFullScreenWindowService, PlatformWin);
-  TPlatformServices.Current.AddPlatformService(IFMXListingService, PlatformWin);
-  TPlatformServices.Current.AddPlatformService(IFMXSaveStateService, PlatformWin);
-  TPlatformServices.Current.AddPlatformService(IFMXDeviceMetricsService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXGestureRecognizersService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXWindowsTouchService, PlatformWin);
-  TPlatformServices.Current.AddPlatformService(IFMXDeviceService, PlatformWin);
-  TPlatformServices.Current.AddPlatformService(IFMXDefaultMetricsService, PlatformWin);
   TPlatformServices.Current.AddPlatformService(IFMXKeyMappingService, PlatformWin);
+  TPlatformServices.Current.AddPlatformService(IFMXDeviceService, TWinDeviceServices.Create);
+  TPlatformServices.Current.AddPlatformService(IFMXSaveStateService, TWinSaveStateService.Create);
 
-  VirtualKeyboardWin := TVirtualKeyboardWin.Create;
+  MetricsService := TWinMetricsServices.Create;
+  TPlatformServices.Current.AddPlatformService(IFMXLocaleService, MetricsService);
+  TPlatformServices.Current.AddPlatformService(IFMXDefaultMetricsService, MetricsService);
+  TPlatformServices.Current.AddPlatformService(IFMXSystemInformationService, MetricsService);
+  TPlatformServices.Current.AddPlatformService(IFMXSystemFontService, MetricsService);
+  TPlatformServices.Current.AddPlatformService(IFMXListingService, MetricsService);
+
+  VirtualKeyboardWin := TWinVirtualKeyboard.Create;
   TPlatformServices.Current.AddPlatformService(IFMXVirtualKeyboardService, VirtualKeyboardWin);
 
-  MultiDisplayWin := TMultiDisplayWin.Create;
+  MultiDisplayWin := TWinMultiDisplay.Create;
   TPlatformServices.Current.AddPlatformService(IFMXMultiDisplayService, MultiDisplayWin);
+  TPlatformServices.Current.AddPlatformService(IFMXScreenService, MultiDisplayWin);
+  TPlatformServices.Current.AddPlatformService(IFMXDeviceMetricsService, MultiDisplayWin);
 
-  MenuServiceWin := TMenuServiceWin.Create;
+  MenuServiceWin := TWinMenuService.Create;
   TPlatformServices.Current.AddPlatformService(IFMXMenuService, MenuServiceWin);
 
   // If application becomes inactive while a modal dialog is opened it may hang, so we have to DisableProcessWindowsGhosting
@@ -753,6 +555,7 @@ begin
   TPlatformServices.Current.RemovePlatformService(IFMXApplicationService);
   TPlatformServices.Current.RemovePlatformService(IFMXSystemFontService);
   TPlatformServices.Current.RemovePlatformService(IFMXTimerService);
+  TPlatformServices.Current.RemovePlatformService(IFMXWindowConstraintsService);
   TPlatformServices.Current.RemovePlatformService(IFMXWindowService);
   TPlatformServices.Current.RemovePlatformService(IFMXDragDropService);
   TPlatformServices.Current.RemovePlatformService(IFMXCursorService);
@@ -829,11 +632,25 @@ end;
 
 { App }
 
+{$WARN SYMBOL_PLATFORM OFF}
 procedure TPlatformWin.Run;
+var
+  MainForm: TCommonCustomForm;
 begin
   FRunning := True;
   Application.RealCreateForms;
   UpdateAppTitle;
+  if Application.MainForm <> nil then
+  begin
+    MainForm := Application.MainForm;
+    case CmdShow of
+      SW_SHOWMINNOACTIVE:
+        MainForm.WindowState := TWindowState.wsMinimized;
+      SW_SHOWMAXIMIZED:
+        MainForm.WindowState := TWindowState.wsMaximized;
+    end;
+  end;
+
   repeat
     try
       Application.HandleMessage;
@@ -842,6 +659,7 @@ begin
     end;
   until Application.Terminated;
 end;
+{$WARN SYMBOL_PLATFORM DEFAULT}
 
 function TPlatformWin.Terminating: Boolean;
 begin
@@ -858,6 +676,7 @@ begin
   FRunning := False;
   FTerminating := True;
   FIsPostQuitMessage := True;
+  TMessageManager.DefaultManager.SendMessage(nil, TApplicationTerminatingMessage.Create);
 
   FMultiTouchManager.Free; // release multitouch early so that it does not hold reference to services
 
@@ -1287,6 +1106,15 @@ end;
 
 { Window }
 
+procedure TWinWindowHandle.ApplyWndBoundsToWnd;
+var
+  CurrentWndRect: TRect;
+begin
+  GetWindowRect(Wnd, CurrentWndRect);
+  if CurrentWndRect <> FWndBounds then
+    SetWindowPos(Wnd, 0, FWndBounds.Left, FWndBounds.Top, FWndBounds.Width, FWndBounds.Height, SWP_NOACTIVATE or SWP_NOZORDER);
+end;
+
 procedure TWinWindowHandle.CalcNearestIntegerMultiple;
 const
   MaxMul = 9;
@@ -1307,54 +1135,40 @@ begin
     FNearestIntegerMultiple := Round(Scale);
 end;
 
-procedure TWinWindowHandle.CorrectWindowSize(const WindowPos: PWindowPos);
-var
-  LClientSize: TSizeF;
-  WndClientSize: TSize;
-  WndClientOffset: TPoint;
-  LClientRect, LWindowRect: TRect;
-  FinalScale: TPointF;
+class procedure TWinWindowHandle.SetForcedScale(const ANewScale: Single);
 begin
-  GetClientRect(Wnd, LClientRect); // dp
-  ClientToScreen(Wnd, LClientRect.TopLeft);
-  ClientToScreen(Wnd, LClientRect.BottomRight);
-  GetWindowRect(Wnd, LWindowRect); // dp
-
-  WndClientOffset := (LClientRect.TopLeft - LWindowRect.TopLeft) + (LWindowRect.BottomRight - LClientRect.BottomRight); // dp
-  WndClientSize := TSize.Create(WindowPos^.cx - WndClientOffset.X, WindowPos^.cy - WndClientOffset.Y); // dp
-  if SameValue(Frac(WndClientSize.Width / Scale), 0, TEpsilon.Scale) then
-    FinalScale.X := Scale
-  else
-    FinalScale.X := NearestIntegerMultiple;
-  if SameValue(Frac(WndClientSize.Height / Scale), 0, TEpsilon.Scale) then
-    FinalScale.Y := Scale
-  else
-    FinalScale.Y := NearestIntegerMultiple;
-
-  LClientSize := TSizeF.Create(Round(WndClientSize.Width / FinalScale.X), Round(WndClientSize.Height / FinalScale.Y)); // dp
-
-  WindowPos^.cx := Round(LClientSize.Width * FinalScale.X) + WndClientOffset.X; // px
-  WindowPos^.cy := Round(LClientSize.Height * FinalScale.Y) + WndClientOffset.Y; // px
+  FForcedScale := Max(1, ANewScale);
 end;
 
-class procedure TWinWindowHandle.SetForcedScale(NewScale: Single);
+procedure TWinWindowHandle.SetForcedScaleForForm(const ANewScale: Single);
 begin
-  if NewScale < 1 then
-    NewScale := 1;
-  if not SameValue(FForcedScale, NewScale, TEpsilon.Scale) then
-    FForcedScale := NewScale;
+  SetForcedScale(ANewScale);
+  CalcNearestIntegerMultiple;
+  FWndClientSize := TSizeF.Create(FClientSize.Width * Scale, FClientSize.Height * Scale).Ceiling;
+  FWndClientSize := RoundWndClientSizeToMatchScale(FWndClientSize);
+  FClientSize := TSizeF.Create(FWndClientSize.Width / Scale, FWndClientSize.Height / Scale);
+  ApplyWndClientSizeToWnd;
+
+  if Form <> nil then
+    Form.RecreateResources;
 end;
 
 constructor TWinWindowHandle.Create(const AForm: TCommonCustomForm; const AWnd: HWND);
+
+  function WndBoundsToBounds(const AWndBounds: TRect): TRectF;
+  begin
+    Result.TopLeft := MultiDisplayWin.PXToDP(AWndBounds.TopLeft);
+    Result.Width := FWndBounds.Width / Scale;
+    Result.Height := FWndBounds.Height / Scale;
+  end;
+
 begin
   inherited Create;
-  if not (TCanvasManager.DefaultCanvas.InheritsFrom(TCustomCanvasD2D)) or GlobalUseGPUCanvas then
-    FForcedScale := 1;
   FForm := AForm;
   FWnd := AWnd;
   GetWindowRect(Wnd, FWndBounds);
-  FBounds := TRectF.Create(FWndBounds.Left, FWndBounds.Top, FWndBounds.Width / Scale, FWndBounds.Height / Scale);
-  UpdateClientSize;
+  FBounds := WndBoundsToBounds(FWndBounds);
+  CalculateClientSizeFromWindow;
 end;
 
 function FindWindow(Handle: HWND): TCommonCustomForm;
@@ -1401,35 +1215,33 @@ end;
 destructor TWinWindowHandle.Destroy;
 begin
   FreeBuffer;
-  FZOrderManager.Free;
+  FreeAndNil(FZOrderManager);
   inherited;
 end;
 
-procedure TWinWindowHandle.ScaleChanged;
-begin
-  CalcNearestIntegerMultiple;
-
-  FWndClientSize := TSize.Create(Ceil(FClientSize.Width * Scale), Ceil(FClientSize.Height * Scale));
-  FClientSize := TSizeF.Create(FWndClientSize.Width / Scale, FWndClientSize.Height / Scale);
-  SetWindowSizeByClientSize;
-
-  Form.RecreateResources;
-end;
-
-procedure TWinWindowHandle.DpiChanged;
+procedure TWinWindowHandle.WMDpiChanged(var AMessage: TWMDpi);
 var
   NewScale: Single;
 begin
-  NewScale := NewDpi / StandardDpi;
+  NewScale := AMessage.YDpi / StandardDpi;
   if not SameValue(FCurrentScale, NewScale, TEpsilon.Scale) then
   begin
     FCurrentScale := NewScale;
-    ScaleChanged;
+    CalcNearestIntegerMultiple;
+    WndBounds := AMessage.ScaledRect^;
+    if Form <> nil then
+    begin
+      // DPI affects the canvas size and native menu metrics.
+      Form.RecreateResources;
+      Form.RecreateOsMenu;
+    end;
+    AMessage.Result := 0;
   end;
 end;
 
-procedure TWinWindowHandle.CreateBuffer;
+procedure TWinWindowHandle.CreateBuffer(const Width, Height: Integer);
 begin
+  FreeBuffer;
   FBufferSize := TSize.Create(Width, Height);
   FBitmapInfo.bmiHeader.biSize := SizeOf(TBitmapInfoHeader);
   FBitmapInfo.bmiHeader.biPlanes := 1;
@@ -1479,9 +1291,45 @@ begin
   end;
 end;
 
-function TWinWindowHandle.GetClientSize: TSize;
+function TWinWindowHandle.RoundWndClientSizeToMatchScale(const AWndClientSize: TSize): TSize;
+
+  function GetScale(const AValue: Integer): Single;
+  begin
+    if SameValue(Frac(AValue/ Scale), 0, TEpsilon.Scale) then
+      Result := Scale
+    else
+      Result := NearestIntegerMultiple;
+  end;
+
+var
+  LClientSize: TSizeF;
+  FinalScale: TPointF;
 begin
-  Result := FClientSize.Ceiling;
+  FinalScale.X := GetScale(AWndClientSize.Width);
+  FinalScale.Y := GetScale(AWndClientSize.Height);
+
+  LClientSize := TSizeF.Create(Round(AWndClientSize.Width / FinalScale.X), Round(AWndClientSize.Height / FinalScale.Y)); // dp
+  Result.Width := Round(LClientSize.Width * FinalScale.X); // px
+  Result.Height := Round(LClientSize.Height * FinalScale.Y); // px
+end;
+
+function TWinWindowHandle.RoundWndSizeToMatchScale(const AWndSize: TSize): TSize;
+var
+  WndClientSize: TSize;
+begin
+  WndClientSize := AWndSize - WndBorderSize; // px
+  WndClientSize := RoundWndClientSizeToMatchScale(WndClientSize); // px
+  Result := WndClientSize + WndBorderSize; // px
+end;
+
+function TWinWindowHandle.GetClientSize: TSizeF;
+var
+  LRect: TRect;
+begin
+  // We could return the FClientSize here. However, for the rendering process, it is important for us to know exactly
+  // the actual size. If the form is on HiDPI screen, we use rounding client size for avoiding rendering artefacts.
+  Winapi.Windows.GetClientRect(Wnd, LRect);
+  Result := TSizeF.Create(LRect.Width / Scale, LRect.Height / Scale);
 end;
 
 function TWinWindowHandle.GetNearestIntegerMultiple: Integer;
@@ -1491,60 +1339,73 @@ begin
   Result := FNearestIntegerMultiple;
 end;
 
-procedure TWinWindowHandle.SetWindowSizeByClientSize;
+procedure TWinWindowHandle.ApplyWndClientSizeToWnd;
 var
-  LClientRect, LWindowRect: TRect;
+  LWindowRect: TRect;
   NewWindowSize: TSize;
-  BorderThickness: TSize;
 begin
-  GetClientRect(Wnd, LClientRect);
-  GetWindowRect(Wnd, LWindowRect);
-
-  BorderThickness := TSize.Create(LWindowRect.Width - LClientRect.Width, LWindowRect.Height - LClientRect.Height);
-  NewWindowSize := FWndClientSize + BorderThickness;
+  GetWindowRect(Wnd, LWindowRect); // px
+  NewWindowSize := FWndClientSize + WndBorderSize; // px
 
   if LWindowRect.Size <> NewWindowSize then
   begin
-    FWndBounds.Width := NewWindowSize.Width;
-    FWndBounds.Height := NewWindowSize.Height;
-    FBounds.Width := NewWindowSize.Width / Scale;
-    FBounds.Height := NewWindowSize.Height / Scale;
-    SetWindowPos(Wnd, 0, LWindowRect.Left, LWindowRect.Top, NewWindowSize.Width, NewWindowSize.Height,
-      SWP_NOMOVE or SWP_NOZORDER or SWP_NOACTIVATE);
+    LWindowRect.Size := NewWindowSize;
+    WndBounds := LWindowRect;
   end;
 end;
 
-procedure TWinWindowHandle.SetClientSize(const Value: TSize);
+procedure TWinWindowHandle.SetClientSize(const Value: TSizeF);
 begin
-  if FClientSize.Ceiling <> Value then
+  if FClientSize <> Value then
   begin
-    FWndClientSize := TSize.Create(Ceil(Value.Width * Scale), Ceil(Value.Height * Scale));
     FClientSize := Value;
-    SetWindowSizeByClientSize;
+    FWndClientSize := TSizeF.Create(Value.Width * Scale, Value.Height * Scale).Ceiling;
+    FWndClientSize := RoundWndClientSizeToMatchScale(FWndClientSize);
+
+    ApplyWndClientSizeToWnd;
+    if Form <> nil then
+      TOpenForm(FForm).ResizeHandle;
   end;
 end;
 
-function TWinWindowHandle.GetBounds: TRect;
+function TWinWindowHandle.GetWndBorderSize: TSize;
+var
+  LClientRect, LWindowRect: TRect;
 begin
-  Result := FBounds.Ceiling;
+  GetClientRect(Wnd, LClientRect); // px
+  ClientToScreen(Wnd, LClientRect.TopLeft);
+  ClientToScreen(Wnd, LClientRect.BottomRight);
+  GetWindowRect(Wnd, LWindowRect); // px
+  Result := TSize.Create(LWindowRect.Width - LClientRect.Width, LWindowRect.Height - LClientRect.Height); // px;
 end;
 
-procedure TWinWindowHandle.SetBounds(const Value: TRect);
-var
-  CurrentWndRect: TRect;
+function TWinWindowHandle.GetBounds: TRectF;
 begin
-  if FBounds.Ceiling <> Value then
+  Result := FBounds;
+end;
+
+procedure TWinWindowHandle.SetBounds(const Value: TRectF);
+
+  function CalculateNewWndBounds: TRect;
   begin
-    FWndBounds.Left := Ceil(Value.Left * Scale);
-    FWndBounds.Top := Ceil(Value.Top * Scale);
-    FWndBounds.Width := Ceil(Value.Width * Scale);
-    FWndBounds.Height := Ceil(Value.Height * Scale);
+    Result.TopLeft := MultiDisplayWin.DpToPx(Value.TopLeft);
+    if FBounds.Width = Value.Width then
+      Result.Width := FWndBounds.Width
+    else
+      Result.Width := Trunc(Value.Width * Scale);
+    if FBounds.Height = Value.Height then
+      Result.Height := FWndBounds.Height
+    else
+      Result.Height := Trunc(Value.Height * Scale);
+  end;
+
+begin
+  if FBounds <> Value then
+  begin
+    FWndBounds := CalculateNewWndBounds;
     FBounds := Value;
-    GetWindowRect(Wnd, CurrentWndRect);
-    if CurrentWndRect <> FWndBounds then
-      SetWindowPos(Wnd, 0, FWndBounds.Left, FWndBounds.Top, FWndBounds.Width, FWndBounds.Height,
-        SWP_NOACTIVATE or SWP_NOZORDER);
-    UpdateClientSize;
+    ApplyWndBoundsToWnd;
+    CalculateClientSizeFromWindow;
   end;
 end;
 
@@ -1554,20 +1415,27 @@ begin
 end;
 
 procedure TWinWindowHandle.SetWndBounds(const Value: TRect);
-var
-  CurrentWndRect: TRect;
+
+  function CalculateNewBounds: TRectF;
+  begin
+    Result.TopLeft := MultiDisplayWin.PxToDp(Value.TopLeft);
+    if FWndBounds.Width = Value.Width then
+      Result.Width := FBounds.Width
+    else
+      Result.Width := Value.Width / Scale;
+    if FWndBounds.Height = Value.Height then
+      Result.Height := FBounds.Height
+    else
+      Result.Height := Value.Height / Scale;
+  end;
+
 begin
   if FWndBounds <> Value then
   begin
+    FBounds := CalculateNewBounds;
     FWndBounds := Value;
-    FBounds.Left := Value.Left / Scale;
-    FBounds.Top := Value.Top / Scale;
-    FBounds.Width := Value.Width / Scale;
-    FBounds.Height := Value.Height / Scale;
-    GetWindowRect(Wnd, CurrentWndRect);
-    if CurrentWndRect <> Value then
-      SetWindowPos(Wnd, 0, Value.Left, Value.Top, Value.Width, Value.Height, SWP_NOACTIVATE or SWP_NOZORDER);
-    UpdateClientSize;
+    ApplyWndBoundsToWnd;
+    CalculateClientSizeFromWindow;
   end;
 end;
 
@@ -1614,18 +1482,17 @@ begin
   Result := FZOrderManager;
 end;
 
-procedure TWinWindowHandle.UpdateClientSize;
+procedure TWinWindowHandle.CalculateClientSizeFromWindow;
 var
-  R: TRect;
-  OldWndClientSize: TSize;
+  NewWndClientSize: TRect;
+  WasResized: Boolean;
 begin
-  GetClientRect(Wnd, R);
-  OldWndClientSize := FWndClientSize;
-  FWndClientSize := TSize.Create(R.Width, R.Height);
+  GetClientRect(Wnd, NewWndClientSize); // px
+  WasResized := FWndClientSize <> NewWndClientSize.Size;
+  FWndClientSize := NewWndClientSize.Size;
   FClientSize := TSizeF.Create(FWndClientSize.Width / Scale, FWndClientSize.Height / Scale);
 
-  // We need to update canvas size, based on new Client Size value.
-  if (OldWndClientSize <> FWndClientSize) and FForm.IsHandleAllocated then
+  if WasResized and FForm.IsHandleAllocated then
     TOpenForm(FForm).ResizeHandle;
 end;
 
@@ -1662,6 +1529,76 @@ begin
   Result := WndToForm(TRectF.Create(Rect));
 end;
 
+procedure TWinWindowHandle.WMWindowPosChanging(var AMessage: TWMWindowPosChanging);
+
+  function IsResized(const AWindowPos: PWindowPos): Boolean;
+  begin
+    Result := (AWindowPos^.Flags and SWP_NOSIZE) <> SWP_NOSIZE;
+  end;
+
+var
+  WindowPos: PWindowPos;
+  AdjustedWndSize: TSize;
+begin
+  // We need to round the window size based on the current screen scaling factor for avoiding issue
+  // with rounding in rendering process.
+  WindowPos := AMessage.WindowPos;
+  if IsResized(WindowPos) then
+  begin
+    AdjustedWndSize := TSize.Create(WindowPos^.cx, WindowPos^.cy); // px
+    AdjustedWndSize := RoundWndSizeToMatchScale(AdjustedWndSize); // px
+    WindowPos^.cx := AdjustedWndSize.Width; // px
+    WindowPos^.cy := AdjustedWndSize.Height; // px
+  end;
+end;
+
+procedure TWinWindowHandle.WMWindowPosChanged(var AMessage: TWMWindowPosChanged);
+var
+  WindowPos: PWindowPos;
+begin
+  WindowPos := AMessage.WindowPos;
+  if (WindowPos^.Flags and SWP_NOSIZE = 0) or (WindowPos^.Flags and SWP_NOMOVE = 0) then
+  begin
+    WndBounds := TRect.Create(TPoint.Create(WindowPos^.x, WindowPos^.y), WindowPos^.cx, WindowPos^.cy);
+    if Form <> nil then
+      Form.SetBoundsF(Bounds);
+  end;
+end;
+
+procedure TWinWindowHandle.WMGetMinMaxInfo(var Message: TWMGetMinMaxInfo);
+var
+  LMinMaxInfo: PMinMaxInfo;
+  MinSize: TSize;
+  MaxSize: TSize;
+begin
+  if csReading in Form.ComponentState then
+    Exit;
+
+  LMinMaxInfo := Message.MinMaxInfo;
+  // Calculating constraints based on rounding ClientSize.
+  MinSize := TSize.Create(Trunc(Form.Constraints.MinWidth * Scale), Trunc(Form.Constraints.MinHeight * Scale));
+  MinSize := RoundWndSizeToMatchScale(MinSize);
+  MaxSize := TSize.Create(Trunc(Form.Constraints.MaxWidth * Scale), Trunc(Form.Constraints.MaxHeight * Scale));
+  MaxSize := RoundWndSizeToMatchScale(MaxSize);
+
+  if Form.Constraints.MinWidth > 0 then
+    LMinMaxInfo^.ptMinTrackSize.x := MinSize.Width;
+
+  if Form.Constraints.MinHeight > 0 then
+    LMinMaxInfo^.ptMinTrackSize.y := MinSize.Height;
+
+  if Form.Constraints.MaxWidth > 0 then
+    LMinMaxInfo^.ptMaxTrackSize.x := MaxSize.Width;
+
+  if Form.Constraints.MaxHeight > 0 then
+    LMinMaxInfo^.ptMaxTrackSize.y := MaxSize.Height;
+end;
+
+procedure TWinWindowHandle.WMSize(var AMessage: TWMSize);
+begin
+  CalculateClientSizeFromWindow;
+end;
+
 function TWinWindowHandle.WndToForm(const Rect: TRectF): TRectF;
 begin
   Result := TRectF.Create(Rect.Left / Scale, Rect.Top / Scale, Rect.Right / Scale, Rect.Bottom / Scale);
@@ -1683,14 +1620,13 @@ begin
   LForm := FindWindow(HWND);
   if LForm <> nil then
   begin
-    LForm.Dispatch(Message);
     Wnd := FormToHWND(LForm);
     GetUpdateRect(Wnd, R, False);
     Region := CreateRectRgn(R.Left, R.Top, R.Right, R.Bottom);
     if Region <> 0 then
       try
         rgnStatus := GetUpdateRgn(Wnd, Region, False);
-        if (rgnStatus = 2) or (rgnStatus = 3) then
+        if rgnStatus in [SIMPLEREGION, COMPLEXREGION] then
         begin
           RegionSize := GetRegionData(Region, $FFFF, nil);
           if RegionSize > 0 then
@@ -1757,8 +1693,8 @@ const
   CPressAndTap: array [Boolean] of Cardinal = (0, GC_PRESSANDTAP);
   CTwoFingerTap: array [Boolean] of Cardinal = (0, GC_TWOFINGERTAP);
 var
-  LPoint: TPoint;
-  LPointF: TPointF;
+  ScreenPointPx: TPoint;
+  ScreenPointDp: TPointF;
   LControl: TComponent;
   LConfigs: array of TGestureConfig;
   LGestures: TInteractiveGestures;
@@ -1769,15 +1705,15 @@ begin
   LGestureNotify := Pointer(AGestureNotify);
 
   // Get the location of the gesture.
-  LPoint := SmallPointToPoint(LGestureNotify.ptsLocation);
-  LPointF := TPointF.Create(LPoint.X, LPoint.Y);
+  ScreenPointPx := SmallPointToPoint(LGestureNotify.ptsLocation); // px
+  ScreenPointDp := MultiDisplayWin.PxToDp(ScreenPointPx); // dp
 
   // Find the object that the gesture belongs to.
-  LObj := AForm.ObjectAtPoint(LPointF);
-  if LObj <> nil then
-    LControl := LObj.GetObject
+  LObj := AForm.ObjectAtPoint(ScreenPointDp);
+  if LObj = nil then
+    LControl := AForm
   else
-    LControl := AForm;
+    LControl := LObj.GetObject;
 
   if Supports(LControl, IGestureControl, LGObj) then
     LGestures := LGObj.GetListOfInteractiveGestures;
@@ -1815,8 +1751,20 @@ begin
 end;
 
 function WMGesture(const AForm: TCommonCustomForm; uMsg: UINT; AParam: wParam; AGestureInfo: LPARAM): LRESULT;
+
+  function PxToDp(const APX: Integer): Single; overload;
+  begin
+    Result := APX / AForm.Handle.Scale;
+  end;
+
+  function PxToDp(const APhysicalPoint: TPointF): TPointF; overload;
+  begin
+    Result := APhysicalPoint / AForm.Handle.Scale;
+  end;
+
 var
-  LPoint: TPointF;
+  ScreenPointPx: TPoint;
+  ScreenPointDp: TPointF;
   LControl: TComponent;
   LGestureInfo: GestureInfo;
   EventInfo: TGestureEventInfo;
@@ -1832,22 +1780,22 @@ begin
       EventInfo.GestureID := LGestureInfo.dwID + igiFirst;
 
       // Get the control
-      LPoint := TPointF.Create(LGestureInfo.ptsLocation.X, LGestureInfo.ptsLocation.Y);
-      Obj := AForm.ObjectAtPoint(LPoint);
-      if Obj <> nil then
-        LControl := Obj.GetObject
+      ScreenPointPx := TPoint.Create(LGestureInfo.ptsLocation.X, LGestureInfo.ptsLocation.Y); // px
+      ScreenPointDp := MultiDisplayWin.PxToDp(ScreenPointPx); // dp
+      Obj := AForm.ObjectAtPoint(ScreenPointDp);
+      if Obj = nil then
+        LControl := AForm
       else
-        LControl := AForm;
+        LControl := Obj.GetObject;
 
       if EventInfo.GestureID = igiBegin then
         CapturedGestureControl := LControl;
 
       // Don't pass GID_BEGIN and GID_END to the control
-      if (EventInfo.GestureID <> igiBegin) and
-        (EventInfo.GestureID <> igiEnd) then
+      if (EventInfo.GestureID <> igiBegin) and (EventInfo.GestureID <> igiEnd) then
       begin
         // Set EventInfo fields from LGestureInfo
-        EventInfo.Location := AForm.ScreenToClient(LPoint);
+        EventInfo.Location := AForm.ScreenToClient(ScreenPointDp);
         EventInfo.Flags := [];
         if LGestureInfo.dwFlags and GF_BEGIN = GF_BEGIN then
           Include(EventInfo.Flags, TInteractiveGestureFlag.gfBegin);
@@ -1858,17 +1806,17 @@ begin
         case EventInfo.GestureID of
           igiPan:
             begin
-              EventInfo.Distance := Cardinal(LGestureInfo.ullArguments);
-              EventInfo.InertiaVector :=
-                TPointF(SmallPointToPoint(InertiaVectorFromArgument(LGestureInfo.ullArguments)));
+              EventInfo.Distance := Trunc(PxToDp(Cardinal(LGestureInfo.ullArguments)));
+              EventInfo.InertiaVector := PxToDp(
+                TPointF(SmallPointToPoint(InertiaVectorFromArgument(LGestureInfo.ullArguments))));
             end;
           igiZoom, igiTwoFingerTap:
             EventInfo.Distance := Cardinal(LGestureInfo.ullArguments);
           igiPressAndTap:
             begin
               // ullArguments is distance/offset. Add to Location to make TapLocation
-              LPoint := TPointF(SmallPointToPoint(TSmallPoint(Cardinal(LGestureInfo.ullArguments))));
-              // EventInfo.TapLocation := AForm.ScreenToClient(TPointF(LPoint.X + LGestureInfo.ptsLocation.X, LPoint.Y + LGestureInfo.ptsLocation.Y));
+              ScreenPointDp := PxToDp(TPointF(SmallPointToPoint(TSmallPoint(Cardinal(LGestureInfo.ullArguments)))));
+              // EventInfo.TapLocation := AForm.ScreenToClient(TPointF(ScreenPointDp.X + LGestureInfo.ptsLocation.X, ScreenPointDp.Y + LGestureInfo.ptsLocation.Y));
             end;
           igiRotate:
             EventInfo.Angle := RotateAngleFromArgument(LGestureInfo.ullArguments);
@@ -1882,7 +1830,6 @@ begin
 
       if EventInfo.GestureID = igiEnd then
         CapturedGestureControl := nil;
-
     finally
       CloseGestureInfoHandle(AGestureInfo);
     end;
@@ -1906,11 +1853,14 @@ var
   Action: TTouchAction;
   Point: TPointF;
   Control: IControl;
+  MidPoint: TPointF;
+  FormScale: Single;
 begin
   Result := 0;
   TouchCount := LoWord(Cardinal(TouchInputCount));
   SetLength(Inputs, TouchCount);
   Action := TTouchAction.None;
+  FormScale := AForm.Handle.Scale;
 
   if GetTouchInputInfo(TouchInputInfo, TouchCount, @Inputs[0], SizeOf(TTouchInput)) then
     try
@@ -1921,20 +1871,25 @@ begin
 
         if (Input.dwFlags and TOUCHEVENTF_DOWN) <> 0 then
           Action := TTouchAction.Down
-        else if ((Input.dwFlags and TOUCHEVENTF_UP) <> 0) then
+        else if (Input.dwFlags and TOUCHEVENTF_UP) <> 0 then
           Action := TTouchAction.Up
-        else if ((Input.dwFlags and TOUCHEVENTF_MOVE) <> 0) then
+        else if (Input.dwFlags and TOUCHEVENTF_MOVE) <> 0 then
           Action := TTouchAction.Move;
 
         // TOUCHINFO point coordinates is in 1/100 of a pixel
-        Point := TPointF.Create(Input.X / 100, Input.Y / 100);
+        Point := TPointF.Create(Input.X / 100, Input.Y / 100); // px
+        Point := Point / FormScale; //dp
+
         Touches[I].Location := AForm.ScreenToClient(Point);
       end;
 
       if Length(Touches) = 1 then
         Control := AForm.ObjectAtPoint(Point)
       else if Length(Touches) = 2 then
-        Control := AForm.ObjectAtPoint(AForm.ClientToScreen(Touches[0].Location.MidPoint(Touches[1].Location)))
+      begin
+        MidPoint := Touches[0].Location.MidPoint(Touches[1].Location); // dp
+        Control := AForm.ObjectAtPoint(AForm.ClientToScreen(MidPoint));
+      end
       else
         Control := nil;
 
@@ -1947,54 +1902,52 @@ begin
     end;
 end;
 
-procedure HandleMouseGestures(const AForm: TCommonCustomForm; uMsg: UINT; const X, Y: Single);
+procedure HandleMouseGestures(const AForm: TCommonCustomForm; uMsg: UINT; const AScreenPoint: TPointF);
 var
   GestureObj: IGestureControl;
   Control: TComponent;
   Obj: IControl;
   Action: TTouchAction;
-  Point: TPointF;
+  ControlLocalPoint: TPointF;
 begin
-  if TWinTouchGestureEngine.Supported(AForm) then
-    if not ((uMsg <> WM_LBUTTONDOWN) and (PlatformWin.FMultiTouchManager = nil)) then
+  if not TWinTouchGestureEngine.Supported(AForm) then
+    Exit;
+
+  if not ((uMsg <> WM_LBUTTONDOWN) and (PlatformWin.FMultiTouchManager = nil)) then
+  begin
+    Obj := AForm.ObjectAtPoint(AScreenPoint);
+    if Obj = nil then
     begin
-      Point := TPointF.Create(X, Y);
-      Obj := AForm.ObjectAtPoint(Point);
-      if Obj <> nil then
-        Control := Obj.GetObject
-      else
-        Control := AForm;
-
-      if Supports(Control, IGestureControl, GestureObj) then
+      Control := AForm;
+      ControlLocalPoint := AForm.ScreenToClient(AScreenPoint);
+    end
+    else
+    begin
+      Control := Obj.GetObject;
+      ControlLocalPoint := Obj.ScreenToLocal(AScreenPoint);
+    end;
+    if Supports(Control, IGestureControl, GestureObj) then
+    begin
+      Control := GestureObj.GetFirstControlWithGestureEngine;
+      if Control <> nil then
       begin
-        Control := GestureObj.GetFirstControlWithGestureEngine;
-        if Control <> nil then
-        begin
-          case uMsg of
-            WM_MOUSEMOVE:
-              Action := TTouchAction.Move;
-            WM_LBUTTONDOWN:
-              Action := TTouchAction.Down;
-            WM_LBUTTONUP:
-              Action := TTouchAction.Up;
-          else
-            Action := TTouchAction.None;
-          end;
-
-          InitializeMultiTouch(AForm);
-          PlatformWin.FMultiTouchManager.HandleMouseGestures(Point, Action, Obj);
+        case uMsg of
+          WM_MOUSEMOVE:
+            Action := TTouchAction.Move;
+          WM_LBUTTONDOWN:
+            Action := TTouchAction.Down;
+          WM_LBUTTONUP:
+            Action := TTouchAction.Up;
+        else
+          Action := TTouchAction.None;
         end;
+
+        InitializeMultiTouch(AForm);
+        PlatformWin.FMultiTouchManager.HandleMouseGestures(ControlLocalPoint, Action, Obj);
       end;
     end;
-end;
-
-type
-  PDestroyChildData = ^TDestroyChildData;
-
-  TDestroyChildData = record
-    Parent: HWND;
-    Recreating: Boolean;
   end;
+end;
 
 var
   LastKeyIsDeadKey: Boolean = False;
@@ -2033,7 +1986,7 @@ var
 
   procedure PrepareClosePopups;
   begin
-    if (Screen <> nil) and (LForm <> nil) and (not WindowHandleToPlatform(LForm.Handle).FDisableDeactivate) then
+    if (Screen <> nil) and (LForm <> nil) and not WindowHandleToPlatform(LForm.Handle).FDisableDeactivate then
     begin
       if LForm.FormStyle = TFormStyle.Popup then
         Screen.PrepareClosePopups(LForm)
@@ -2044,7 +1997,7 @@ var
 
   procedure ClosePopupList;
   begin
-    if (Screen <> nil) and (LForm <> nil) and (not WindowHandleToPlatform(LForm.Handle).FDisableDeactivate) then
+    if (Screen <> nil) and (LForm <> nil) and not WindowHandleToPlatform(LForm.Handle).FDisableDeactivate then
       Screen.ClosePopupForms;
   end;
 
@@ -2108,16 +2061,17 @@ var
       Ch := #0;
   end;
 
-  procedure ScaleMousePos(const Handle: TWindowHandle; var P: TPoint);
+  function FormPxToDp(const AForm: TCommonCustomForm; const APoint: TPoint): TPointF;
+  var
+    LScale: Single;
   begin
-    ScreenToClient(WindowHandleToPlatform(Handle).Wnd, P);
-    P := TPoint.Create(Round(P.X / Handle.Scale), Round(P.Y / Handle.Scale));
+    LScale := AForm.Handle.Scale;
+    Result := (TPointF(APoint) / LScale).Round;
   end;
 
 const
   FlagZOrder: UINT = SWP_NOSIZE or SWP_NOMOVE or SWP_NOACTIVATE;
 var
-  R: TRect;
   P: TPoint;
   H: Boolean;
   Key: Word;
@@ -2132,10 +2086,26 @@ var
   MenuDisplayed: Boolean;
   OldWindowState: TWindowState;
   CharMsg, DeadCharMsg: UInt32;
+  WindowPoint: TPoint;
+  FormPoint: TPointF;
+  ScreenPoint: TPointF;
 begin
-                                                                       
   Result := 0;
   LForm := FindWindow(hwnd);
+  //! Launcher Fix
+  if LForm <> nil then
+  begin
+    TMsg.Msg := uMsg;
+    TMsg.WParam := wParam;
+    TMsg.LParam := lParam;
+    TMsg.Result := 0;
+
+    LForm.Dispatch(TMsg);
+   
+    uMsg := TMsg.Msg;
+    wParam := TMsg.WParam;
+    lParam := TMsg.LParam;
+  end;
 
   Message.Msg := uMsg;
   Message.WParam := wParam;
@@ -2153,10 +2123,14 @@ begin
       try
         case uMsg of
           WM_NCHITTEST,
-            WM_NCACTIVATE,
-            WM_NCADDUPDATERECT,
-            WM_NCMOUSEMOVE, WM_NCLBUTTONDOWN, WM_NCLBUTTONUP,
-            WM_NCCALCSIZE, WM_NCPAINT:
+          WM_NCACTIVATE,
+          WM_NCADDUPDATERECT,
+          WM_NCMOUSEMOVE,
+          WM_NCLBUTTONDOWN,
+          WM_NCLBUTTONUP,
+          WM_NCCALCSIZE,
+          WM_NCPAINT,
+          WM_NCMOUSELEAVE:
             Result := WMNCMessages(LForm, uMsg, wParam, lParam);
           $B000 + 74: // CM_DESTROYHANDLE
             begin
@@ -2172,7 +2146,7 @@ begin
           WM_ACTIVATE:
             begin
               if not ((TFmxFormState.Recreating in LForm.FormState) or (LForm.FormStyle = TFormStyle.Popup) or
-                (WindowHandleToPlatform(LForm.Handle).FDisableDeactivate)) then
+                WindowHandleToPlatform(LForm.Handle).FDisableDeactivate) then
               begin
                 if LoWord(wParam) <> 0 then
                 begin
@@ -2193,11 +2167,11 @@ begin
             begin
               if not (TFmxFormState.Recreating in LForm.FormState) then
               begin
-                if (LForm.FormStyle = TFormStyle.Popup) then
+                if LForm.FormStyle = TFormStyle.Popup then
                   Result := MA_NOACTIVATE
                 else
+                  // Default result if nothing happens
                   Result := DefWindowProc(hwnd, uMsg, wParam, lParam);
-                // Default result if nothing happens
               end;
             end;
           WM_ERASEBKGND:
@@ -2211,7 +2185,7 @@ begin
           WM_DPICHANGED:
             begin
               MultiDisplayWin.UpdateDisplayInformation;
-              WindowHandleToPlatform(LForm.Handle).DpiChanged(HiWord(wParam));
+              LForm.Handle.Dispatch(Message);
               Result := 0;
             end;
           WM_DISPLAYCHANGE:
@@ -2225,9 +2199,14 @@ begin
                 PaintControl.PaintRects(UpdateRects);
               WindowHandleToPlatform(LForm.Handle).UpdateLayer;
             end;
+          WM_SIZE:
+            begin
+              LForm.Handle.Dispatch(Message);
+              Result := 0;
+            end;
           WM_WINDOWPOSCHANGING:
             begin
-              if ([csLoading, csDesigning] * LForm.ComponentState = [csLoading]) then
+              if [csLoading, csDesigning] * LForm.ComponentState = [csLoading] then
               begin
                 if (LForm.Position in [TFormPosition.Default, TFormPosition.DefaultPosOnly]) and
                   (LForm.WindowState <> TWindowState.wsMaximized) then
@@ -2240,17 +2219,13 @@ begin
                   PWindowPos(lParam)^.Flags := PWindowPos(lParam)^.Flags or SWP_NOSIZE;
                 end;
               end;
-              if (not ((PWindowPos(lParam)^.Flags and FlagZOrder) = FlagZOrder)) then
+              if not ((PWindowPos(lParam)^.Flags and FlagZOrder) = FlagZOrder) then
               begin
-                if (Screen <> nil) and (LForm <> nil) and (not WindowHandleToPlatform(LForm.Handle).FDisableDeactivate)
-                then
-                begin
+                if (Screen <> nil) and (LForm <> nil) and (not WindowHandleToPlatform(LForm.Handle).FDisableDeactivate) then
                   if (LForm.FormStyle = TFormStyle.Popup) then
                     ClosePopupList;
-                end;
               end;
-              if (not ((PWindowPos(lParam)^.Flags and SWP_NOSIZE) = SWP_NOSIZE)) then
-                WindowHandleToPlatform(LForm.Handle).CorrectWindowSize(PWindowPos(lParam));
+              LForm.Handle.Dispatch(Message);
               if (TFmxFormState.InDesigner in LForm.FormState) and (TFmxFormState.WasNotShown in LForm.FormState) then
                 TOpenForm(LForm).ShowInDesigner;
             end;
@@ -2258,8 +2233,7 @@ begin
             begin
               Placement.Length := SizeOf(TWindowPlacement);
               GetWindowPlacement(hwnd, Placement);
-              if (Application.MainForm <> nil) and (LForm = Application.MainForm)
-                and (Placement.showCmd = SW_SHOWMINIMIZED) then
+              if (Application.MainForm <> nil) and (LForm = Application.MainForm) and (Placement.showCmd = SW_SHOWMINIMIZED) then
               begin
                 PlatformWin.MinimizeApp;
                 Result := DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -2267,16 +2241,7 @@ begin
               else
               begin
                 Result := DefWindowProc(hwnd, uMsg, wParam, lParam);
-                if (PWindowPos(lParam)^.Flags and SWP_NOSIZE = 0) or
-                  (PWindowPos(lParam)^.Flags and SWP_NOMOVE = 0) then
-                begin
-                  GetWindowRect(hwnd, R);
-                  WindowHandleToPlatform(LForm.Handle).WndBounds := R;
-                  R := WindowHandleToPlatform(LForm.Handle).Bounds;
-                  LForm.SetBounds(R.Left, R.Top, R.Width, R.Height);
-                end;
-                if PWindowPos(lParam)^.Flags and SWP_FRAMECHANGED = SWP_FRAMECHANGED then
-                  WindowHandleToPlatform(LForm.Handle).UpdateClientSize;
+                LForm.Handle.Dispatch(Message);
                 { update state }
                 PlatformWin.FDiableUpdateState := True;
                 try
@@ -2313,24 +2278,27 @@ begin
                 WMNCMessages(LForm, uMsg, wParam, lParam);
               end;
             end;
+          WM_GETMINMAXINFO:
+            LForm.Handle.Dispatch(Message);
           WM_CLOSE:
             LForm.Close;
           WM_LBUTTONDOWN:
             begin
               PlatformWin.FormInfo[LForm].WasLeftMouseButtonPressed := True;
-              GetCursorPos(P);
               LastMousePos := ImpossibleMousePosition;
-              ScaleMousePos(LForm.Handle, P);
-              LForm.MouseDown(TMouseButton.mbLeft, MouseToShiftState(wParam), P.X, P.Y);
-              HandleMouseGestures(LForm, uMsg, P.X, P.Y);
+              WindowPoint := TWMLButtonDown(Message).Pos; // Form point in px
+              FormPoint := FormPxToDp(LForm, WindowPoint); // dp
+              ScreenPoint := LForm.ClientToScreen(FormPoint); // dp
+              LForm.MouseDown(TMouseButton.mbLeft, MouseToShiftState(wParam), FormPoint.X, FormPoint.Y);
+              HandleMouseGestures(LForm, uMsg, ScreenPoint);
             end;
           WM_LBUTTONDBLCLK:
             begin
               PlatformWin.FormInfo[LForm].WasLeftMouseButtonPressed := True;
-              GetCursorPos(P);
               LastMousePos := ImpossibleMousePosition;
-              ScaleMousePos(LForm.Handle, P);
-              LForm.MouseDown(TMouseButton.mbLeft, MouseToShiftState(wParam) + [ssDouble], P.X, P.Y);
+              WindowPoint := TWMLButtonDblClk(Message).Pos; // Form point in px
+              FormPoint := FormPxToDp(LForm, WindowPoint); // Form point in dp
+              LForm.MouseDown(TMouseButton.mbLeft, MouseToShiftState(wParam) + [ssDouble], FormPoint.X, FormPoint.Y);
             end;
           WM_CANCELMODE:
           begin
@@ -2355,65 +2323,66 @@ begin
             begin
               PlatformWin.FormInfo[LForm].WasLeftMouseButtonPressed := False;
               WindowBorder := TWindowBorderWin(LForm.Border.WindowBorder);
+              WindowPoint := TWMLButtonUp(Message).Pos; // Form point in px
+              FormPoint := FormPxToDp(LForm, WindowPoint); // dp
+              ScreenPoint := LForm.ClientToScreen(FormPoint); // dp
               if LForm.Border.IsSupported and WindowBorder.NCClick then
                 Result := WMNCMessages(LForm, uMsg, wParam, lParam)
               else
               begin
-                GetCursorPos(P);
                 LastMousePos := ImpossibleMousePosition;
-                ScaleMousePos(LForm.Handle, P);
-                LForm.MouseUp(TMouseButton.mbLeft, MouseToShiftState(wParam), P.X, P.Y);
+                LForm.MouseUp(TMouseButton.mbLeft, MouseToShiftState(wParam), FormPoint.X, FormPoint.Y);
               end;
-              HandleMouseGestures(LForm, uMsg, P.X, P.Y);
+              HandleMouseGestures(LForm, uMsg, ScreenPoint);
             end;
            WM_RBUTTONDOWN, WM_RBUTTONDBLCLK:
             begin
-              GetCursorPos(P);
               LastMousePos := ImpossibleMousePosition;
-              Obj := IControl(LForm.ObjectAtPoint(P));
+              WindowPoint := TWMMouse(Message).Pos; // Form point in px
+              FormPoint := FormPxToDp(LForm, WindowPoint); // dp
+              ScreenPoint := LForm.ClientToScreen(FormPoint); // dp
+              Obj := LForm.ObjectAtPoint(ScreenPoint);
               if (Obj <> nil) and (Obj.GetObject <> nil) and not (csDesigning in Obj.GetObject.ComponentState) then
               begin
                 Obj.SetFocus;
-                MenuDisplayed := Obj.ShowContextMenu(P);
+                MenuDisplayed := Obj.ShowContextMenu(ScreenPoint);
               end
               else
                 MenuDisplayed := False;
               if not MenuDisplayed then
               begin
-                ScaleMousePos(LForm.Handle, P);
                 if uMsg = WM_RBUTTONDBLCLK then
-                  LForm.MouseDown(TMouseButton.mbRight, MouseToShiftState(wParam) + [ssDouble], P.X, P.Y)
-                else
-                LForm.MouseDown(TMouseButton.mbRight, MouseToShiftState(wParam), P.X, P.Y);
+                  LForm.MouseDown(TMouseButton.mbRight, MouseToShiftState(wParam) + [ssDouble], FormPoint.X, FormPoint.Y);
+                LForm.MouseDown(TMouseButton.mbRight, MouseToShiftState(wParam), FormPoint.X, FormPoint.Y);
               end;
             end;
           WM_RBUTTONUP:
             begin
-              GetCursorPos(P);
               LastMousePos := ImpossibleMousePosition;
-              ScaleMousePos(LForm.Handle, P);
-              LForm.MouseUp(TMouseButton.mbRight, MouseToShiftState(wParam), P.X, P.Y);
+              WindowPoint := TWMRButtonUp(Message).Pos; // Form point in px
+              FormPoint := FormPxToDp(LForm, WindowPoint); // dp
+              LForm.MouseUp(TMouseButton.mbRight, MouseToShiftState(wParam), FormPoint.X, FormPoint.Y);
             end;
           WM_MBUTTONDOWN:
             begin
-              GetCursorPos(P);
               LastMousePos := ImpossibleMousePosition;
-              ScaleMousePos(LForm.Handle, P);
-              LForm.MouseDown(TMouseButton.mbMiddle, MouseToShiftState(wParam), P.X, P.Y);
+              WindowPoint := TWMMButtonDown(Message).Pos; // Form point in px
+              FormPoint := FormPxToDp(LForm, WindowPoint); // dp
+              LForm.MouseDown(TMouseButton.mbMiddle, MouseToShiftState(wParam), FormPoint.X, FormPoint.Y);
             end;
           WM_MBUTTONUP:
             begin
-              GetCursorPos(P);
               LastMousePos := ImpossibleMousePosition;
-              ScaleMousePos(LForm.Handle, P);
-              LForm.MouseUp(TMouseButton.mbMiddle, MouseToShiftState(wParam), P.X, P.Y);
+              WindowPoint := TWMMButtonUp(Message).Pos; // Form point in px
+              FormPoint := FormPxToDp(LForm, WindowPoint); // dp
+              LForm.MouseUp(TMouseButton.mbMiddle, MouseToShiftState(wParam), FormPoint.X, FormPoint.Y);
             end;
           WM_MBUTTONDBLCLK:
             begin
-              GetCursorPos(P);
               LastMousePos := ImpossibleMousePosition;
-              ScaleMousePos(LForm.Handle, P);
-              LForm.MouseDown(TMouseButton.mbMiddle, MouseToShiftState(wParam) + [ssDouble], P.X, P.Y);
+              WindowPoint := TWMMButtonDblClk(Message).Pos; // Form point in px
+              FormPoint := FormPxToDp(LForm, WindowPoint); // dp
+              LForm.MouseDown(TMouseButton.mbMiddle, MouseToShiftState(wParam) + [ssDouble], FormPoint.X, FormPoint.Y);
             end;
           WM_MENUSELECT,
           WM_INITMENUPOPUP:
@@ -2421,6 +2390,7 @@ begin
           WM_MOUSEMOVE:
             begin
               WindowBorder := TWindowBorderWin(LForm.Border.WindowBorder);
+
               if LForm.Border.IsSupported then
               begin
                 if WindowBorder.NCClick then
@@ -2432,8 +2402,9 @@ begin
                   if P <> LastMousePos then
                   begin
                     LastMousePos := P;
-                    ScaleMousePos(LForm.Handle, P);
-                    LForm.MouseMove(MouseToShiftState(wParam), P.X, P.Y);
+                    WindowPoint := TWMMouseMove(Message).Pos; // Form point in px
+                    FormPoint := FormPxToDp(LForm, WindowPoint); // dp
+                    LForm.MouseMove(MouseToShiftState(wParam), FormPoint.X, FormPoint.Y);
                   end;
                 end;
               end
@@ -2443,8 +2414,9 @@ begin
                 if P <> LastMousePos then
                 begin
                   LastMousePos := P;
-                  ScaleMousePos(LForm.Handle, P);
-                  LForm.MouseMove(MouseToShiftState(wParam), P.X, P.Y);
+                  WindowPoint := TWMMouseMove(Message).Pos; // Form point in px
+                  FormPoint := FormPxToDp(LForm, WindowPoint); // dp
+                  LForm.MouseMove(MouseToShiftState(wParam), FormPoint.X, FormPoint.Y);
                 end;
               end;
               tme.cbSize := SizeOf(tme);
@@ -2452,7 +2424,11 @@ begin
               tme.dwFlags := TME_LEAVE;
               tme.dwHoverTime := HOVER_DEFAULT;
               TrackMouseEvent(tme);
-              HandleMouseGestures(LForm, uMsg, P.X, P.Y);
+
+              WindowPoint := TWMMouseMove(Message).Pos; // Form point in px
+              FormPoint := FormPxToDp(LForm, WindowPoint); // dp
+              ScreenPoint := LForm.ClientToScreen(FormPoint); // dp
+              HandleMouseGestures(LForm, uMsg, ScreenPoint);
             end;
           WM_MOUSELEAVE:
             begin
@@ -2465,11 +2441,8 @@ begin
           WM_MOUSEWHEEL:
             begin
               H := DispatchMouseWheelToPopups;
-
               if not H then
-                LForm.MouseWheel(KeysToShiftState(wParam),
-                  TSmallPoint(Cardinal(wParam)).Y, H);
-
+                LForm.MouseWheel(KeysToShiftState(wParam), TSmallPoint(Cardinal(wParam)).Y, H);
               Result := Integer(H = True);
             end;
           WM_GETDLGCODE:
@@ -2607,9 +2580,7 @@ begin
             end;
           WM_TOUCH:
             begin
-              GetCursorPos(P);
               Result := WMTouch(LForm, uMsg, wParam, lParam);
-              ScreenToClient(Wnd, P);
             end;
           WM_CTLCOLORMSGBOX..WM_CTLCOLORSTATIC:
             Result := SendMessage(lParam, CN_BASE + uMsg, wParam, lParam);
@@ -2630,9 +2601,11 @@ begin
     if (PlatformWin <> nil) and (hwnd = PlatformWin.FApplicationHWND) then
     begin
       case uMsg of
+        WM_SETTINGCHANGE:
+          MultiDisplayWin.UpdateDisplayInformation;
         WM_SYSCOMMAND:
           begin
-            case TWMSysCommand(Message).CmdType of
+            case TWMSysCommand(Message).CmdType and $FFF0 of
               SC_MINIMIZE:
               begin
                 PlatformWin.MinimizeApp;
@@ -2744,28 +2717,79 @@ var
   Wnd: HWND;
   ParentWnd: HWND;
   WndClassName: string;
-  LForm, LParentForm: TCommonCustomForm;
 
-  function GetParentFormHandle: HWND;
+  procedure DefineWindowStyle(const AForm: TCommonCustomForm; var AStyle: DWORD; var AExStyle: DWORD);
+  begin
+    case AForm.FormStyle of
+      TFormStyle.Popup:
+        begin
+          AStyle := AStyle or WS_POPUP;
+          AExStyle := AExStyle or WS_EX_NOACTIVATE;
+        end;
+      TFormStyle.StayOnTop:
+        AExStyle := AExStyle or WS_EX_TOPMOST;
+    end;
+    if AForm.Transparency then
+    begin
+      AStyle := AStyle or WS_POPUP;
+      AExStyle := AExStyle or WS_EX_LAYERED;
+    end
+    else
+    begin
+      case AForm.BorderStyle of
+        TFmxFormBorderStyle.None:
+          AStyle := AStyle or WS_POPUP or WS_SYSMENU;
+        TFmxFormBorderStyle.Single, TFmxFormBorderStyle.ToolWindow:
+          AStyle := AStyle or WS_CAPTION or WS_BORDER;
+        TFmxFormBorderStyle.Sizeable, TFmxFormBorderStyle.SizeToolWin:
+          AStyle := AStyle or WS_CAPTION or WS_THICKFRAME;
+      end;
+      if AForm.BorderStyle in [TFmxFormBorderStyle.ToolWindow, TFmxFormBorderStyle.SizeToolWin] then
+        AExStyle := AExStyle or WS_EX_TOOLWINDOW;
+      if AForm.BorderStyle <> TFmxFormBorderStyle.None then
+      begin
+        if TBorderIcon.biMinimize in AForm.BorderIcons then
+          AStyle := AStyle or WS_MINIMIZEBOX;
+        if TBorderIcon.biMaximize in AForm.BorderIcons then
+          AStyle := AStyle or WS_MAXIMIZEBOX;
+        if TBorderIcon.biSystemMenu in AForm.BorderIcons then
+          AStyle := AStyle or WS_SYSMENU;
+      end;
+    end;
+  end;
+
+  function DefineParentWnd(const AForm: TCommonCustomForm): HWND;
   begin
     Result := 0;
-    if LForm.ParentForm <> nil then
+    // Trying to use the parent form
+    if AForm.ParentForm <> nil then
     begin
-      if LForm.ParentForm.Handle = nil then
-        raise EArgumentException.CreateFMT(SNotInstance, ['ParentForm.Handle'])at ReturnAddress;
-      Result := FormToHWND(LForm.ParentForm);
+      if AForm.ParentForm.Handle = nil then
+        raise EArgumentException.CreateFMT(SNotInstance, ['ParentForm.Handle']) at ReturnAddress;
+      Result := FormToHWND(AForm.ParentForm);
     end;
+    if Result <> 0 then
+      Exit;
+
+    // For Dialogs and Popups we use a handle of the active form
+    if ((TFmxFormState.Modal in AForm.FormState) or (AForm.FormStyle = TFormStyle.Popup)) then
+      if (Screen <> nil) and (Screen.ActiveForm <> nil) then
+        Result := FormToHWND(Screen.ActiveForm);
+    if Result <> 0 then
+      Exit;
+
+    // If none parent then we use handle of Application
+    Result := ApplicationHWND;
   end;
 
 begin
   RaiseIfNil(AForm, 'AForm');
 
   LDropTarget := nil;
-  LForm := AForm;
   Style := WS_CLIPSIBLINGS or WS_CLIPCHILDREN;
   ExStyle := 0;
-  WndClassName := 'FM' + LForm.ClassName;
-  IsDesignerForm := TFmxFormState.InDesigner in LForm.FormState;
+  WndClassName := 'FM' + AForm.ClassName;
+  IsDesignerForm := TFmxFormState.InDesigner in AForm.FormState;
   if not GetClassInfo(hInstance, PChar(WndClassName), WindowClass) then
   begin
     FillChar(WindowClass, SizeOf(WindowClass), 0);
@@ -2775,7 +2799,7 @@ begin
     WindowClass.cbWndExtra := 0;
     WindowClass.hInstance := hInstance;
     WindowClass.hIcon := LoadIconW(MainInstance, PChar('MAINICON'));
-    if csDesigning in LForm.ComponentState then
+    if csDesigning in AForm.ComponentState then
       WindowClass.hCursor := LoadCursorW(0, PChar(IDC_ARROW))
     else
       WindowClass.hCursor := 0;
@@ -2785,7 +2809,7 @@ begin
     if Winapi.Windows.RegisterClass(WindowClass) = 0 then
       RaiseLastOSError;
   end;
-  if (csDesigning in LForm.ComponentState) or IsDesignerForm then
+  if (csDesigning in AForm.ComponentState) or IsDesignerForm then
   begin
     Style := Style or WS_CHILD;
     // Parent handle going to set in IDE.
@@ -2794,78 +2818,24 @@ begin
   end
   else
   begin
-    case LForm.FormStyle of
-      TFormStyle.Popup:
-        begin
-          Style := style or WS_POPUP;
-          ExStyle := ExStyle or WS_EX_NOACTIVATE;
-        end;
-      TFormStyle.StayOnTop:
-        begin
-          ExStyle := ExStyle or WS_EX_TOPMOST;
-        end;
-    end;
-    if LForm.Transparency then
-    begin
-      Style := style or WS_POPUP;
-      ExStyle := ExStyle or WS_EX_LAYERED;
-    end
-    else
-    begin
-      case LForm.BorderStyle of
-        TFmxFormBorderStyle.None:
-          Style := Style or WS_POPUP or WS_SYSMENU;
-        TFmxFormBorderStyle.Single, TFmxFormBorderStyle.ToolWindow:
-          Style := Style or (WS_CAPTION or WS_BORDER);
-        TFmxFormBorderStyle.Sizeable, TFmxFormBorderStyle.SizeToolWin:
-          Style := Style or (WS_CAPTION or WS_THICKFRAME);
-      end;
-      if LForm.BorderStyle in [TFmxFormBorderStyle.ToolWindow, TFmxFormBorderStyle.SizeToolWin] then
-        ExStyle := ExStyle or WS_EX_TOOLWINDOW;
-      if LForm.BorderStyle <> TFmxFormBorderStyle.None then
-      begin
-        if TBorderIcon.biMinimize in LForm.BorderIcons then
-          Style := Style or WS_MINIMIZEBOX;
-        if TBorderIcon.biMaximize in LForm.BorderIcons then
-          Style := Style or WS_MAXIMIZEBOX;
-        if TBorderIcon.biSystemMenu in LForm.BorderIcons then
-          Style := Style or WS_SYSMENU;
-      end;
-    end;
-    // Use handle of parent form
-    ParentWnd := GetParentFormHandle;
-    // For Dialogs and Popups we used handle of active form
-    if (ParentWnd = 0) and ((TFmxFormState.Modal in LForm.FormState) or (LForm.FormStyle = TFormStyle.Popup)) then
-    begin
-      if (Screen <> nil) and (Screen.ActiveForm <> nil) then
-        ParentWnd := FormToHWND(Screen.ActiveForm);
-      if (ParentWnd = 0) then
-      begin
-        ParentWnd := GetActiveWindow;
-        LParentForm := FindWindow(ParentWnd);
-        if LParentForm = nil then
-          ParentWnd := 0;
-      end;
-    end;
-    // If none parent then we use handle of Application
-    if ParentWnd = 0 then
-      ParentWnd := ApplicationHWND;
+    DefineWindowStyle(AForm, Style, ExStyle);
+    ParentWnd := DefineParentWnd(AForm);
   end;
-  Wnd := CheckWinapiHandle(CreateWindowEx(ExStyle, WindowClass.lpszClassName, PChar(LForm.Caption), style,
+  Wnd := CheckWinapiHandle(CreateWindowEx(ExStyle, WindowClass.lpszClassName, PChar(AForm.Caption), Style,
     Integer(CW_USEDEFAULT), Integer(CW_USEDEFAULT), Integer(CW_USEDEFAULT), Integer(CW_USEDEFAULT), ParentWnd, 0,
     hInstance, nil));
   try
-    SetProp(Wnd, MakeIntAtom(WindowAtom), THandle(LForm));
+    SetProp(Wnd, MakeIntAtom(WindowAtom), THandle(AForm));
     try
       if not ((csDesigning in AForm.ComponentState) or Supports(AForm, IDesignerForm, DesignerForm)) then
       begin
         LDropTarget := TWinDropTarget.Create(nil);
-        LDropTarget.Form := LForm;
+        LDropTarget.Form := AForm;
       end;
       try
         if LDropTarget <> nil then
           RegisterDragDrop(Wnd, LDropTarget);
-        Result := TWinWindowHandle.Create(LForm, Wnd);
+        Result := TWinWindowHandle.Create(AForm, Wnd);
         TWinWindowHandle(Result).FWinDropTarget := LDropTarget;
       except
         if LDropTarget <> nil then
@@ -2888,7 +2858,7 @@ end;
 
 function TPlatformWin.CreateWindowBorder(const AForm: TCommonCustomForm): TWindowBorder;
 begin
-  Result := FMX.Forms.Border.Win.CreateWindowBorder(AForm);
+  Result := TWinWindowBorder.Create(AForm);
 end;
 
 procedure TPlatformWin.DestroyWindow(const AForm: TCommonCustomForm);
@@ -3007,14 +2977,18 @@ var
     end;
   end;
 
+var
+  MainForm: TCommonCustomForm;
+  WndPos: TPoint;
 begin
   AnimationEnable := GetAnimation;
   try
     SetAnimation(False);
     if Application.MainForm <> nil then
     begin
-      SetWindowPos(ApplicationHWND, FormToHWND(Application.MainForm), Application.MainForm.Left,
-        Application.MainForm.Top, Application.MainForm.Width, 0, SWP_SHOWWINDOW);
+      MainForm := Application.MainForm;
+      WndPos := MultiDisplayWin.DpToPx(TPointF.Create(MainForm.Left, MainForm.Top));
+      SetWindowPos(ApplicationHWND, FormToHWND(Application.MainForm), WndPos.X, WndPos.Y, Trunc(MainForm.Width), 0, SWP_SHOWWINDOW);
       MinimiseAllForms;
     end;
     DefWindowProc(ApplicationHWND, WM_SYSCOMMAND, SC_MINIMIZE, 0);
@@ -3040,7 +3014,7 @@ begin
   if AForm.IsHandleAllocated then
     Result := AForm.Handle.Scale
   else
-    Result := GetScreenScale;
+    Result := MultiDisplayWin.GetScreenScale;
 end;
 
 procedure TPlatformWin.SetWindowRect(const AForm: TCommonCustomForm; ARect: TRectF);
@@ -3049,7 +3023,7 @@ begin
 
   { for using Metro-style interface in designer we set Maximized but we can change window size }
   if AForm.IsHandleAllocated and (AForm.WindowState in [TWindowState.wsNormal, TWindowState.wsMaximized]) then
-    WindowHandleToPlatform(AForm.Handle).Bounds := ARect.Round;
+    WindowHandleToPlatform(AForm.Handle).Bounds := ARect;
 end;
 
 procedure TPlatformWin.SetWindowCaption(const AForm: TCommonCustomForm; const ACaption: string);
@@ -3114,11 +3088,6 @@ begin
   Winapi.Windows.SetCapture(FormToHWND(AForm));
 end;
 
-function TPlatformWin.GetCaretWidth: Integer;
-begin
-  Result := 1;
-end;
-
 function TPlatformWin.GetClientSize(const AForm: TCommonCustomForm): TPointF;
 begin
   RaiseIfNil(AForm, 'AForm');
@@ -3134,7 +3103,13 @@ begin
   RaiseIfNil(AForm, 'AForm');
 
   if AForm.IsHandleAllocated then
-    WindowHandleToPlatform(AForm.Handle).ClientSize := TSizeF.Create(ASize).Ceiling;
+    WindowHandleToPlatform(AForm.Handle).ClientSize := TSizeF.Create(ASize);
+end;
+
+procedure TPlatformWin.SetConstraints(const AForm: TCommonCustomForm; const AMinWidth, AMinHeight, AMaxWidth, AMaxHeight: Single);
+begin
+  RaiseIfNil(AForm, 'AForm');
+  // The constraints are set in TWinWindowHandle.WMGetMinMaxInfo.
 end;
 
 procedure TPlatformWin.HideWindow(const AForm: TCommonCustomForm);
@@ -3147,52 +3122,81 @@ end;
 
 const
   ShowCommands: array [TWindowState] of Integer = (SW_SHOWNORMAL, SW_MINIMIZE, SW_SHOWMAXIMIZED);
+  ShowPopupCommands: array [TWindowState] of Integer = (SW_SHOWNOACTIVATE, SW_SHOWMINNOACTIVE, SW_SHOWMAXIMIZED);
 
 procedure TPlatformWin.ShowWindow(const AForm: TCommonCustomForm);
+type
+  TDeactivationState = record
+    Handle: TWinWindowHandle;
+    SavedDisableDeactivate: Boolean;
+  end;
+
+  function GetActiveWindowHandle: TWinWindowHandle;
+  var
+    ActiveForm: TCommonCustomForm;
+  begin
+    if Screen = nil then
+      Result := nil
+    else
+    begin
+      ActiveForm := Screen.ActiveForm;
+      if ActiveForm = nil then
+        Result := nil
+      else
+        Result := WindowHandleToPlatform(ActiveForm.Handle);
+    end;
+  end;
+
+  function DisableDeactivating(const AFormHandle: TWinWindowHandle): TDeactivationState;
+  begin
+    if AFormHandle = nil then
+    begin
+      Result.Handle := nil;
+      Result.SavedDisableDeactivate := False;
+    end
+    else
+    begin
+      Result.Handle := AFormHandle;
+      Result.SavedDisableDeactivate := AFormHandle.FDisableDeactivate;
+      AFormHandle.FDisableDeactivate := True;
+    end;
+  end;
+
+  procedure RestoreDeactivating(const AState: TDeactivationState);
+  begin
+    if AState.Handle <> nil then
+      AState.Handle.FDisableDeactivate := AState.SavedDisableDeactivate;
+  end;
+
 const
   uFlags = SWP_NOACTIVATE or SWP_NOMOVE or SWP_NOSIZE;
 var
   Wnd, WndParent: HWND;
-  nCmdShow: Integer;
-  OldActiveForm: TCommonCustomForm;
-  OldDisableDeactivate: Boolean;
-  OldActiveHandle: TWinWindowHandle;
+  FormSize: TSize;
+  DeactivationState: TDeactivationState;
 begin
   RaiseIfNil(AForm, 'AForm');
 
   Wnd := FormToHWND(AForm);
-  nCmdShow := ShowCommands[AForm.WindowState];
-  if (AForm.FormStyle = TFormStyle.Popup) then
+  if AForm.FormStyle = TFormStyle.Popup then
   begin
-    nCmdShow := nCmdShow or SW_SHOWNOACTIVATE;
-    OldDisableDeactivate := False;
-    OldActiveHandle := nil;
-    if Screen <> nil then
-    begin
-      OldActiveForm := Screen.ActiveForm;
-      if OldActiveForm <> nil then
-        OldActiveHandle := WindowHandleToPlatform(OldActiveForm.Handle);
-    end;
+    // When new popup form is showing, it can lead to closing other popup, for avoiding it we disable autoclosing
+    // popup on this period.
+    DeactivationState := DisableDeactivating(GetActiveWindowHandle);
     try
-      if OldActiveHandle <> nil then
-      begin
-        OldDisableDeactivate := OldActiveHandle.FDisableDeactivate;
-        OldActiveHandle.FDisableDeactivate := True;
-      end;
-      Winapi.Windows.ShowWindow(Wnd, nCmdShow);
-      if OldActiveHandle <> nil then
-        SetWindowPos(OldActiveHandle.Wnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE or SWP_NOSIZE or SWP_NOZORDER);
+      Winapi.Windows.ShowWindow(Wnd, ShowPopupCommands[AForm.WindowState]);
     finally
-      if OldActiveHandle <> nil then
-        OldActiveHandle.FDisableDeactivate := OldDisableDeactivate;
+      RestoreDeactivating(DeactivationState);
     end;
   end
   else
-    Winapi.Windows.ShowWindow(Wnd, nCmdShow);
+    Winapi.Windows.ShowWindow(Wnd, ShowCommands[AForm.WindowState]);
 
   if AForm.Transparency and not (csDesigning in AForm.ComponentState) then
-    PostMessage(FormToHWND(AForm), WM_ADDUPDATERECT, Integer(SmallPoint(0, 0)),
-      Integer(SmallPoint(AForm.Width, AForm.Height)));
+  begin
+    FormSize := TSize.Create(AForm.Width, AForm.Height); // dp
+    PostMessage(Wnd, WM_ADDUPDATERECT, Integer(SmallPoint(0, 0)), Integer(SmallPoint(FormSize.Width, FormSize.Height)));
+  end;
 
   if AForm.FormStyle in [TFormStyle.StayOnTop, TFormStyle.Popup] then
   begin
@@ -3282,8 +3286,8 @@ end;
 function TPlatformWin.ShowWindowModal(const AForm: TCommonCustomForm): TModalResult;
 var
   WindowList: Pointer;
-  AppService: IFMXApplicationService;
   CloseRes: TCloseAction;
+  Wnd: HWND;
 begin
   RaiseIfNil(AForm, 'AForm');
 
@@ -3297,13 +3301,13 @@ begin
     CloseRes := TCloseAction.caNone;
     AForm.Show;
     AForm.ModalResult := mrNone;
-    SetActiveWindow(FormToHWND(AForm));
-    SetFocus(FormToHWND(AForm));
+    Wnd := FormToHWND(AForm);
+    SetActiveWindow(Wnd);
+    SetFocus(Wnd);
     Screen.ActiveForm := AForm;
-    AppService := IFMXApplicationService(TPlatformServices.Current.GetPlatformService(IFMXApplicationService));
     repeat
       if not Application.HandleMessage then
-        AppService.WaitMessage;
+        WaitMessage;
       if Application.Terminated then
         Break
       else if AForm.ModalResult <> mrNone then
@@ -3326,7 +3330,7 @@ begin
   Result := True;
 end;
 
-function TPlatformWin.ClientToScreen(const AForm: TCommonCustomForm; const Point: TPointF): TPointF;
+function TPlatformWin.ClientToScreen(const AForm: TCommonCustomForm; const Point: TPointF {dp}): TPointF;
 var
   P: TPoint;
   Scale: Single;
@@ -3336,28 +3340,24 @@ begin
   Scale := WindowHandleToPlatform(AForm.Handle).Scale;
   P := (Point * Scale).Round;
   Winapi.Windows.ClientToScreen(FormToHWND(AForm), P);
-  Result := TPointF.Create(P) / Scale;
+
+  Result := MultiDisplayWin.PxToDp(P);
 end;
 
-function TPlatformWin.ScreenToClient(const AForm: TCommonCustomForm; const Point: TPointF): TPointF;
+function TPlatformWin.ScreenToClient(const AForm: TCommonCustomForm; const Point: TPointF {dp}): TPointF;
 var
   P: TPoint;
   Scale: Single;
 begin
   RaiseIfNil(AForm, 'AForm');
 
-  Scale := WindowHandleToPlatform(AForm.Handle).Scale;
-  P := (Point * Scale).Round;
+  P := MultiDisplayWin.DpToPx(Point);
   Winapi.Windows.ScreenToClient(FormToHWND(AForm), P);
+  Scale := WindowHandleToPlatform(AForm.Handle).Scale;
   Result := TPointF.Create(P) / Scale;
 end;
 
 { Menus }
-
-function TPlatformWin.SupportsDefaultSize(const AComponent: TComponentKind): Boolean;
-begin
-  Result := AComponent = TComponentKind.Calendar;
-end;
 
 procedure TPlatformWin.ThreadSync(var Msg: TMessage);
 begin
@@ -3401,13 +3401,11 @@ begin
   if Screen = nil then
     Exit;
 
-  if Screen.ActiveForm <> nil then
-    Screen.ActiveForm.Activate
-  else
+  if Screen.ActiveForm = nil then
   begin
     LWND := GetActiveWindow;
-    if LWND <> 0 then
-    begin
+    if (LWND <> 0) and (LWND <> ApplicationHWND) then
+    begin   
       if TryFindForm(LWND, Form) then
         Form.Activate
       else
@@ -3417,7 +3415,9 @@ begin
 
     if Application.MainForm <> nil then
       Application.MainForm.Activate;
-  end;
+  end
+  else
+    Screen.ActiveForm.Activate;
 end;
 
 procedure TPlatformWin.HookTouchHandler(const AForm: TCommonCustomForm);
@@ -3521,8 +3521,7 @@ begin
   end;
 end;
 
-function TWinDropTarget.DragEnter(const dataObj: IDataObject; grfKeyState: Longint; pt: TPoint;
-  var dwEffect: Longint): HRESULT;
+function TWinDropTarget.DragEnter(const dataObj: IDataObject; grfKeyState: Longint; pt: TPoint; var dwEffect: Longint): HRESULT;
 var
   Res: HRESULT;
 begin
@@ -3551,7 +3550,7 @@ begin
   Result := E_UNEXPECTED;
   try
     dwEffect := DROPEFFECT_NONE;
-    P := PointF(pt.X, pt.Y);
+    P := MultiDisplayWin.PxToDp(pt); // dp
     Operation := TDragOperation.None;
     Form.DragOver(GetDataObject, P, Operation);
     case Operation of
@@ -3585,28 +3584,25 @@ begin
   Result := S_OK;
 end;
 
-function TWinDropTarget.Drop(const dataObj: IDataObject; grfKeyState: Longint; pt: TPoint;
-  var dwEffect: Longint): HRESULT;
+function TWinDropTarget.Drop(const dataObj: IDataObject; grfKeyState: Longint; pt: TPoint; var dwEffect: Longint): HRESULT;
 var
   P: TPointF;
 begin
   Result := S_OK;
   try
-    if (dataObj = nil) then
+    if dataObj = nil then
       Exit;
-    P := PointF(pt.X, pt.Y);
+    P := MultiDisplayWin.PxToDp(pt); // dp
     Form.DragDrop(GetDataObject, P);
     // do NOT translate the screen coordinates to form coordinates because
     // it seems that the drop target helper needs screen coordinates
-    if (FDropTargetHelper <> nil) then
+    if FDropTargetHelper <> nil then
       FDropTargetHelper.Drop(dataObj, pt, dwEffect)
   finally
     FDataObj := nil;
     FDropTargetHelper := nil;
   end;
 end;
-
-{ TDropSource }
 
 { IDropSource }
 
@@ -4043,24 +4039,30 @@ end;
 procedure TPlatformWin.SetCursor(const ACursor: TCursor);
 const
   CustomCursorMap: array [crSizeAll .. crNone] of PChar = (
-    nil, nil, nil, nil, nil, { IDC_SQLWAIT } PChar(32755), { IDC_MULTIDRAG } PChar(32756), nil, nil, { IDC_NODROP } PChar(32760), { IDC_DRAG } PChar(32759), nil, nil, nil, nil, nil,
+    nil, nil, nil, nil, nil, IDC_SQLWAIT, IDC_MULTIDRAG, nil, nil, IDC_NODROP, IDC_DRAG, nil, nil, nil, nil, nil,
     nil, nil, nil, nil, nil, nil);
-const
+
   CursorMap: array [crSizeAll .. crNone] of PChar = (
     IDC_SIZEALL, IDC_HAND, IDC_HELP, IDC_APPSTARTING, IDC_NO, nil, nil, IDC_SIZENS, IDC_SIZEWE, nil, nil, IDC_WAIT,
     IDC_UPARROW, IDC_SIZEWE, IDC_SIZENWSE, IDC_SIZENS, IDC_SIZENESW, IDC_SIZEALL, IDC_IBEAM, IDC_CROSS, IDC_ARROW, nil);
+
+  function IsDefaultOrInvalidCursor(const ACursor: TCursor): Boolean;
+  begin
+    Result := (ACursor = crDefault) or not InRange(ACursor, crSizeAll, crNone);
+  end;
+
 var
   NewCursor: HCURSOR;
 begin
   if not FDragAndDropActive then
   begin
     // We don't set cursor by default, when we create window. So we should use crArrow cursor by default.
-    if (ACursor = crDefault) and not (csDesigning in Application.ComponentState) then
+    if IsDefaultOrInvalidCursor(ACursor) and not (csDesigning in Application.ComponentState) then
       FCursor := crArrow
     else
       FCursor := ACursor;
 
-    if FCursor < 0 then
+    if InRange(FCursor, crSizeAll, crNone) then
     begin
       if CustomCursorMap[FCursor] <> nil then
         NewCursor := LoadCursorW(HInstance, CustomCursorMap[FCursor])
@@ -4108,8 +4110,8 @@ begin
     LFSParam.BorderStyle := AForm.BorderStyle;
     if AForm.WindowState = TWindowState.wsNormal then
     begin
-      LFSParam.Size := Point(AForm.Width, AForm.Height);
-      LFSParam.Position := Point(AForm.Left, AForm.Top);
+      LFSParam.Size := TSizeF.Create(AForm.Width, AForm.Height);
+      LFSParam.Position := TPointF.Create(AForm.Left, AForm.Top);
     end;
     FFullScreenSupport.Items[AForm] := LFSParam;
     if AForm.WindowState = TWindowState.wsMinimized then
@@ -4122,10 +4124,10 @@ begin
     LClean := LFSParam;
     LClean.Clean;
     FFullScreenSupport.Items[AForm] := LClean;
-    if (LFSParam.Size.X > 0) and (LFSParam.Size.Y > 0) then
+    if (LFSParam.Size.Width > 0) and (LFSParam.Size.Height > 0) then
     begin
       AForm.BorderStyle := LFSParam.BorderStyle;
-      AForm.SetBounds(LFSParam.Position.X, LFSParam.Position.Y, LFSParam.Size.X, LFSParam.Size.Y);
+      AForm.SetBoundsF(LFSParam.Position.X, LFSParam.Position.Y, LFSParam.Size.Width, LFSParam.Size.Height);
       AForm.WindowState := LFSParam.WindowState;
     end;
   end;
@@ -4138,162 +4140,14 @@ end;
 function TPlatformWin.GetMousePos: TPointF;
 var
   P: TPoint;
-  Scale: Single;
 begin
   GetCursorPos(P);
-  Scale := GetScreenScale;
-  Result := TPoint.Create(Round(P.X / Scale), Round(P.Y / Scale));
-end;
-
-{ Screen }
-
-function TPlatformWin.GetScreenSize: TPointF;
-var
-  WR: TRect;
-  Scale: Single;
-begin
-  Winapi.Windows.GetWindowRect(GetDesktopWindow, WR);
-  Scale := GetScreenScale;
-  Result := PointF(WR.Width / Scale, WR.Height / Scale);
-end;
-
-function TPlatformWin.GetScreenScale: Single;
-var
-  DC: HDC;
-begin
-  DC := GetDC(0);
-  try
-    Result := GetDCScale(DC);
-  finally
-    ReleaseDC(0, DC);
-  end;
-end;
-
-function TPlatformWin.GetScreenOrientation: TScreenOrientation;
-begin
-  Result := TScreenOrientation.Landscape;
-end;
-
-procedure TPlatformWin.SetSupportedScreenOrientations(const AOrientations: TScreenOrientations);
-begin
-  // Not needed for Windows
-end;
-
-{ IFMXDeviceService }
-
-function TPlatformWin.GetFeatures: TDeviceFeatures;
-var
-  Value: Integer;
-begin
-  Value := GetSystemMetrics(SM_DIGITIZER);
-  if ((Value and NID_READY) = NID_READY) and (((Value and NID_MULTI_INPUT) = NID_MULTI_INPUT)) then
-    Result := [TDeviceFeature.HasTouchScreen]
-  else
-    Result := [];
-end;
-
-function TPlatformWin.GetFirstWeekday: Byte;
-const
-  MondayOffset = 1;
-var
-  buffer: DWORD;
-begin
-  // On Windows zero index corresponds to Monday, so we need to add offset to match DayMonday = 1 in RTL
-  if GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IFIRSTDAYOFWEEK, @buffer, SizeOf(buffer) div SizeOf(Char)) > 0 then
-    Result := buffer - Ord('0') + MondayOffset
-  else
-    Result := DayMonday;
+  Result := MultiDisplayWin.PxToDp(P);
 end;
 
 function TPlatformWin.GetFormInfo(const Index: TCommonCustomForm): TFormInfo;
 begin
   Result := FFormsInfo[Index];
-end;
-
-function TPlatformWin.GetModel: string;
-begin
-  Result := '';
-end;
-
-function TPlatformWin.GetDeviceClass: TDeviceInfo.TDeviceClass;
-begin
-  if (GetSystemMetrics(SM_TABLETPC) <> 0) and (GetSystemMetrics(SM_DIGITIZER) and NID_MULTI_INPUT = NID_MULTI_INPUT)
-  then
-    Result := TDeviceInfo.TDeviceClass.Tablet
-  else
-    Result := TDeviceInfo.TDeviceClass.Desktop;
-end;
-
-{ IFMXSystemInformationService }
-
-function TPlatformWin.GetScrollingBehaviour: TScrollingBehaviours;
-var
-  Value: Integer;
-begin
-  Value := GetSystemMetrics(SM_DIGITIZER);
-  if ((Value and NID_READY) = NID_READY) and (((Value and NID_MULTI_INPUT) = NID_MULTI_INPUT)) then
-    Result := [TScrollingBehaviour.Animation, TScrollingBehaviour.TouchTracking]
-  else
-    Result := [];
-end;
-
-function TPlatformWin.GetMinScrollThumbSize: Single;
-begin
-  Result := 15;
-end;
-
-function TPlatformWin.GetMenuShowDelay: Integer;
-begin
-  if SystemParametersInfo(SPI_GETMENUSHOWDELAY, 0, @Result, 0) then
-    Result := Result div 2
-  else
-    Result := 0;
-end;
-
-function TPlatformWin.GetCurrentLangID: string;
-var
-  buffer: MarshaledString;
-  UserLCID: LCID;
-  buflen: Integer;
-begin
-  // defaults
-  UserLCID := GetUserDefaultLCID;
-  buflen := GetLocaleInfo(UserLCID, LOCALE_SISO639LANGNAME, nil, 0);
-  buffer := StrAlloc(buflen);
-  if GetLocaleInfo(UserLCID, LOCALE_SISO639LANGNAME, buffer, buflen) <> 0 then
-    Result := buffer
-  else
-    Result := 'en';
-  StrDispose(buffer);
-end;
-
-function TPlatformWin.GetDefaultFontFamilyName: string;
-begin
-  if TOSVersion.Check(6) then
-    Result := 'Segoe UI'
-  else
-    Result := 'Tahoma';
-end;
-
-function TPlatformWin.GetDefaultFontSize: Single;
-begin
-  Result := DefaultWindowsFontSize;
-end;
-
-function TPlatformWin.GetDefaultSize(const AComponent: TComponentKind): TSize;
-begin
-  if AComponent = TComponentKind.Calendar then
-    Result := TSize.Create(202, 180)
-  else
-    Result := TSize.Create(80, 22);
-end;
-
-function TPlatformWin.GetLocaleFirstDayOfWeek: string;
-var
-  buffer: DWORD;
-begin
-  GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IFIRSTDAYOFWEEK, @buffer, SizeOf(buffer) div SizeOf(Char));
-  Result := Chr(buffer);
 end;
 
 function TPlatformWin.FindForm(const AHandle: TWindowHandle): TCommonCustomForm;
@@ -4306,167 +4160,14 @@ begin
     Result := nil;
 end;
 
-procedure TPlatformWin.Log(const AFormat: string; const AParams: array of const);
-begin
-  if Length(AParams) = 0 then
-    OutputDebugString(PChar(AFormat))
-  else
-    OutputDebugString(PChar(Format(AFormat, AParams)));
-end;
-
-function TPlatformWin.GetListingHeaderBehaviors: TListingHeaderBehaviors;
-begin
-  Result := [];
-end;
-
-function TPlatformWin.GetListingSearchFeatures: TListingSearchFeatures;
-begin
-  Result := [TListingSearchFeature.StayOnTop];
-end;
-
-function TPlatformWin.GetListingTransitionFeatures: TListingTransitionFeatures;
-begin
-  Result := [];
-end;
-
-function TPlatformWin.GetListingEditModeFeatures: TListingEditModeFeatures;
-begin
-  Result := [];
-end;
-
-function TPlatformWin.GetSaveStateFileName(const ABlockName: string): string;
-const
-  Prefix = '~';
-  Separator = '_';
-var
-  S: TStringBuilder;
-  FilePath: string;
-begin
-  if FSaveStateStoragePath.IsEmpty then
-    FilePath := TPath.GetTempPath
-  else
-    FilePath := FSaveStateStoragePath;
-  S := TStringBuilder.Create(FilePath.Length + Length(Prefix) + Length(Separator) + ABlockName.Length);
-  try
-    S.Append(FilePath);
-    S.Append(Prefix);
-    S.Append(ChangeFileExt(ExtractFileName(ParamStr(0)), ''));
-    S.Append(Separator);
-    S.Append(ABlockName);
-    Result := S.ToString(True);
-  finally
-    S.Free;
-  end;
-end;
-
-function TPlatformWin.GetSaveStateBlock(const ABlockName: string; const ABlockData: TStream): Boolean;
-
-  procedure ReadPersistent(const AFileName: string);
-  var
-    S: TFileStream;
-  begin
-    S := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyWrite);
-    try
-      ABlockData.CopyFrom(S, S.Size);
-    finally
-      S.Free;
-    end;
-  end;
-
-var
-  LFileName: string;
-begin
-  if ABlockName.IsEmpty or (ABlockData = nil) then
-    Exit(False);
-  LFileName := GetSaveStateFileName(ABlockName);
-  if not TFile.Exists(LFileName) then
-    Exit(False);
-  try
-    ReadPersistent(LFileName);
-  except
-    Exit(False);
-  end;
-  Result := True;
-end;
-
-function TPlatformWin.SetSaveStateBlock(const ABlockName: string; const ABlockData: TStream): Boolean;
-
-  procedure WritePersistent(const AFileName: string);
-  var
-    S: TFileStream;
-  begin
-    S := TFileStream.Create(AFileName, fmCreate or fmShareExclusive);
-    try
-      ABlockData.Seek(0, TSeekOrigin.soBeginning);
-      S.CopyFrom(ABlockData, ABlockData.Size);
-    finally
-      S.Free;
-    end;
-  end;
-
-var
-  LFileName: string;
-begin
-  if ABlockName.IsEmpty then
-    Exit(False);
-  LFileName := GetSaveStateFileName(ABlockName);
-  if (ABlockData = nil) or (ABlockData.Size < 1) then
-  begin
-    if TFile.Exists(LFileName) then
-      TFile.Delete(LFileName);
-  end
-  else
-    try
-      WritePersistent(LFileName);
-    except
-      Exit(False);
-    end;
-  Result := True;
-end;
-
-function TPlatformWin.GetSaveStateStoragePath: string;
-begin
-  Result := FSaveStateStoragePath;
-end;
-
-procedure TPlatformWin.SetSaveStateStoragePath(const ANewPath: string);
-begin
-  if not ANewPath.IsEmpty then
-    FSaveStateStoragePath := IncludeTrailingPathDelimiter(ANewPath)
-  else
-    FSaveStateStoragePath := '';
-end;
-
-function TPlatformWin.GetSaveStateNotifications: Boolean;
-begin
-  Result := False;
-end;
-
-function TPlatformWin.GetDisplayMetrics: TDeviceDisplayMetrics;
-var
-  R: TRect;
-begin
-  Winapi.Windows.GetWindowRect(GetDesktopWindow, R);
-  Result.PhysicalScreenSize := TSize.Create(R.Width, R.Height);
-  Result.RawScreenSize := Result.PhysicalScreenSize;
-  Result.LogicalScreenSize := Result.PhysicalScreenSize;
-  if Result.PhysicalScreenSize.cx > 0 then
-    Result.AspectRatio := Result.PhysicalScreenSize.cy / Result.PhysicalScreenSize.cx
-  else
-    Result.AspectRatio := 1;
-  Result.PixelsPerInch := 96; // Windows Default
-  Result.ScreenScale := 1;
-  Result.FontScale := 1;
-end;
-
 function TPlatformWin.RegisterKeyMapping(const PlatformKey, VirtualKey: Word; const KeyKind: TKeyKind): Boolean;
 begin
-    Result := FKeyMapping.RegisterKeyMapping(PlatformKey, VirtualKey, KeyKind);
+  Result := FKeyMapping.RegisterKeyMapping(PlatformKey, VirtualKey, KeyKind);
 end;
 
 function TPlatformWin.UnregisterKeyMapping(const PlatformKey: Word): Boolean;
 begin
-    Result := FKeyMapping.UnregisterKeyMapping(PlatformKey);
+  Result := FKeyMapping.UnregisterKeyMapping(PlatformKey);
 end;
 
 function TPlatformWin.PlatformKeyToVirtualKey(const PlatformKey: Word; var KeyKind: TKeyKind): Word;
@@ -4487,820 +4188,6 @@ begin
     raise EArgumentNilException.Create(SArgumentNil);
 end;
 
-{ TVirtualKeyboardWin }
-
-constructor TVirtualKeyboardWin.Create;
-var
-  L: Integer;
-  S: string;
-  HID: HKey;
-begin
-  S := '';
-  inherited Create;
-  SetLength(S, MAX_PATH);
-  L := GetSystemDirectory(PChar(S), MAX_PATH);
-  SetLength(S, L);
-  FPath := S;
-  FExeName := 'osk.exe';
-  FWndClassName := 'OSKMainClass';
-  FKBPresent := True;
-  if not TOSVersion.Check(6, 2) then
-  begin
-    if Winapi.Windows.RegOpenKeyEx(HKEY_LOCAL_MACHINE, 'SYSTEM\CurrentControlSet\Enum', 0, KEY_READ,
-      HID) = ERROR_SUCCESS then
-      try
-        S := FindKeyValue(HID, 'ClassGUID', '{4D36E96B-E325-11CE-BFC1-08002BE10318}', 'Control',
-          'ActiveService');
-        FKBPresent := S <> '';
-      finally
-        RegCloseKey(HID);
-      end;
-  end;
-  FNewvkbState := vkbState;
-  StartTimerLang;
-end;
-
-procedure TVirtualKeyboardWin.Clear;
-var
-  H: HWND;
-begin
-  H := vkbHandle;
-  if (H <> 0) and (FInst > 32) then
-  begin
-    PostMessage(H, WM_SYSCOMMAND, SC_CLOSE, 0);
-  end;
-  KillTimerVisible;
-  KillTimerLang;
-  FInst := 0;
-  FError := False;
-  FLastTime := 0;
-  FLastHandle := 0;
-end;
-
-destructor TVirtualKeyboardWin.Destroy;
-begin
-  Clear;
-  inherited;
-end;
-
-function TVirtualKeyboardWin.FindKeyValue(const Key: HKey; const Name, Value, SubKeyName, SubValueName: string): string;
-var
-  Buf, Val: string;
-  R, I, J: Integer;
-  SubKey: HKey;
-  BufSize, T, ValSize: Cardinal;
-begin
-  Result := '';
-  I := 0;
-  Buf := '';
-  Val := '';
-  BufSize := 2048;
-  SetLength(Buf, BufSize);
-  ValSize := BufSize;
-  SetLength(Val, ValSize);
-  repeat
-    BufSize := Length(Buf);
-    ValSize := Length(Val);
-    R := Winapi.Windows.RegEnumValue(Key, I, @Buf[1], BufSize, nil, @T, @Val[1], @ValSize);
-    if (R = ERROR_SUCCESS) then
-    begin
-      if (string(PChar(Buf)) = Name) and (T = REG_SZ) and (SameText(string(PChar(Val)), Value)) then
-      begin
-        if Winapi.Windows.RegOpenKeyEx(Key, PChar(SubKeyName), 0, KEY_READ, SubKey) = ERROR_SUCCESS
-        then
-          try
-            J := 0;
-            repeat
-              BufSize := Length(Buf);
-              ValSize := Length(Val);
-              R := Winapi.Windows.RegEnumValue(SubKey, J, @Buf[1], BufSize, nil, @T, @Val[1],
-                @ValSize);
-              if (R = ERROR_SUCCESS) and (string(PChar(Buf)) = SubValueName) and (T = REG_SZ) and
-                (string(PChar(Val)) <> '') then
-              begin
-                Result := string(PChar(Val));
-              end;
-              Inc(J);
-            until (Result <> '') or (R <> ERROR_SUCCESS);
-          finally
-            RegCloseKey(SubKey);
-          end;
-      end;
-      Inc(I);
-    end;
-  until (Result <> '') or (R <> ERROR_SUCCESS);
-  if Result = '' then
-  begin
-    I := 0;
-    repeat
-      R := Winapi.Windows.RegEnumKey(Key, I, PChar(Buf), BufSize);
-      if R = ERROR_SUCCESS then
-      begin
-        if Winapi.Windows.RegOpenKeyEx(Key, PChar(Buf), 0, KEY_READ, SubKey) = ERROR_SUCCESS then
-          try
-            Result := FindKeyValue(SubKey, Name, Value, SubKeyName, SubValueName);
-          finally
-            RegCloseKey(SubKey);
-          end;
-        Inc(I);
-      end;
-    until (Result <> '') or (R <> ERROR_SUCCESS);
-  end;
-end;
-
-function TVirtualKeyboardWin.GetVirtualKeyboardState: TVirtualKeyboardStates;
-var
-  LState: TvkbState;
-begin
-  if FError then
-    Result := [TVirtualKeyboardState.Error]
-  else
-    Result := [];
-  if IsAutoShow then
-    Result := Result + [TVirtualKeyboardState.AutoShow];
-  if not FError then
-  begin
-    if Abs(Now - FLastTime) > 1 / SecsPerDay then
-      LState := vkbState
-    else
-      LState := FLastvkbState;
-    if LState = TvkbState.Shown then
-      Result := Result + [TVirtualKeyboardState.Visible];
-  end;
-end;
-
-function TVirtualKeyboardWin.GetVKBounds: TRect;
-begin
-  if FLastHandle <> 0 then
-    GetWindowRect(FLastHandle, Result);
-end;
-
-function TVirtualKeyboardWin.HideVirtualKeyboard: Boolean;
-begin
-  Result := not FError;
-  if (not FError) then
-  begin
-    if IsAutoShow then
-      FNewvkbState := TvkbState.Hidden
-    else
-      FNewvkbState := TvkbState.None;
-    if FNewvkbState <> vkbState then
-    begin
-      StartTimerVisible;
-    end;
-  end;
-end;
-
-procedure TVirtualKeyboardWin.SetTransientState(Value: Boolean);
-begin
-end;
-
-function TVirtualKeyboardWin.ShowVirtualKeyboard(const AControl: TFmxObject): Boolean;
-var
-  Root: IRoot;
-begin
-  Result := not FError;
-  if (not FError) then
-  begin
-    FNewvkbState := TvkbState.Shown;
-    if FNewvkbState <> vkbState then
-      StartTimerVisible;
-    FWait := True;
-    FFormHandle := 0;
-    if (AControl <> nil) then
-    begin
-      Root := AControl.Root;
-      if (Root <> nil) and (Root.GetObject is TCommonCustomForm) then
-        FFormHandle := FormToHWND(TCommonCustomForm(Root.GetObject));
-    end;
-  end;
-end;
-
-function TVirtualKeyboardWin.IsAutoShow: Boolean;
-begin
-  Result := (VKAutoShowMode = TVKAutoShowMode.Always) or ((VKAutoShowMode = TVKAutoShowMode.DefinedBySystem) and
-    (not FKBPresent));
-end;
-
-procedure TVirtualKeyboardWin.KillTimerLang;
-begin
-  if FHTmerLang <> 0 then
-  begin
-    if (FTimerService <> nil) or
-      TPlatformServices.Current.SupportsPlatformService(IFMXTimerService, FTimerService) then
-    begin
-      FTimerService.DestroyTimer(FHTmerLang);
-      FHTmerLang := 0;
-    end
-    else
-      raise EUnsupportedPlatformService.Create('IFMXTimerService');
-  end;
-end;
-
-procedure TVirtualKeyboardWin.StartTimerLang;
-begin
-  if FHTmerLang = 0 then
-  begin
-    if (FTimerService <> nil) or
-      TPlatformServices.Current.SupportsPlatformService(IFMXTimerService, FTimerService) then
-    begin
-      FHTmerLang := FTimerService.CreateTimer(250, TimerLangProc);
-    end
-    else
-      raise EUnsupportedPlatformService.Create('IFMXTimerService');
-  end;
-end;
-
-procedure TVirtualKeyboardWin.TimerLangProc;
-var
-  LCodeKeyboard: HKL;
-begin
-  if FStepActivate > 0 then
-  begin
-    FLastHandle := vkbHandle;
-    case FStepActivate of
-      1:
-        begin
-          SetActiveWindow(FLastHandle);
-          SetFocus(FLastHandle);
-        end;
-      4:
-        begin
-          SetActiveWindow(FFormHandle);
-        end;
-      5:
-        begin
-          SetFocus(FFormHandle);
-          FCodeKeyboard := GetKeyboardLayout(0);
-        end;
-    end;
-    if FStepActivate = 5 then
-      FStepActivate := 0
-    else
-    begin
-      Inc(FStepActivate);
-      Exit;
-    end;
-  end
-  else
-  begin
-    if vkbState = TvkbState.Shown then
-    begin
-      LCodeKeyboard := GetKeyboardLayout(0);
-      if FCodeKeyboard <> LCodeKeyboard then
-      begin
-        SetActiveWindow(0);
-        SetActiveWindow(FFormHandle);
-        SetFocus(FFormHandle);
-        FCodeKeyboard := LCodeKeyboard;
-      end;
-    end;
-  end;
-end;
-
-procedure TVirtualKeyboardWin.KillTimerVisible;
-begin
-  if FHTmerVisible <> 0 then
-  begin
-    if (FTimerService <> nil) or
-      TPlatformServices.Current.SupportsPlatformService(IFMXTimerService, FTimerService) then
-    begin
-      FTimerService.DestroyTimer(FHTmerVisible);
-      FHTmerVisible := 0;
-    end
-    else
-      raise EUnsupportedPlatformService.Create('IFMXTimerService');
-  end;
-end;
-
-procedure TVirtualKeyboardWin.StartTimerVisible;
-begin
-  if FHTmerVisible = 0 then
-  begin
-    if (FTimerService <> nil) or
-      TPlatformServices.Current.SupportsPlatformService(IFMXTimerService, FTimerService) then
-    begin
-      FHTmerVisible := FTimerService.CreateTimer(100, TimerVisibleProc);
-    end
-    else
-      raise EUnsupportedPlatformService.Create('IFMXTimerService');
-  end;
-end;
-
-procedure TVirtualKeyboardWin.TimerVisibleProc;
-var
-  LState: TvkbState;
-  procedure Quit;
-  begin
-    if FLastHandle <> 0 then
-      PostMessage(FLastHandle, WM_SYSCOMMAND, SC_CLOSE, 0);
-    Sleep(40);
-    FLastHandle := 0;
-    TMessageManager.DefaultManager.SendMessage(Self, TVKStateChangeMessage.Create(False, TRect.Empty), True);
-  end;
-  procedure Restore;
-  begin
-    if FLastHandle <> 0 then
-    begin
-      if Winapi.Windows.GetActiveWindow <> FLastHandle then
-      begin
-        SendMessage(FLastHandle, WM_SYSCOMMAND, SC_RESTORE, 0);
-        TMessageManager.DefaultManager.SendMessage(Self, TVKStateChangeMessage.Create(True, GetVKBounds), True);
-      end;
-    end;
-  end;
-  procedure Hide;
-  begin
-    if FLastHandle <> 0 then
-      PostMessage(FLastHandle, WM_SYSCOMMAND, SC_CLOSE, 0);
-    FWait := True;
-    FLastHandle := 0;
-    TMessageManager.DefaultManager.SendMessage(Self, TVKStateChangeMessage.Create(False, TRect.Empty), True);
-  end;
-
-begin
-  if FWait then
-  begin
-    FLastHandle := vkbHandle;
-    FWait := False;
-    Exit;
-  end;
-  FWait := True;
-  LState := vkbState;
-  if LState <> FNewvkbState then
-  begin
-    case LState of
-      TvkbState.None:
-        case FNewvkbState of
-          TvkbState.Hidden: { none }
-            ;
-          TvkbState.Shown:
-            begin
-              vkbExecute(FFormHandle);
-              FWait := False;
-              FStepActivate := 1;
-              Exit;
-            end;
-        end;
-      TvkbState.Hidden:
-        case FNewvkbState of
-          TvkbState.None:
-            Quit;
-          TvkbState.Shown:
-            Restore;
-        end;
-      TvkbState.Shown:
-        case FNewvkbState of
-          TvkbState.None:
-            Quit;
-          TvkbState.Hidden:
-            Hide;
-        end;
-    end;
-    FNewvkbState := vkbState;
-  end
-  else if (FNewvkbState = TvkbState.Shown) and (FStepActivate = 1) then
-    // Here we are sending a deferred message, otherwise there will be incorrect coordinates
-    TMessageManager.DefaultManager.SendMessage(Self, TVKStateChangeMessage.Create(True, GetVKBounds), True);
-  KillTimerVisible;
-end;
-
-procedure TVirtualKeyboardWin.vkbExecute(FormHandle: HWND);
-
-  function IsFileExisted(const AFileName: string): Boolean;
-  begin
-    if FileExists(AFileName) then
-      Exit(True);
-
-    TWow64Redirection.Current.Disable;
-    try
-      Result := FileExists(AFileName);
-    finally
-      TWow64Redirection.Current.Restore;
-    end;
-  end;
-
-  function LaunchVirtualKeyboardApp(const AFileName: string): HINST;
-  begin
-    TWow64Redirection.Current.Disable;
-    try
-      Result := ShellExecute(FormHandle, 'open', PChar(AFileName), nil, PChar(ExtractFileDir(AFileName)), SW_SHOWNOACTIVATE);
-    finally
-      TWow64Redirection.Current.Restore;
-    end;
-  end;
-
-  function WaitLaunchingVirtualKeyboardApp: Boolean;
-  const
-    StepPause = 40; //msec
-    MaxAttemptsCount = 100;
-  var
-    AttemptsCount: Integer;
-  begin
-    AttemptsCount := 0;
-    while (AttemptsCount < MaxAttemptsCount) and (vkbState = TvkbState.None) do
-    begin
-      Inc(AttemptsCount);
-      Sleep(StepPause);
-    end;
-    Result := AttemptsCount < MaxAttemptsCount;
-  end;
-
-var
-  VKAppFileName: string;
-  H: HWND;
-begin
-  if FError then
-    Exit;
-  H := vkbHandle;
-  if H = 0 then
-  begin
-    VKAppFileName := TPath.Combine(Path, ExeName);
-
-    if IsFileExisted(VKAppFileName) then
-      FInst := LaunchVirtualKeyboardApp(VKAppFileName)
-    else
-      FInst := 0;
-
-    if FInst <= 32 then
-      FError := True
-    else if not WaitLaunchingVirtualKeyboardApp then
-    begin
-      FInst := 0;
-      FError := True;
-    end;
-  end;
-end;
-
-function TVirtualKeyboardWin.vkbHandle: HWND;
-begin
-  Result := Winapi.Windows.FindWindow(PChar(FWndClassName), nil);
-end;
-
-function TVirtualKeyboardWin.vkbState: TvkbState;
-var
-  H: HWND;
-begin
-  H := vkbHandle;
-  if (H <> INVALID_HANDLE_VALUE) and (H <> 0) then
-  begin
-    if (not IsWindowVisible(H)) or (IsIconic(H)) then
-      Result := TvkbState.Hidden
-    else
-      Result := TvkbState.Shown;
-    FLastHandle := H;
-  end
-  else
-  begin
-    Result := TvkbState.None;
-    FLastHandle := 0;
-  end;
-  FLastvkbState := Result;
-  FLastTime := Now;
-end;
-
-{ TOrderedDictionary<TKey, TValue> }
-
-procedure TOrderedDictionary<TKey, TValue>.Add(const AKey: TKey; const AValue: TValue);
-var
-  Index: Integer;
-begin
-  Index := FValues.Add(AValue);
-  FIndex.Add(AKey, Index);
-end;
-
-procedure TOrderedDictionary<TKey, TValue>.Clear;
-begin
-  FValues.Clear;
-  FIndex.Clear;
-end;
-
-constructor TOrderedDictionary<TKey, TValue>.Create;
-begin
-  FValues := TList<TValue>.Create;
-  FIndex := TDictionary<TKey, Integer>.Create;
-end;
-
-destructor TOrderedDictionary<TKey, TValue>.Destroy;
-begin
-  FreeAndNil(FIndex);
-  FreeAndNil(FValues);
-  inherited;
-end;
-
-function TOrderedDictionary<TKey, TValue>.GetCount: Integer;
-begin
-  Result := FValues.Count;
-end;
-
-function TOrderedDictionary<TKey, TValue>.GetValues(const AIndex: Integer): TValue;
-begin
-  Result := FValues[AIndex];
-end;
-
-function TOrderedDictionary<TKey, TValue>.TryGetValue(const AKey: TKey; out AValue: TValue): Boolean;
-var
-  Index: Integer;
-begin
-  Result := FIndex.TryGetValue(AKey, Index);
-  if Result then
-    AValue := FValues[Index];
-end;
-
-{ TMultiDisplayWin }
-
-procedure TMultiDisplayWin.AddDisplay(const AMonitorHandle: HMONITOR);
-var
-  MonInfo: TMonitorInfo;
-  Scale: Single;
-  IsPrimary: Boolean;
-  Bounds: TRect;
-  WorkArea: TRect;
-  Display: TDisplay;
-begin
-  MonInfo.cbSize := SizeOf(MonInfo);
-  if GetMonitorInfo(AMonitorHandle, @MonInfo) then
-  begin
-    Scale := GetMonitorScale(AMonitorHandle);
-    IsPrimary := (MonInfo.dwFlags and MONITORINFOF_PRIMARY) <> 0;
-    Bounds := TMultiDisplayWin.ScaleRect(MonInfo.rcMonitor, Scale); // dp
-    WorkArea := TMultiDisplayWin.ScaleRect(MonInfo.rcWork, Scale); // dp
-    Display := TDisplay.Create(FDisplays.Count, IsPrimary, Bounds, WorkArea);
-
-    FDisplays.Add(AMonitorHandle, Display);
-  end;
-end;
-
-constructor TMultiDisplayWin.Create;
-begin
-  FDisplays := TOrderedDictionary<HMONITOR, TDisplay>.Create;
-  FWorkAreaRect := TRect.Empty;
-  FDesktopRect := TRect.Empty;
-  FOutdatedParameters := [Low(TParameter)..High(TParameter)];
-end;
-
-destructor TMultiDisplayWin.Destroy;
-begin
-  FreeAndNil(FDisplays);
-  inherited;
-end;
-
-function TMultiDisplayWin.GetDisplayCount: Integer;
-begin
-  if TParameter.DisplayCount in FOutdatedParameters then
-  begin
-    FDisplayCount := GetSystemMetrics(SM_CMONITORS);
-    Exclude(FOutdatedParameters, TParameter.DisplayCount);
-  end;
-  Result := FDisplayCount;
-end;
-
-class function TMultiDisplayWin.GetMonitorScale(const AHandle: HMONITOR): Single;
-const
-  StandardDpi = 96;
-var
-  DpiX, DpiY: Cardinal;
-begin
-  if TOSVersion.Check(6, 3) then
-  begin
-    if GetDPIForMonitor(AHandle, MDT_Default, DpiX, DpiY) = S_OK then
-      Result := DpiX / StandardDpi
-    else
-      Result := 1;
-  end
-  else
-    Result := 1;
-end;
-
-function TMultiDisplayWin.GetDesktopCenterRect(const ASize: TSize): TRect;
-
-  function PointOutOfDisplay(const P: TPoint): Boolean;
-  var
-    I: Integer;
-  begin
-    for I := 0 to GetDisplayCount - 1 do
-      if PtInRect(GetDisplay(I).Bounds, P) then
-        Exit(False);
-    Result := True;
-  end;
-
-  function CornerOutOfDisplay(const R: TRect): Boolean;
-  begin
-    Result := PointOutOfDisplay(R.TopLeft) or PointOutOfDisplay(TPoint.Create(R.Right, R.Top)) or
-      PointOutOfDisplay(R.BottomRight) or PointOutOfDisplay(TPoint.Create(R.Left, R.Bottom));
-  end;
-
-var
-  I, MinI: Integer;
-  DesktopCenter: TPoint;
-  Dist, MinDist: Double;
-  WorkArea: TRect;
-begin
-  DesktopCenter := GetDesktopRect.CenterPoint;
-  Result := TRect.Create(TPoint.Create(DesktopCenter.X - ASize.cx div 2, DesktopCenter.Y - ASize.cy div 2), ASize.cx, ASize.cy);
-  MinDist := MaxInt;
-  MinI := -1;
-
-  for I := 0 to GetDisplayCount - 1 do
-  begin
-    Dist := GetDisplay(I).WorkArea.CenterPoint.Distance(DesktopCenter);
-    if Dist < MinDist then
-    begin
-      MinDist := Dist;
-      MinI := I;
-    end;
-  end;
-  WorkArea := GetDisplay(MinI).WorkArea;
-  if CornerOutOfDisplay(Result) then
-  begin
-    if Result.Top < WorkArea.Top then
-      Result.SetLocation(Result.Left, WorkArea.Top);
-    if Result.Bottom > WorkArea.Bottom then
-      Result.SetLocation(Result.Left, WorkArea.Bottom - Result.Height);
-    if CornerOutOfDisplay(Result) then
-    begin
-      if Result.Left < WorkArea.Left then
-        Result.SetLocation(WorkArea.Left, Result.Top);
-      if Result.Right > WorkArea.Right then
-        Result.SetLocation(WorkArea.Right - Result.Width, Result.Top);
-    end;
-  end;
-end;
-
-function TMultiDisplayWin.GetDesktopRect: TRect;
-begin
-  if TParameter.DesktopRect in FOutdatedParameters then
-  begin
-    FDesktopRect.Left := GetSystemMetrics(SM_XVIRTUALSCREEN);
-    FDesktopRect.Top := GetSystemMetrics(SM_YVIRTUALSCREEN);
-    FDesktopRect.Width := GetSystemMetrics(SM_CXVIRTUALSCREEN);
-    FDesktopRect.Height := GetSystemMetrics(SM_CYVIRTUALSCREEN);
-    Exclude(FOutdatedParameters, TParameter.DesktopRect);
-  end;
-
-  Result := FDesktopRect;
-end;
-
-function TMultiDisplayWin.GetWorkAreaRect: TRect;
-begin
-  if (TParameter.WorkareaRect in FOutdatedParameters) and SystemParametersInfo(SPI_GETWORKAREA, 0, FWorkAreaRect, 0) then
-    Exclude(FOutdatedParameters, TParameter.WorkareaRect);
-  Result := FWorkAreaRect;
-end;
-
-class function TMultiDisplayWin.ScaleRect(const ARect: TRect; const AScale: Single): TRect;
-begin
-  Result.Left := Round(ARect.Left / AScale);
-  Result.Right := Round(ARect.Right / AScale);
-  Result.Top := Round(ARect.Top / AScale);
-  Result.Bottom := Round(ARect.Bottom / AScale);
-end;
-
-procedure TMultiDisplayWin.UpdateDisplayInformation;
-begin
-  FOutdatedParameters := [Low(TParameter)..High(TParameter)];
-end;
-
-function TMultiDisplayWin.FindDisplay(const AMonitorHandle: HMONITOR): TDisplay;
-begin
-  UpdateDisplaysIfNeeded;
-
-  if not FDisplays.TryGetValue(AMonitorHandle, Result) then
-    raise EInvalidArgument.Create(sArgumentInvalid)
-end;
-
-function IsPopupForm(const AForm: TCommonCustomForm): Boolean;
-begin
-  Result := (AForm <> nil) and ((AForm.FormStyle = TFormStyle.Popup) or (AForm.Owner is TPopup) or (AForm is TCustomPopupForm));
-end;
-
-function TMultiDisplayWin.DisplayFromWindow(const AHandle: TWindowHandle): TDisplay;
-var
-  Wnd: TWinWindowHandle;
-  Form, ParentForm: TCommonCustomForm;
-  ParentControl: TFmxObject;
-  Control: TControl;
-  P: TPointF;
-  ScreenPosition: TPoint;
-  Scene: IScene;
-begin
-  RaiseIfNil(AHandle, 'AHandle');
-
-  Wnd := WindowHandleToPlatform(AHandle);
-  Form := FindWindow(Wnd.Wnd);
-  ParentControl := nil;
-  if IsPopupForm(Form) then
-  begin
-    if Form is TCustomPopupForm then
-    begin
-      if GetKeyState(VK_RBUTTON) <> 0 then
-      begin
-        GetCursorPos(ScreenPosition);
-        Result := FindDisplay(Winapi.MultiMon.MonitorFromPoint(ScreenPosition, MONITOR_DEFAULTTONEAREST));
-        Exit;
-      end;
-      ParentControl := TCustomPopupForm(Form).PlacementTarget;
-    end;
-    ParentForm := Form.ParentForm;
-    if (ParentControl = nil) and (ParentForm <> nil) then
-    begin
-      while IsPopupForm(ParentForm) and (ParentForm.ParentForm <> nil) do
-        ParentForm := ParentForm.ParentForm;
-      if ParentControl = nil then
-      begin
-        ParentControl := Form.Parent;
-        while (ParentControl <> nil) and (ParentControl.Root <> nil) and (ParentControl.Root.GetObject <> ParentForm) do
-          ParentControl := ParentControl.Parent;
-        while (ParentControl <> nil) and not (ParentControl is TControl) do
-          ParentControl := ParentControl.Parent;
-      end;
-      if (ParentControl = nil) and (ParentForm <> nil) and (ParentForm.Focused <> nil) then
-        ParentControl := ParentForm.Focused.GetObject;
-    end;
-    if ParentControl is TControl then
-    begin
-      Control := TControl(ParentControl);
-      P := Control.Padding.Rect.TopLeft;
-      P := Control.LocalToAbsolute(P);
-      if Supports(Control.Root.GetObject, IScene, Scene) then
-        P := Scene.LocalToScreen(P);
-      P.Offset((Control.Width - Control.Padding.Right) / 2, (Control.Height - Control.Padding.Bottom) / 2);
-      ScreenPosition := TPoint.Create(Round(P.X), Round(P.Y));
-      Result := FindDisplay(Winapi.MultiMon.MonitorFromPoint(ScreenPosition, MONITOR_DEFAULTTONEAREST));
-      Exit;
-    end;
-    if ParentForm <> nil then
-      Wnd := WindowHandleToPlatform(ParentForm.Handle);
-  end;
-  if (Wnd = nil) or (Wnd.Wnd = 0) then
-    raise EArgumentException.Create(sArgumentInvalid);
-  Result := FindDisplay(Winapi.MultiMon.MonitorFromWindow(Wnd.Wnd, MONITOR_DEFAULTTONEAREST));
-end;
-
-function TMultiDisplayWin.DisplayFromPoint(const AHandle: TWindowHandle; const APoint: TPoint): TDisplay;
-var
-  Wnd: TWinWindowHandle;
-  Form: TCommonCustomForm;
-  DispByPoint, DispByMouse: TDisplay;
-  PointF: TPointF;
-  ScreenPosition: TPoint;
-begin
-  RaiseIfNil(AHandle, 'AHandle');
-
-  Wnd := WindowHandleToPlatform(AHandle);
-  if (Wnd = nil) or (Wnd.Wnd = 0) then
-    raise EArgumentException.Create(sArgumentInvalid);
-  Form := FindWindow(Wnd.Wnd);
-  if not IsPopupForm(Form) then
-  begin
-    PointF := TPointF.Create(APoint);
-    ScreenPosition := Form.ClientToScreen(PointF).Round;
-    DispByPoint := FindDisplay(Winapi.MultiMon.MonitorFromPoint(ScreenPosition, MONITOR_DEFAULTTONEAREST));
-    if (GetKeyState(VK_RBUTTON) <> 0) or (GetKeyState(VK_LBUTTON) <> 0) or (GetKeyState(VK_MBUTTON) <> 0) then
-    begin
-      Result := DisplayFromWindow(AHandle);
-      GetCursorPos(ScreenPosition);
-      DispByMouse := FindDisplay(Winapi.MultiMon.MonitorFromPoint(ScreenPosition, MONITOR_DEFAULTTONEAREST));
-      if DispByMouse.Index <> Result.Index then
-        Result := DispByPoint;
-    end
-    else
-      Result := DispByPoint;
-  end
-  else if Form.Visible and (Form is TCustomPopupForm) then
-    Result := FindDisplay(Winapi.MultiMon.MonitorFromWindow(Wnd.Wnd, MONITOR_DEFAULTTONEAREST))
-  else
-    Result := DisplayFromWindow(AHandle);
-end;
-
-function EnumMonitorsProc(hm: HMONITOR; dc: HDC; R: PRect; Data: Pointer): Boolean; stdcall;
-var
-  Sender: TMultiDisplayWin;
-begin
-  Sender := TMultiDisplayWin(Data);
-  Sender.AddDisplay(hm);
-  Result := True;
-end;
-
-procedure TMultiDisplayWin.UpdateDisplaysIfNeeded;
-begin
-  if TParameter.Displays in FOutdatedParameters then
-  begin
-    FDisplays.Clear;
-    EnumDisplayMonitors(0, nil, @EnumMonitorsProc, Winapi.Windows.LPARAM(Self));
-    Exclude(FOutdatedParameters, TParameter.Displays);
-  end;
-end;
-
-function TMultiDisplayWin.GetDisplay(const AIndex: Integer): TDisplay;
-begin
-  UpdateDisplaysIfNeeded;
-
-  if (AIndex < 0) or (AIndex >= GetDisplayCount) then
-    raise EListError.CreateFMT(SListIndexError, [AIndex]);
-  Result := FDisplays[AIndex];
-end;
-
 { TFullScreenParams }
 
 procedure TFullScreenParams.Clean;
@@ -5312,1104 +4199,6 @@ end;
 function TFullScreenParams.IsFullScreen: Boolean;
 begin
   Result := not ((Self.BorderStyle = TFmxFormBorderStyle.None) and (Self.WindowState = TWindowState.wsMaximized));
-end;
-
-{ TWin32MenuInfo }
-
-constructor TWin32MenuInfo.Create(const AMenuId: Integer; const AnItem: TMenuItem);
-begin
-  MenuID := AMenuId;
-  FMXMenuItem := AnItem;
-end;
-
-procedure ShutDown;
-begin
-  if IsLibrary then
-  begin
-    FMX.Canvas.D2D.UnregisterCanvasClasses;
-    FMX.Context.DX11.UnregisterContextClasses;
-    FMX.Forms.FinalizeForms;
-  end;
-end;
-
-{ TMenuServiceWin }
-
-procedure TMenuServiceWin.AddBitmapToMenu(const AParentMenu: HMENU; const AMenuItemId: TMenuId; const ABitmap: HBITMAP);
-var
-  MenuItemInfo: tagMENUITEMINFOW;
-begin
-  if ABitmap <> 0 then
-  begin
-    FillChar(MenuItemInfo, SizeOf(MenuItemInfo), 0);
-    MenuItemInfo.cbSize := SizeOf(MenuItemInfo);
-    MenuItemInfo.fMask := MIIM_BITMAP;
-    if not GetMenuItemInfo(AParentMenu, AMenuItemId, False, MenuItemInfo) then
-      RaiseLastOSError;
-    MenuItemInfo.hbmpItem := ABitmap;
-    try
-      if not SetMenuItemInfo(AParentMenu, AMenuItemId, False, MenuItemInfo) then
-        RaiseLastOSError;
-    except
-      MenuItemInfo.hbmpItem := 0;
-      SetMenuItemInfo(AParentMenu, AMenuItemId, False, MenuItemInfo);
-      raise;
-    end;
-  end;
-end;
-
-function TMenuServiceWin.AssignNewIdToMenu(const AParentMenu, AMenu: HMENU): TMenuId;
-var
-  MenuItemInfo: tagMENUITEMINFOW;
-begin
-  Result := GenerateMenuId;
-
-  FillChar(MenuItemInfo, SizeOf(MenuItemInfo), 0);
-  MenuItemInfo.cbSize := SizeOf(MenuItemInfo);
-  MenuItemInfo.fMask := MIIM_ID;
-  if not GetMenuItemInfo(AParentMenu, AMenu, False, MenuItemInfo) then
-    RaiseLastOSError;
-  MenuItemInfo.wID := Result;
-  try
-    if not SetMenuItemInfo(AParentMenu, AMenu, False, MenuItemInfo) then
-      RaiseLastOSError;
-    FHMenuIdMap.Add(Result, AMenu);
-  except
-    MenuItemInfo.wID := 0;
-    SetMenuItemInfo(AParentMenu, AMenu, False, MenuItemInfo);
-    raise;
-  end;
-end;
-
-constructor TMenuServiceWin.Create;
-begin
-  FHMenuMap := TDictionary<TFmxHandle, TWin32MenuInfo>.Create;
-  FHMenuIdMap := TDictionary<TMenuId, TFmxHandle>.Create;
-  FMenuLooper := TMenuLooperWin.Create;
-end;
-
-procedure TMenuServiceWin.CreateOSMenu(AForm: TCommonCustomForm; const AMenu: IItemsContainer);
-
-  function CalculateItemFlags(const AMenuItem: TMenuItem): Integer;
-  begin
-    Result := 0;
-    if AMenuItem.Text = SMenuSeparator then
-      Result := Result or MF_SEPARATOR
-    else
-    begin
-      if AMenuItem.IsChecked then
-        Result := Result or MF_CHECKED;
-
-      if not AMenuItem.Enabled then
-        Result := Result or MF_DISABLED;
-
-      Result := Result or MF_STRING;
-    end;
-  end;
-
-  function CalculateVisibleCount(const AMenu: IItemsContainer): Integer;
-  var
-    I: Integer;
-  begin
-    Result := 0;
-    for I := 0 to AMenu.GetItemsCount - 1 do
-      if (AMenu.GetItem(I) is TMenuItem) and TMenuItem(AMenu.GetItem(I)).Visible then
-        Inc(Result);
-  end;
-
-  procedure InsertItems(const AParent: HMENU; AChild: IItemsContainer; const AMenuLevel: Integer);
-  var
-    I, Flags, VisibleCount: Integer;
-    PopupMenu: HMENU;
-    Native: INativeControl;
-    MenuItem: TMenuItem;
-    SubChild: IItemsContainer;
-    S: string;
-    Bitmap: HBITMAP;
-  begin
-    if (AChild <> nil) and (AChild.GetObject is TMenuItem) then
-    begin
-      Bitmap := 0;
-      MenuItem := TMenuItem(AChild.GetObject);
-      if MenuItem.Visible and Supports(MenuItem, INativeControl, Native) then
-      begin
-        Flags := CalculateItemFlags(MenuItem);
-        VisibleCount := CalculateVisibleCount(AChild);
-        if VisibleCount > 0 then
-          Flags := Flags or MF_POPUP;
-
-        Native.Handle := 0;
-        PopupMenu := CreateMenu;
-        if PopupMenu = 0 then
-          RaiseLastOSError;
-        try
-          if AMenuLevel > 0 then
-            S := ShortCutToText(MenuItem.ShortCut)
-          else
-            S := string.Empty;
-          if not S.IsEmpty then
-            S := #9 + S;
-          S := MenuItem.Text + S;
-          if AppendMenu(AParent, Flags, PopupMenu, PChar(S)) then
-          begin
-            Bitmap := ImageListToMenuBitmap(AMenuLevel = 0, MenuItem.Images, MenuItem.ImageIndex);
-            if Bitmap = 0 then
-              Bitmap := BitmapToMenuBitmap(AMenuLevel = 0, MenuItem.Bitmap);
-            if Bitmap <> 0 then
-              try
-                AddBitmapToMenu(AParent, PopupMenu, Bitmap);
-              except
-                DeleteObject(Bitmap);
-                Bitmap := 0;
-                raise;
-              end;
-            FHMenuMap.Add(PopupMenu, TWin32MenuInfo.Create(AssignNewIdToMenu(AParent, PopupMenu), MenuItem));
-            if VisibleCount > 0 then
-              for I := 0 to AChild.GetItemsCount - 1 do
-                if Supports(AChild.GetItem(I), IItemsContainer, SubChild) then
-                  InsertItems(PopupMenu, SubChild, AMenuLevel + 1);
-            Native.Handle := PopupMenu;
-          end
-          else
-            RaiseLastOSError;
-        except
-          if Bitmap <> 0 then
-            RemoveBitmapFromMenu(AParent, PopupMenu);
-          DestroyMenu(PopupMenu);
-          raise;
-        end;
-      end;
-    end;
-  end;
-
-var
-  Handle: HMENU;
-  Wnd: HWND;
-  I, VisibleCount: Integer;
-  WindowBorder: TWindowBorderWin;
-  Native: INativeControl;
-  SavedWindowState: TWindowState;
-begin
-  if TState.CreatingOSMenu in FStates then
-    Exit;
-  SavedWindowState := AForm.WindowState;
-  try
-    Include(FStates, TState.CreatingOSMenu);
-    Wnd := FormToHWND(AForm);
-    if Wnd = 0 then
-      Exit;
-
-    VisibleCount := 0;
-    Native := nil;
-    if AMenu <> nil then
-    begin
-      DestroysAllMenuItems(AMenu);
-      Supports(AMenu.GetObject, INativeControl, Native);
-      if not (csDesigning in AForm.ComponentState) and AForm.Border.IsSupported then
-      begin
-        WindowBorder := TWindowBorderWin(AForm.Border.WindowBorder);
-        WindowBorder.CreateOSMenu(AMenu);
-      end
-      else if (Native <> nil) and Native.HandleSupported then
-        VisibleCount := CalculateVisibleCount(AMenu);
-    end;
-    Handle := GetMenu(Wnd);
-    if VisibleCount > 0 then
-    begin
-      if Handle = 0 then
-      begin
-        Native.Handle := 0;
-        Handle := CreateMenu;
-        if Handle = 0 then
-          RaiseLastOSError;
-      end;
-      try
-        for I := 0 to AMenu.GetItemsCount - 1 do
-          if AMenu.GetItem(I) is TMenuItem and TMenuItem(AMenu.GetItem(I)).Visible then
-            InsertItems(Handle, TMenuItem(AMenu.GetItem(I)), 0);
-      except
-        DestroyMenu(Handle);
-        raise;
-      end;
-      SetMenu(Wnd, Handle);
-    end
-    else if Handle <> 0 then
-    begin
-      if not DestroyMenu(Handle) then
-        RaiseLastOSError;
-      SetMenu(Wnd, 0);
-      Handle := 0;
-    end;
-    if Native <> nil then
-      Native.Handle := Handle;
-  finally
-    AForm.WindowState := SavedWindowState;
-    Exclude(FStates, TState.CreatingOSMenu);
-  end;
-end;
-
-destructor TMenuServiceWin.Destroy;
-begin
-  FreeAndNil(FMenuLooper);
-  FreeAndNil(FHMenuMap);
-  FreeAndNil(FHMenuIdMap);
-
-  inherited;
-end;
-
-procedure TMenuServiceWin.DestroyMenuItem(const AItem: IItemsContainer);
-var
-  Form: TCommonCustomForm;
-  MenuItem: TFmxObject;
-  Wnd: HWND;
-  MenuHandle, Handle: TFmxHandle;
-  Native: INativeControl;
-  Root: IRoot;
-begin
-  if not (TState.DestroyingMenuItem in FStates) and (AItem <> nil) and (AItem.GetObject is TFmxObject) then
-    MenuItem := AItem.GetObject
-  else
-    Exit;
-  Include(FStates, TState.DestroyingMenuItem);
-  try
-    Root := MenuItem.Root;
-    if (Root <> nil) and (Root.GetObject is TCommonCustomForm) then
-    begin
-      Form := TCommonCustomForm(Root.GetObject);
-      if (MenuItem <> nil) and Supports(MenuItem, INativeControl, Native) and (Native.Handle <> 0) then
-      begin
-        Handle := Native.Handle;
-        if not (csDesigning in Form.ComponentState) and (Form.Border.WindowBorder is TWindowBorderWin) and
-          TWindowBorderWin(Form.Border.WindowBorder).HandleExists(Handle) then
-        begin
-          TWindowBorderWin(Form.Border.WindowBorder).RemoveHandle(Handle);
-        end
-        else
-        begin
-          if Handle <> INVALID_HANDLE_VALUE then
-          begin
-            Wnd := FormToHWND(Form);
-            MenuHandle := GetMenu(Wnd);
-            if MenuHandle = Handle then
-            begin
-              CreateOSMenu(Form, nil);
-              SetMenu(Wnd, 0)
-            end
-            else if MenuHandle <> 0 then
-              RemoveBitmapFromMenu(MenuHandle, Handle);
-            if IsMenu(Handle) then
-              CheckWinapiResult(DestroyMenu(Handle));
-          end;
-          RemoveMenuFromMaps(Handle);
-        end;
-        Native.Handle := 0
-      end;
-    end;
-  finally
-    Exclude(FStates, TState.DestroyingMenuItem);
-  end;
-end;
-
-function TMenuServiceWin.FindMenuInfoById(const AMenuItemId: TMenuId; var AMenuInfo: TWin32MenuInfo): Boolean;
-var
-  FmxHandle: TFmxHandle;
-begin
-  Result := FHMenuIdMap.TryGetValue(AMenuItemId, FmxHandle) and FHMenuMap.TryGetValue(FmxHandle, AMenuInfo);
-end;
-
-function TMenuServiceWin.GenerateMenuId: TMenuId;
-begin
-  Result := NewUniqueMenuCommand;
-  if Result > 65535 then
-  begin
-    FreeUniqueMenuCommand(Result);
-    raise EUnavailableMenuId.Create(SUnavailableMenuId);
-  end;
-end;
-
-function TMenuServiceWin.IsMenuBarOnWindowBorder: Boolean;
-begin
-  Result := True;
-end;
-
-procedure TMenuServiceWin.RemoveBitmapFromMenu(const AParentMenu, AMenu: HMENU);
-var
-  MenuItemInfo: tagMENUITEMINFOW;
-  MenuInfo: TWin32MenuInfo;
-  MenuId: TMenuId;
-begin
-  if FHMenuMap.TryGetValue(AMenu, MenuInfo) then
-    MenuId := MenuInfo.MenuID
-  else
-    Exit;
-  FillChar(MenuItemInfo, SizeOf(MenuItemInfo), 0);
-  MenuItemInfo.cbSize := SizeOf(MenuItemInfo);
-  MenuItemInfo.fMask := MIIM_BITMAP;
-  if not GetMenuItemInfo(AParentMenu, MenuId, False, MenuItemInfo) then
-    RaiseLastOSError;
-  if (MenuItemInfo.hbmpItem <> HBITMAP(-1)) and (MenuItemInfo.hbmpItem > HBMMENU_POPUP_MINIMIZE) then
-  begin
-    if not DeleteObject(MenuItemInfo.hbmpItem) then
-      RaiseLastOSError;
-
-    MenuItemInfo.hbmpItem := HBITMAP(-1);
-    if not SetMenuItemInfo(AParentMenu, MenuId, False, MenuItemInfo) then
-      RaiseLastOSError;
-  end;
-end;
-
-procedure TMenuServiceWin.DestroysAllMenuItems(const AMenu: IItemsContainer);
-var
-  I: Integer;
-  ItemsContainer: IItemsContainer;
-begin
-  for I := 0 to AMenu.GetItemsCount - 1 do
-    if Supports(AMenu.GetItem(I), IItemsContainer, ItemsContainer) then
-      DestroysAllMenuItems(ItemsContainer);
-  DestroyMenuItem(AMenu);
-end;
-
-procedure TMenuServiceWin.RemoveMenuFromMaps(const AMenuHandle: TFmxHandle);
-var
-  Pair: TPair<TMenuId, TFmxHandle>;
-begin
-  FHMenuMap.Remove(AMenuHandle);
-
-  for Pair in FHMenuIdMap do
-    if Pair.Value = AMenuHandle then
-    begin
-      FreeUniqueMenuCommand(Pair.Key);
-      FHMenuIdMap.Remove(Pair.Key);
-      Break;
-    end;
-end;
-
-procedure TMenuServiceWin.ShortCutToKey(ShortCut: TShortCut; var Key: Word; var Shift: TShiftState);
-begin
-  FMX.Helpers.Win.ShortCutToKey(ShortCut, Key, Shift);
-end;
-
-function TMenuServiceWin.ShortCutToText(ShortCut: TShortCut): string;
-begin
-  Result := FMX.Helpers.Win.ShortCutToText(ShortCut);
-end;
-
-procedure TMenuServiceWin.StartMenuLoop(const AView: IMenuView);
-begin
-  FMenuLooper.StartLoop(AView);
-end;
-
-function TMenuServiceWin.TextToShortCut(Text: string): Integer;
-begin
-  Result := FMX.Helpers.Win.TextToShortCut(Text);
-end;
-
-procedure TMenuServiceWin.UpdateMenuBar;
-begin
-end;
-
-procedure TMenuServiceWin.UpdateMenuItem(const AItem: IItemsContainer; AChange: TMenuItemChanges);
-
-  function GetParentMenuItemHandle(const AMenuItem: TMenuItem): TFmxHandle;
-  var
-    NativeControl: INativeControl;
-  begin
-    if Supports(AMenuItem.ParentMenuItem, INativeControl, NativeControl) or Supports(AMenuItem.MainMenu, INativeControl, NativeControl) then
-      Result := NativeControl.Handle
-    else
-      Result := 0;
-  end;
-
-  function GetBitmap(const AMenuItem: TMenuItem): HBITMAP;
-  var
-    IsTopLevelItem: Boolean;
-  begin
-    IsTopLevelItem := AMenuItem.Parent is TMainMenu;
-    Result := ImageListToMenuBitmap(IsTopLevelItem, AMenuItem.Images, AMenuItem.ImageIndex);
-    if Result = 0 then
-      Result := BitmapToMenuBitmap(IsTopLevelItem, AMenuItem.Bitmap);
-  end;
-
-  procedure UpdateBitmap(const AMenuItem: TMenuItem);
-  var
-    ParentHandle: TFmxHandle;
-    Bitmap: HBITMAP;
-    MenuItemHandle: TFmxHandle;
-  begin
-    MenuItemHandle := (AMenuItem as INativeControl).Handle;
-    ParentHandle := GetParentMenuItemHandle(AMenuItem);
-    if ParentHandle = 0 then
-      Exit;
-
-    Bitmap := GetBitmap(AMenuItem);
-    if Bitmap <> 0 then
-      try
-        AddBitmapToMenu(ParentHandle, FHMenuMap[MenuItemHandle].Menuid, Bitmap);
-      except
-        DeleteObject(Bitmap);
-        raise;
-      end
-    else
-      RemoveBitmapFromMenu(ParentHandle, MenuItemHandle);
-  end;
-
-  procedure UpdateEnabled(const AMenuItem: TMenuItem);
-  const
-    Enables: array[Boolean] of DWORD = (MF_DISABLED or MF_GRAYED, MF_ENABLED);
-  var
-    ParentHandle: TFmxHandle;
-    MenuItemHandle: TFmxHandle;
-  begin
-    MenuItemHandle := (AMenuItem as INativeControl).Handle;
-    ParentHandle := GetParentMenuItemHandle(AMenuItem);
-    if ParentHandle = 0 then
-      Exit;
-
-    EnableMenuItem(ParentHandle, FHMenuMap[MenuItemHandle].Menuid, MF_BYCOMMAND or Enables[AMenuItem.enabled]);
-  end;
-
-  procedure UpdateChecked(const AMenuItem: TMenuItem);
-  const
-    Checks: array[Boolean] of DWORD = (MF_UNCHECKED, MF_CHECKED);
-  var
-    ParentHandle: TFmxHandle;
-    MenuItemHandle: TFmxHandle;
-  begin
-    MenuItemHandle := (AMenuItem as INativeControl).Handle;
-    ParentHandle := GetParentMenuItemHandle(AMenuItem);
-    if ParentHandle = 0 then
-      Exit;
-
-    CheckMenuItem(ParentHandle, FHMenuMap[MenuItemHandle].Menuid, MF_BYCOMMAND or Checks[AMenuItem.IsChecked]);
-  end;
-
-  procedure RecreateMainMenu(const AMenuItem: TMenuItem);
-  var
-    MainMenu: TMainMenu;
-  begin
-    MainMenu := AMenuItem.MainMenu;
-    if MainMenu <> nil then
-      MainMenu.RecreateOSMenu;
-  end;
-
-  function IsStyledBorder(const AMenuItem: TMenuItem): Boolean;
-  var
-    Form: TCommonCustomForm;
-  begin
-    if AMenuItem.Root = nil then
-      Exit(False);
-
-    Form := AMenuItem.Root.GetObject as TCommonCustomForm;
-    Result := Form.Border.IsSupported;
-  end;
-
-var
-  MenuItem: TMenuItem;
-  MenuItemHandle: TFmxHandle;
-begin
-  if not (AItem.GetObject is TMenuItem) then
-    Exit;
-
-  MenuItem := TMenuItem(AItem.GetObject);
-  MenuItemHandle := (MenuItem as INativeControl).Handle;
-  if (MenuItemHandle = 0) or IsStyledBorder(MenuItem) then
-  begin
-    RecreateMainMenu(MenuItem);
-    Exit;
-  end;
-
-  if MenuItemHandle = INVALID_HANDLE_VALUE then
-    raise EInvalidFmxHandle.CreateFMT(SInvalidFmxHandle, [HexDisplayPrefix, SizeOf(MenuItemHandle) * 2, MenuItemHandle]);
-
-  if AChange = [TMenuItemChange.Bitmap] then
-    UpdateBitmap(MenuItem)
-  else if AChange = [TMenuItemChange.Enabled] then
-    UpdateEnabled(MenuItem)
-  else if AChange = [TMenuItemChange.Checked] then
-    UpdateChecked(MenuItem)
-  else
-    // If Visible, Text or Shortcut are changed, then we need to rebuild menu. Because WinApi doesn't support
-    RecreateMainMenu(MenuItem);
-end;
-
-procedure TMenuServiceWin.WMCommand(var Message: TWMCommand);
-var
-  MenuInfo: TWin32MenuInfo;
-begin
-  if FindMenuInfoById(Message.ItemId, MenuInfo) then
-  begin
-    TOpenMenuItem(MenuInfo.FMXMenuItem).Click;
-    Message.Result := 0;
-  end;
-end;
-
-procedure TMenuServiceWin.WMInitMenuPopup(var Message: TWMInitMenuPopup);
-var
-  MenuInfo: TWin32MenuInfo;
-begin
-  if FHMenuMap.TryGetValue(Message.MenuPopup, MenuInfo) then
-    TOpenMenuItem(MenuInfo.FMXMenuItem).Click;
-end;
-
-procedure TMenuServiceWin.WMMenuSelect(var Message: TWMMenuSelect);
-var
-  MenuInfo: TWin32MenuInfo;
-  MenuHandle: HMENU;
-begin
-  MenuHandle := GetSubMenu(Message.Menu, Message.IDItem);
-  if MenuHandle = 0 then
-    Exit;
-
-  if FindMenuInfoById(Message.IDItem, MenuInfo) then
-    Application.Hint := MenuInfo.FMXMenuItem.Hint
-  else
-    Application.Hint := string.Empty;
-end;
-
-{ TMenuLooperWin }
-
-function TMenuLooperWin.BackwardSelectNextMenuItem(const AView: IMenuView; const AStartInd, AEndInd: Integer): Boolean;
-var
-  I: Integer;
-begin
-  Result := False;
-  if AView <> nil then
-    for I := AStartInd downto AEndInd do
-      if IsItemSelectable(AView.GetItem(I)) then
-      begin
-        AView.Selected := TMenuItem(AView.GetItem(I));
-        Result := True;
-        Break;
-      end;
-end;
-
-procedure TMenuLooperWin.EndLoop(const AView: IMenuView);
-var
-  View: IMenuView;
-begin
-  View := AView;
-  while View <> nil do
-  begin
-    View.Loop := False;
-    View.Selected := nil;
-    View := View.ParentView;
-  end;
-end;
-
-function TMenuLooperWin.ForwardSelectNextMenuItem(const AView: IMenuView; const AStartInd, AEndInd: Integer): Boolean;
-var
-  I: Integer;
-begin
-  Result := False;
-  if AView <> nil then
-    for I := AStartInd to AEndInd do
-      if IsItemSelectable(AView.GetItem(I)) then
-      begin
-        AView.Selected := TMenuItem(AView.GetItem(I));
-        Result := True;
-        Break;
-      end;
-end;
-
-function TMenuLooperWin.IsItemSelectable(const Item: TFmxObject): Boolean;
-begin
-  Result := (Item is TMenuItem) and TMenuItem(Item).Visible and (TMenuItem(Item).Text <> SMenuSeparator);
-end;
-
-procedure TMenuLooperWin.SelectFirstMenuItem(const AView: IMenuView);
-var
-  I: Integer;
-begin
-  if AView <> nil then
-  begin
-    I := 0;
-    while (I < AView.GetItemsCount) and not IsItemSelectable(AView.GetItem(I)) do
-      Inc(I);
-    if I < AView.GetItemsCount then
-      AView.Selected := TMenuItem(AView.GetItem(I));
-  end;
-end;
-
-procedure TMenuLooperWin.SelectLastMenuItem(const AView: IMenuView);
-var
-  I: Integer;
-begin
-  if AView <> nil then
-  begin
-    I := AView.GetItemsCount - 1;
-    while (I >= 0) and not IsItemSelectable(AView.GetItem(I)) do
-      Dec(I);
-    if I >= 0 then
-      AView.Selected := TMenuItem(AView.GetItem(I));
-  end;
-end;
-
-procedure TMenuLooperWin.SelectNextMenuItem(const AView: IMenuView; const ABackward: Boolean);
-begin
-  if ABackward then
-  begin
-    if (AView.Selected = nil) or not BackwardSelectNextMenuItem(AView, AView.Selected.Index - 1, 0) then
-      SelectLastMenuItem(AView);
-    // otherwise nothing
-  end
-  else
-  begin
-    if (AView.Selected = nil) or not ForwardSelectNextMenuItem(AView, AView.Selected.Index + 1,  AView.GetItemsCount - 1) then
-      SelectFirstMenuItem(AView);
-    // otherwise nothing
-  end;
-end;
-
-procedure TMenuLooperWin.StartLoop(const AView: IMenuView);
-var
-  FirstLoop: Boolean;
-
-  function ContinueLoop: Boolean;
-  begin
-    Result := AView.Loop;
-  end;
-
-  function ParentWindow(AView: IMenuView): HWND;
-  var
-    Obj: TFmxObject;
-    Form: TCommonCustomForm;
-  begin
-    Result := 0;
-    if (AView <> nil) and (AView.Parent <> nil) then
-    begin
-      Obj := AView.Parent;
-      while (Obj <> nil) and not (Obj is TCommonCustomForm) do
-        Obj := Obj.Parent;
-      if Obj is TCommonCustomForm then
-      begin
-        Form := TCommonCustomForm(Obj);
-        while (Form <> nil) and IsPopup(Form) do
-          Form := Form.ParentForm;
-        if (Form <> nil) and (Form.Handle <> nil) then
-          Result := WindowHandleToPlatform(Form.Handle).Wnd;
-      end;
-    end;
-  end;
-
-  function GetDpMousePos(const AView: IMenuView; const AMsg: TMsg): TPointF;
-  var
-    WP: TPoint;
-    Form: TCommonCustomForm;
-    Scale: Single;
-  begin
-    // WP is client point in Native window in px.
-  {$IFDEF CPUX64}
-    WP := SmallPointToPoint(TSmallPoint(Cardinal(AMsg.LPARAM))); // px
-  {$ELSE}
-    WP := SmallPointToPoint(TSmallPoint(AMsg.LPARAM)); // px
-  {$ENDIF}
-    Winapi.Windows.ClientToScreen(AMsg.HWND, WP);
-    if AView.GetObject.Root.GetObject is TCommonCustomForm then
-    begin
-      Form := TCommonCustomForm(AView.GetObject.Root.GetObject);
-      Scale := Form.Handle.Scale;
-      Result := TPoint.Create(Round(WP.X / Scale), Round(WP.Y / Scale));
-    end
-    else
-      Result := WP;
-  end;
-
-var
-  Msg: TMsg;
-  WP: TPoint;
-  ParentWnd: HWND;
-  P: TPointF;
-  InMenus: Boolean;
-  CurrentView, NewView: IMenuView;
-  Obj: IControl;
-  TimerID: THandle;
-  MenuItem: TMenuItem;
-begin
-  FView := AView;
-  AView.Loop := True;
-  TimerID := SetTimer(0, 0, 50, nil);
-  try
-    FirstLoop := True;
-    while ContinueLoop do
-    begin
-                                                         
-      if FirstLoop then
-        FirstLoop := False
-      else
-        WaitMessage;
-
-      while ContinueLoop and PeekMessage(Msg, 0, 0, 0, PM_NOREMOVE) do
-      begin
-        case Msg.Message of
-          WM_WINDOWPOSCHANGING:
-            begin
-              EndLoop(AView);
-              Exit;
-            end;
-          WM_QUIT { , WM_NCLBUTTONDOWN..WM_NCMBUTTONDBLCLK } :
-            begin
-              EndLoop(AView);
-              Continue;
-            end;
-          WM_TIMER:
-            begin
-              TranslateMessage(Msg);
-            end;
-        end;
-        if PeekMessage(Msg, 0, 0, 0, PM_REMOVE) then
-        begin
-          case Msg.Message of
-            WM_CLOSEMENU:
-              EndLoop(AView);
-            WM_NCMOUSEMOVE, WM_NCLBUTTONDOWN, WM_NCRBUTTONDOWN, WM_NCLBUTTONUP:
-              begin
-                case Msg.Message of
-                  WM_NCMOUSEMOVE:
-                    begin
-                      { Handle MouseOver }
-                      P := GetDpMousePos(AView, Msg); // dp
-                      Obj := AView.ObjectAtPoint(P);
-                      TranslateMessage(Msg);
-                      DispatchMessage(Msg);
-                      { Find top level menu }
-                      CurrentView := AView;
-                      while CurrentView.ParentView <> nil do
-                        CurrentView := CurrentView.ParentView;
-                      { Check all items }
-                      while CurrentView <> nil do
-                      begin
-                        Obj := CurrentView.ObjectAtPoint(P);
-                        if (Obj <> nil) and (Obj.GetObject is TMenuItem) and not (TMenuItem(Obj.GetObject).IsSelected) then
-                        begin
-                          if (CurrentView <> AView) then
-                          begin
-                            NewView := AView;
-                            while NewView <> CurrentView do
-                            begin
-                              NewView.Loop := False;
-                              NewView := NewView.ParentView;
-                            end;
-                            TOpenMenuItem(Obj.GetObject).NeedPopup;
-                            Exit;
-                          end;
-                        end;
-                        CurrentView := CurrentView.ChildView;
-                      end;
-                      Continue;
-                    end;
-                  WM_NCLBUTTONDOWN, WM_NCRBUTTONDOWN:
-                    begin
-                      { Handle MouseOver if mouse over not menuitem }
-                      P := GetDpMousePos(AView, Msg); // dp
-                      Obj := AView.ObjectAtPoint(P);
-                      if (Obj <> nil) and not (Obj is TMenuItem) then
-                      begin
-                        TranslateMessage(Msg);
-                        DispatchMessage(Msg);
-                        Continue;
-                      end;
-                      { Menus }
-                      if (Obj <> nil) and (Obj.GetObject is TMenuItem) then
-                      begin
-                        MenuItem := TMenuItem(Obj.GetObject);
-                        if not MenuItem.IsSelected and MenuItem.HavePopup then
-                          TOpenMenuItem(MenuItem).NeedPopup
-                        else if MenuItem.CanBeClicked then
-                        begin
-                          EndLoop(AView);
-                          TOpenMenuItem(Obj.GetObject).Click;
-                        end;
-                      end
-                      else
-                      begin
-                        CurrentView := AView;
-                        InMenus := False;
-                        while (CurrentView <> nil) and not InMenus do
-                        begin
-                          if not (CurrentView.IsMenuBar) and (CurrentView.ObjectAtPoint(P) <> nil) then
-                            InMenus := True;
-                          CurrentView := CurrentView.ParentView;
-                        end;
-                        if not InMenus then
-                          EndLoop(AView);
-                      end;
-                    end;
-                  WM_NCLBUTTONUP:
-                    begin
-                      { Handle MouseOver if mouse over not menuitem }
-                      P := GetDpMousePos(AView, Msg); // dp
-                      Obj := AView.ObjectAtPoint(P);
-                      if (Obj <> nil) and not (Obj is TMenuItem) then
-                      begin
-                        TranslateMessage(Msg);
-                        DispatchMessage(Msg);
-                        Continue;
-                      end;
-                    end;
-                end;
-              end;
-            WM_MOUSEFIRST .. WM_MOUSELAST:
-              begin
-                { Handle MouseOver if mouse over not menuitem }
-{$IFDEF CPUX64}
-                WP := SmallPointToPoint(TSmallPoint(Cardinal(Msg.LPARAM)));
-{$ELSE}
-                WP := SmallPointToPoint(TSmallPoint(Msg.LPARAM));
-{$ENDIF}
-                Winapi.Windows.ClientToScreen(Msg.HWND, WP);
-                case Msg.Message of
-                  WM_MOUSEMOVE:
-                    begin
-                      TranslateMessage(Msg);
-                      DispatchMessage(Msg);
-                      Continue;
-                    end;
-                  WM_LBUTTONDOWN, WM_RBUTTONDOWN:
-                    begin
-                      P := GetDpMousePos(AView, Msg); // dp
-                      Obj := AView.ObjectAtPoint(P);
-                      if (Obj <> nil) and not (Obj is TMenuItem) then
-                      begin
-                        TranslateMessage(Msg);
-                        DispatchMessage(Msg);
-                        Continue;
-                      end;
-                      { Menus }
-                      if (Obj <> nil) and (Obj.GetObject is TMenuItem) then
-                      begin
-                        MenuItem := TMenuItem(Obj.GetObject);
-                        if not MenuItem.IsSelected and MenuItem.HavePopup then
-                          TOpenMenuItem(MenuItem).NeedPopup
-                        else if MenuItem.CanBeClicked then
-                        begin
-                          EndLoop(AView);
-                          TOpenMenuItem(MenuItem).Click;
-                        end;
-                      end
-                      else
-                      begin
-                        CurrentView := AView;
-                        InMenus := False;
-                        while (CurrentView <> nil) and not InMenus do
-                        begin
-                          if not (CurrentView.IsMenuBar) and (CurrentView.ObjectAtPoint(P) <> nil) then
-                            InMenus := True;
-                          CurrentView := CurrentView.ParentView;
-                        end;
-                        if not InMenus then
-                        begin
-                          EndLoop(AView);
-                          ParentWnd := ParentWindow(AView);
-                          if ParentWnd <> 0 then
-                          begin
-                            // Redirect messages to the parent form
-                            Winapi.Windows.ScreenToClient(ParentWnd, WP);
-                            Msg.LPARAM := Cardinal(PointToSmallPoint(WP));
-                            PostMessage(ParentWnd, Msg.Message, Msg.wParam, Msg.LPARAM);
-                          end;
-                        end;
-                      end;
-                    end;
-                  WM_LBUTTONUP, WM_RBUTTONUP:
-                    begin
-                      P := GetDpMousePos(AView, Msg); // dp
-                      Obj := AView.ObjectAtPoint(P);
-                      if (Obj <> nil) and not (Obj is TMenuItem) then
-                      begin
-                        TranslateMessage(Msg);
-                        DispatchMessage(Msg);
-                        Continue;
-                      end;
-                    end;
-                end;
-              end;
-            WM_KEYFIRST .. WM_KEYLAST:
-              if (GetKeyState(VK_LBUTTON) >= 0) then
-                case Msg.Message of
-                  WM_KEYDOWN, WM_SYSKEYDOWN:
-                    case Msg.wParam of
-                      VK_RETURN:
-                        begin
-                          if AView.Selected <> nil then
-                          begin
-                            if AView.Selected.HavePopup then
-                              AView.Selected.NeedPopup
-                            else if AView.Selected.CanBeClicked then
-                            begin
-                              TOpenMenuItem(AView.Selected).Click;
-                              EndLoop(AView);
-                            end;
-                          end
-                          else
-                            EndLoop(AView);
-                        end;
-                      VK_ESCAPE:
-                        begin
-                          AView.Selected := nil;
-                          Exit;
-                        end;
-                      VK_MENU, VK_F10:
-                        EndLoop(AView);
-                      VK_LEFT, VK_RIGHT:
-                          if AView.IsMenuBar then
-                            SelectNextMenuItem(AView, Msg.wParam = VK_LEFT)
-                          else if AView.ParentView <> nil then
-                            if (AView.Selected <> nil) and AView.Selected.HavePopup and (Msg.wParam = VK_RIGHT) then
-                              AView.Selected.NeedPopup
-                            else if AView.ParentView.IsMenuBar then
-                            begin
-                              AView.Loop := False;
-                              SelectNextMenuItem(AView.ParentView, Msg.wParam = VK_LEFT);
-                              if AView.ParentView.Selected <> nil then
-                                AView.ParentView.Selected.NeedPopup;
-                              Exit;
-                            end
-                            else
-                              AView.Loop := False;
-                      VK_UP, VK_DOWN:
-                          if AView.IsMenuBar then
-                          begin
-                            if (AView.Selected <> nil) and (Msg.wParam = VK_DOWN) then
-                              AView.Selected.NeedPopup;
-                          end
-                          else
-                            SelectNextMenuItem(AView, Msg.wParam = VK_UP);
-                    end;
-                end;
-          else
-            TranslateMessage(Msg);
-            DispatchMessage(Msg);
-          end;
-        end;
-      end;
-    end;
-  finally
-    KillTimer(0, TimerID);
-    AView.Loop := False;
-    Winapi.Windows.ReleaseCapture;
-    FView := nil;
-  end;
-end;
-
-{ TWinTimerService }
-
-procedure TWinTimerService.ApplicationTerminatingHandler(const Sender: TObject; const Msg: System.Messaging.TMessage);
-begin
-  FTerminating := True;
-  DestroyTimers;
-end;
-
-constructor TWinTimerService.Create;
-begin
-  inherited;
-  FTimers := TList<TWin32TimerInfo>.Create;
-  FHandleCounter := 128; // Start counting handles at 128. All valid handles have lower nibble = 0;
-  FTerminating := False;
-  if not QueryPerformanceFrequency(FPerformanceFrequency) then
-    FPerformanceFrequency := 0;
-
-  TMessageManager.DefaultManager.SubscribeToMessage(TApplicationTerminatingMessage, ApplicationTerminatingHandler);
-end;
-
-destructor TWinTimerService.Destroy;
-begin
-  TMessageManager.DefaultManager.Unsubscribe(TApplicationTerminatingMessage, ApplicationTerminatingHandler);
-
-  FreeAndNil(FTimers);
-  inherited;
-end;
-
-function TWinTimerService.CreateTimer(AInterval: Integer; ATimerFunc: TTimerProc): TFmxHandle;
-var
-  TimerInfo: TWin32TimerInfo;
-begin
-  Result := 0;
-  if not FTerminating and (AInterval > 0) and Assigned(ATimerFunc) then
-  begin
-    TimerInfo.TimerFunc := ATimerFunc;
-    TimerInfo.TimerID := Winapi.Windows.SetTimer(0, 0, AInterval, @TimerCallback);
-    if TimerInfo.TimerID <> 0 then
-    begin
-{$IFDEF CPUX64}
-      TimerInfo.TimerHandle := TInterlocked.Add(Int64(FHandleCounter), 16);
-{$ENDIF}
-{$IFDEF CPUX86}
-      TimerInfo.TimerHandle := TInterlocked.Add(Integer(FHandleCounter), 16);
-{$ENDIF}
-      FTimers.Add(TimerInfo);
-      Result := TimerInfo.TimerHandle;
-    end
-    else
-      raise Exception.CreateFmt(SCannotCreateTimer, [GetLastError]);
-  end;
-end;
-
-function TWinTimerService.DestroyTimer(Timer: TFmxHandle): Boolean;
-var
-  Index: Integer;
-  TimerInfo: TWin32TimerInfo;
-begin
-  Result := False;
-  Index := FTimers.Count;
-  while (Index > 0) do
-  begin
-    Dec(Index);
-    TimerInfo := FTimers[Index];
-    if TimerInfo.TimerHandle = Timer then
-    begin
-      Result := Winapi.Windows.KillTimer(0, TimerInfo.TimerID);
-      FTimers.Delete(Index);
-    end;
-  end;
-end;
-
-procedure TWinTimerService.DestroyTimers;
-var
-  I: Integer;
-begin
-  for I := FTimers.Count - 1 downto 0 do
-    try
-      DestroyTimer(FTimers[I].TimerHandle);
-    except
-    end;
-end;
-
-function TWinTimerService.GetTick: Double;
-var
-  PerformanceCounter: Int64;
-begin
-  if FPerformanceFrequency <> 0 then
-  begin
-    QueryPerformanceCounter(PerformanceCounter);
-    Result := PerformanceCounter / FPerformanceFrequency;
-  end
-  else
-    Result := timeGetTime / 1000;
-end;
-
-class procedure TWinTimerService.TimerCallback(window_hwnd: HWND; Msg: Longint; idEvent: UINT; dwTime: Longint);
-var
-  Index: Integer;
-begin
-  try
-    Index := PlatformWin.TimerService.FTimers.Count;
-    while (Index > 0) do
-    begin
-      Dec(Index);
-      if PlatformWin.TimerService.FTimers[Index].TimerID = idEvent then
-      begin
-        PlatformWin.TimerService.FTimers[Index].TimerFunc;
-        Break;
-      end;
-    end;
-  except
-    on E: Exception do
-    begin
-      if Application <> nil then
-        Application.HandleException(nil)
-      else
-        raise;
-    end;
-  end;
 end;
 
 { TImmManager }
@@ -6636,6 +4425,16 @@ begin
     Message.Result := DefWindowProc(FormHandle, Message.Msg, Message.WParam, Message.LParam)
   else
     Message.Result := 0;
+end;
+
+procedure ShutDown;
+begin
+  if IsLibrary then
+  begin
+    FMX.Canvas.D2D.UnregisterCanvasClasses;
+    FMX.Context.DX11.UnregisterContextClasses;
+    FMX.Forms.FinalizeForms;
+  end;
 end;
 
 initialization
