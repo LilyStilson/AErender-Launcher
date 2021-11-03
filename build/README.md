@@ -7,18 +7,18 @@ To build **Launcher** you first of all need to install a RAD Studio *(Delphi, we
 3) Click on "Get community edition free"
 4) Complete form, download and install Delphi Community Edition 10.3.3 with macOS/OSX dev tools
 
-**Downsides:** You will have outdated version of Delphi. If you try to build **Launcher**, it will build, but I won't guarantee you 100% functionality, because there was a lot of bugfixes since 10.3.3 to the newest version
+**Downsides:** You will have outdated version of Delphi. If you try to build **Launcher**, it will build, but I won't guarantee you 100% functionality and error-free expirience. Community Edition was recently updated to RAD Studio 10.4.2 Seattle and the code was migrated to RAD Studio 11.0 Alexandria. Compability-wise I left previoius versions of libs untouched, so it should be possible to compile it in the Community Edition
 
 ### Option 2 - Legal, but Trial
 1) Go to https://www.embarcadero.com/
 2) Go to Products -> RAD Studio
 3) Click on "Start a Free Trial"
-4) Complete form, download and install RAD Studio Trial 10.4.2 with macOS/OSX dev tools
+4) Complete form, download and install RAD Studio Trial 11.0 with macOS/OSX dev tools
 
 ### Option 3 - Illegal, but no Trial
-1) Find whereever a pirated version of RAD Studio Architect 10.4.2 
+1) Find whereever a pirated version of RAD Studio Architect 11.0
 2) ...
-3) Install and crack RAD Studio Architect 10.4.2
+3) Install and crack RAD Studio Architect 11.0
 
 *btw, I don't support this, but oh well...*
 
